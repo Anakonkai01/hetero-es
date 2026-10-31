@@ -1,0 +1,9 @@
+control ok    | 10 passed in 0.10s
+killed       package-ignore-dirty-source | 2 failed, 8 passed in 0.11s
+killed       package-compare-file-names-only | 2 failed, 8 passed in 0.11s
+killed       package-ignore-server-sdk | 1 failed, 9 passed in 0.12s
+killed       sm86-reuses-sm120-texts | 1 failed, 9 passed in 0.11s
+killed       sm120-reuses-sm86-texts | 2 failed, 8 passed in 0.11s
+killed       unmeasured-gpu-falls-back-silently | 1 failed, 9 passed in 0.11s
+
+6 of 6 mutants killed.

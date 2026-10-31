@@ -1,0 +1,38 @@
+[
+  {
+    "name": "package-ignore-dirty-source",
+    "file": "acceptance/probes/package_bytes.py",
+    "old": "if dirty:",
+    "new": "if False:"
+  },
+  {
+    "name": "package-compare-file-names-only",
+    "file": "acceptance/probes/package_bytes.py",
+    "old": "if actual != expected:",
+    "new": "if set(actual) != set(expected):"
+  },
+  {
+    "name": "package-ignore-server-sdk",
+    "file": "acceptance/probes/package_bytes.py",
+    "old": "((\"Worker\", worker), (\"Server SDK\", sdk))",
+    "new": "((\"Worker\", worker),)"
+  },
+  {
+    "name": "sm86-reuses-sm120-texts",
+    "file": "runtime/tests/eval/fp16_probe.py",
+    "old": "path = ARCHIVE / \"docs/evidence/2026-11-01-qwen-fp16-sm86/qwen-fp16-sm86.json\"",
+    "new": "path = ARCHIVE / \"runtime/artifacts/probes/2026-09-29/probe_5070ti.json\""
+  },
+  {
+    "name": "sm120-reuses-sm86-texts",
+    "file": "runtime/tests/eval/fp16_probe.py",
+    "old": "path = ARCHIVE / \"runtime/artifacts/probes/2026-09-29/probe_5070ti.json\"",
+    "new": "path = ARCHIVE / \"docs/evidence/2026-11-01-qwen-fp16-sm86/qwen-fp16-sm86.json\""
+  },
+  {
+    "name": "unmeasured-gpu-falls-back-silently",
+    "file": "runtime/tests/eval/fp16_probe.py",
+    "old": "raise ValueError(f\"No recorded FP16 reference for {gpu_name}; qualify this GPU explicitly\")",
+    "new": "return json.loads((ARCHIVE / \"runtime/artifacts/probes/2026-09-29/probe_5070ti.json\").read_text())[\"base_evaluation\"]"
+  }
+]

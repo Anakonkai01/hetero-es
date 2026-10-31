@@ -1,0 +1,107 @@
+{
+  "changes": [
+    {
+      "file": "docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "old": "../evidence/2026-10-24-vllm-probe/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-24-vllm-probe/README.md",
+      "verified_blob": "1829f2e159204f3f5ca261bbadb6875ad552b9ca"
+    },
+    {
+      "file": "docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "old": "../evidence/2026-10-25-strict-throughput/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-throughput/README.md",
+      "verified_blob": "019aa89c8e17627fba3f7bccc45ce1d8b1c6bd4a"
+    },
+    {
+      "file": "docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "old": "../evidence/2026-10-25-strict-overnight/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-overnight/README.md",
+      "verified_blob": "d27e0e15c18abe3afbeef44a4ab866e51ec3c4cf"
+    },
+    {
+      "file": "docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "old": "../evidence/2026-10-25-strict-integer/RESULTS-01.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-integer/RESULTS-01.md",
+      "verified_blob": "07b9da634ad30019ac85a0445b4d390e564e7027"
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "old": "../evidence/2026-10-23-oomd-review/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-oomd-review/README.md",
+      "verified_blob": "e3a37f15a48bf8fa805af943ffe6e0706ee70d18"
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "old": "../evidence/2026-10-23-overnight/soak/oomd-journal.log",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-overnight/soak/oomd-journal.log",
+      "verified_blob": "ba35f5160b35c084224f6a4a5b94f002df0d16a3"
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "old": "../evidence/2026-10-23-overnight/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-overnight/README.md",
+      "verified_blob": "5ceda8bea43b1839d8ac45b49b88e62931225247"
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "old": "../evidence/2026-10-23-overnight/soak-sampler.sh",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-overnight/soak-sampler.sh",
+      "verified_blob": "505674d720be769ad68a75adbba13b04b1acb231"
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "old": "../evidence/2026-10-23-long-run-ui/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-long-run-ui/README.md",
+      "verified_blob": "95f1df432b9554100e0cc947718c6988bd661c12"
+    },
+    {
+      "file": "docs/design/strict-integer-projection-design.md",
+      "old": "../evidence/2026-10-25-strict-integer/RESULTS-01.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-integer/RESULTS-01.md",
+      "verified_blob": "07b9da634ad30019ac85a0445b4d390e564e7027"
+    },
+    {
+      "file": "runtime/docs/strict/b22-paired-weight-reads.md",
+      "old": "../../../docs/evidence/2026-10-25-b22-core-perf/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-b22-core-perf/README.md",
+      "verified_blob": "3a4a47ce79adba09568b0cb17901be6634d3db1a"
+    },
+    {
+      "file": "runtime/docs/strict/b22-streamed-projection.md",
+      "old": "../../../docs/evidence/2026-10-26-strict-projection-shapes/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-26-strict-projection-shapes/README.md",
+      "verified_blob": "c1623a42180be5d7fed2b16fe045143e46a002a3"
+    },
+    {
+      "file": "runtime/docs/strict/b22-weight-prefetch.md",
+      "old": "../../../docs/evidence/2026-10-26-strict-prefetch/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-26-strict-prefetch/README.md",
+      "verified_blob": "e092467afc07de4fc5c0262d42c388a537271ac6"
+    },
+    {
+      "file": "runtime/docs/strict/integer-projection-v1.md",
+      "old": "../../../docs/evidence/2026-10-25-strict-integer/RESULTS-01.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-integer/RESULTS-01.md",
+      "verified_blob": "07b9da634ad30019ac85a0445b4d390e564e7027"
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "old": "../../../docs/evidence/2026-10-25-strict-overnight/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-overnight/README.md",
+      "verified_blob": "d27e0e15c18abe3afbeef44a4ab866e51ec3c4cf"
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "old": "../../../docs/evidence/2026-10-25-strict-throughput/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-throughput/README.md",
+      "verified_blob": "019aa89c8e17627fba3f7bccc45ce1d8b1c6bd4a"
+    },
+    {
+      "file": "runtime/docs/strict/strict-lora-output-execution.md",
+      "old": "../../../docs/evidence/2026-10-25-frozen-subwarp-perf/README.md",
+      "new": "https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-frozen-subwarp-perf/README.md",
+      "verified_blob": "6988deb8ccdbec51f78e3866a45bff9629960bcd"
+    }
+  ],
+  "unresolved": []
+}
