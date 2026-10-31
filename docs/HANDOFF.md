@@ -68,3 +68,32 @@ python3 -I "$HOME/.local/share/heteroes-lab/app/scripts/local-lab.py" status
 
 The 3060 is one physical GPU: run its WSL2 and native checks one after the other. Do not measure throughput while other
 GPU or heavy CPU work runs.
+
+## Tiến độ kế hoạch 2026-11
+
+- 2026-10-31: mục 0 và A0 xong trên `review/fixes-2026-11`. Đợt tài liệu: `06db4720`; kế hoạch đã duyệt: `07b57638`, tại
+  [docs/plans](plans/codex-2026-11-review-fixes-and-minicloud.md). Notebook đã khôi phục; evidence untracked chuyển vào
+  `.scratch/leftover-docs-evidence-2026-10-29/`. Đã nhập ghi chú ứng dụng vào [FINDINGS-B](review/FINDINGS-B.md).
+- SSH 3060 của Thảo đã kiểm thành công. File truy cập riêng ở `~/.config/heteroes-private/codex-access.md`, quyền 0600.
+- Lab thật: chỉ chạy `local-lab.py status`; ba dịch vụ alive, instance `34d68e114a5316bb76de9c12f657dff0`. Output hiện tại
+  không có run/reservation, nên chưa đủ bằng chứng cho phép chạy GPU local; đang kiểm tra cách xác nhận theo kế hoạch.
+- Đang làm A1 (A-010/A-020): chặn redirect trên mọi HTTP client liên quan; chưa sửa vùng đóng băng.
+
+## Việc của chủ dự án
+
+Các việc này không chặn phần A/B. Lệnh repo 2 sẽ chạy sau khi repo và scripts được tạo ở phần C.
+
+- O1: tạo repo `Anakonkai01/heteroes-minicloud` trên GitHub, rồi:
+  `cd ~/projects/heteroes-minicloud && git remote add origin git@github.com:Anakonkai01/heteroes-minicloud.git && git push origin --all`.
+- O2: tạo tài khoản Docker Hub, chạy `docker login`, ghi username vào file riêng; sau C5 chạy
+  `cd ~/projects/heteroes-minicloud && scripts/push-images.sh`.
+- O3: tạo EC2 theo C7 (Ubuntu 24.04 x86_64, 8 GB RAM, gp3 40 GB, ap-southeast-1), security group theo kế hoạch; đặt
+  AWS Budget 20/50/80 USD. Ghi IP và đường dẫn khóa SSH vào file riêng; sau C7 chạy `scripts/deploy-ec2.sh` ở repo 2.
+- O4 (tùy chọn): ghi khóa Tailscale EC2 vào file riêng để nối worker GPU qua mạng riêng.
+- O5: điền thông tin thật trong `team.json` của repo 2 và cung cấp avatar/PDF; trường chưa có giữ nhãn "mẫu".
+- O6: sửa bản nháp báo cáo và quay video theo `docs/video-script.md` của repo 2 sau C8.
+- O7: quyết định deploy bản sửa lên lab thật sau nghiệm thu. Agent không deploy lab trong kế hoạch này.
+- O8 (tùy chọn): tự thuê GPU, dùng hướng dẫn `docs/rent-gpu-worker.md` của repo 2 sau C8.
+- O9: sửa unit đã cài bằng template đã commit khi thuận tiện:
+  `install -m 644 ~/projects/heteroes/deploy/heteroes-lab.user.service ~/.config/systemd/user/heteroes-lab.service && systemctl --user daemon-reload`.
+  Việc restart/deploy lab do chủ dự án quyết định riêng.
