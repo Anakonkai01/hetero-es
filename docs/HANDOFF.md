@@ -21,7 +21,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Current technical state
 
-- Part A code is on `review/fixes-2026-11`; source fixes through `a5d81cbd`, accepted at `21d7f591`.
+- Part A is fast-forwarded and pushed on `main` at `6ee47147`; work continues on `feat/cloud-services`.
+  Source fixes through `a5d81cbd` were accepted at `21d7f591`.
   Full source identity: `src-ede4338ef54a443a0ecc33a2bc96ea836ea188b856727ed63e095594a7b8b3a4`.
   The final documentation/receipt commit has the same source identity. Continue B on `feat/cloud-services` from main.
 - Receipts and milestone gates: [STATUS](acceptance/STATUS.md). Final logs, reports and SHA verification:
@@ -46,9 +47,9 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - A4 done: mandatory pytest counts, clean source identities and verifiable receipts. A5 architecture answers complete.
 - A6 done: A-022/023 handle/admin-HTTP fixes; A-024 source-aware package guard; A-025 exact SM86 FP16 reference;
   58 acceptance selftests; final matrix and immutable evidence. All 10 strict notes and numerical-contract §15–17 read.
-- B1 preparation is in `.scratch/review-2026-11/B1`: 111 product method/path pairs + two static mounts,
+- B1 done: [architecture inventory](design/lab-server-architecture.md) publishes 111 product method/path pairs + two static mounts,
   37 tables / 177 columns, 358 SQL calls in 24 modules, proposed state/route ownership and implementation pitfalls.
-  This inventory uses isolated temporary state. B1 still needs publishing on the B branch; B2–B10 and C remain.
+  Evidence `2026-11-01-backend-inventory` uses isolated temporary state. B2 starts with accounts/auth; B3–B10 and C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
