@@ -1,0 +1,9 @@
+$ bash -c '"$1" acceptance/probes/strict_e2e.py --out "$2/plain" --generations 4 && "$1" acceptance/probes/strict_e2e.py --out "$2/fault" --generations 4 --kill-local-at 2 --compare "$2/plain/report.json"' e2e /home/pc5070ti/projects/heteroes/.venv-backend/bin/python /home/pc5070ti/projects/heteroes/.scratch/accept/20261031-233650-local/strict-e2e
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/acceptance/probes/strict_e2e.py", line 208, in <module>
+    from heteroes.es.update import apply_coefficients_
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/es/update.py", line 1, in <module>
+    from heteroes.model.schema import ParameterSchema, resolve_tensors
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/model/schema.py", line 6, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'

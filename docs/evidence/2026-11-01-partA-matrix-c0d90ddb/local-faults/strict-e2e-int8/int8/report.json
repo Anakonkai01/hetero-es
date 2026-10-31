@@ -1,0 +1,172 @@
+{
+ "coordinatorExit": 0,
+ "recipeHash": "43669e6e4b64fb5ec9f884a7ccf1aa819ecc90756d53cf09f51bfeea20aa92e7",
+ "failures": [],
+ "fault": null,
+ "generations": 4,
+ "audits": [
+  {
+   "enabled": true,
+   "selected": 4,
+   "completed": 4,
+   "matched": 4,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  },
+  {
+   "enabled": true,
+   "selected": 2,
+   "completed": 2,
+   "matched": 2,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  },
+  {
+   "enabled": true,
+   "selected": 4,
+   "completed": 4,
+   "matched": 4,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  },
+  {
+   "enabled": true,
+   "selected": 4,
+   "completed": 4,
+   "matched": 4,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  }
+ ],
+ "resultsByWorker": {
+  "local-5070ti": 29,
+  "thao-3060": 3
+ },
+ "expiredByWorker": {},
+ "auditPairs": [
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "local-5070ti",
+   "thao-3060",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ]
+ ],
+ "children": [
+  "fc38e32aead1380378ffa190c8ca470653b351e8a52f6b2067e6de71d5eebd78",
+  "ae791ba29f6902b63e385e02f327eab81774fe06f2f3ce90783ebf47b4b31f18",
+  "808ee860cb8f552e0e32769f5635b93b0a181d22dd428db449525c6b74ef0a4f",
+  "69d523bff24d5e990ded203892cd514b5e9699ff89afb83be93195d4bba730b6"
+ ],
+ "rewards": [
+  0.640625,
+  0.5546875,
+  0.390625,
+  0.375
+ ],
+ "bookkeeping": {
+  "early": {
+   "record_seconds": 0.0022,
+   "update_seconds": 0.1099,
+   "publish_seconds": 0.0016,
+   "total_seconds": 19.6715
+  },
+  "middle": {
+   "record_seconds": 0.0021,
+   "update_seconds": 0.0961,
+   "publish_seconds": 0.0015,
+   "total_seconds": 7.289
+  },
+  "late": {
+   "record_seconds": 0.0025,
+   "update_seconds": 0.1057,
+   "publish_seconds": 0.0017,
+   "total_seconds": 12.1475
+  }
+ },
+ "recordHashes": [
+  "d849010eb753a79fbc65d5f2d0be879b1d2c416d4bd720fd980c02c1c343b58d",
+  "a66da3b66ffc3b9e82d5e77c084437b9763fc8ca4a22b9cc2e15b33dddd4fad5",
+  "d03386b5dff0a3726038b1764817e14b2e05cfbc5f8376437019b6e77ffa63ec",
+  "17a6f50e5748974d741a47009dfdb25f8647b08a42d7938965a16d3c5e27ab71"
+ ]
+}

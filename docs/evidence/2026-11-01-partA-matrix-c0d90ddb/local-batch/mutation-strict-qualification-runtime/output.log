@@ -1,0 +1,17 @@
+$ /home/pc5070ti/projects/heteroes/.venv-backend/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --copy tests/ledger --env PYTHONPATH=src:tests/v3:tests/ledger --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261031-233650-local/mutation-strict-qualification-runtime --mutants acceptance/mutants/strict-qualification-runtime.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_model_qualification.py tests/v3/test_model_probe_process.py tests/ledger/test_model_probe_agent.py'
+control ok    | 29 passed in 21.25s
+killed       key drops the decoder | 1 failed, 12 passed in 4.22s
+killed       key accepts any decoder | 1 failed, 12 passed in 4.31s
+killed       reference documents ignore the decoder dtype | 1 failed, 12 passed in 4.03s
+killed       reference documents name the plain decoder | 1 failed, 12 passed in 4.28s
+killed       check_reference builds the plain config | 1 failed, 13 passed in 13.23s
+killed       build_reference builds the plain config | 1 failed, 13 passed in 5.28s
+killed       strict cell config keeps float32 | 1 failed, 12 passed in 4.30s
+killed       strict cell config names the plain decoder | 1 failed, 12 passed in 4.43s
+killed       probe child ignores the decoder | 1 failed, 17 passed in 21.32s
+killed       probe child ignores the noise engine | 1 failed, 17 passed in 21.20s
+killed       frozen probe command drops the decoder | 1 failed, 26 passed in 21.56s
+killed       frozen probe command drops the noise engine | 1 failed, 26 passed in 21.37s
+killed       probe agent accepts any decoder | 1 failed, 28 passed in 21.44s
+
+13 of 13 mutants killed.

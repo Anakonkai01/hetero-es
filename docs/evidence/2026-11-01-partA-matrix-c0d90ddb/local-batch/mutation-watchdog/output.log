@@ -1,0 +1,15 @@
+$ /home/pc5070ti/projects/heteroes/.venv-backend/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/ledger --copy tests/v3 --env PYTHONPATH=src:tests/ledger:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261031-233650-local/mutation-watchdog --mutants acceptance/mutants/watchdog.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/ledger/test_stage_watchdog.py tests/v3/test_v3_progress.py'
+control ok    | 18 passed in 13.19s
+killed       every heartbeat is progress | 1 failed, 1 passed in 9.22s
+killed       legacy heartbeats are not progress | 1 failed, 2 passed in 6.12s
+killed       cap restarts with the coordinator | 1 failed, 5 passed in 61.64s (0:01:01)
+killed       first start not persisted | 1 failed, 6 passed in 12.01s
+killed       stall may equal the cap | 1 failed, 10 passed in 11.96s
+killed       infinite cap admitted | 1 failed, 8 passed in 12.00s
+killed       hard cap ignored | 1 failed, 12 passed in 11.99s
+killed       progress sent unasked | 1 failed, 2 passed in 6.12s
+killed       perturb not reported | 1 failed, 14 passed in 13.11s
+killed       chunks not reported | 1 failed, 14 passed in 13.17s
+killed       malformed progress admitted | 1 failed, 4 passed in 10.61s
+
+11 of 11 mutants killed.
