@@ -1,0 +1,207 @@
+diff --git a/runtime/docs/numerical-contract.md b/runtime/docs/numerical-contract.md
+index 08d1bdfd..8755a7c1 100644
+--- a/runtime/docs/numerical-contract.md
++++ b/runtime/docs/numerical-contract.md
+@@ -391,6 +391,11 @@ Generating the noise was 77 percent of a generation (audit of 07/10: 3.7 s per c
+ 
+ > **Scope (2026-10-29).** This is the default of `build_recipe` and of the `hf_generate` / `hf_compact` decoders (`DEFAULT_EVAL_DTYPE = "float32"` in `manifest.py`). The strict decoder `strict_b22_v1` instead reads the live FP16 weights in place and requires `evalDtype = "float16"` (ADR-013, section 19), so it does not use this choice.
+ 
++The original arith16 FP16 probe is also device-specific: on the same pinned model and workload, the RTX 3060 returns
++`674` where the RTX 5070 Ti reference returns `664` for question index 5; both are wrong, so the mean reward remains
++0.25. The independent [SM86 capture](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-11-01-qwen-fp16-sm86/README.md)
++and exact per-device test references preserve this distinction. They do not weaken the shared strict-decoder goldens.
++
+ **What was found [E].** The greedy answer to a prompt is an argmax over scores computed in FP16, so it flips whenever the two best scores are closer than the rounding noise of the computation. Two things change that noise without changing the model: a prompt in a batch with others (left padding changes the shapes and the order of the sums), and another GPU (another kernel). On the 5070 Ti, with the stack of the 1660S (torch 2.13+cu132, transformers 5.17; the same counts were obtained with torch 2.10 and transformers 5.5, so it is not the software stack):
+ 
+ | 33 states (the parent and 32 candidates) x 16 prompts | prompts whose answer differs from "one prompt per call" |
+diff --git a/runtime/docs/strict/attention-tree-execution.md b/runtime/docs/strict/attention-tree-execution.md
+index ed1b6e16..170b7344 100644
+--- a/runtime/docs/strict/attention-tree-execution.md
++++ b/runtime/docs/strict/attention-tree-execution.md
+@@ -1,6 +1,6 @@
+ # Exact grouped attention reductions
+ 
+-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
++> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+ 
+ The numerical reference remains `pairwise_f32_reference_v1_experimental`. This changes execution of its
+ adjacent-pair trees, not its rounded operations or model arithmetic. (When this was written managed strict was inactive; it is active for `strict_b22_v1` since D9, 2026-10-27, see [audit-state-v1](../audit-state-v1.md).)
+diff --git a/runtime/docs/strict/bounded-lm-head.md b/runtime/docs/strict/bounded-lm-head.md
+index 98cf4cc2..b742f2ef 100644
+--- a/runtime/docs/strict/bounded-lm-head.md
++++ b/runtime/docs/strict/bounded-lm-head.md
+@@ -1,6 +1,6 @@
+ # Exact bounded greedy selection for B22
+ 
+-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
++> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+ 
+ `integer_lm_head.py` changes the execution of greedy decode, while preserving the integer projection
+ arithmetic in ADR-012. It does not change forward/logit APIs or any historical recipe. Hardware
+diff --git a/runtime/docs/strict/frozen-int8-artifact-v1.md b/runtime/docs/strict/frozen-int8-artifact-v1.md
+index c9ec2c3a..003bcfac 100644
+--- a/runtime/docs/strict/frozen-int8-artifact-v1.md
++++ b/runtime/docs/strict/frozen-int8-artifact-v1.md
+@@ -1,10 +1,10 @@
+ # Frozen int8 base artifact v1 (experimental)
+ 
+-> **Status (2026-10-29).** This format is the base of the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md), accepted, M6 PASS in the [acceptance STATUS](../../../docs/acceptance/STATUS.md)). It runs through `python -m heteroes.v3` and the SDK; the lab does not offer it. "Experimental" in identity strings is a name inside hashed documents and is never edited. The sentences below that say "not an accepted backend, not a managed recipe" describe 2026-10-25.
++> **Status (2026-11-01).** This format underlies the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md)), available through `python -m heteroes.v3` and the SDK; the lab does not offer it. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md), including M6, for actual checks and measured hosts. `experimental` and `hardwareQualified: false` are immutable identity fields. Historical integration/promotion statements below describe the original 2026-10-25 note; the arithmetic and artifact definitions remain normative.
+ 
+-Status: implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA adapters and an
+-explicit captured-decode composition. It is not an accepted backend, not a managed recipe, and not a claim about model
+-quality or speed. `heteroes/strict/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
++Initial scope (2026-10-25): implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA
++adapters and an explicit captured-decode composition, before Recipe v3 integration. This format is not a claim about
++model quality or speed. `heteroes/strict/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
+ against it under zero adapters. Adapter deltas have their own FP32 namespace and are not part of the exact base claim.
+ 
+ ## Scope
+@@ -61,8 +61,8 @@ y = encode_fp32_rne(T * 2^e)                   (one final RNE, then signed-zero
+ `signif` and `exponent_of_scale` are decoded from the stored FP32 scale: a normal scale is `signif * 2^(E-150)` with
+ `signif` in `[2^23, 2^24)`, and a subnormal scale is `signif * 2^-149`. The exact dot bound is
+ `|S| < 127 * 2^22 * K < 2^44` for the admitted `K <= 32768`, so int64 accumulation is exact. `|T| < 2^68`, which does
+-not fit int64; the reference uses Python integers and a future CUDA operator must use a two-limb (96-bit) product and
+-a single exact RNE/FTZ encoding. Multiplying an int64 dot by an FP32 scale and calling the result exact is forbidden
++not fit int64; the reference uses Python integers and the CUDA operator below uses a two-limb product with a 96-bit
++admitted bound and a single exact RNE/FTZ encoding. Multiplying an int64 dot by an FP32 scale and calling the result exact is forbidden
+ under this identity.
+ 
+ The encoder accepts an exact integer `T` with `|T| < 2^96` and an exponent not below `-2048`; values at or above the
+@@ -189,13 +189,14 @@ covers typed storage, deterministic adapters, pinned files, the adapter-only ES
+ projections, incremental/packed/captured decode, perturb/restore and buffer recapture. The committed mutation runs
+ kill 8 of 8 storage/artifact mutants, 3 of 3 graph mutants (one via the GPU recapture test) and 5 of 5 CUDA mutants.
+ 
+-The full CPU runtime suite passes with `3116 passed, 426 skipped`; the frozen CUDA operator plus graph tests pass
+-`31` with explicit GPU opt-in. These are fixture-scale checks.
++The initial fixture receipt recorded `3116 passed, 426 skipped` for the CPU runtime suite and `31` frozen CUDA
++operator/graph tests with explicit GPU opt-in. These historical counts do not describe the current suite size.
+ 
+ ## What this does not establish
+ 
+-No real-model artifact bundle, model-quality result, LoRA training run, throughput measurement, lifecycle peak,
+-cross-GPU token/logit equality with nonzero adapters or managed acceptance. The CPU path is an oracle and may be slow
+-by design. The three-limb work count is a hypothesis, not a measured speed improvement. The format and the CUDA
++The initial fixture checks alone do not establish a real-model artifact bundle, model-quality result, LoRA training
++run, throughput measurement, lifecycle peak, cross-GPU equality with nonzero adapters or managed acceptance. Later
++real-model/lifecycle measurements belong to their separate source-specific M6 receipts. The CPU path is an oracle
++and may be slow by design. The three-limb work count alone is not a measured speed improvement. The format and the CUDA
+ operator are experimental and may be replaced by a new versioned identity; existing artifacts must not be
+ reinterpreted under a new rule.
+diff --git a/runtime/docs/strict/integer-projection-v1.md b/runtime/docs/strict/integer-projection-v1.md
+index bfb0fd47..5d4b1a89 100644
+--- a/runtime/docs/strict/integer-projection-v1.md
++++ b/runtime/docs/strict/integer-projection-v1.md
+@@ -1,11 +1,12 @@
+ # Experimental row-scaled integer projection
+ 
+-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
++> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+ 
+ This is a separate arithmetic reference, `row_scaled_signed_integer_dot_v1_experimental`, permitted for feasibility
+ work by [ADR-012](../adr/ADR-012-single-model-strict-inference.md). It is not the historical adjacent-pair FP32 tree.
+-The graph adapter composes it with the existing strict FP32 nonlinearities and canonical RoPE constants. No managed
+-recipe, default, qualification or historical noise/perturb/update/restore contract changes.
++The graph adapter composes it with the existing strict FP32 nonlinearities and canonical RoPE constants. The initial
++feasibility work left managed recipes and defaults unchanged; ADR-013 later introduced the separate B22 Recipe v3
++identity. Historical noise/perturb/update/restore contracts remain unchanged.
+ 
+ ## Reference operation
+ 
+@@ -24,7 +25,7 @@ Magnitude precision B is exactly 14 or 22 and is part of the portable identity.
+    token publication; there is no ordinary floating GEMM fallback.
+ 
+ The encoder constructs the FP32 sign/exponent/significand with integer operations. For an underflowing normal
+-exponent, it rounds in units of 2^-149 before FTZ: the midpoint immediately below minimum normal rounds *up* to
++exponent, it rounds in units of 2^-149 before FTZ: the midpoint immediately below minimum normal rounds _up_ to
+ minimum normal. Multiplying by a precomputed FP32 scale would lose this boundary. Overflow, carry and negative
+ underflow have explicit tests. Rational test oracles use `Fraction` and a search over representable FP32 values,
+ avoiding an intermediate binary64 rounding.
+@@ -46,7 +47,7 @@ or five int32 accumulator groups rather than four or nine independent groups.
+ 
+ - Every individual digit dot is bounded in absolute value by K*128^2 <= 2^29. A degree groups at most three dots,
+   so every intermediate signed sum is bounded by 3*2^29 < 2^31, regardless of reduction order.
+-- Reconstructing the degree groups in int64 is safe even with the looser bound of 128 for *all* three digits:
++- Reconstructing the degree groups in int64 is safe even with the looser bound of 128 for _all_ three digits:
+   K * (128*(1+256+65536))^2 = 2^29*65793^2 < 2^62. This bounds the sum of absolute terms and every reconstruction
+   partial sum. The tighter final result bound is K*2^(2B) <= 2^59. Signed multiplication by positive powers of two
+   avoids a signed-left-shift assumption.
+@@ -59,7 +60,8 @@ The CUDA prototype uses `mma.sync.aligned.m16n8k32.row.col.s32.s8.s8.s32`. The f
+ The nonoverflow proof above is required; merely selecting integer Tensor Cores is insufficient. Generated PTX and
+ SASS must contain the signed integer MMA/IMMA and pass the strict operator audit. Float multiplication/FMA/MUFU
+ instructions in an integer module are refused. One rejected runtime split stride caused compiler-generated float
+-reciprocal control code; the selected split stride is a compile-time constant. Native Windows remains untested.
++reciprocal control code; the selected split stride is a compile-time constant. The initial feasibility receipt did not
++cover native Windows; current coverage belongs to the source-specific acceptance receipts.
+ 
+ ## Weights, request lifetime and memory
+ 
+@@ -84,7 +86,8 @@ Receipts: [integer feasibility](https://github.com/Anakonkai01/hetero-es/blob/ev
+ GPU encoder boundaries, odd widths/tails, precision identity, compiler audit, batch/permutation equality, live-weight
+ changes and graph composition are distinct checks. Synthetic matrix speed is not trained-model throughput.
+ 
+-Before promotion, finish multi-model parent/canonical-candidate measurements, cross-GPU token/reward equality,
+-perturbation sensitivity and numerical/quality assessment, exact restore/failure/resource ownership, source/native
+-packaging and the remaining M0–M6 system gates. All identities retain `hardwareQualified:false`. Comparing a new
+-integer reference with itself establishes implementation equality, not equivalence to the FP32 tree or model quality.
++The original promotion checklist required multi-model parent/canonical-candidate measurements, cross-GPU token/reward
++equality, perturbation sensitivity and numerical/quality assessment, exact restore/failure/resource ownership and
++source/native packaging. Current M0–M6 results and unresolved gates are recorded separately in the acceptance STATUS.
++All identities retain `hardwareQualified:false`. Comparing a new integer reference with itself establishes
++implementation equality, not equivalence to the FP32 tree or model quality.
+diff --git a/runtime/docs/strict/strict-decoder-v1.md b/runtime/docs/strict/strict-decoder-v1.md
+index 467acfef..cd6a0254 100644
+--- a/runtime/docs/strict/strict-decoder-v1.md
++++ b/runtime/docs/strict/strict-decoder-v1.md
+@@ -1,6 +1,6 @@
+ # Experimental strict decoder graph
+ 
+-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
++> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+ 
+ The strict CUDA implementation is shared by graph adapters, rather than specialized to one checkpoint.
+ `strict/strict_decoder.py` provides an eager operator oracle and serial CUDA graph;
+@@ -27,7 +27,8 @@ architectures, quantized weights or attached LoRA. Those require additional oper
+ Backend identity includes the graph descriptor, parameter shapes/biases/tying, numerical constants, context and
+ fixture scope, and source hashes of the shared graph, packed execution, reference operators and CUDA kernels.
+ Model weight identity remains separate. Per-device NVRTC/options/PTX/SASS/build receipts remain separate from the
+-portable fingerprint. M4 still has to bind these identities to real qualification, software/OS builds and profiles.
++portable fingerprint. M4 binds these identities to real qualification, software/OS builds and profiles; its checked
++source trees and remaining limits are recorded in the acceptance STATUS.
+ 
+ ## Arithmetic and execution
+ 
+@@ -111,5 +112,7 @@ four small graph layouts and two finite weight states on four physical GPUs from
+ used for throughput comparison. Tiny graph equality is not acceptance of trained Llama/Mistral checkpoints.
+ 
+ The [vLLM source review](../../../docs/design/STRICT-PERFORMANCE-VLLM.md) identifies which execution techniques transfer and
+-which arithmetic cannot be substituted. The current scalar strict projections remain substantially slower than
+-vendor/tensor-core inference. Since this was written the throughput floor (M1.throughput), native Windows operators and decoder parity, M2 and M6 have PASS receipts ([acceptance STATUS](../../../docs/acceptance/STATUS.md)); M3 and M5.release are still open. Paged KV storage and wider operator/model coverage were open when this was written and are not re-checked here.
++which arithmetic cannot be substituted. The scalar FP32 projection reference is distinct from the selected B22 integer
++projection path; their timings must not be interchanged. Throughput floors, native Windows operators/decoder parity,
++lifecycle checks and unresolved gates are recorded per source in the [acceptance STATUS](../../../docs/acceptance/STATUS.md).
++Paged KV storage and wider operator/model coverage were open when this note was written and are not re-checked here.
+diff --git a/runtime/docs/strict/strict-lora-output-execution.md b/runtime/docs/strict/strict-lora-output-execution.md
+index 12e2cc9a..b15ec4fd 100644
+--- a/runtime/docs/strict/strict-lora-output-execution.md
++++ b/runtime/docs/strict/strict-lora-output-execution.md
+@@ -1,6 +1,6 @@
+ # Output-parallel execution of the strict LoRA finish
+ 
+-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The frozen int8 + LoRA path described here is the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md), accepted, M6 PASS; standalone/SDK only, the lab does not offer it). Acceptance at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
++> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The frozen int8 + LoRA composition is the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md)), available through standalone/SDK entrypoints; the lab does not offer it. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md), including M6, for actual checks and measured hosts. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+ 
+ This is a scheduling change to the existing strict FP32 adapter arithmetic, not a new precision, quantizer,
+ adapter model or recipe. The frozen integer base, first adapter product and FP16 storage are unchanged.
+diff --git a/runtime/docs/strict/strict-reference-v1.md b/runtime/docs/strict/strict-reference-v1.md
+index 650d2c7b..c0bb9c1b 100644
+--- a/runtime/docs/strict/strict-reference-v1.md
++++ b/runtime/docs/strict/strict-reference-v1.md
+@@ -1,6 +1,6 @@
+ # Experimental single-model numerical reference
+ 
+-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
++> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+ 
+ This document specifies the candidate arithmetic behind ADR-012. The implementation is deliberately slow and is
+ **not a production backend or a qualified recipe**. Existing recipes, FP32 evaluation, noise, publication, update

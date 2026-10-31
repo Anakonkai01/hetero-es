@@ -1,0 +1,90 @@
+{
+  "source": "src-ede4338ef54a443a0ecc33a2bc96ea836ea188b856727ed63e095594a7b8b3a4",
+  "sourceDirty": false,
+  "reviewedStrictNotes": 10,
+  "reviewedContractSections": [
+    15,
+    16,
+    17
+  ],
+  "runtimeSourceUnchanged": true,
+  "documents": [
+    {
+      "path": "runtime/docs/strict/attention-tree-execution.md",
+      "beforeSha256": "12be60fbab07e7d6c46d4a15884ab4952cd21dbb3a3d1cbe411b808852d4adec",
+      "afterSha256": "82fcd25f2ff429659cad87556898428ca9d3bd69a63b89d2b3f2ffdf779154bc",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/b22-paired-weight-reads.md",
+      "beforeSha256": "424cc8f2de1ff9ee5ff78d07a560f5322b86fd8bb6287d85dfc7fa3b5e251577",
+      "afterSha256": "424cc8f2de1ff9ee5ff78d07a560f5322b86fd8bb6287d85dfc7fa3b5e251577",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/b22-streamed-projection.md",
+      "beforeSha256": "a22a96449082de76016a249a7e75bc71040e276fdf943af4744b5d77af1ddfbc",
+      "afterSha256": "a22a96449082de76016a249a7e75bc71040e276fdf943af4744b5d77af1ddfbc",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/b22-weight-prefetch.md",
+      "beforeSha256": "9cf34f9f9d9306bc94878d14abb7a821477baa963e6a74011834391366c27985",
+      "afterSha256": "9cf34f9f9d9306bc94878d14abb7a821477baa963e6a74011834391366c27985",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/bounded-lm-head.md",
+      "beforeSha256": "48a250688441c122d62d94692df91318db79a43e9601563a14d03c84a131dd07",
+      "afterSha256": "5ee6f05b55249f618c19dbbd83e18d5b79d96711883629a9af6c54164c863d6c",
+      "codeBlocks": 1,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/frozen-int8-artifact-v1.md",
+      "beforeSha256": "1e612482e56e7b38d24c34365b72110aa7f1cb75e231c6287b08e337792e0c68",
+      "afterSha256": "c042661992b65fa85cdebd618277d43eaf2ea0d909faab6c0216fbb29886d5f4",
+      "codeBlocks": 3,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/integer-projection-v1.md",
+      "beforeSha256": "1529628cecadb9068e85342566143afaddbcfec523d0f943efd881683504d258",
+      "afterSha256": "e0c51df05db85124f8877e8e667273dbf56e423bcdfbeb6f623de5b4acdba3ce",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/strict-decoder-v1.md",
+      "beforeSha256": "2c4abbc9a833b402f3392e9921f87ee47b7141ab0469c31e6e33f540e1ba7ebd",
+      "afterSha256": "8409b384dea184d677b1e1790cfe6ef7411b86549279f1162360e142de3f2e76",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/strict-lora-output-execution.md",
+      "beforeSha256": "82a386d48d8244eb978551b800e188eff0951cf93cc39e33ee14ba7824478628",
+      "afterSha256": "2c7d66bbece6395962b0113866f867df270670f23093a2ca152f1ad83da6a1d7",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/strict/strict-reference-v1.md",
+      "beforeSha256": "7c56910e9c71ef31b44c874596cbe114f1271ea55222c6591aef0724924e5751",
+      "afterSha256": "45273d3c04d36e229b08a208e7d6db2cf014c54740b8c5fcc40a959aaa2599f6",
+      "codeBlocks": 0,
+      "codeBlocksByteIdentical": true
+    },
+    {
+      "path": "runtime/docs/numerical-contract.md",
+      "beforeSha256": "b9e1bce53653a24060becedaebce419e15033ef8fb7b70d07a606528be0c7d3a",
+      "afterSha256": "0ad35140a2999b346136866c348390a5eac1dae8fdb9a2933755244b53ec54bd",
+      "codeBlocks": 3,
+      "codeBlocksByteIdentical": true
+    }
+  ]
+}
