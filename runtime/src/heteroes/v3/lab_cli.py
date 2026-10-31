@@ -9,6 +9,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.http_safety import opener
 from heteroes.http_transport import USER_AGENT
 from heteroes.product.files import read_json, write_json
 from heteroes.product.worker_cli import sha256_file
@@ -35,7 +36,7 @@ class Lab:
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=600) as response:
+            with opener(proxy=True).open(request, timeout=600) as response:
                 return json.load(response)
         except urllib.error.HTTPError as error:
             try:
@@ -54,7 +55,7 @@ class Lab:
             with Path(path).open("rb") as stream:
                 headers = {"User-Agent": USER_AGENT, **plan["headers"]}
                 request = urllib.request.Request(url, method="PUT", data=stream, headers=headers)
-                with urllib.request.urlopen(request, timeout=600) as response:
+                with opener(proxy=True).open(request, timeout=600) as response:
                     response.read()
         except (urllib.error.URLError, OSError):
             raise RuntimeError("Signed artifact upload failed; private receipt retained for retry") from None

@@ -76,8 +76,10 @@ GPU or heavy CPU work runs.
   `.scratch/leftover-docs-evidence-2026-10-29/`. Đã nhập ghi chú ứng dụng vào [FINDINGS-B](review/FINDINGS-B.md).
 - SSH 3060 của Thảo đã kiểm thành công. File truy cập riêng ở `~/.config/heteroes-private/codex-access.md`, quyền 0600.
 - Lab thật: chỉ chạy `local-lab.py status`; ba dịch vụ alive, instance `34d68e114a5316bb76de9c12f657dff0`. Output hiện tại
-  không có run/reservation, nên chưa đủ bằng chứng cho phép chạy GPU local; đang kiểm tra cách xác nhận theo kế hoạch.
-- Đang làm A1 (A-010/A-020): chặn redirect trên mọi HTTP client liên quan; chưa sửa vùng đóng băng.
+  không có run/reservation. Sau đó chủ dự án cấp quyền dùng máy/GPU thoải mái trong phiên này; GPU đã kiểm: 0% sử dụng,
+  không có compute process. Vẫn giữ nguyên các giới hạn đối với lab thật.
+- A1 xong (A-010/A-020): 105 test redirect/proxy xanh; hồi quy 1 354 passed / 1 skipped; mutation 18/18 killed.
+  Evidence `2026-10-31-review-network`. Đang làm A2 và chuẩn bị dấu vân tay P-FROZEN; vùng đóng băng chưa đổi.
 
 ## Việc của chủ dự án
 

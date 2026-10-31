@@ -43,6 +43,7 @@ import socket
 import threading
 import time
 import traceback
+from heteroes.http_safety import RedirectError, opener
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -436,7 +437,7 @@ class HttpClient:
         self._timeout = timeout
         self._retries = retries
         self._backoff = backoff
-        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))  # a private network, never a proxy
+        self._opener = opener(proxy=False)
 
     def _request(self, method: str, path: str, data: bytes | None = None, *, bulk=False):
         if bulk and self._bulk is None:
@@ -456,6 +457,8 @@ class HttpClient:
         try:
             with self._opener.open(request, timeout=self._timeout) as response:
                 return response.status, response.read()
+        except RedirectError as error:
+            raise TransportError(str(error), error.code) from error
         except urllib.error.HTTPError as error:  # a reply with a status of 4xx or 5xx still carries its JSON
             return error.code, error.read()
         except (urllib.error.URLError, OSError, http.client.HTTPException) as error:
@@ -514,6 +517,8 @@ class HttpClient:
             request.add_header("Range", f"bytes={start}-")
         try:
             return self._opener.open(request, timeout=self._timeout)
+        except RedirectError as error:
+            raise TransportError(str(error), error.code) from error
         except urllib.error.HTTPError as error:
             if error.code == 401:
                 raise UnauthorizedError(f"GET {path}: HTTP 401, the token is missing or wrong", 401) from error

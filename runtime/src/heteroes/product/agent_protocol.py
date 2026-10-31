@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.http_transport import USER_AGENT
+from heteroes.http_safety import opener
 
 
 COMMAND_KINDS = frozenset(
@@ -57,7 +58,7 @@ def request(url, path, token, body, method=None):
         },
     )
     # Never expose exception URLs, token-bearing bodies or server tracebacks.
-    with urllib.request.urlopen(req, timeout=15) as response:
+    with opener(proxy=False).open(req, timeout=15) as response:
         return json.load(response)
 
 
@@ -67,7 +68,7 @@ def reachable(url, token, timeout=4):
         req = urllib.request.Request(
             url.rstrip("/") + "/v1/health", headers={"Authorization": "Bearer " + token, "User-Agent": USER_AGENT}
         )
-        with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req, timeout=timeout) as response:
+        with opener(proxy=False).open(req, timeout=timeout) as response:
             return response.status == 200 and json.load(response).get("ok") is True
     except Exception:
         return False

@@ -10,6 +10,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.http_transport import USER_AGENT
+from heteroes.http_safety import opener
 
 
 DOWNLOAD_ATTEMPTS = 6
@@ -54,7 +55,7 @@ def _fetch(item, partial, progress):
         partial.unlink()
         offset = 0
     headers = {"User-Agent": USER_AGENT, **({"Range": f"bytes={offset}-"} if offset else {})}
-    with urllib.request.urlopen(urllib.request.Request(item["url"], headers=headers), timeout=60) as response:
+    with opener(proxy=False).open(urllib.request.Request(item["url"], headers=headers), timeout=60) as response:
         if offset and getattr(response, "status", None) != 206:
             offset = 0
         with open(partial, "ab" if offset else "wb") as output:

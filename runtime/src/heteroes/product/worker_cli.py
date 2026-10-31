@@ -33,6 +33,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.http_transport import USER_AGENT
+from heteroes.http_safety import opener
 from .downloads import DOWNLOAD_ATTEMPTS, TRANSIENT, Progress, sha256_file, verified_download
 from .files import read_json, write_json
 from .worker_service import Service
@@ -714,7 +715,7 @@ def update(worker, args, call=None, run=subprocess.run):
     with tempfile.TemporaryDirectory() as scratch:
         script = Path(scratch) / "install-worker.sh"
         request = urllib.request.Request(lab + "/downloads/install-worker.sh", headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with opener(proxy=False).open(request, timeout=60) as response:
             script.write_bytes(response.read())
         run(
             ["bash", str(script)],

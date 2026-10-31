@@ -8,6 +8,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.http_transport import USER_AGENT
+from heteroes.http_safety import opener
 from .downloads import TRANSIENT
 
 DEFAULT_LAB = "https://lab.heteroes.site"
@@ -41,7 +42,7 @@ def lab_request(server_url, path, token, body, method=None):
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with opener(proxy=False).open(request, timeout=30) as response:
             data = response.read()
             return json.loads(data) if data else None
     except urllib.error.HTTPError as error:
@@ -56,7 +57,7 @@ def lab_health(url, call=None):
         return call(url, "/api/v1/health", None, None), None
     request = urllib.request.Request(url + "/api/v1/health", headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with opener(proxy=False).open(request, timeout=15) as response:
             date = response.headers.get("Date")
             skew = time.time() - email.utils.parsedate_to_datetime(date).timestamp() if date else None
             return json.load(response), skew

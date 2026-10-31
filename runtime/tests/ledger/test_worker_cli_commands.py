@@ -6,10 +6,11 @@ import io
 import json
 import time
 import urllib.error
+from types import SimpleNamespace
 
 import pytest
 
-from heteroes.product import worker_cli, worker_service
+from heteroes.product import downloads, worker_cli, worker_service
 from heteroes.product.worker_cli import LabError, Worker, explain, render_status, setup, verified_download
 from test_worker_cli import SELF_TEST, bundle, item
 
@@ -40,7 +41,7 @@ def test_a_download_cut_by_the_network_is_retried_and_resumes_where_it_stopped(t
         start = int(request.get_header("Range")[6:-1])
         return Body(data[start:], status=206)
 
-    monkeypatch.setattr(worker_cli.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(downloads, "opener", lambda **_: SimpleNamespace(open=urlopen))
     target = verified_download(wanted, tmp_path / "out", said.append, sleep=lambda _: None)
     assert target.read_bytes() == data
     assert ranges == [None, "bytes=4000-"]
@@ -55,7 +56,7 @@ def test_a_download_that_keeps_failing_says_so_and_a_missing_file_is_not_retried
         calls.append(1)
         raise urllib.error.URLError(TimeoutError())
 
-    monkeypatch.setattr(worker_cli.urllib.request, "urlopen", broken)
+    monkeypatch.setattr(downloads, "opener", lambda **_: SimpleNamespace(open=broken))
     with pytest.raises(RuntimeError, match="DOWNLOAD_FAILED"):
         verified_download(wanted, tmp_path / "out", lambda *_: None, attempts=3, sleep=lambda _: None)
     assert len(calls) == 3
@@ -65,7 +66,7 @@ def test_a_download_that_keeps_failing_says_so_and_a_missing_file_is_not_retried
         raise urllib.error.HTTPError(request.full_url, 404, "Not Found", {}, None)
 
     calls.clear()
-    monkeypatch.setattr(worker_cli.urllib.request, "urlopen", missing)
+    monkeypatch.setattr(downloads, "opener", lambda **_: SimpleNamespace(open=missing))
     with pytest.raises(RuntimeError, match="HTTP 404"):
         verified_download(wanted, tmp_path / "out", lambda *_: None, sleep=lambda _: None)
     assert len(calls) == 1

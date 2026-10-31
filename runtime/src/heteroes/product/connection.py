@@ -4,16 +4,11 @@ import json
 import re
 import urllib.request
 from heteroes.http_transport import USER_AGENT
-
-
-class NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        # A probe must not forward a compute grant to another origin.
-        return None
+from heteroes.http_safety import NoRedirect as NoRedirect, opener as safe_opener
 
 
 def check_worker(command, *, opener=None, timeout=4):
-    opener = opener or urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    opener = opener or safe_opener(proxy=False)
     headers = {"Authorization": "Bearer " + command["computeToken"], "User-Agent": USER_AGENT}
 
     def get(origin, path, *, byte_range=False):

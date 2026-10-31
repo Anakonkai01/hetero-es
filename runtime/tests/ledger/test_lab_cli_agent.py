@@ -107,7 +107,11 @@ def test_a_dataset_upload_without_the_private_route_goes_over_the_public_link(mo
         def read(self):
             return b""
 
-    monkeypatch.setattr(lab_cli.urllib.request, "urlopen", lambda request, timeout: sent.append(request) or Response())
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(
+        lab_cli, "opener", lambda **_: SimpleNamespace(open=lambda request, timeout: sent.append(request) or Response())
+    )
     (tmp_path / "all.jsonl").write_text("{}\n")
     plan = {"url": "http://100.64.0.1:8002/u/1", "publicUrl": "https://lab.test/api/v1/public-upload/1", "headers": {}}
     lab = lab_cli.Lab("https://lab.test", "lab")

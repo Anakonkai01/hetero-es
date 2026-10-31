@@ -30,6 +30,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.http_safety import opener
 
 TERMINAL = ("COMPLETED", "FAILED", "CANCELLED")
 SAFE_FILES = ["*.json", "*.safetensors", "*.txt", "*.model", "*.tiktoken", "*.jinja"]  # never code or pickles
@@ -95,7 +96,7 @@ class Lab:
             request = urllib.request.Request(
                 url, method="PUT", data=stream, headers={"User-Agent": USER_AGENT, **plan["headers"]}
             )
-            with urllib.request.urlopen(request, timeout=600) as response:
+            with opener(proxy=True).open(request, timeout=600) as response:
                 response.read()
 
     def devices(self):
@@ -493,7 +494,7 @@ def _http(url, method, body=None, headers=None):
         headers={"Content-Type": "application/json", "User-Agent": USER_AGENT, **(headers or {})},
     )
     try:
-        with urllib.request.urlopen(request, timeout=600) as response:
+        with opener(proxy=True).open(request, timeout=600) as response:
             text = response.read()
             return json.loads(text) if text else None
     except urllib.error.HTTPError as error:

@@ -9,6 +9,7 @@ import tempfile
 import urllib.request
 from urllib.parse import urlsplit
 from heteroes.catalog import PINNED_MODEL_ID, PINNED_REVISION
+from heteroes.http_safety import opener
 from .data import verify as verify_data, sha
 from .models import verify as verify_model
 
@@ -60,10 +61,9 @@ def transfer(agent, assignment, digest, target, limit, reachable=private_reachab
         total = 0
         from heteroes.http_transport import USER_AGENT
 
-        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         # the public edge refuses urllib's default agent (HTTP 403): candidate13 acceptance, finding 12
         request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with opener.open(request, timeout=120) as response, os.fdopen(fd, "wb") as out:
+        with opener(proxy=False).open(request, timeout=120) as response, os.fdopen(fd, "wb") as out:
             while chunk := response.read(1024**2):
                 total += len(chunk)
                 if total > limit:

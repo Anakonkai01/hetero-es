@@ -181,7 +181,7 @@ def upload_with(tmp_path, monkeypatch, content, objects, changed=None):
             return {"status": "UPLOADING", "objects": [{"sha256": digest, "sizeBytes": len(content), **objects}]}
         return {}
 
-    monkeypatch.setattr(cloud_sync.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(cloud_sync, "opener", lambda **_: SimpleNamespace(open=urlopen))
     sync = CloudSync(SimpleNamespace(call=call))
     return sync, point, sent, calls
 

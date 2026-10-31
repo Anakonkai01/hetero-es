@@ -5,6 +5,7 @@ import shutil
 import threading
 import time
 import urllib.request
+from heteroes.http_safety import opener
 from .files import read_json, write_json
 from .recovery import verify_point
 from .storage import data_root
@@ -42,7 +43,7 @@ class CloudSync:
     def _put(self, url, stream, offset, size, digest, headers):
         body = _Section(stream, offset, size, digest)
         request = urllib.request.Request(url, data=body, method="PUT", headers={**headers, "Content-Length": str(size)})
-        with urllib.request.urlopen(request, timeout=180) as response:
+        with opener(proxy=False).open(request, timeout=180) as response:
             etag = response.headers["ETag"]
             response.read()
         if body.left:
