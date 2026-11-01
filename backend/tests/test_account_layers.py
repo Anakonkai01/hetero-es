@@ -79,6 +79,17 @@ def test_account_layer_boundaries():
         "storage/local_backend.py",
         "api/recovery_storage.py",
         "api/local_storage.py",
+        "api/operations.py",
+        "services/operations.py",
+        "api/inventory.py",
+        "services/inventory.py",
+        "services/policies.py",
+        "services/validation.py",
+        "core/request_models.py",
+        "core/config.py",
+        "core/throttle.py",
+        "core/addresses.py",
+        "core/monitor_models.py",
     ):
         tree = ast.parse((backend / relative).read_text())
         for node in ast.walk(tree):

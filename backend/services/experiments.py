@@ -2,7 +2,7 @@
 
 from ..errors import RuntimeRejected
 from ..request_models import BackupPolicy, Configuration, MembershipRequest
-from ..policies import dispatch_held
+from .policies import dispatch_held
 import hashlib
 import json
 import secrets

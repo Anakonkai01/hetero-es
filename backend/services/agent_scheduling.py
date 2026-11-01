@@ -2,7 +2,7 @@
 
 from ..constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
 
-from ..policies import (
+from .policies import (
     v2_qualification as v2_qualification,
     v3_qualification as v3_qualification,
     noise_qualification as noise_qualification,

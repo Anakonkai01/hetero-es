@@ -11,3 +11,7 @@ class ServiceError(Exception):
 
 class DatabaseConflict(Exception):
     """A persistence constraint conflict; callers decide its business meaning."""
+
+
+class RuntimeRejected(Exception):
+    """The runtime definitively rejected a new configuration without launching it."""

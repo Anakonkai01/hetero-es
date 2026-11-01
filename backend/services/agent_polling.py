@@ -79,7 +79,7 @@ class AgentPolling:
         if body.selfTest is not None:
             previous = json.loads(old["self_test"])
             updated = body.selfTest.model_dump()
-            from ..policies import has_device_reservation
+            from .policies import has_device_reservation
 
             reserved = has_device_reservation(db, device["id"], previous.get("gpuUUID"))
             if reserved and (

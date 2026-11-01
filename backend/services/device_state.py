@@ -1,7 +1,7 @@
 """DeviceStateService business operations behind the Store facade."""
 
 import json
-from ..policies import read_setting, set_disabled_workers
+from .policies import read_setting, set_disabled_workers
 from ..repositories.device_state import DeviceStateRepository as repository
 
 

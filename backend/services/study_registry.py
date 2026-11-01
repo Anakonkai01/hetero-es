@@ -9,7 +9,7 @@ import uuid
 from heteroes.study.data import dataset, canonical
 from heteroes.study.models import validate as validate_model
 from heteroes.v3 import data as v3data
-from ..policies import platform_profile
+from .policies import platform_profile
 from types import SimpleNamespace
 from ..core.errors import ServiceError
 from ..repositories.study_registry import StudyRegistryRepository as repository

@@ -7,7 +7,7 @@ import time
 import uuid
 from heteroes.canonical import canonical_json_hash
 from heteroes.product.model_qualification import STRICT_DECODER, check_reference, qualification_key, verify_observations
-from ..policies import has_device_reservation, noise_qualification
+from .policies import has_device_reservation, noise_qualification
 from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
 from heteroes.product.cpu_coordinator import coordinator_only
 from types import SimpleNamespace

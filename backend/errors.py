@@ -1,5 +1,3 @@
-"""Shared runtime admission errors."""
+"""Compatibility export for runtime admission errors."""
 
-
-class RuntimeRejected(Exception):
-    """The runtime definitively rejected a new configuration without launching it."""
+from .core.errors import RuntimeRejected as RuntimeRejected

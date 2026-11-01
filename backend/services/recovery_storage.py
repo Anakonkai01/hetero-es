@@ -4,7 +4,7 @@ from ..core.storage_models import Begin, Finish
 import secrets
 import logging
 from ..db.migrations import initialize_recovery_schema, initialize_recovery_downloads_schema
-from ..policies import backup_policy
+from .policies import backup_policy
 import hashlib
 import json
 import re
