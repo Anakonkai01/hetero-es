@@ -1,0 +1,44 @@
+[
+  {
+    "name": "expired session accepted",
+    "file": "backend/repositories/accounts.py",
+    "old": "WHERE digest=? AND expires>?",
+    "new": "WHERE digest=? AND expires>=0 AND ?>0"
+  },
+  {
+    "name": "bad password accepted",
+    "file": "backend/services/accounts.py",
+    "old": "except VerificationError:\n                raise ServiceError(401, \"Invalid username or password\") from None",
+    "new": "except VerificationError:\n                pass"
+  },
+  {
+    "name": "registration bypasses approval",
+    "file": "backend/services/accounts.py",
+    "old": "\"accountStatus\": \"PENDING\"",
+    "new": "\"accountStatus\": \"ACTIVE\""
+  },
+  {
+    "name": "logout does not revoke token",
+    "file": "backend/services/accounts.py",
+    "old": "self.repository.delete_session(db, _digest(token))",
+    "new": "pass"
+  },
+  {
+    "name": "password change revokes current session instead",
+    "file": "backend/repositories/accounts.py",
+    "old": "DELETE FROM sessions WHERE user_id=? AND digest<>?",
+    "new": "DELETE FROM sessions WHERE user_id=? AND digest=?"
+  },
+  {
+    "name": "login throttling ignored",
+    "file": "backend/services/accounts.py",
+    "old": "wait = max(failures.retry_after(key), failures_by_address.retry_after(address))",
+    "new": "wait = 0"
+  },
+  {
+    "name": "service response headers lost",
+    "file": "backend/core/errors.py",
+    "old": "self.headers = headers",
+    "new": "self.headers = None"
+  }
+]

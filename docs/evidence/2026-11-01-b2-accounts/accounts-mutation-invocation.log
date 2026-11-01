@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/scripts/mutation-check.py", line 87, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/pc5070ti/projects/heteroes/scripts/mutation-check.py", line 73, in main
+    ok, tail = run_one(args.repo.resolve(), args.copy, env, command, args.scratch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/scripts/mutation-check.py", line 26, in run_one
+    work = Path(tempfile.mkdtemp(prefix="mutation-", dir=scratch))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/ai/lib/python3.12/tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [Errno 2] No such file or directory: '.scratch/review-2026-11/B2/accounts-mutation/mutation-ywxchrxm'

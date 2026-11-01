@@ -1,0 +1,10 @@
+control ok    | 63 passed, 1 warning in 12.17s
+killed       expired session accepted | 1 failed, 1 warning in 0.12s
+killed       bad password accepted | 1 failed, 3 passed, 1 warning in 0.37s
+killed       registration bypasses approval | 1 failed, 20 passed, 1 warning in 4.70s
+killed       logout does not revoke token | 1 failed, 1 warning in 0.12s
+killed       password change revokes current session instead | 1 failed, 24 passed, 1 warning in 6.05s
+killed       login throttling ignored | 1 failed, 56 passed, 1 warning in 8.03s
+killed       service response headers lost | 1 failed, 1 passed, 1 warning in 0.12s
+
+7 of 7 mutants killed.

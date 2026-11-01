@@ -1,0 +1,670 @@
+diff --git a/backend/api/__init__.py b/backend/api/__init__.py
+new file mode 100644
+index 00000000..f1b17ed7
+--- /dev/null
++++ b/backend/api/__init__.py
+@@ -0,0 +1 @@
++"""HTTP adapters: parse requests, call business operations and construct responses."""
+diff --git a/backend/api/accounts.py b/backend/api/accounts.py
+new file mode 100644
+index 00000000..afe23341
+--- /dev/null
++++ b/backend/api/accounts.py
+@@ -0,0 +1,32 @@
++"""Account/profile HTTP adapters; persistence and policy live in services/."""
++
++from fastapi import APIRouter, Depends, Header, Request, Response
++
++from ..request_models import Registration, ProfileEdit, PasswordEdit
++from ..throttle import client_address
++
++
++def install_routes(app, store, user):
++    router = APIRouter()
++    accounts = store.accounts
++
++    @router.post("/api/v1/auth/register", status_code=201)
++    def register(body: Registration, request: Request):
++        address = client_address(request.client.host if request.client else None, request.headers)
++        return accounts.register(body.username, body.password, body.displayName, address, app.state.registrations)
++
++    @router.patch("/api/v1/profile")
++    def edit_profile(body: ProfileEdit, current=Depends(user)):
++        return accounts.edit_profile(current["userId"], body.model_dump(exclude_none=True))
++
++    @router.post("/api/v1/auth/password", status_code=204)
++    def change_password(body: PasswordEdit, current=Depends(user), authorization: str = Header()):
++        accounts.change_password(current["userId"], body.currentPassword, body.newPassword, authorization[7:])
++        return Response(status_code=204)
++
++    @router.post("/api/v1/auth/revoke-other-sessions", status_code=204)
++    def revoke_other_sessions(current=Depends(user), authorization: str = Header()):
++        accounts.revoke_other_sessions(current["userId"], authorization[7:])
++        return Response(status_code=204)
++
++    app.include_router(router)
+diff --git a/backend/api/auth.py b/backend/api/auth.py
+new file mode 100644
+index 00000000..99554ad4
+--- /dev/null
++++ b/backend/api/auth.py
+@@ -0,0 +1,34 @@
++"""Local authentication HTTP adapter."""
++
++from fastapi import APIRouter, Depends, Header, Request, Response
++
++from ..request_models import Login
++from ..throttle import client_address
++
++
++def install_routes(app, store, user, session):
++    router = APIRouter()
++    accounts = store.accounts
++
++    @router.post("/api/v1/auth/login")
++    def sign_in(body: Login, request: Request):
++        address = client_address(request.client.host if request.client else None, request.headers)
++        return accounts.sign_in(
++            body.username,
++            body.password,
++            address,
++            app.state.login_failures,
++            app.state.login_failures_by_address,
++            session,
++        )
++
++    @router.get("/api/v1/auth/session")
++    def get_session(current=Depends(user)):
++        return session(current)
++
++    @router.post("/api/v1/auth/logout", status_code=204)
++    def sign_out(current=Depends(user), authorization: str = Header()):
++        accounts.sign_out(authorization[7:])
++        return Response(status_code=204)
++
++    app.include_router(router)
+diff --git a/backend/api/security.py b/backend/api/security.py
+new file mode 100644
+index 00000000..43f53a6a
+--- /dev/null
++++ b/backend/api/security.py
+@@ -0,0 +1,12 @@
++"""HTTP authentication dependencies."""
++
++from fastapi import Header, HTTPException
++
++
++def local_user(accounts):
++    def user(authorization: str = Header(default="")):
++        if not authorization.startswith("Bearer "):
++            raise HTTPException(401, "Sign in to continue")
++        return accounts.current(authorization[7:])
++
++    return user
+diff --git a/backend/app.py b/backend/app.py
+index f28664bb..25638b87 100644
+--- a/backend/app.py
++++ b/backend/app.py
+@@ -8,12 +8,10 @@ from .validation import validate_configuration
+ from .policies import active_profile
+ from .config import load_config
+ from contextlib import asynccontextmanager
+-import hashlib
+ import json
+ import os
+ from pathlib import Path
+ import threading
+-import time
+ 
+ from fastapi import Depends, FastAPI, Header, HTTPException
+ from fastapi.responses import JSONResponse
+@@ -25,6 +23,8 @@ from .live import LiveStreams
+ from .templates import install_template_routes
+ from .notifications import install_notification_routes
+ from .throttle import Throttle
++from .api.security import local_user
++from .core.errors import ServiceError
+ 
+ 
+ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
+@@ -71,22 +71,12 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
+     app.state.store = store
+     app.state.live = LiveStreams()
+ 
++    @app.exception_handler(ServiceError)
+     @app.exception_handler(HTTPException)
+     async def handle_http(_request, error):
+         return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
+ 
+-    def user(authorization: str = Header(default="")):
+-        if not authorization.startswith("Bearer "):
+-            raise HTTPException(401, "Sign in to continue")
+-        digest = hashlib.sha256(authorization[7:].encode()).hexdigest()
+-        with store.db() as db:
+-            row = db.execute(
+-                "SELECT users.profile FROM sessions JOIN users ON users.id=sessions.user_id WHERE digest=? AND expires>?",
+-                (digest, time.time()),
+-            ).fetchone()
+-        if not row:
+-            raise HTTPException(401, "Session expired or revoked")
+-        return json.loads(row[0])
++    user = local_user(store.accounts)
+ 
+     def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
+         profile = active_profile(store, current, "Your account must be active to access lab resources")
+@@ -95,11 +85,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
+             raise HTTPException(403, "Select a workspace you belong to")
+         return {**profile, "workspaceId": x_workspace_id, "workspaceRole": membership["role"]}
+ 
+-    def session(current):
+-        return {
+-            "user": current,
+-            "workspaces": store.workspaces(current["userId"]) if current["accountStatus"] == "ACTIVE" else [],
+-        }
++    session = store.accounts.session
+ 
+     def visible(current):
+         return [
+diff --git a/backend/core/__init__.py b/backend/core/__init__.py
+new file mode 100644
+index 00000000..ac0db4ac
+--- /dev/null
++++ b/backend/core/__init__.py
+@@ -0,0 +1 @@
++"""Shared product policy and errors, independent of application entrypoints."""
+diff --git a/backend/core/errors.py b/backend/core/errors.py
+new file mode 100644
+index 00000000..b18f0c19
+--- /dev/null
++++ b/backend/core/errors.py
+@@ -0,0 +1,9 @@
++"""Errors raised by business operations and translated by HTTP adapters."""
++
++
++class ServiceError(Exception):
++    def __init__(self, status_code, detail, *, headers=None):
++        super().__init__(detail)
++        self.status_code = status_code
++        self.detail = detail
++        self.headers = headers
+diff --git a/backend/repositories/__init__.py b/backend/repositories/__init__.py
+new file mode 100644
+index 00000000..9ca26040
+--- /dev/null
++++ b/backend/repositories/__init__.py
+@@ -0,0 +1 @@
++"""Product persistence operations grouped by domain."""
+diff --git a/backend/repositories/accounts.py b/backend/repositories/accounts.py
+new file mode 100644
+index 00000000..8fc9709d
+--- /dev/null
++++ b/backend/repositories/accounts.py
+@@ -0,0 +1,57 @@
++"""Account and session SQL. Transaction ownership belongs to the calling service."""
++
++import sqlite3
++
++
++class AccountExists(Exception):
++    pass
++
++
++class AccountsRepository:
++    @staticmethod
++    def by_username(db, username):
++        return db.execute(
++            "SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (username,)
++        ).fetchone()
++
++    @staticmethod
++    def profile(db, user_id):
++        return db.execute("SELECT profile FROM users WHERE id=?", (user_id,)).fetchone()
++
++    @staticmethod
++    def current_session(db, digest, now):
++        return db.execute(
++            "SELECT users.profile FROM sessions JOIN users ON users.id=sessions.user_id WHERE digest=? AND expires>?",
++            (digest, now),
++        ).fetchone()
++
++    @staticmethod
++    def add_session(db, digest, user_id, expires):
++        db.execute("INSERT INTO sessions VALUES (?,?,?)", (digest, user_id, expires))
++
++    @staticmethod
++    def delete_session(db, digest):
++        db.execute("DELETE FROM sessions WHERE digest=?", (digest,))
++
++    @staticmethod
++    def add_user(db, user_id, password_hash, profile):
++        try:
++            db.execute("INSERT INTO users VALUES (?,?,?)", (user_id, password_hash, profile))
++        except sqlite3.IntegrityError:
++            raise AccountExists from None
++
++    @staticmethod
++    def save_profile(db, user_id, profile):
++        db.execute("UPDATE users SET profile=? WHERE id=?", (profile, user_id))
++
++    @staticmethod
++    def password_hash(db, user_id):
++        return db.execute("SELECT hash FROM users WHERE id=?", (user_id,)).fetchone()[0]
++
++    @staticmethod
++    def save_password(db, user_id, password_hash):
++        db.execute("UPDATE users SET hash=? WHERE id=?", (password_hash, user_id))
++
++    @staticmethod
++    def revoke_other_sessions(db, user_id, digest):
++        db.execute("DELETE FROM sessions WHERE user_id=? AND digest<>?", (user_id, digest))
+diff --git a/backend/routes_accounts.py b/backend/routes_accounts.py
+index 205da9cc..fe3c278b 100644
+--- a/backend/routes_accounts.py
++++ b/backend/routes_accounts.py
+@@ -1,92 +1,3 @@
+-"""Identity and membership operations, independent of runtime numerical state."""
++"""Compatibility import retained during the three-layer extraction."""
+ 
+-from .request_models import Registration, ProfileEdit, PasswordEdit
+-import hashlib
+-import json
+-import sqlite3
+-import uuid
+-
+-from argon2.exceptions import VerificationError
+-from fastapi import Depends, Header, HTTPException, Request, Response
+-
+-from .throttle import client_address
+-from .passwords import password_problem
+-
+-
+-from fastapi import APIRouter
+-
+-
+-def install_routes(app, store, user):
+-    router = APIRouter()
+-
+-    @router.post("/api/v1/auth/register", status_code=201)
+-    def register(body: Registration, request: Request):
+-        address = client_address(request.client.host if request.client else None, request.headers)
+-        wait = app.state.registrations.retry_after(address)
+-        if wait:
+-            raise HTTPException(
+-                429,
+-                f"Too many registrations from this address. Try again in {wait} seconds.",
+-                headers={"Retry-After": str(wait)},
+-            )
+-        problem = password_problem(body.password, body.username, body.displayName)
+-        if problem:
+-            raise HTTPException(422, problem)
+-        app.state.registrations.record(address)
+-        profile = {
+-            "userId": uuid.uuid4().hex,
+-            "username": body.username,
+-            "displayName": body.displayName,
+-            "accountStatus": "PENDING",
+-            "platformAdmin": False,
+-            "canCreateWorkspace": False,
+-        }
+-        with store.db() as db:
+-            try:
+-                db.execute(
+-                    "INSERT INTO users VALUES (?,?,?)",
+-                    (profile["userId"], store.hasher.hash(body.password), json.dumps(profile)),
+-                )
+-            except sqlite3.IntegrityError:
+-                raise HTTPException(409, "Username already exists") from None
+-            store.audit(db, profile["userId"], "REGISTER", profile["userId"])
+-        return profile
+-
+-    @router.patch("/api/v1/profile")
+-    def edit_profile(body: ProfileEdit, current=Depends(user)):
+-        with store.db() as db:
+-            profile = store.profile(current["userId"])
+-            profile.update(body.model_dump(exclude_none=True))
+-            db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(profile), current["userId"]))
+-            store.audit(db, current["userId"], "PROFILE_EDIT", current["userId"])
+-            return profile
+-
+-    @router.post("/api/v1/auth/password", status_code=204)
+-    def change_password(body: PasswordEdit, current=Depends(user), authorization: str = Header()):
+-        profile = store.profile(current["userId"])
+-        problem = password_problem(body.newPassword, profile["username"], profile.get("displayName", ""))
+-        if problem:
+-            raise HTTPException(422, problem)
+-        with store.db() as db:
+-            password_hash = db.execute("SELECT hash FROM users WHERE id=?", (current["userId"],)).fetchone()[0]
+-            try:
+-                store.hasher.verify(password_hash, body.currentPassword)
+-            except VerificationError:
+-                raise HTTPException(403, "Current password is incorrect") from None
+-            db.execute("UPDATE users SET hash=? WHERE id=?", (store.hasher.hash(body.newPassword), current["userId"]))
+-            digest = hashlib.sha256(authorization[7:].encode()).hexdigest()
+-            db.execute("DELETE FROM sessions WHERE user_id=? AND digest<>?", (current["userId"], digest))
+-            store.audit(db, current["userId"], "PASSWORD_CHANGE", current["userId"])
+-        return Response(status_code=204)
+-
+-    @router.post("/api/v1/auth/revoke-other-sessions", status_code=204)
+-    def revoke_other_sessions(current=Depends(user), authorization: str = Header()):
+-        with store.db() as db:
+-            db.execute(
+-                "DELETE FROM sessions WHERE user_id=? AND digest<>?",
+-                (current["userId"], hashlib.sha256(authorization[7:].encode()).hexdigest()),
+-            )
+-            store.audit(db, current["userId"], "REVOKE_OTHER_SESSIONS", current["userId"])
+-        return Response(status_code=204)
+-
+-    app.include_router(router)
++from .api.accounts import install_routes as install_routes
+diff --git a/backend/routes_auth.py b/backend/routes_auth.py
+index b6126cf8..41571c4a 100644
+--- a/backend/routes_auth.py
++++ b/backend/routes_auth.py
+@@ -1,67 +1,3 @@
+-from .request_models import Login
+-import hashlib
+-import json
+-import secrets
+-import time
++"""Compatibility import retained during the three-layer extraction."""
+ 
+-from argon2.exceptions import VerificationError
+-from fastapi import Depends, Header, HTTPException, Request, Response
+-
+-from .throttle import client_address
+-
+-
+-from fastapi import APIRouter
+-
+-
+-def install_routes(app, store, user, session):
+-    router = APIRouter()
+-
+-    def authenticate(body: Login):
+-        with store.db() as db:
+-            row = db.execute(
+-                "SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (body.username,)
+-            ).fetchone()
+-            try:
+-                store.hasher.verify(row["hash"] if row else store.hasher.hash("unknown-user"), body.password)
+-            except VerificationError:
+-                raise HTTPException(401, "Invalid username or password") from None
+-            if not row:
+-                raise HTTPException(401, "Invalid username or password")
+-            token = secrets.token_urlsafe(32)
+-            db.execute(
+-                "INSERT INTO sessions VALUES (?,?,?)",
+-                (hashlib.sha256(token.encode()).hexdigest(), row["id"], time.time() + 43200),
+-            )
+-            return {**session(json.loads(row["profile"])), "accessToken": token}
+-
+-    @router.post("/api/v1/auth/login")
+-    def sign_in(body: Login, request: Request):
+-        address = client_address(request.client.host if request.client else None, request.headers)
+-        user_key = (address, body.username.lower())
+-        state = app.state
+-        wait = max(state.login_failures.retry_after(user_key), state.login_failures_by_address.retry_after(address))
+-        if wait:
+-            raise HTTPException(
+-                429, f"Too many attempts. Try again in {wait} seconds.", headers={"Retry-After": str(wait)}
+-            )
+-        try:
+-            result = authenticate(body)
+-        except HTTPException as error:
+-            if error.status_code == 401:
+-                state.login_failures.record(user_key)
+-                state.login_failures_by_address.record(address)
+-            raise
+-        state.login_failures.clear(user_key)
+-        return result
+-
+-    @router.get("/api/v1/auth/session")
+-    def get_session(current=Depends(user)):
+-        return session(current)
+-
+-    @router.post("/api/v1/auth/logout", status_code=204)
+-    def sign_out(current=Depends(user), authorization: str = Header()):
+-        with store.db() as db:
+-            db.execute("DELETE FROM sessions WHERE digest=?", (hashlib.sha256(authorization[7:].encode()).hexdigest(),))
+-        return Response(status_code=204)
+-
+-    app.include_router(router)
++from .api.auth import install_routes as install_routes
+diff --git a/backend/services/__init__.py b/backend/services/__init__.py
+new file mode 100644
+index 00000000..411e4918
+--- /dev/null
++++ b/backend/services/__init__.py
+@@ -0,0 +1 @@
++"""Product business operations, independent of HTTP routing."""
+diff --git a/backend/services/accounts.py b/backend/services/accounts.py
+new file mode 100644
+index 00000000..7b0aac0a
+--- /dev/null
++++ b/backend/services/accounts.py
+@@ -0,0 +1,131 @@
++"""Local account/session policy. HTTP parsing and response construction stay in api/."""
++
++import hashlib
++import json
++import secrets
++import time
++import uuid
++
++from argon2.exceptions import VerificationError
++
++from ..core.errors import ServiceError
++from ..passwords import password_problem
++from ..repositories.accounts import AccountExists, AccountsRepository
++
++
++def _digest(token):
++    return hashlib.sha256(token.encode()).hexdigest()
++
++
++class AccountService:
++    def __init__(self, store):
++        self.store = store
++        self.repository = AccountsRepository()
++
++    def profile(self, user_id):
++        with self.store.db() as db:
++            row = self.repository.profile(db, user_id)
++            return json.loads(row[0]) if row else None
++
++    def current(self, token):
++        with self.store.db() as db:
++            row = self.repository.current_session(db, _digest(token), time.time())
++        if not row:
++            raise ServiceError(401, "Session expired or revoked")
++        return json.loads(row[0])
++
++    def session(self, current):
++        return {
++            "user": current,
++            "workspaces": self.store.workspaces(current["userId"]) if current["accountStatus"] == "ACTIVE" else [],
++        }
++
++    def authenticate(self, username, password, session):
++        with self.store.db() as db:
++            row = self.repository.by_username(db, username)
++            try:
++                self.store.hasher.verify(row["hash"] if row else self.store.hasher.hash("unknown-user"), password)
++            except VerificationError:
++                raise ServiceError(401, "Invalid username or password") from None
++            if not row:
++                raise ServiceError(401, "Invalid username or password")
++            token = secrets.token_urlsafe(32)
++            self.repository.add_session(db, _digest(token), row["id"], time.time() + 43200)
++            return {**session(json.loads(row["profile"])), "accessToken": token}
++
++    def sign_in(self, username, password, address, failures, failures_by_address, session):
++        key = (address, username.lower())
++        wait = max(failures.retry_after(key), failures_by_address.retry_after(address))
++        if wait:
++            raise ServiceError(
++                429, f"Too many attempts. Try again in {wait} seconds.", headers={"Retry-After": str(wait)}
++            )
++        try:
++            result = self.authenticate(username, password, session)
++        except ServiceError as error:
++            if error.status_code == 401:
++                failures.record(key)
++                failures_by_address.record(address)
++            raise
++        failures.clear(key)
++        return result
++
++    def sign_out(self, token):
++        with self.store.db() as db:
++            self.repository.delete_session(db, _digest(token))
++
++    def register(self, username, password, display_name, address, registrations):
++        wait = registrations.retry_after(address)
++        if wait:
++            raise ServiceError(
++                429,
++                f"Too many registrations from this address. Try again in {wait} seconds.",
++                headers={"Retry-After": str(wait)},
++            )
++        problem = password_problem(password, username, display_name)
++        if problem:
++            raise ServiceError(422, problem)
++        registrations.record(address)
++        profile = {
++            "userId": uuid.uuid4().hex,
++            "username": username,
++            "displayName": display_name,
++            "accountStatus": "PENDING",
++            "platformAdmin": False,
++            "canCreateWorkspace": False,
++        }
++        with self.store.db() as db:
++            try:
++                self.repository.add_user(db, profile["userId"], self.store.hasher.hash(password), json.dumps(profile))
++            except AccountExists:
++                raise ServiceError(409, "Username already exists") from None
++            self.store.audit(db, profile["userId"], "REGISTER", profile["userId"])
++        return profile
++
++    def edit_profile(self, user_id, changes):
++        with self.store.db() as db:
++            profile = self.store.profile(user_id)
++            profile.update(changes)
++            self.repository.save_profile(db, user_id, json.dumps(profile))
++            self.store.audit(db, user_id, "PROFILE_EDIT", user_id)
++            return profile
++
++    def change_password(self, user_id, current_password, new_password, token):
++        profile = self.store.profile(user_id)
++        problem = password_problem(new_password, profile["username"], profile.get("displayName", ""))
++        if problem:
++            raise ServiceError(422, problem)
++        with self.store.db() as db:
++            password_hash = self.repository.password_hash(db, user_id)
++            try:
++                self.store.hasher.verify(password_hash, current_password)
++            except VerificationError:
++                raise ServiceError(403, "Current password is incorrect") from None
++            self.repository.save_password(db, user_id, self.store.hasher.hash(new_password))
++            self.repository.revoke_other_sessions(db, user_id, _digest(token))
++            self.store.audit(db, user_id, "PASSWORD_CHANGE", user_id)
++
++    def revoke_other_sessions(self, user_id, token):
++        with self.store.db() as db:
++            self.repository.revoke_other_sessions(db, user_id, _digest(token))
++            self.store.audit(db, user_id, "REVOKE_OTHER_SESSIONS", user_id)
+diff --git a/backend/store.py b/backend/store.py
+index 65ad27fd..48097414 100644
+--- a/backend/store.py
++++ b/backend/store.py
+@@ -18,6 +18,7 @@ from .errors import RuntimeRejected
+ from .migrations import initialize_workspace_extras, migrate
+ 
+ from .constants import ACTIVE, TERMINAL, REVISION, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
++from .services.accounts import AccountService
+ 
+ 
+ def now():
+@@ -31,6 +32,7 @@ class Store:
+         self.lock = threading.RLock()
+         self.operation_lock = threading.RLock()
+         self.hasher = PasswordHasher()
++        self.accounts = AccountService(self)
+         self.last_error = None
+         with self.db() as db:
+             initialize_product_schema(db)
+@@ -91,9 +93,7 @@ class Store:
+             self.last_error = None
+ 
+     def profile(self, user_id):
+-        with self.db() as db:
+-            row = db.execute("SELECT profile FROM users WHERE id=?", (user_id,)).fetchone()
+-            return json.loads(row[0]) if row else None
++        return self.accounts.profile(user_id)
+ 
+     def workspaces(self, user_id):
+         with self.db() as db:
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+new file mode 100644
+index 00000000..f1fb096c
+--- /dev/null
++++ b/backend/tests/test_account_layers.py
+@@ -0,0 +1,57 @@
++"""Account services retain durable auth behavior without an HTTP or SQL dependency in the wrong layer."""
++
++import ast
++import hashlib
++from pathlib import Path
++import time
++
++import pytest
++
++from backend.core.errors import ServiceError
++from backend.services.accounts import AccountService
++from backend.devices import AgentRuntime
++from backend.store import Store
++
++
++def test_session_lookup_checks_expiry_and_revocation_from_durable_state(tmp_path):
++    store = Store(tmp_path / "accounts.sqlite", {"admin": "test-admin-pass"}, AgentRuntime())
++    service = AccountService(store)
++    token = "test-session-value"
++    digest = hashlib.sha256(token.encode()).hexdigest()
++    with store.db() as db:
++        db.execute("INSERT INTO sessions VALUES (?,?,?)", (digest, "admin", time.time() - 60))
++    with pytest.raises(ServiceError) as expired:
++        service.current(token)
++    assert expired.value.status_code == 401
++    with store.db() as db:
++        db.execute("UPDATE sessions SET expires=? WHERE digest=?", (time.time() + 60, digest))
++    assert service.current(token)["userId"] == "admin"
++    service.sign_out(token)
++    with pytest.raises(ServiceError) as revoked:
++        service.current(token)
++    assert revoked.value.status_code == 401
++
++
++def test_service_errors_are_plain_errors_and_keep_public_message_headers():
++    error = ServiceError(429, "Try again later", headers={"Retry-After": "30"})
++    assert isinstance(error, Exception)
++    assert not any(base.__module__.startswith(("fastapi", "starlette")) for base in type(error).__mro__)
++    assert error.status_code == 429 and error.detail == "Try again later"
++    assert error.headers == {"Retry-After": "30"}
++
++
++def test_account_layer_boundaries():
++    backend = Path(__file__).resolve().parents[1]
++    for relative in ("api/auth.py", "api/accounts.py", "api/security.py", "services/accounts.py"):
++        tree = ast.parse((backend / relative).read_text())
++        for node in ast.walk(tree):
++            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
++                assert node.func.attr not in {"execute", "executemany", "executescript"}, relative
++            if isinstance(node, ast.ImportFrom):
++                module = node.module or ""
++                if relative.startswith("api/"):
++                    assert not module.startswith(("repositories", "db")), (relative, module)
++                else:
++                    assert not module.startswith(("fastapi", "starlette")), (relative, module)
++            if isinstance(node, ast.Import) and relative.startswith("services/"):
++                assert not any(n.name.startswith(("fastapi", "starlette")) for n in node.names)
