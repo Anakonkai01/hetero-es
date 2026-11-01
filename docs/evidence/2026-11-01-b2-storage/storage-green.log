@@ -1,0 +1,86 @@
+.......F....................EEEE.EE.EE                                   [100%]
+==================================== ERRORS ====================================
+__ ERROR at setup of test_upload_scope_and_native_download_ticket_revocation ___
+backend/tests/test_recovery_routes.py:15: in lab
+    app = create_app(
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+___ ERROR at setup of test_worker_device_cannot_upload_coordinator_snapshot ____
+backend/tests/test_recovery_routes.py:15: in lab
+    app = create_app(
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+___ ERROR at setup of test_abandoned_upload_cleanup_preserves_verified_point ___
+backend/tests/test_recovery_routes.py:15: in lab
+    app = create_app(
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+_ ERROR at setup of test_historical_import_requires_final_lineage_and_scoped_admin _
+backend/tests/test_recovery_routes.py:15: in lab
+    app = create_app(
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+_ ERROR at setup of test_a_large_dataset_is_uploaded_built_from_files_and_reaches_the_devices _
+backend/tests/test_large_datasets.py:16: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+_ ERROR at setup of test_the_administrator_sets_the_limits_and_bad_files_are_refused _
+backend/tests/test_large_datasets.py:16: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+_ ERROR at setup of test_a_device_without_the_private_route_gets_small_dataset_files_over_the_public_address _
+backend/tests/test_large_datasets.py:16: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+_ ERROR at setup of test_a_researcher_without_the_private_route_uploads_a_small_dataset_over_the_public_address _
+backend/tests/test_large_datasets.py:16: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+=================================== FAILURES ===================================
+_______ test_product_route_contract_matches_archived_pre_split_inventory _______
+backend/tests/test_route_contract.py:19: in test_product_route_contract_matches_archived_pre_split_inventory
+    app = create_app(
+backend/app.py:146: in create_app
+    from .recovery_storage import RecoveryStorage, install_storage_routes
+E   ImportError: cannot import name 'install_storage_routes' from 'backend.recovery_storage' (/home/pc5070ti/projects/heteroes/backend/recovery_storage.py)
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_route_contract.py::test_product_route_contract_matches_archived_pre_split_inventory
+ERROR backend/tests/test_recovery_routes.py::test_upload_scope_and_native_download_ticket_revocation
+ERROR backend/tests/test_recovery_routes.py::test_worker_device_cannot_upload_coordinator_snapshot
+ERROR backend/tests/test_recovery_routes.py::test_abandoned_upload_cleanup_preserves_verified_point
+ERROR backend/tests/test_recovery_routes.py::test_historical_import_requires_final_lineage_and_scoped_admin
+ERROR backend/tests/test_large_datasets.py::test_a_large_dataset_is_uploaded_built_from_files_and_reaches_the_devices
+ERROR backend/tests/test_large_datasets.py::test_the_administrator_sets_the_limits_and_bad_files_are_refused
+ERROR backend/tests/test_large_datasets.py::test_a_device_without_the_private_route_gets_small_dataset_files_over_the_public_address
+ERROR backend/tests/test_large_datasets.py::test_a_researcher_without_the_private_route_uploads_a_small_dataset_over_the_public_address
+1 failed, 29 passed, 1 warning, 8 errors in 2.10s

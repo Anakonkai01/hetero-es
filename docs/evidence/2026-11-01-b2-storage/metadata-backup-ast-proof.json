@@ -1,0 +1,7 @@
+{
+  "base": "af048af2",
+  "serviceFunctionAST": "identical except snapshot helper and repository calls",
+  "databaseBackupBlockAST": "identical",
+  "atomicFilesystemFunctionAST": "identical",
+  "sqlCalls": 1
+}

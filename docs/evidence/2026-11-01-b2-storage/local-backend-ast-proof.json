@@ -1,0 +1,8 @@
+{
+  "base": "401cb4e1",
+  "businessClassAST": "identical except plain errors and core Enrollment import; HTTP installer delegates",
+  "httpSignaturesAndDecorators": "identical",
+  "httpBody": "self renamed backend; public instrumentation references module; API converts ServiceError to HTTPException for standalone apps",
+  "asyncOwnership": "same off-loop calls, stream iteration and shielded close finally; error mapping wraps the original block",
+  "namespace": "backend.local_storage and storage.local_backend share module identity"
+}

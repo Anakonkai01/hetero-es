@@ -1,0 +1,259 @@
+{
+  "domain": "recovery_storage",
+  "sqlCalls": 31,
+  "businessFunctions": 17,
+  "httpFunctions": 13,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "grant_select_assignments",
+      "scope": "grant",
+      "statement": "'SELECT coordinator,epoch,run_id FROM assignments WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 273
+    },
+    {
+      "name": "point_run_select_recovery_points",
+      "scope": "point_run",
+      "statement": "'SELECT run_id FROM recovery_points WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 279
+    },
+    {
+      "name": "device_status_select_assignments",
+      "scope": "device_status",
+      "statement": "'SELECT coordinator FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "dynamic": false,
+      "free": [],
+      "line": 319
+    },
+    {
+      "name": "historical_select_assignments",
+      "scope": "historical",
+      "statement": "'SELECT 1 FROM assignments WHERE run_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 341
+    },
+    {
+      "name": "ticket_insert_cloud_downloads",
+      "scope": "ticket",
+      "statement": "'INSERT INTO cloud_downloads VALUES (?,?,?,?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 430
+    },
+    {
+      "name": "consume_delete_cloud_downloads",
+      "scope": "consume",
+      "statement": "'DELETE FROM cloud_downloads WHERE digest=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 448
+    },
+    {
+      "name": "consume_select_cloud_downloads",
+      "scope": "consume",
+      "statement": "'SELECT * FROM cloud_downloads WHERE digest=? AND expires>?'",
+      "dynamic": false,
+      "free": [],
+      "line": 438
+    },
+    {
+      "name": "consume_select_memberships",
+      "scope": "consume",
+      "statement": "'SELECT role FROM memberships WHERE workspace_id=? AND user_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 445
+    },
+    {
+      "name": "consume_select_sessions",
+      "scope": "consume",
+      "statement": "'SELECT 1 FROM sessions WHERE digest=? AND user_id=? AND expires>?'",
+      "dynamic": false,
+      "free": [],
+      "line": 441
+    },
+    {
+      "name": "begin_insert_recovery_points",
+      "scope": "begin",
+      "statement": "'INSERT OR IGNORE INTO recovery_points VALUES (?,?,?,?,?,?,NULL,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 81
+    },
+    {
+      "name": "complete_object_update_cloud_objects",
+      "scope": "complete_object",
+      "statement": "'UPDATE cloud_objects SET status=\"UPLOADED\" WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 129
+    },
+    {
+      "name": "delete_point_delete_cloud_refs",
+      "scope": "delete_point",
+      "statement": "'DELETE FROM cloud_refs WHERE point_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 242
+    },
+    {
+      "name": "delete_point_delete_recovery_points",
+      "scope": "delete_point",
+      "statement": "'DELETE FROM recovery_points WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 243
+    },
+    {
+      "name": "begin_insert_cloud_objects",
+      "scope": "begin",
+      "statement": "'INSERT OR IGNORE INTO cloud_objects VALUES (?,?,\"PENDING\",NULL,NULL)'",
+      "dynamic": false,
+      "free": [],
+      "line": 86
+    },
+    {
+      "name": "begin_insert_cloud_refs",
+      "scope": "begin",
+      "statement": "'INSERT OR IGNORE INTO cloud_refs VALUES (?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 87
+    },
+    {
+      "name": "verify_update_recovery_points",
+      "scope": "verify",
+      "statement": "'UPDATE recovery_points SET status=\"READY\",error=NULL WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 167
+    },
+    {
+      "name": "points_select_recovery_points",
+      "scope": "points",
+      "statement": "'SELECT * FROM recovery_points WHERE run_id=? ORDER BY generation DESC,created DESC'",
+      "dynamic": false,
+      "free": [],
+      "line": 221
+    },
+    {
+      "name": "manifest_select_recovery_points",
+      "scope": "manifest",
+      "statement": "'SELECT manifest,status FROM recovery_points WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 228
+    },
+    {
+      "name": "delete_point_delete_cloud_objects",
+      "scope": "delete_point",
+      "statement": "'DELETE FROM cloud_objects WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 258
+    },
+    {
+      "name": "begin_select_recovery_points",
+      "scope": "begin",
+      "statement": "'SELECT manifest,status FROM recovery_points WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 62
+    },
+    {
+      "name": "begin_select_cloud_objects",
+      "scope": "begin",
+      "statement": "'SELECT * FROM cloud_objects'",
+      "dynamic": false,
+      "free": [],
+      "line": 72
+    },
+    {
+      "name": "begin_update_cloud_objects",
+      "scope": "begin",
+      "statement": "'UPDATE cloud_objects SET upload_plan=?,expires=? WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 103
+    },
+    {
+      "name": "complete_object_select_cloud_objects",
+      "scope": "complete_object",
+      "statement": "'SELECT o.* FROM cloud_objects o JOIN cloud_refs r ON o.sha=r.sha WHERE r.point_id=? AND o.sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 113
+    },
+    {
+      "name": "verify_select_recovery_points",
+      "scope": "verify",
+      "statement": "'SELECT * FROM recovery_points WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 134
+    },
+    {
+      "name": "verify_update_cloud_objects",
+      "scope": "verify",
+      "statement": "'UPDATE cloud_objects SET status=\"READY\",upload_plan=NULL,expires=NULL WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 162
+    },
+    {
+      "name": "verify_update_recovery_points_2",
+      "scope": "verify",
+      "statement": "'UPDATE recovery_points SET status=?,error=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 188
+    },
+    {
+      "name": "delete_point_select_cloud_objects",
+      "scope": "delete_point",
+      "statement": "'SELECT * FROM cloud_objects o WHERE NOT EXISTS(SELECT 1 FROM cloud_refs r WHERE r.sha=o.sha)'",
+      "dynamic": false,
+      "free": [],
+      "line": 246
+    },
+    {
+      "name": "usage_select_cloud_objects",
+      "scope": "usage",
+      "statement": "'SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!=\"READY\"'",
+      "dynamic": false,
+      "free": [],
+      "line": 48
+    },
+    {
+      "name": "begin_select_cloud_objects_2",
+      "scope": "begin",
+      "statement": "'SELECT * FROM cloud_objects WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 93
+    },
+    {
+      "name": "verify_update_cloud_objects_2",
+      "scope": "verify",
+      "statement": "'UPDATE cloud_objects SET status=\"PENDING\",upload_plan=NULL,expires=NULL WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 183
+    },
+    {
+      "name": "verify_select_cloud_objects",
+      "scope": "verify",
+      "statement": "'SELECT * FROM cloud_objects WHERE sha=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 141
+    }
+  ]
+}

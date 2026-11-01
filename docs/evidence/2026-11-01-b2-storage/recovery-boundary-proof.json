@@ -1,0 +1,20 @@
+{
+  "base": "401cb4e1",
+  "coreRequestClasses": "same AST",
+  "httpSignaturesAndDecorators": "same AST",
+  "cookieAndRedirectOperations": "same AST except secret/result and service URL references",
+  "serviceTicket": "same body except token input replaces Request header, cookie output moves to API; returns internal secret alongside path",
+  "serviceConsume": "same body except cookie input replaces Request and URL replaces HTTP response",
+  "originalHttpArgs": {
+    "ticket": "arguments(posonlyargs=[], args=[arg(arg='artifact_id', annotation=Name(id='str', ctx=Load())), arg(arg='response', annotation=Name(id='Response', ctx=Load())), arg(arg='request', annotation=Name(id='Request', ctx=Load())), arg(arg='current')], kwonlyargs=[], kw_defaults=[], defaults=[Call(func=Name(id='Depends', ctx=Load()), args=[Name(id='scoped', ctx=Load())], keywords=[])])",
+    "consume": "arguments(posonlyargs=[], args=[arg(arg='ticket_digest', annotation=Name(id='str', ctx=Load())), arg(arg='request', annotation=Name(id='Request', ctx=Load()))], kwonlyargs=[], kw_defaults=[], defaults=[])"
+  },
+  "originalDecorators": {
+    "ticket": [
+      "Call(func=Attribute(value=Name(id='app', ctx=Load()), attr='post', ctx=Load()), args=[Constant(value='/api/v1/artifacts/{artifact_id}/download-ticket')], keywords=[])"
+    ],
+    "consume": [
+      "Call(func=Attribute(value=Name(id='app', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='/api/v1/cloud-downloads/{ticket_digest}')], keywords=[])"
+    ]
+  }
+}

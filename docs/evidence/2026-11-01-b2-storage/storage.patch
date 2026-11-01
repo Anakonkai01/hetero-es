@@ -1,0 +1,2275 @@
+diff --git a/backend/api/local_storage.py b/backend/api/local_storage.py
+new file mode 100644
+index 00000000..fadc8e93
+--- /dev/null
++++ b/backend/api/local_storage.py
+@@ -0,0 +1,57 @@
++"""Signed filesystem HTTP transfers; blocking disk work stays off the event loop."""
++
++from anyio import CancelScope
++from fastapi import HTTPException, Request
++from fastapi.responses import FileResponse
++from starlette.concurrency import run_in_threadpool
++from ..core.errors import ServiceError
++from ..storage import local_backend as local
++
++
++def install_routes(app, backend):
++
++    @app.put("/api/v1/local-storage/{token}")
++    async def upload(token: str, request: Request):
++        return await receive(token, request, "PUT")
++
++    @app.put("/api/v1/public-upload/{token}")
++    async def public_upload(token: str, request: Request):
++        return await receive(token, request, "PUT-PUBLIC")
++
++    async def receive(token, request, method):
++        session = local._Upload()
++        try:
++            try:
++                await run_in_threadpool(
++                    backend._open_upload, session, token, request.headers.get("content-length"), method
++                )
++                async for chunk in request.stream():
++                    await run_in_threadpool(session.write, chunk)
++                return await run_in_threadpool(session.finish)
++            finally:
++                with CancelScope(shield=True):
++                    await run_in_threadpool(session.close)
++        except ServiceError as error:
++            raise HTTPException(error.status_code, error.detail, headers=error.headers) from None
++
++    @app.get("/api/v1/public-study/{token}")
++    def public_study(token: str):
++        try:
++            grant = backend.grant(token, "GET-PUBLIC")
++            path = backend.path(grant["key"])
++            if not path.is_file() or path.stat().st_size > local.PUBLIC_STUDY_MAX_BYTES:
++                raise HTTPException(404, "Object unavailable")
++            return FileResponse(path, media_type="application/octet-stream")
++        except ServiceError as error:
++            raise HTTPException(error.status_code, error.detail, headers=error.headers) from None
++
++    @app.get("/api/v1/local-storage/{token}")
++    def download(token: str):
++        try:
++            grant = backend.grant(token, "GET")
++            path = backend.path(grant["key"])
++            if not path.is_file():
++                raise HTTPException(404, "Object unavailable")
++            return FileResponse(path, media_type="application/octet-stream")
++        except ServiceError as error:
++            raise HTTPException(error.status_code, error.detail, headers=error.headers) from None
+diff --git a/backend/api/recovery_storage.py b/backend/api/recovery_storage.py
+new file mode 100644
+index 00000000..0fb6fd94
+--- /dev/null
++++ b/backend/api/recovery_storage.py
+@@ -0,0 +1,83 @@
++"""Recovery_Storage HTTP adapters."""
++
++from ..core.storage_models import Begin, Finish
++from fastapi import Depends, Request, Response
++from fastapi.responses import RedirectResponse
++from fastapi import APIRouter
++from ..services.recovery_storage import operations
++
++
++def install_routes(app, store, storage, device_auth, user, scoped, authorized):
++    service = operations(store, storage, device_auth, user, scoped, authorized)
++    router = APIRouter()
++
++    @app.post("/api/v1/device/recovery-points")
++    def begin(body: Begin, current=Depends(device_auth)):
++        return service.begin(body=body, current=current)
++
++    @app.post("/api/v1/device/recovery-points/complete-object")
++    def complete(body: Finish, current=Depends(device_auth)):
++        return service.complete(body=body, current=current)
++
++    @app.post("/api/v1/device/recovery-points/{point_id}/verify")
++    def verify(point_id: str, body: dict, current=Depends(device_auth)):
++        return service.verify(point_id=point_id, body=body, current=current)
++
++    @app.get("/api/v1/device/recovery-points/{point_id}")
++    def device_status(point_id: str, current=Depends(device_auth)):
++        return service.device_status(point_id=point_id, current=current)
++
++    @app.delete("/api/v1/device/recovery-points/{point_id}")
++    def abandon(point_id: str, body: dict, current=Depends(device_auth)):
++        return service.abandon(point_id=point_id, body=body, current=current)
++
++    @app.post("/api/v1/experiments/{run_id}/recovery-import")
++    def import_begin(run_id: str, body: dict, current=Depends(scoped)):
++        return service.import_begin(run_id=run_id, body=body, current=current)
++
++    @app.post("/api/v1/experiments/{run_id}/recovery-import/complete-object")
++    def import_complete(run_id: str, body: dict, current=Depends(scoped)):
++        return service.import_complete(run_id=run_id, body=body, current=current)
++
++    @app.post("/api/v1/experiments/{run_id}/recovery-import/{point_id}/verify")
++    def import_verify(run_id: str, point_id: str, current=Depends(scoped)):
++        return service.import_verify(run_id=run_id, point_id=point_id, current=current)
++
++    @app.get("/api/v1/experiments/{run_id}/recovery-points")
++    def points(run_id: str, current=Depends(scoped)):
++        return service.points(run_id=run_id, current=current)
++
++    @app.post("/api/v1/recovery-points/{point_id}/download-plan")
++    def download_plan(point_id: str, current=Depends(scoped)):
++        return service.download_plan(point_id=point_id, current=current)
++
++    @app.delete("/api/v1/recovery-points/{point_id}")
++    def delete(point_id: str, current=Depends(scoped)):
++        return service.delete(point_id=point_id, current=current)
++
++    @app.post("/api/v1/artifacts/{artifact_id}/download-ticket")
++    def ticket(artifact_id: str, response: Response, request: Request, current=Depends(scoped)):
++        result = service.ticket(
++            artifact_id=artifact_id, token=request.headers.get("Authorization", "")[7:], current=current
++        )
++        path = result["downloadUrl"]
++        response.set_cookie(
++            "heteroes-cloud-download",
++            result["secret"],
++            httponly=True,
++            secure=request.url.scheme == "https",
++            samesite="strict",
++            path=path,
++            max_age=60,
++        )
++        return {"downloadUrl": path}
++
++    @app.get("/api/v1/cloud-downloads/{ticket_digest}")
++    def consume(ticket_digest: str, request: Request):
++        url = service.consume(ticket_digest=ticket_digest, secret=request.cookies.get("heteroes-cloud-download", ""))
++        response = RedirectResponse(url, status_code=303)
++        response.delete_cookie("heteroes-cloud-download", path="/api/v1/cloud-downloads/" + ticket_digest)
++        response.headers["Referrer-Policy"] = "no-referrer"
++        return response
++
++    app.include_router(router)
+diff --git a/backend/core/filesystem.py b/backend/core/filesystem.py
+new file mode 100644
+index 00000000..551e2bca
+--- /dev/null
++++ b/backend/core/filesystem.py
+@@ -0,0 +1,20 @@
++"""Atomic filesystem publication helpers."""
++
++import ctypes
++import os
++import sys
++
++
++def publish_new_directory(staging, destination):
++    if sys.platform.startswith("linux"):
++        # os.rename can replace an empty directory created between verification
++        # and publication. Linux RENAME_NOREPLACE closes that race atomically.
++        rename = ctypes.CDLL(None, use_errno=True).renameat2
++        rename.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
++        rename.restype = ctypes.c_int
++        if rename(-100, os.fsencode(staging), -100, os.fsencode(destination), 1) != 0:
++            error = ctypes.get_errno()
++            raise OSError(error, os.strerror(error), str(destination))
++    else:
++        # Windows rename already refuses an existing destination directory.
++        staging.rename(destination)
+diff --git a/backend/core/storage_models.py b/backend/core/storage_models.py
+new file mode 100644
+index 00000000..80894e30
+--- /dev/null
++++ b/backend/core/storage_models.py
+@@ -0,0 +1,19 @@
++"""Recovery request contracts shared by HTTP adapters and services."""
++
++from pydantic import BaseModel, ConfigDict, Field
++
++
++class Begin(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    assignmentId: str
++    epoch: int
++    manifest: dict
++
++
++class Finish(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    assignmentId: str
++    epoch: int
++    pointId: str
++    sha256: str
++    parts: list[dict] = Field(default_factory=list, max_length=10000)
+diff --git a/backend/db/backups.py b/backend/db/backups.py
+new file mode 100644
+index 00000000..6847a803
+--- /dev/null
++++ b/backend/db/backups.py
+@@ -0,0 +1,8 @@
++"""Consistent SQLite snapshots; metadata publication policy belongs to services."""
++
++import sqlite3
++
++
++def backup_sqlite(store, database):
++    with store.db() as source, sqlite3.connect(database) as destination:
++        source.backup(destination)
+diff --git a/backend/local_storage.py b/backend/local_storage.py
+index 7dfbf555..5b3d7c54 100644
+--- a/backend/local_storage.py
++++ b/backend/local_storage.py
+@@ -1,332 +1,6 @@
+-"""Filesystem recovery storage with expiring scoped upload/download capabilities."""
++"""Public compatibility namespace for filesystem storage and instrumentation."""
+ 
+-import base64
+-import hashlib
+-import hmac
+-import json
+-import os
+-from pathlib import Path
+-import re
+-import secrets
+-import shutil
+-import tempfile
+-import time
+-import threading
+-from anyio import CancelScope
++import sys
++from .storage import local_backend as _implementation
+ 
+-from fastapi import HTTPException, Request
+-from fastapi.responses import FileResponse
+-from starlette.concurrency import run_in_threadpool
+-
+-KEY = re.compile(
+-    r"(?:uploads/[a-f0-9]{64}/[a-f0-9]{32}|objects/[a-f0-9]{64}|"
+-    r"manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.sqlite|manifest\.json))"
+-)
+-
+-
+-def digest(path):
+-    with path.open("rb") as stream:
+-        return hashlib.file_digest(stream, "sha256").hexdigest()
+-
+-
+-class _Upload:
+-    """One bounded streaming upload; each method runs off the API event loop."""
+-
+-    def __init__(self):
+-        self.lock = threading.RLock()
+-        self.closed = False
+-        self.partial = None
+-        self.stream = None
+-        self.fd = None
+-        self.total = 0
+-        self.hasher = hashlib.sha256()
+-
+-    def open(self, target, size):
+-        with self.lock:
+-            if self.closed:
+-                raise RuntimeError("Upload already closed")
+-            target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+-            self.fd, partial = tempfile.mkstemp(prefix=".pending-", dir=target.parent)
+-            self.partial = Path(partial)
+-            self.target = target
+-            self.size = size
+-            self.stream = os.fdopen(self.fd, "wb")
+-            self.fd = None
+-
+-    def write(self, chunk):
+-        with self.lock:
+-            self.total += len(chunk)
+-            if self.total > self.size:
+-                raise HTTPException(413, "Upload exceeds signed size")
+-            self.hasher.update(chunk)
+-            self.stream.write(chunk)
+-
+-    def finish(self):
+-        with self.lock:
+-            self.stream.flush()
+-            os.fsync(self.stream.fileno())
+-            self.stream.close()
+-            if self.total != self.size:
+-                raise HTTPException(400, "Incomplete upload")
+-            try:
+-                os.link(self.partial, self.target)
+-            except FileExistsError:
+-                if digest(self.target) != self.hasher.hexdigest():
+-                    raise HTTPException(409, "Upload is immutable")
+-            return {"sizeBytes": self.total}
+-
+-    def close(self):
+-        # Raw asyncio cancellation can leave a thread operation running. Wait
+-        # for its ownership before closing, even outside an AnyIO cancel scope.
+-        with self.lock:
+-            self.closed = True
+-            try:
+-                if self.stream is not None:
+-                    self.stream.close()
+-                elif self.fd is not None:
+-                    os.close(self.fd)
+-                    self.fd = None
+-            finally:
+-                if self.partial is not None:
+-                    self.partial.unlink(missing_ok=True)
+-
+-
+-PUBLIC_STUDY_MAX_BYTES = 64 * 1024**2  # datasets are at most 10 MB documents plus split files; never weights
+-
+-
+-class LocalBackend:
+-    mode = "local"
+-
+-    def __init__(self, root, key_file, base_url, expected_uuid=None, metadata_root=None):
+-        from .devices import Enrollment
+-
+-        # Same private LAN/Tailscale validation as the compute endpoint.
+-        self.base_url = Enrollment.private_compute(base_url)
+-        self.root = Path(root).resolve()
+-        self.expected_uuid = expected_uuid
+-        if expected_uuid is not None:
+-            if not re.fullmatch("[a-fA-F0-9-]+", expected_uuid):
+-                raise ValueError("Invalid storage volume UUID")
+-            self.check_volume()
+-        if self.root == Path("/mnt/sekai") or Path("/mnt/sekai") in self.root.parents:
+-            raise ValueError("Sekai is not authorized for HeteroES storage")
+-        self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+-        self.metadata_root = Path(metadata_root).resolve() if metadata_root is not None else None
+-        if self.metadata_root is not None:
+-            self.metadata_root.mkdir(parents=True, exist_ok=True, mode=0o700)
+-            if os.name != "nt" and self.metadata_root.stat().st_mode & 0o077:
+-                raise ValueError("Metadata storage directory must be private")
+-        key_file = Path(key_file)
+-        if key_file.is_symlink():
+-            raise ValueError("Storage signing key cannot be a symlink")
+-        key_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+-        if not key_file.exists():
+-            with key_file.open("xb") as stream:
+-                os.chmod(key_file, 0o600)
+-                stream.write(secrets.token_bytes(32))
+-        if os.name != "nt" and key_file.stat().st_mode & 0o077:
+-            raise ValueError("Storage signing key must be private")
+-        self.secret = key_file.read_bytes()
+-        if len(self.secret) != 32:
+-            raise ValueError("Invalid storage signing key")
+-
+-    def check_volume(self):
+-        if self.expected_uuid is None:
+-            return
+-        import subprocess
+-
+-        candidate = self.root
+-        while not candidate.exists():
+-            candidate = candidate.parent
+-        source = subprocess.run(
+-            ["findmnt", "-rn", "-T", str(candidate), "-o", "SOURCE"],
+-            check=True,
+-            capture_output=True,
+-            text=True,
+-            timeout=5,
+-        ).stdout.strip()
+-        device = Path("/dev/disk/by-uuid") / self.expected_uuid
+-        if not device.exists() or Path(source).resolve() != device.resolve():
+-            raise ValueError("Selected storage volume is not mounted")
+-
+-    def path(self, key):
+-        self.check_volume()
+-        if not isinstance(key, str) or not KEY.fullmatch(key):
+-            raise ValueError("Unsafe storage key")
+-        root = self.metadata_root if self.metadata_root is not None and key.startswith("metadata/") else self.root
+-        path = root / key
+-        if path.resolve() != path or root not in path.parents:
+-            raise ValueError("Storage symlinks are forbidden")
+-        return path
+-
+-    def inventory(self):
+-        self.check_volume()
+-        total = 0
+-        for root in [self.root] + (
+-            [self.metadata_root]
+-            if self.metadata_root is not None and not self.metadata_root.is_relative_to(self.root)
+-            else []
+-        ):
+-            for path in root.rglob("*"):
+-                if path.is_symlink():
+-                    raise ValueError("Storage contains a symlink")
+-                if path.is_file():
+-                    total += path.stat().st_size
+-        return total
+-
+-    def get(self, key):
+-        with self.path(key).open("rb") as stream:
+-            while chunk := stream.read(1024**2):
+-                yield chunk
+-
+-    def read_version(self, key):
+-        path = self.path(key)
+-        # Uploads are published once and cannot be overwritten by upload rights.
+-        return digest(path), self.get(key)
+-
+-    def publish_upload(self, source, destination, etag):
+-        source_path, target = self.path(source), self.path(destination)
+-        if digest(source_path) != etag or destination != "objects/" + etag:
+-            raise ValueError("Verified upload changed before publication")
+-        self._publish(target, self.get(source), etag)
+-        source_path.unlink()
+-
+-    def _publish(self, target, chunks, expected=None):
+-        target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+-        fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=target.parent)
+-        temporary = Path(temporary)
+-        actual = hashlib.sha256()
+-        try:
+-            with os.fdopen(fd, "wb") as stream:
+-                for chunk in chunks:
+-                    actual.update(chunk)
+-                    stream.write(chunk)
+-                stream.flush()
+-                os.fsync(stream.fileno())
+-            if expected is not None and actual.hexdigest() != expected:
+-                raise ValueError("Publication hash mismatch")
+-            try:
+-                os.link(temporary, target)
+-            except FileExistsError:
+-                if digest(target) != actual.hexdigest():
+-                    raise ValueError("Immutable object already has different contents")
+-        finally:
+-            temporary.unlink(missing_ok=True)
+-
+-    def put(self, key, data):
+-        self._publish(self.path(key), [data])
+-
+-    def put_file(self, key, source, expected=None):
+-        """Publish a large local file under `key` without reading it into memory."""
+-
+-        def chunks():
+-            with open(source, "rb") as stream:
+-                while chunk := stream.read(1024**2):
+-                    yield chunk
+-
+-        self._publish(self.path(key), chunks(), expected)
+-
+-    def delete(self, key):
+-        self.path(key).unlink(missing_ok=True)
+-
+-    def _token(self, method, key, size, lifetime):
+-        self.path(key)
+-        payload = json.dumps(
+-            {"method": method, "key": key, "size": size, "expires": int(time.time()) + lifetime}, sort_keys=True
+-        ).encode()
+-        encoded = base64.urlsafe_b64encode(payload).rstrip(b"=").decode()
+-        return encoded + "." + hmac.new(self.secret, encoded.encode(), hashlib.sha256).hexdigest()
+-
+-    def _url(self, method, key, size, lifetime):
+-        return self.base_url + "/api/v1/local-storage/" + self._token(method, key, size, lifetime)
+-
+-    def public_study_url(self, public_base, key):
+-        """A dataset object for a device without the private route (owner decision 2026-10-22): over the lab's public
+-        HTTPS address, for 5 minutes, only for objects up to PUBLIC_STUDY_MAX_BYTES. Model weights never qualify."""
+-        path = self.path(key)
+-        if not key.startswith("objects/") or not path.is_file() or path.stat().st_size > PUBLIC_STUDY_MAX_BYTES:
+-            return None
+-        return public_base.rstrip("/") + "/api/v1/public-study/" + self._token("GET-PUBLIC", key, None, 300)
+-
+-    def grant(self, token, method):
+-        try:
+-            encoded, signature = token.split(".")
+-            expected = hmac.new(self.secret, encoded.encode(), hashlib.sha256).hexdigest()
+-            if not hmac.compare_digest(signature, expected):
+-                raise ValueError("Invalid signature")
+-            payload = json.loads(base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)))
+-            if payload["method"] != method or payload["expires"] <= time.time():
+-                raise ValueError("Wrong method or expired capability")
+-            self.path(payload["key"])
+-            return payload
+-        except (ValueError, KeyError, TypeError, UnicodeError):
+-            raise HTTPException(403, "Invalid or expired storage capability") from None
+-
+-    def upload_plan(self, key, size, public_base=None):
+-        """A signed upload. With `public_base`, a dataset file up to PUBLIC_STUDY_MAX_BYTES also gets a link over the lab's
+-        public HTTPS address, for a researcher without the private route (owner 2026-10-22: no Tailscale by default)."""
+-        if not key.startswith("uploads/") or type(size) is not int or not 0 < size <= 5_000_000_000:
+-            raise ValueError("Invalid upload size or key")
+-        plan = {
+-            "mode": "single",
+-            "key": key,
+-            "url": self._url("PUT", key, size, 900),
+-            "headers": {"Content-Length": str(size)},
+-        }
+-        if public_base and size <= PUBLIC_STUDY_MAX_BYTES:
+-            plan["publicUrl"] = (
+-                public_base.rstrip("/") + "/api/v1/public-upload/" + self._token("PUT-PUBLIC", key, size, 900)
+-            )
+-        return plan
+-
+-    def download_url(self, key):
+-        return self._url("GET", key, None, 60)
+-
+-    def _open_upload(self, session, token, content_length, method="PUT"):
+-        with session.lock:
+-            if session.closed:
+-                raise RuntimeError("Upload already closed")
+-            grant = self.grant(token, method)
+-            if content_length != str(grant["size"]):
+-                raise HTTPException(400, "Signed upload length required")
+-            if shutil.disk_usage(self.root).free < grant["size"] + 64 * 1024**2:
+-                raise HTTPException(507, "Local storage is full")
+-            session.open(self.path(grant["key"]), grant["size"])
+-
+-    def install_routes(self, app):
+-        @app.put("/api/v1/local-storage/{token}")
+-        async def upload(token: str, request: Request):
+-            return await receive(token, request, "PUT")
+-
+-        @app.put("/api/v1/public-upload/{token}")
+-        async def public_upload(token: str, request: Request):
+-            return await receive(token, request, "PUT-PUBLIC")
+-
+-        async def receive(token, request, method):
+-            session = _Upload()
+-            try:
+-                await run_in_threadpool(
+-                    self._open_upload, session, token, request.headers.get("content-length"), method
+-                )
+-                async for chunk in request.stream():
+-                    await run_in_threadpool(session.write, chunk)
+-                return await run_in_threadpool(session.finish)
+-            finally:
+-                with CancelScope(shield=True):
+-                    await run_in_threadpool(session.close)
+-
+-        @app.get("/api/v1/public-study/{token}")
+-        def public_study(token: str):
+-            grant = self.grant(token, "GET-PUBLIC")
+-            path = self.path(grant["key"])
+-            if not path.is_file() or path.stat().st_size > PUBLIC_STUDY_MAX_BYTES:
+-                raise HTTPException(404, "Object unavailable")
+-            return FileResponse(path, media_type="application/octet-stream")
+-
+-        @app.get("/api/v1/local-storage/{token}")
+-        def download(token: str):
+-            grant = self.grant(token, "GET")
+-            path = self.path(grant["key"])
+-            if not path.is_file():
+-                raise HTTPException(404, "Object unavailable")
+-            return FileResponse(path, media_type="application/octet-stream")
++sys.modules[__name__] = _implementation
+diff --git a/backend/metadata_backup.py b/backend/metadata_backup.py
+index 7eee30e7..6feb9345 100644
+--- a/backend/metadata_backup.py
++++ b/backend/metadata_backup.py
+@@ -1,103 +1,4 @@
+-"""Hourly consistent product metadata backup; recovery storage failure leaves a local copy."""
++"""Compatibility exports for metadata backup and atomic publication."""
+ 
+-import logging
+-import ctypes
+-import hashlib
+-import json
+-import os
+-from pathlib import Path
+-import sqlite3
+-import sys
+-import time
+-import uuid
+-
+-
+-def create_metadata_backup(store, storage):
+-    root = Path(store.path).parent / "metadata-backups"
+-    root.mkdir(mode=0o700, exist_ok=True)
+-    point = root / uuid.uuid4().hex
+-    point.mkdir(mode=0o700)
+-    database = point / "product.sqlite"
+-    with store.db() as source, sqlite3.connect(database) as destination:
+-        source.backup(destination)
+-    os.chmod(database, 0o600)
+-    with open(database, "rb") as stream:
+-        sha = hashlib.file_digest(stream, "sha256").hexdigest()
+-    data = database.read_bytes()
+-    manifest = {
+-        "formatVersion": 1,
+-        "component": "heteroes-product-metadata",
+-        "createdAt": time.time(),
+-        "sha256": sha,
+-        "sizeBytes": len(data),
+-        "objectKey": "metadata/" + point.name + "/product.sqlite",
+-    }
+-    (point / "manifest.json").write_text(json.dumps(manifest))
+-    os.chmod(point / "manifest.json", 0o600)
+-    try:
+-        with storage.lock:
+-            usage = storage.usage()
+-            if usage["observedBytes"] + usage["reservedBytes"] + len(data) + len(json.dumps(manifest)) > storage.quota:
+-                raise RuntimeError("Cloud quota reached")
+-
+-            storage.backend.put(manifest["objectKey"], data)
+-            check = hashlib.sha256()
+-            size = 0
+-            for chunk in storage.backend.get(manifest["objectKey"]):
+-                check.update(chunk)
+-                size += len(chunk)
+-            if size != len(data) or check.hexdigest() != sha:
+-                raise ValueError("Metadata checksum mismatch")
+-            storage.backend.put("metadata/" + point.name + "/manifest.json", json.dumps(manifest).encode())
+-        status = {"status": "READY", "pointId": point.name, "createdAt": manifest["createdAt"]}
+-    except Exception as error:
+-        status = {
+-            "status": "PENDING",
+-            "pointId": point.name,
+-            "errorType": type(error).__name__,
+-            "createdAt": manifest["createdAt"],
+-        }
+-    (point / "cloud-state.json").write_text(json.dumps(status))
+-    os.chmod(point / "cloud-state.json", 0o600)
+-    with store.db() as db:
+-        db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("metadataBackupStatus", json.dumps(status)))
+-    points = sorted([p for p in root.iterdir() if p.is_dir()], key=lambda p: p.stat().st_mtime, reverse=True)
+-    import shutil
+-
+-    for old in points[24:]:
+-        if (old / "cloud-state.json").exists():
+-            storage.backend.delete("metadata/" + old.name + "/manifest.json")
+-            storage.backend.delete("metadata/" + old.name + "/product.sqlite")
+-        shutil.rmtree(old)
+-    return status
+-
+-
+-def backup_loop(store, storage, stop):
+-    last = 0
+-    root = Path(store.path).parent / "metadata-backups"
+-    if root.exists():
+-        for point in root.glob("*/manifest.json"):
+-            last = max(last, json.loads(point.read_text())["createdAt"])
+-    while not stop.wait(60):
+-        if time.time() - last < 3600:
+-            continue
+-        try:
+-            create_metadata_backup(store, storage)
+-        except Exception as error:
+-            logging.getLogger(__name__).warning("Metadata backup failed: %s", type(error).__name__)
+-        last = time.time()
+-
+-
+-def publish_new_directory(staging, destination):
+-    if sys.platform.startswith("linux"):
+-        # os.rename can replace an empty directory created between verification
+-        # and publication. Linux RENAME_NOREPLACE closes that race atomically.
+-        rename = ctypes.CDLL(None, use_errno=True).renameat2
+-        rename.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+-        rename.restype = ctypes.c_int
+-        if rename(-100, os.fsencode(staging), -100, os.fsencode(destination), 1) != 0:
+-            error = ctypes.get_errno()
+-            raise OSError(error, os.strerror(error), str(destination))
+-    else:
+-        # Windows rename already refuses an existing destination directory.
+-        staging.rename(destination)
++from .services.metadata_backup import create_metadata_backup as create_metadata_backup, backup_loop as backup_loop
++from .core.filesystem import publish_new_directory as publish_new_directory
+diff --git a/backend/recovery_storage.py b/backend/recovery_storage.py
+index 6ad9fb7f..4552f345 100644
+--- a/backend/recovery_storage.py
++++ b/backend/recovery_storage.py
+@@ -1,483 +1,11 @@
+-"""Local recovery storage. Manifest publication is the commit."""
++"""Compatibility recovery exports during backend layer extraction."""
+ 
+-import logging
+-from .migrations import initialize_recovery_schema, initialize_recovery_downloads_schema
+-from .policies import backup_policy
+-import hashlib
+-import json
+-import re
+-import threading
+-import time
+-import uuid
++from .api.recovery_storage import install_routes as install_storage_routes
++from .services.recovery_storage import (
++    RecoveryStorage as RecoveryStorage,
++    QuotaExceeded as QuotaExceeded,
++    HEX as HEX,
++    UUID as UUID,
++)
+ 
+-HEX = re.compile("[a-f0-9]{64}")
+-UUID = re.compile("[a-f0-9]{32}")
+-
+-
+-class QuotaExceeded(RuntimeError):
+-    pass
+-
+-
+-class RecoveryStorage:
+-    # Legacy cloud_* table names preserve compatibility with existing lab databases.
+-
+-    def __init__(self, store, backend, quota_bytes=8000000000):
+-        self.store = store
+-        self.backend = backend
+-        self.quota = quota_bytes
+-        self.lock = threading.RLock()
+-        with store.db() as db:
+-            initialize_recovery_downloads_schema(db)
+-        self.pending = set()
+-
+-    def validate_manifest(self, m):
+-        from heteroes.recovery_manifest import validate_manifest
+-
+-        validate_manifest(m)
+-        backup_policy(m.get("backupPolicy", {}))
+-
+-    def usage(self):
+-        observed = self.backend.inventory()
+-        with self.store.db() as db:
+-            reserved = (
+-                2 * db.execute('SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!="READY"').fetchone()[0]
+-            )
+-        return {
+-            "quotaBytes": self.quota,
+-            "observedBytes": observed,
+-            "reservedBytes": reserved,
+-            "storageMode": getattr(self.backend, "mode", "local"),
+-            "warning": observed + reserved >= self.quota * 0.8,
+-        }
+-
+-    def begin(self, m):
+-        self.validate_manifest(m)
+-        with self.lock:
+-            with self.store.db() as db:
+-                old = db.execute("SELECT manifest,status FROM recovery_points WHERE id=?", (m["pointId"],)).fetchone()
+-                if old and json.loads(old[0]) != m:
+-                    raise ValueError("Frozen recovery manifest changed")
+-                if old and old["status"] == "READY":
+-                    return {"pointId": m["pointId"], "status": "READY", "objects": []}
+-                unique = {}
+-                for meta in m["files"].values():
+-                    if meta["sha256"] in unique and unique[meta["sha256"]] != meta["sizeBytes"]:
+-                        raise ValueError("Hash/size mismatch")
+-                    unique[meta["sha256"]] = meta["sizeBytes"]
+-                existing = {r["sha"]: dict(r) for r in db.execute("SELECT * FROM cloud_objects")}
+-                if any((sha in existing and existing[sha]["size"] != size for sha, size in unique.items())):
+-                    raise ValueError("Stored hash/size mismatch")
+-            usage = self.usage()
+-            new_bytes = 2 * sum((size for sha, size in unique.items() if sha not in existing))
+-            if usage["observedBytes"] + usage["reservedBytes"] + new_bytes + len(json.dumps(m)) > self.quota:
+-                raise QuotaExceeded("Recovery storage quota reached; compute continues with local recovery points")
+-            plans = []
+-            with self.store.db() as db:
+-                db.execute(
+-                    "INSERT OR IGNORE INTO recovery_points VALUES (?,?,?,?,?,?,NULL,?)",
+-                    (m["pointId"], m["runId"], m["generation"], m["final"], "PENDING", json.dumps(m), time.time()),
+-                )
+-                for sha, size in unique.items():
+-                    db.execute('INSERT OR IGNORE INTO cloud_objects VALUES (?,?,"PENDING",NULL,NULL)', (sha, size))
+-                    db.execute("INSERT OR IGNORE INTO cloud_refs VALUES (?,?)", (m["pointId"], sha))
+-            for sha, size in unique.items():
+-                entry = existing.get(sha)
+-                if entry and entry["status"] in ("READY", "UPLOADED"):
+-                    continue
+-                with self.store.db() as db:
+-                    row = db.execute("SELECT * FROM cloud_objects WHERE sha=?", (sha,)).fetchone()
+-                if row["upload_plan"] and (row["expires"] or 0) > time.time() + 30:
+-                    plan = json.loads(row["upload_plan"])
+-                else:
+-                    if row["upload_plan"]:
+-                        previous = json.loads(row["upload_plan"])
+-                        if previous.get("uploadId"):
+-                            self.backend.abort(previous["key"], previous["uploadId"])
+-                    plan = self.backend.upload_plan("uploads/" + sha + "/" + uuid.uuid4().hex, size)
+-                    with self.store.db() as db:
+-                        db.execute(
+-                            "UPDATE cloud_objects SET upload_plan=?,expires=? WHERE sha=?",
+-                            (json.dumps(plan), time.time() + 900, sha),
+-                        )
+-                plans.append({"sha256": sha, "sizeBytes": size, **plan})
+-            return {"pointId": m["pointId"], "status": "PENDING", "objects": plans}
+-
+-    def complete_object(self, point_id, sha, parts):
+-        with self.lock:
+-            with self.store.db() as db:
+-                row = db.execute(
+-                    "SELECT o.* FROM cloud_objects o JOIN cloud_refs r ON o.sha=r.sha WHERE r.point_id=? AND o.sha=?",
+-                    (point_id, sha),
+-                ).fetchone()
+-                if not row:
+-                    raise ValueError("Object is not referenced by this point")
+-                if row["status"] in ("READY", "UPLOADED"):
+-                    return
+-                plan = json.loads(row["upload_plan"])
+-            if plan["mode"] == "multipart":
+-                if len(parts) != len(plan["parts"]) or [p["PartNumber"] for p in parts] != list(
+-                    range(1, len(parts) + 1)
+-                ):
+-                    raise ValueError("Incomplete multipart upload")
+-                self.backend.complete(plan["key"], plan["uploadId"], parts)
+-            with self.store.db() as db:
+-                db.execute('UPDATE cloud_objects SET status="UPLOADED" WHERE sha=?', (sha,))
+-
+-    def verify(self, point_id):
+-        with self.lock:
+-            with self.store.db() as db:
+-                row = db.execute("SELECT * FROM recovery_points WHERE id=?", (point_id,)).fetchone()
+-                if not row:
+-                    raise ValueError("Point not found")
+-                m = json.loads(row["manifest"])
+-            try:
+-                for sha in {meta["sha256"] for meta in m["files"].values()}:
+-                    with self.store.db() as db:
+-                        obj = db.execute("SELECT * FROM cloud_objects WHERE sha=?", (sha,)).fetchone()
+-                    if obj["status"] == "READY":
+-                        continue
+-                    hasher = hashlib.sha256()
+-                    size = 0
+-                    plan = json.loads(obj["upload_plan"])
+-                    upload_key = plan["key"]
+-                    if hasattr(self.backend, "read_version"):
+-                        etag, chunks = self.backend.read_version(upload_key)
+-                    else:
+-                        etag = None
+-                        chunks = self.backend.get(upload_key)
+-                    for chunk in chunks:
+-                        hasher.update(chunk)
+-                        size += len(chunk)
+-                        if size > obj["size"]:
+-                            raise ValueError("Object checksum/size mismatch")
+-                    if size != obj["size"] or hasher.hexdigest() != sha:
+-                        raise ValueError("Object checksum/size mismatch")
+-                    self.backend.publish_upload(upload_key, "objects/" + sha, etag)
+-                    with self.store.db() as db:
+-                        db.execute(
+-                            'UPDATE cloud_objects SET status="READY",upload_plan=NULL,expires=NULL WHERE sha=?', (sha,)
+-                        )
+-                self.backend.put("manifests/" + point_id + ".json", json.dumps(m, sort_keys=True).encode())
+-                with self.store.db() as db:
+-                    db.execute('UPDATE recovery_points SET status="READY",error=NULL WHERE id=?', (point_id,))
+-                self.retain(m["runId"], m["backupPolicy"]["retain"])
+-                with self.store.db() as db:
+-                    body = self.store.get(m["runId"])
+-                    if body:
+-                        old = body.get("cloudSync", {})
+-                        if old.get("lastCloudGeneration", -1) <= m["generation"]:
+-                            body["cloudSync"] = {
+-                                "status": "READY",
+-                                "lastCloudGeneration": m["generation"],
+-                                "pointId": point_id,
+-                            }
+-                            self.store.save(db, body)
+-            except Exception as error:
+-                if isinstance(error, ValueError):
+-                    with self.store.db() as db:
+-                        db.execute(
+-                            'UPDATE cloud_objects SET status="PENDING",upload_plan=NULL,expires=NULL WHERE sha=?',
+-                            (sha,),
+-                        )
+-                with self.store.db() as db:
+-                    db.execute(
+-                        "UPDATE recovery_points SET status=?,error=? WHERE id=?",
+-                        ("ERROR", type(error).__name__, point_id),
+-                    )
+-                raise
+-
+-    def verify_background(self, point_id):
+-        with self.lock:
+-            if point_id in self.pending:
+-                return
+-            self.pending.add(point_id)
+-
+-        def work():
+-            try:
+-                self.verify(point_id)
+-            except Exception as error:
+-                logging.getLogger(__name__).warning("Recovery verification failed: %s", type(error).__name__)
+-            finally:
+-                with self.lock:
+-                    self.pending.discard(point_id)
+-
+-        threading.Thread(target=work, daemon=True).start()
+-
+-    def points(self, run_id):
+-        with self.store.db() as db:
+-            return [
+-                {
+-                    "pointId": r["id"],
+-                    "generation": r["generation"],
+-                    "final": bool(r["final"]),
+-                    "status": r["status"],
+-                    "errorType": r["error"],
+-                }
+-                for r in db.execute(
+-                    "SELECT * FROM recovery_points WHERE run_id=? ORDER BY generation DESC,created DESC", (run_id,)
+-                )
+-            ]
+-
+-    def manifest(self, point_id):
+-        with self.store.db() as db:
+-            row = db.execute("SELECT manifest,status FROM recovery_points WHERE id=?", (point_id,)).fetchone()
+-            if not row or row["status"] != "READY":
+-                raise ValueError("Verified recovery point unavailable")
+-            return json.loads(row["manifest"])
+-
+-    def retain(self, run_id, count):
+-        points = [p for p in self.points(run_id) if p["status"] == "READY" and (not p["final"])]
+-        for point in points[count:]:
+-            self.delete_point(point["pointId"])
+-
+-    def delete_point(self, point_id):
+-        with self.lock:
+-            self.backend.delete("manifests/" + point_id + ".json")
+-            with self.store.db() as db:
+-                db.execute("DELETE FROM cloud_refs WHERE point_id=?", (point_id,))
+-                db.execute("DELETE FROM recovery_points WHERE id=?", (point_id,))
+-                orphaned = [
+-                    dict(r)
+-                    for r in db.execute(
+-                        "SELECT * FROM cloud_objects o WHERE NOT EXISTS(SELECT 1 FROM cloud_refs r WHERE r.sha=o.sha)"
+-                    )
+-                ]
+-            for obj in orphaned:
+-                plan = json.loads(obj["upload_plan"]) if obj["upload_plan"] else {}
+-                if plan.get("uploadId"):
+-                    self.backend.abort(plan["key"], plan["uploadId"])
+-                if plan.get("key"):
+-                    self.backend.delete(plan["key"])
+-                self.backend.delete("objects/" + obj["sha"])
+-                with self.store.db() as db:
+-                    db.execute("DELETE FROM cloud_objects WHERE sha=?", (obj["sha"],))
+-
+-
+-def install_storage_routes(app, store, storage, device_auth, user, scoped, authorized):
+-    import secrets
+-    from fastapi import Depends, HTTPException, Request, Response
+-    from fastapi.responses import RedirectResponse
+-    from pydantic import BaseModel, ConfigDict, Field
+-
+-    class Begin(BaseModel):
+-        model_config = ConfigDict(extra="forbid")
+-        assignmentId: str
+-        epoch: int
+-        manifest: dict
+-
+-    class Finish(BaseModel):
+-        model_config = ConfigDict(extra="forbid")
+-        assignmentId: str
+-        epoch: int
+-        pointId: str
+-        sha256: str
+-        parts: list[dict] = Field(default_factory=list, max_length=10000)
+-
+-    def grant(device, assignment_id, epoch, run_id):
+-        with store.db() as db:
+-            row = db.execute("SELECT coordinator,epoch,run_id FROM assignments WHERE id=?", (assignment_id,)).fetchone()
+-            if not row or (row["coordinator"], row["epoch"], row["run_id"]) != (device["id"], epoch, run_id):
+-                raise HTTPException(403, "Recovery upload is outside this assignment")
+-
+-    def point_run(point_id):
+-        with store.db() as db:
+-            row = db.execute("SELECT run_id FROM recovery_points WHERE id=?", (point_id,)).fetchone()
+-            if not row:
+-                raise HTTPException(404, "Recovery point not found")
+-            return row[0]
+-
+-    def storage_error(error):
+-        raise HTTPException(
+-            409 if isinstance(error, QuotaExceeded) else 422,
+-            "Recovery quota reached; local computation continues"
+-            if isinstance(error, QuotaExceeded)
+-            else "Recovery storage operation failed",
+-        ) from None
+-
+-    @app.post("/api/v1/device/recovery-points")
+-    def begin(body: Begin, current=Depends(device_auth)):
+-        grant(current, body.assignmentId, body.epoch, body.manifest.get("runId"))
+-        try:
+-            return storage.begin(body.manifest)
+-        except (ValueError, QuotaExceeded) as error:
+-            storage_error(error)
+-
+-    @app.post("/api/v1/device/recovery-points/complete-object")
+-    def complete(body: Finish, current=Depends(device_auth)):
+-        grant(current, body.assignmentId, body.epoch, point_run(body.pointId))
+-        try:
+-            storage.complete_object(body.pointId, body.sha256, body.parts)
+-        except (ValueError, QuotaExceeded) as error:
+-            storage_error(error)
+-        return {"ok": True}
+-
+-    @app.post("/api/v1/device/recovery-points/{point_id}/verify")
+-    def verify(point_id: str, body: dict, current=Depends(device_auth)):
+-        grant(current, body.get("assignmentId"), body.get("epoch"), point_run(point_id))
+-        storage.verify_background(point_id)
+-        return {"status": "VERIFYING"}
+-
+-    @app.get("/api/v1/device/recovery-points/{point_id}")
+-    def device_status(point_id: str, current=Depends(device_auth)):
+-        run_id = point_run(point_id)
+-        with store.db() as db:
+-            row = db.execute(
+-                "SELECT coordinator FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", (run_id,)
+-            ).fetchone()
+-            if not row or row[0] != current["id"]:
+-                raise HTTPException(403, "Coordinator identity required")
+-        return next((p for p in storage.points(run_id) if p["pointId"] == point_id))
+-
+-    @app.delete("/api/v1/device/recovery-points/{point_id}")
+-    def abandon(point_id: str, body: dict, current=Depends(device_auth)):
+-        grant(current, body.get("assignmentId"), body.get("epoch"), point_run(point_id))
+-        with storage.lock:
+-            point = next((p for p in storage.points(point_run(point_id)) if p["pointId"] == point_id))
+-            if point["status"] == "READY":
+-                return {"deleted": False, "retained": True}
+-            storage.delete_point(point_id)
+-        return {"deleted": True}
+-
+-    def historical(run_id, current):
+-        body = authorized(run_id, current)
+-        if not current.get("platformAdmin") or body["status"] != "COMPLETED":
+-            raise HTTPException(403, "Completed experiment and platform administrator required")
+-        with store.db() as db:
+-            if db.execute("SELECT 1 FROM assignments WHERE run_id=?", (run_id,)).fetchone():
+-                raise HTTPException(409, "Use the assigned coordinator for this experiment")
+-        return body
+-
+-    @app.post("/api/v1/experiments/{run_id}/recovery-import")
+-    def import_begin(run_id: str, body: dict, current=Depends(scoped)):
+-        experiment = historical(run_id, current)
+-        if (
+-            body.get("runId") != run_id
+-            or body.get("final") is not True
+-            or body.get("childWeightsSha256") != experiment.get("modelVersion")
+-        ):
+-            raise HTTPException(422, "Imported point disagrees with the historical final checkpoint")
+-        try:
+-            result = storage.begin(body)
+-        except (ValueError, QuotaExceeded) as error:
+-            storage_error(error)
+-        with store.db() as db:
+-            store.audit(db, current["userId"], "HISTORICAL_RECOVERY_IMPORT", body["pointId"], experiment["workspaceId"])
+-        return result
+-
+-    @app.post("/api/v1/experiments/{run_id}/recovery-import/complete-object")
+-    def import_complete(run_id: str, body: dict, current=Depends(scoped)):
+-        historical(run_id, current)
+-        if point_run(body.get("pointId")) != run_id:
+-            raise HTTPException(403, "Recovery point belongs to another experiment")
+-        try:
+-            storage.complete_object(body["pointId"], body["sha256"], body.get("parts", []))
+-        except (ValueError, QuotaExceeded) as error:
+-            storage_error(error)
+-        return {"ok": True}
+-
+-    @app.post("/api/v1/experiments/{run_id}/recovery-import/{point_id}/verify")
+-    def import_verify(run_id: str, point_id: str, current=Depends(scoped)):
+-        historical(run_id, current)
+-        if point_run(point_id) != run_id:
+-            raise HTTPException(403, "Recovery point belongs to another experiment")
+-        storage.verify_background(point_id)
+-        return {"status": "VERIFYING"}
+-
+-    @app.get("/api/v1/experiments/{run_id}/recovery-points")
+-    def points(run_id: str, current=Depends(scoped)):
+-        authorized(run_id, current)
+-        return storage.points(run_id)
+-
+-    @app.post("/api/v1/recovery-points/{point_id}/download-plan")
+-    def download_plan(point_id: str, current=Depends(scoped)):
+-        authorized(point_run(point_id), current)
+-        try:
+-            m = storage.manifest(point_id)
+-        except ValueError:
+-            raise HTTPException(409, "Recovery point is not verified") from None
+-        return {
+-            "manifest": m,
+-            "objects": {
+-                name: storage.backend.download_url("objects/" + meta["sha256"]) for name, meta in m["files"].items()
+-            },
+-        }
+-
+-    @app.delete("/api/v1/recovery-points/{point_id}")
+-    def delete(point_id: str, current=Depends(scoped)):
+-        body = authorized(point_run(point_id), current)
+-        storage.delete_point(point_id)
+-        with store.db() as db:
+-            store.audit(db, current["userId"], "CLOUD_COPY_DELETED", point_id, body["workspaceId"])
+-        return {"deleted": True}
+-
+-    with store.db() as db:
+-        initialize_recovery_schema(db)
+-
+-    @app.post("/api/v1/artifacts/{artifact_id}/download-ticket")
+-    def ticket(artifact_id: str, response: Response, request: Request, current=Depends(scoped)):
+-        run_id, _, name = artifact_id.partition(".")
+-        authorized(run_id, current)
+-        if not re.fullmatch("[a-f0-9]{64}\\.bin", name):
+-            raise HTTPException(404, "Cloud checkpoint not found")
+-        sha = name[:-4]
+-        found = False
+-        for point in storage.points(run_id):
+-            if point["status"] == "READY" and any(
+-                (v["sha256"] == sha for v in storage.manifest(point["pointId"])["files"].values())
+-            ):
+-                found = True
+-                break
+-        if not found:
+-            raise HTTPException(404, "Cloud checkpoint not ready")
+-        secret = secrets.token_urlsafe(32)
+-        td = hashlib.sha256(secret.encode()).hexdigest()
+-        session_digest = hashlib.sha256(request.headers.get("Authorization", "")[7:].encode()).hexdigest()
+-        path = "/api/v1/cloud-downloads/" + td
+-        with store.db() as db:
+-            db.execute(
+-                "INSERT INTO cloud_downloads VALUES (?,?,?,?,?,?)",
+-                (td, current["userId"], session_digest, run_id, sha, time.time() + 60),
+-            )
+-        response.set_cookie(
+-            "heteroes-cloud-download",
+-            secret,
+-            httponly=True,
+-            secure=request.url.scheme == "https",
+-            samesite="strict",
+-            path=path,
+-            max_age=60,
+-        )
+-        return {"downloadUrl": path}
+-
+-    @app.get("/api/v1/cloud-downloads/{ticket_digest}")
+-    def consume(ticket_digest: str, request: Request):
+-        secret = request.cookies.get("heteroes-cloud-download", "")
+-        if hashlib.sha256(secret.encode()).hexdigest() != ticket_digest:
+-            raise HTTPException(401, "Download ticket required")
+-        with store.db() as db:
+-            row = db.execute(
+-                "SELECT * FROM cloud_downloads WHERE digest=? AND expires>?", (ticket_digest, time.time())
+-            ).fetchone()
+-            if not row:
+-                raise HTTPException(401, "Download ticket expired")
+-            if not db.execute(
+-                "SELECT 1 FROM sessions WHERE digest=? AND user_id=? AND expires>?",
+-                (row["session_digest"], row["user_id"], time.time()),
+-            ).fetchone():
+-                raise HTTPException(401, "Session revoked")
+-            body = store.get(row["run_id"])
+-            profile = store.profile(row["user_id"])
+-            membership = db.execute(
+-                "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?", (body["workspaceId"], row["user_id"])
+-            ).fetchone()
+-            if (
+-                profile["accountStatus"] != "ACTIVE"
+-                or not membership
+-                or (membership[0] != "ADMIN" and body["ownerUserId"] != row["user_id"])
+-            ):
+-                raise HTTPException(403, "Experiment access revoked")
+-            db.execute("DELETE FROM cloud_downloads WHERE digest=?", (ticket_digest,))
+-        response = RedirectResponse(storage.backend.download_url("objects/" + row["sha"]), status_code=303)
+-        response.delete_cookie("heteroes-cloud-download", path="/api/v1/cloud-downloads/" + ticket_digest)
+-        response.headers["Referrer-Policy"] = "no-referrer"
+-        return response
++__all__ = ["RecoveryStorage", "QuotaExceeded", "HEX", "UUID", "install_storage_routes"]
+diff --git a/backend/repositories/metadata.py b/backend/repositories/metadata.py
+new file mode 100644
+index 00000000..6908c2b9
+--- /dev/null
++++ b/backend/repositories/metadata.py
+@@ -0,0 +1,9 @@
++"""Metadata backup status SQL."""
++
++from .base import execute
++
++
++class MetadataRepository:
++    @staticmethod
++    def set_backup_status(db, parameters):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
+diff --git a/backend/repositories/recovery_storage.py b/backend/repositories/recovery_storage.py
+new file mode 100644
+index 00000000..94d6492b
+--- /dev/null
++++ b/backend/repositories/recovery_storage.py
+@@ -0,0 +1,143 @@
++"""Recovery_Storage SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class RecoveryStorageRepository:
++    @staticmethod
++    def grant_select_assignments(db, parameters=()):
++        return execute(db, "SELECT coordinator,epoch,run_id FROM assignments WHERE id=?", parameters)
++
++    @staticmethod
++    def point_run_select_recovery_points(db, parameters=()):
++        return execute(db, "SELECT run_id FROM recovery_points WHERE id=?", parameters)
++
++    @staticmethod
++    def device_status_select_assignments(db, parameters=()):
++        return execute(db, "SELECT coordinator FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters)
++
++    @staticmethod
++    def historical_select_assignments(db, parameters=()):
++        return execute(db, "SELECT 1 FROM assignments WHERE run_id=?", parameters)
++
++    @staticmethod
++    def ticket_insert_cloud_downloads(db, parameters=()):
++        return execute(db, "INSERT INTO cloud_downloads VALUES (?,?,?,?,?,?)", parameters)
++
++    @staticmethod
++    def consume_delete_cloud_downloads(db, parameters=()):
++        return execute(db, "DELETE FROM cloud_downloads WHERE digest=?", parameters)
++
++    @staticmethod
++    def consume_select_cloud_downloads(db, parameters=()):
++        return execute(db, "SELECT * FROM cloud_downloads WHERE digest=? AND expires>?", parameters)
++
++    @staticmethod
++    def consume_select_memberships(db, parameters=()):
++        return execute(db, "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++
++    @staticmethod
++    def consume_select_sessions(db, parameters=()):
++        return execute(db, "SELECT 1 FROM sessions WHERE digest=? AND user_id=? AND expires>?", parameters)
++
++    @staticmethod
++    def begin_insert_recovery_points(db, parameters=()):
++        return execute(db, "INSERT OR IGNORE INTO recovery_points VALUES (?,?,?,?,?,?,NULL,?)", parameters)
++
++    @staticmethod
++    def complete_object_update_cloud_objects(db, parameters=()):
++        return execute(db, 'UPDATE cloud_objects SET status="UPLOADED" WHERE sha=?', parameters)
++
++    @staticmethod
++    def delete_point_delete_cloud_refs(db, parameters=()):
++        return execute(db, "DELETE FROM cloud_refs WHERE point_id=?", parameters)
++
++    @staticmethod
++    def delete_point_delete_recovery_points(db, parameters=()):
++        return execute(db, "DELETE FROM recovery_points WHERE id=?", parameters)
++
++    @staticmethod
++    def begin_insert_cloud_objects(db, parameters=()):
++        return execute(db, 'INSERT OR IGNORE INTO cloud_objects VALUES (?,?,"PENDING",NULL,NULL)', parameters)
++
++    @staticmethod
++    def begin_insert_cloud_refs(db, parameters=()):
++        return execute(db, "INSERT OR IGNORE INTO cloud_refs VALUES (?,?)", parameters)
++
++    @staticmethod
++    def verify_update_recovery_points(db, parameters=()):
++        return execute(db, 'UPDATE recovery_points SET status="READY",error=NULL WHERE id=?', parameters)
++
++    @staticmethod
++    def points_select_recovery_points(db, parameters=()):
++        return execute(
++            db, "SELECT * FROM recovery_points WHERE run_id=? ORDER BY generation DESC,created DESC", parameters
++        )
++
++    @staticmethod
++    def manifest_select_recovery_points(db, parameters=()):
++        return execute(db, "SELECT manifest,status FROM recovery_points WHERE id=?", parameters)
++
++    @staticmethod
++    def delete_point_delete_cloud_objects(db, parameters=()):
++        return execute(db, "DELETE FROM cloud_objects WHERE sha=?", parameters)
++
++    @staticmethod
++    def begin_select_recovery_points(db, parameters=()):
++        return execute(db, "SELECT manifest,status FROM recovery_points WHERE id=?", parameters)
++
++    @staticmethod
++    def begin_select_cloud_objects(db, parameters=()):
++        return execute(db, "SELECT * FROM cloud_objects", parameters)
++
++    @staticmethod
++    def begin_update_cloud_objects(db, parameters=()):
++        return execute(db, "UPDATE cloud_objects SET upload_plan=?,expires=? WHERE sha=?", parameters)
++
++    @staticmethod
++    def complete_object_select_cloud_objects(db, parameters=()):
++        return execute(
++            db,
++            "SELECT o.* FROM cloud_objects o JOIN cloud_refs r ON o.sha=r.sha WHERE r.point_id=? AND o.sha=?",
++            parameters,
++        )
++
++    @staticmethod
++    def verify_select_recovery_points(db, parameters=()):
++        return execute(db, "SELECT * FROM recovery_points WHERE id=?", parameters)
++
++    @staticmethod
++    def verify_update_cloud_objects(db, parameters=()):
++        return execute(
++            db, 'UPDATE cloud_objects SET status="READY",upload_plan=NULL,expires=NULL WHERE sha=?', parameters
++        )
++
++    @staticmethod
++    def verify_update_recovery_points_2(db, parameters=()):
++        return execute(db, "UPDATE recovery_points SET status=?,error=? WHERE id=?", parameters)
++
++    @staticmethod
++    def delete_point_select_cloud_objects(db, parameters=()):
++        return execute(
++            db,
++            "SELECT * FROM cloud_objects o WHERE NOT EXISTS(SELECT 1 FROM cloud_refs r WHERE r.sha=o.sha)",
++            parameters,
++        )
++
++    @staticmethod
++    def usage_select_cloud_objects(db, parameters=()):
++        return execute(db, 'SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!="READY"', parameters)
++
++    @staticmethod
++    def begin_select_cloud_objects_2(db, parameters=()):
++        return execute(db, "SELECT * FROM cloud_objects WHERE sha=?", parameters)
++
++    @staticmethod
++    def verify_update_cloud_objects_2(db, parameters=()):
++        return execute(
++            db, 'UPDATE cloud_objects SET status="PENDING",upload_plan=NULL,expires=NULL WHERE sha=?', parameters
++        )
++
++    @staticmethod
++    def verify_select_cloud_objects(db, parameters=()):
++        return execute(db, "SELECT * FROM cloud_objects WHERE sha=?", parameters)
+diff --git a/backend/services/metadata_backup.py b/backend/services/metadata_backup.py
+new file mode 100644
+index 00000000..6506df82
+--- /dev/null
++++ b/backend/services/metadata_backup.py
+@@ -0,0 +1,86 @@
++"""Hourly consistent product metadata backup; recovery storage failure leaves a local copy."""
++
++from ..db.backups import backup_sqlite
++from ..repositories.metadata import MetadataRepository as repository
++import logging
++import hashlib
++import json
++import os
++from pathlib import Path
++import time
++import uuid
++
++
++def create_metadata_backup(store, storage):
++    root = Path(store.path).parent / "metadata-backups"
++    root.mkdir(mode=0o700, exist_ok=True)
++    point = root / uuid.uuid4().hex
++    point.mkdir(mode=0o700)
++    database = point / "product.sqlite"
++    backup_sqlite(store, database)
++    os.chmod(database, 0o600)
++    with open(database, "rb") as stream:
++        sha = hashlib.file_digest(stream, "sha256").hexdigest()
++    data = database.read_bytes()
++    manifest = {
++        "formatVersion": 1,
++        "component": "heteroes-product-metadata",
++        "createdAt": time.time(),
++        "sha256": sha,
++        "sizeBytes": len(data),
++        "objectKey": "metadata/" + point.name + "/product.sqlite",
++    }
++    (point / "manifest.json").write_text(json.dumps(manifest))
++    os.chmod(point / "manifest.json", 0o600)
++    try:
++        with storage.lock:
++            usage = storage.usage()
++            if usage["observedBytes"] + usage["reservedBytes"] + len(data) + len(json.dumps(manifest)) > storage.quota:
++                raise RuntimeError("Cloud quota reached")
++
++            storage.backend.put(manifest["objectKey"], data)
++            check = hashlib.sha256()
++            size = 0
++            for chunk in storage.backend.get(manifest["objectKey"]):
++                check.update(chunk)
++                size += len(chunk)
++            if size != len(data) or check.hexdigest() != sha:
++                raise ValueError("Metadata checksum mismatch")
++            storage.backend.put("metadata/" + point.name + "/manifest.json", json.dumps(manifest).encode())
++        status = {"status": "READY", "pointId": point.name, "createdAt": manifest["createdAt"]}
++    except Exception as error:
++        status = {
++            "status": "PENDING",
++            "pointId": point.name,
++            "errorType": type(error).__name__,
++            "createdAt": manifest["createdAt"],
++        }
++    (point / "cloud-state.json").write_text(json.dumps(status))
++    os.chmod(point / "cloud-state.json", 0o600)
++    with store.db() as db:
++        repository.set_backup_status(db, ("metadataBackupStatus", json.dumps(status)))
++    points = sorted([p for p in root.iterdir() if p.is_dir()], key=lambda p: p.stat().st_mtime, reverse=True)
++    import shutil
++
++    for old in points[24:]:
++        if (old / "cloud-state.json").exists():
++            storage.backend.delete("metadata/" + old.name + "/manifest.json")
++            storage.backend.delete("metadata/" + old.name + "/product.sqlite")
++        shutil.rmtree(old)
++    return status
++
++
++def backup_loop(store, storage, stop):
++    last = 0
++    root = Path(store.path).parent / "metadata-backups"
++    if root.exists():
++        for point in root.glob("*/manifest.json"):
++            last = max(last, json.loads(point.read_text())["createdAt"])
++    while not stop.wait(60):
++        if time.time() - last < 3600:
++            continue
++        try:
++            create_metadata_backup(store, storage)
++        except Exception as error:
++            logging.getLogger(__name__).warning("Metadata backup failed: %s", type(error).__name__)
++        last = time.time()
+diff --git a/backend/services/recovery_storage.py b/backend/services/recovery_storage.py
+new file mode 100644
+index 00000000..25cebbe9
+--- /dev/null
++++ b/backend/services/recovery_storage.py
+@@ -0,0 +1,432 @@
++"""Recovery_Storage business operations; HTTP responses stay in api/."""
++
++from ..core.storage_models import Begin, Finish
++import secrets
++import logging
++from ..db.migrations import initialize_recovery_schema, initialize_recovery_downloads_schema
++from ..policies import backup_policy
++import hashlib
++import json
++import re
++import threading
++import time
++import uuid
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.recovery_storage import RecoveryStorageRepository as repository
++
++HEX = re.compile("[a-f0-9]{64}")
++
++UUID = re.compile("[a-f0-9]{32}")
++
++
++class QuotaExceeded(RuntimeError):
++    pass
++
++
++class RecoveryStorage:
++    # Legacy cloud_* table names preserve compatibility with existing lab databases.
++
++    def __init__(self, store, backend, quota_bytes=8000000000):
++        self.store = store
++        self.backend = backend
++        self.quota = quota_bytes
++        self.lock = threading.RLock()
++        with store.db() as db:
++            initialize_recovery_downloads_schema(db)
++        self.pending = set()
++
++    def validate_manifest(self, m):
++        from heteroes.recovery_manifest import validate_manifest
++
++        validate_manifest(m)
++        backup_policy(m.get("backupPolicy", {}))
++
++    def usage(self):
++        observed = self.backend.inventory()
++        with self.store.db() as db:
++            reserved = 2 * repository.usage_select_cloud_objects(db, ()).fetchone()[0]
++        return {
++            "quotaBytes": self.quota,
++            "observedBytes": observed,
++            "reservedBytes": reserved,
++            "storageMode": getattr(self.backend, "mode", "local"),
++            "warning": observed + reserved >= self.quota * 0.8,
++        }
++
++    def begin(self, m):
++        self.validate_manifest(m)
++        with self.lock:
++            with self.store.db() as db:
++                old = repository.begin_select_recovery_points(db, (m["pointId"],)).fetchone()
++                if old and json.loads(old[0]) != m:
++                    raise ValueError("Frozen recovery manifest changed")
++                if old and old["status"] == "READY":
++                    return {"pointId": m["pointId"], "status": "READY", "objects": []}
++                unique = {}
++                for meta in m["files"].values():
++                    if meta["sha256"] in unique and unique[meta["sha256"]] != meta["sizeBytes"]:
++                        raise ValueError("Hash/size mismatch")
++                    unique[meta["sha256"]] = meta["sizeBytes"]
++                existing = {r["sha"]: dict(r) for r in repository.begin_select_cloud_objects(db, ())}
++                if any((sha in existing and existing[sha]["size"] != size for sha, size in unique.items())):
++                    raise ValueError("Stored hash/size mismatch")
++            usage = self.usage()
++            new_bytes = 2 * sum((size for sha, size in unique.items() if sha not in existing))
++            if usage["observedBytes"] + usage["reservedBytes"] + new_bytes + len(json.dumps(m)) > self.quota:
++                raise QuotaExceeded("Recovery storage quota reached; compute continues with local recovery points")
++            plans = []
++            with self.store.db() as db:
++                repository.begin_insert_recovery_points(
++                    db, (m["pointId"], m["runId"], m["generation"], m["final"], "PENDING", json.dumps(m), time.time())
++                )
++                for sha, size in unique.items():
++                    repository.begin_insert_cloud_objects(db, (sha, size))
++                    repository.begin_insert_cloud_refs(db, (m["pointId"], sha))
++            for sha, size in unique.items():
++                entry = existing.get(sha)
++                if entry and entry["status"] in ("READY", "UPLOADED"):
++                    continue
++                with self.store.db() as db:
++                    row = repository.begin_select_cloud_objects_2(db, (sha,)).fetchone()
++                if row["upload_plan"] and (row["expires"] or 0) > time.time() + 30:
++                    plan = json.loads(row["upload_plan"])
++                else:
++                    if row["upload_plan"]:
++                        previous = json.loads(row["upload_plan"])
++                        if previous.get("uploadId"):
++                            self.backend.abort(previous["key"], previous["uploadId"])
++                    plan = self.backend.upload_plan("uploads/" + sha + "/" + uuid.uuid4().hex, size)
++                    with self.store.db() as db:
++                        repository.begin_update_cloud_objects(db, (json.dumps(plan), time.time() + 900, sha))
++                plans.append({"sha256": sha, "sizeBytes": size, **plan})
++            return {"pointId": m["pointId"], "status": "PENDING", "objects": plans}
++
++    def complete_object(self, point_id, sha, parts):
++        with self.lock:
++            with self.store.db() as db:
++                row = repository.complete_object_select_cloud_objects(db, (point_id, sha)).fetchone()
++                if not row:
++                    raise ValueError("Object is not referenced by this point")
++                if row["status"] in ("READY", "UPLOADED"):
++                    return
++                plan = json.loads(row["upload_plan"])
++            if plan["mode"] == "multipart":
++                if len(parts) != len(plan["parts"]) or [p["PartNumber"] for p in parts] != list(
++                    range(1, len(parts) + 1)
++                ):
++                    raise ValueError("Incomplete multipart upload")
++                self.backend.complete(plan["key"], plan["uploadId"], parts)
++            with self.store.db() as db:
++                repository.complete_object_update_cloud_objects(db, (sha,))
++
++    def verify(self, point_id):
++        with self.lock:
++            with self.store.db() as db:
++                row = repository.verify_select_recovery_points(db, (point_id,)).fetchone()
++                if not row:
++                    raise ValueError("Point not found")
++                m = json.loads(row["manifest"])
++            try:
++                for sha in {meta["sha256"] for meta in m["files"].values()}:
++                    with self.store.db() as db:
++                        obj = repository.verify_select_cloud_objects(db, (sha,)).fetchone()
++                    if obj["status"] == "READY":
++                        continue
++                    hasher = hashlib.sha256()
++                    size = 0
++                    plan = json.loads(obj["upload_plan"])
++                    upload_key = plan["key"]
++                    if hasattr(self.backend, "read_version"):
++                        etag, chunks = self.backend.read_version(upload_key)
++                    else:
++                        etag = None
++                        chunks = self.backend.get(upload_key)
++                    for chunk in chunks:
++                        hasher.update(chunk)
++                        size += len(chunk)
++                        if size > obj["size"]:
++                            raise ValueError("Object checksum/size mismatch")
++                    if size != obj["size"] or hasher.hexdigest() != sha:
++                        raise ValueError("Object checksum/size mismatch")
++                    self.backend.publish_upload(upload_key, "objects/" + sha, etag)
++                    with self.store.db() as db:
++                        repository.verify_update_cloud_objects(db, (sha,))
++                self.backend.put("manifests/" + point_id + ".json", json.dumps(m, sort_keys=True).encode())
++                with self.store.db() as db:
++                    repository.verify_update_recovery_points(db, (point_id,))
++                self.retain(m["runId"], m["backupPolicy"]["retain"])
++                with self.store.db() as db:
++                    body = self.store.get(m["runId"])
++                    if body:
++                        old = body.get("cloudSync", {})
++                        if old.get("lastCloudGeneration", -1) <= m["generation"]:
++                            body["cloudSync"] = {
++                                "status": "READY",
++                                "lastCloudGeneration": m["generation"],
++                                "pointId": point_id,
++                            }
++                            self.store.save(db, body)
++            except Exception as error:
++                if isinstance(error, ValueError):
++                    with self.store.db() as db:
++                        repository.verify_update_cloud_objects_2(db, (sha,))
++                with self.store.db() as db:
++                    repository.verify_update_recovery_points_2(db, ("ERROR", type(error).__name__, point_id))
++                raise
++
++    def verify_background(self, point_id):
++        with self.lock:
++            if point_id in self.pending:
++                return
++            self.pending.add(point_id)
++
++        def work():
++            try:
++                self.verify(point_id)
++            except Exception as error:
++                logging.getLogger(__name__).warning("Recovery verification failed: %s", type(error).__name__)
++            finally:
++                with self.lock:
++                    self.pending.discard(point_id)
++
++        threading.Thread(target=work, daemon=True).start()
++
++    def points(self, run_id):
++        with self.store.db() as db:
++            return [
++                {
++                    "pointId": r["id"],
++                    "generation": r["generation"],
++                    "final": bool(r["final"]),
++                    "status": r["status"],
++                    "errorType": r["error"],
++                }
++                for r in repository.points_select_recovery_points(db, (run_id,))
++            ]
++
++    def manifest(self, point_id):
++        with self.store.db() as db:
++            row = repository.manifest_select_recovery_points(db, (point_id,)).fetchone()
++            if not row or row["status"] != "READY":
++                raise ValueError("Verified recovery point unavailable")
++            return json.loads(row["manifest"])
++
++    def retain(self, run_id, count):
++        points = [p for p in self.points(run_id) if p["status"] == "READY" and (not p["final"])]
++        for point in points[count:]:
++            self.delete_point(point["pointId"])
++
++    def delete_point(self, point_id):
++        with self.lock:
++            self.backend.delete("manifests/" + point_id + ".json")
++            with self.store.db() as db:
++                repository.delete_point_delete_cloud_refs(db, (point_id,))
++                repository.delete_point_delete_recovery_points(db, (point_id,))
++                orphaned = [dict(r) for r in repository.delete_point_select_cloud_objects(db, ())]
++            for obj in orphaned:
++                plan = json.loads(obj["upload_plan"]) if obj["upload_plan"] else {}
++                if plan.get("uploadId"):
++                    self.backend.abort(plan["key"], plan["uploadId"])
++                if plan.get("key"):
++                    self.backend.delete(plan["key"])
++                self.backend.delete("objects/" + obj["sha"])
++                with self.store.db() as db:
++                    repository.delete_point_delete_cloud_objects(db, (obj["sha"],))
++
++
++def operations(store, storage, device_auth, user, scoped, authorized):
++    with store.db() as db:
++        initialize_recovery_schema(db)
++
++    def grant(device, assignment_id, epoch, run_id):
++        with store.db() as db:
++            row = repository.grant_select_assignments(db, (assignment_id,)).fetchone()
++            if not row or (row["coordinator"], row["epoch"], row["run_id"]) != (device["id"], epoch, run_id):
++                raise ServiceError(403, "Recovery upload is outside this assignment")
++
++    def point_run(point_id):
++        with store.db() as db:
++            row = repository.point_run_select_recovery_points(db, (point_id,)).fetchone()
++            if not row:
++                raise ServiceError(404, "Recovery point not found")
++            return row[0]
++
++    def storage_error(error):
++        raise ServiceError(
++            409 if isinstance(error, QuotaExceeded) else 422,
++            "Recovery quota reached; local computation continues"
++            if isinstance(error, QuotaExceeded)
++            else "Recovery storage operation failed",
++        ) from None
++
++    def begin(body: Begin, *, current):
++        grant(current, body.assignmentId, body.epoch, body.manifest.get("runId"))
++        try:
++            return storage.begin(body.manifest)
++        except (ValueError, QuotaExceeded) as error:
++            storage_error(error)
++
++    def complete(body: Finish, *, current):
++        grant(current, body.assignmentId, body.epoch, point_run(body.pointId))
++        try:
++            storage.complete_object(body.pointId, body.sha256, body.parts)
++        except (ValueError, QuotaExceeded) as error:
++            storage_error(error)
++        return {"ok": True}
++
++    def verify(point_id: str, body: dict, *, current):
++        grant(current, body.get("assignmentId"), body.get("epoch"), point_run(point_id))
++        storage.verify_background(point_id)
++        return {"status": "VERIFYING"}
++
++    def device_status(point_id: str, *, current):
++        run_id = point_run(point_id)
++        with store.db() as db:
++            row = repository.device_status_select_assignments(db, (run_id,)).fetchone()
++            if not row or row[0] != current["id"]:
++                raise ServiceError(403, "Coordinator identity required")
++        return next((p for p in storage.points(run_id) if p["pointId"] == point_id))
++
++    def abandon(point_id: str, body: dict, *, current):
++        grant(current, body.get("assignmentId"), body.get("epoch"), point_run(point_id))
++        with storage.lock:
++            point = next((p for p in storage.points(point_run(point_id)) if p["pointId"] == point_id))
++            if point["status"] == "READY":
++                return {"deleted": False, "retained": True}
++            storage.delete_point(point_id)
++        return {"deleted": True}
++
++    def historical(run_id, current):
++        body = authorized(run_id, current)
++        if not current.get("platformAdmin") or body["status"] != "COMPLETED":
++            raise ServiceError(403, "Completed experiment and platform administrator required")
++        with store.db() as db:
++            if repository.historical_select_assignments(db, (run_id,)).fetchone():
++                raise ServiceError(409, "Use the assigned coordinator for this experiment")
++        return body
++
++    def import_begin(run_id: str, body: dict, *, current):
++        experiment = historical(run_id, current)
++        if (
++            body.get("runId") != run_id
++            or body.get("final") is not True
++            or body.get("childWeightsSha256") != experiment.get("modelVersion")
++        ):
++            raise ServiceError(422, "Imported point disagrees with the historical final checkpoint")
++        try:
++            result = storage.begin(body)
++        except (ValueError, QuotaExceeded) as error:
++            storage_error(error)
++        with store.db() as db:
++            store.audit(db, current["userId"], "HISTORICAL_RECOVERY_IMPORT", body["pointId"], experiment["workspaceId"])
++        return result
++
++    def import_complete(run_id: str, body: dict, *, current):
++        historical(run_id, current)
++        if point_run(body.get("pointId")) != run_id:
++            raise ServiceError(403, "Recovery point belongs to another experiment")
++        try:
++            storage.complete_object(body["pointId"], body["sha256"], body.get("parts", []))
++        except (ValueError, QuotaExceeded) as error:
++            storage_error(error)
++        return {"ok": True}
++
++    def import_verify(run_id: str, point_id: str, *, current):
++        historical(run_id, current)
++        if point_run(point_id) != run_id:
++            raise ServiceError(403, "Recovery point belongs to another experiment")
++        storage.verify_background(point_id)
++        return {"status": "VERIFYING"}
++
++    def points(run_id: str, *, current):
++        authorized(run_id, current)
++        return storage.points(run_id)
++
++    def download_plan(point_id: str, *, current):
++        authorized(point_run(point_id), current)
++        try:
++            m = storage.manifest(point_id)
++        except ValueError:
++            raise ServiceError(409, "Recovery point is not verified") from None
++        return {
++            "manifest": m,
++            "objects": {
++                name: storage.backend.download_url("objects/" + meta["sha256"]) for name, meta in m["files"].items()
++            },
++        }
++
++    def delete(point_id: str, *, current):
++        body = authorized(point_run(point_id), current)
++        storage.delete_point(point_id)
++        with store.db() as db:
++            store.audit(db, current["userId"], "CLOUD_COPY_DELETED", point_id, body["workspaceId"])
++        return {"deleted": True}
++
++    def ticket(artifact_id: str, token: str, *, current):
++        run_id, _, name = artifact_id.partition(".")
++        authorized(run_id, current)
++        if not re.fullmatch("[a-f0-9]{64}\\.bin", name):
++            raise ServiceError(404, "Cloud checkpoint not found")
++        sha = name[:-4]
++        found = False
++        for point in storage.points(run_id):
++            if point["status"] == "READY" and any(
++                (v["sha256"] == sha for v in storage.manifest(point["pointId"])["files"].values())
++            ):
++                found = True
++                break
++        if not found:
++            raise ServiceError(404, "Cloud checkpoint not ready")
++        secret = secrets.token_urlsafe(32)
++        td = hashlib.sha256(secret.encode()).hexdigest()
++        session_digest = hashlib.sha256(token.encode()).hexdigest()
++        path = "/api/v1/cloud-downloads/" + td
++        with store.db() as db:
++            repository.ticket_insert_cloud_downloads(
++                db, (td, current["userId"], session_digest, run_id, sha, time.time() + 60)
++            )
++        return {"downloadUrl": path, "secret": secret}
++
++    def consume(ticket_digest: str, secret: str):
++        if hashlib.sha256(secret.encode()).hexdigest() != ticket_digest:
++            raise ServiceError(401, "Download ticket required")
++        with store.db() as db:
++            row = repository.consume_select_cloud_downloads(db, (ticket_digest, time.time())).fetchone()
++            if not row:
++                raise ServiceError(401, "Download ticket expired")
++            if not repository.consume_select_sessions(
++                db, (row["session_digest"], row["user_id"], time.time())
++            ).fetchone():
++                raise ServiceError(401, "Session revoked")
++            body = store.get(row["run_id"])
++            profile = store.profile(row["user_id"])
++            membership = repository.consume_select_memberships(db, (body["workspaceId"], row["user_id"])).fetchone()
++            if (
++                profile["accountStatus"] != "ACTIVE"
++                or not membership
++                or (membership[0] != "ADMIN" and body["ownerUserId"] != row["user_id"])
++            ):
++                raise ServiceError(403, "Experiment access revoked")
++            repository.consume_delete_cloud_downloads(db, (ticket_digest,))
++        return storage.backend.download_url("objects/" + row["sha"])
++
++    return SimpleNamespace(
++        grant=grant,
++        point_run=point_run,
++        storage_error=storage_error,
++        begin=begin,
++        complete=complete,
++        verify=verify,
++        device_status=device_status,
++        abandon=abandon,
++        historical=historical,
++        import_begin=import_begin,
++        import_complete=import_complete,
++        import_verify=import_verify,
++        points=points,
++        download_plan=download_plan,
++        delete=delete,
++        ticket=ticket,
++        consume=consume,
++    )
+diff --git a/backend/storage/__init__.py b/backend/storage/__init__.py
+new file mode 100644
+index 00000000..3a7f8bcd
+--- /dev/null
++++ b/backend/storage/__init__.py
+@@ -0,0 +1 @@
++"""Object storage implementations."""
+diff --git a/backend/storage/local_backend.py b/backend/storage/local_backend.py
+new file mode 100644
+index 00000000..0fd7ccca
+--- /dev/null
++++ b/backend/storage/local_backend.py
+@@ -0,0 +1,298 @@
++"""Filesystem recovery storage with expiring scoped upload/download capabilities."""
++
++import base64
++import hashlib
++import hmac
++import json
++import os
++from pathlib import Path
++import re
++import secrets
++import shutil
++import tempfile
++import time
++import threading
++
++
++from ..core.errors import ServiceError
++
++
++KEY = re.compile(
++    r"(?:uploads/[a-f0-9]{64}/[a-f0-9]{32}|objects/[a-f0-9]{64}|"
++    r"manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.sqlite|manifest\.json))"
++)
++
++
++def digest(path):
++    with path.open("rb") as stream:
++        return hashlib.file_digest(stream, "sha256").hexdigest()
++
++
++class _Upload:
++    """One bounded streaming upload; each method runs off the API event loop."""
++
++    def __init__(self):
++        self.lock = threading.RLock()
++        self.closed = False
++        self.partial = None
++        self.stream = None
++        self.fd = None
++        self.total = 0
++        self.hasher = hashlib.sha256()
++
++    def open(self, target, size):
++        with self.lock:
++            if self.closed:
++                raise RuntimeError("Upload already closed")
++            target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
++            self.fd, partial = tempfile.mkstemp(prefix=".pending-", dir=target.parent)
++            self.partial = Path(partial)
++            self.target = target
++            self.size = size
++            self.stream = os.fdopen(self.fd, "wb")
++            self.fd = None
++
++    def write(self, chunk):
++        with self.lock:
++            self.total += len(chunk)
++            if self.total > self.size:
++                raise ServiceError(413, "Upload exceeds signed size")
++            self.hasher.update(chunk)
++            self.stream.write(chunk)
++
++    def finish(self):
++        with self.lock:
++            self.stream.flush()
++            os.fsync(self.stream.fileno())
++            self.stream.close()
++            if self.total != self.size:
++                raise ServiceError(400, "Incomplete upload")
++            try:
++                os.link(self.partial, self.target)
++            except FileExistsError:
++                if digest(self.target) != self.hasher.hexdigest():
++                    raise ServiceError(409, "Upload is immutable")
++            return {"sizeBytes": self.total}
++
++    def close(self):
++        # Raw asyncio cancellation can leave a thread operation running. Wait
++        # for its ownership before closing, even outside an AnyIO cancel scope.
++        with self.lock:
++            self.closed = True
++            try:
++                if self.stream is not None:
++                    self.stream.close()
++                elif self.fd is not None:
++                    os.close(self.fd)
++                    self.fd = None
++            finally:
++                if self.partial is not None:
++                    self.partial.unlink(missing_ok=True)
++
++
++PUBLIC_STUDY_MAX_BYTES = 64 * 1024**2  # datasets are at most 10 MB documents plus split files; never weights
++
++
++class LocalBackend:
++    mode = "local"
++
++    def __init__(self, root, key_file, base_url, expected_uuid=None, metadata_root=None):
++        from ..core.device_models import Enrollment
++
++        # Same private LAN/Tailscale validation as the compute endpoint.
++        self.base_url = Enrollment.private_compute(base_url)
++        self.root = Path(root).resolve()
++        self.expected_uuid = expected_uuid
++        if expected_uuid is not None:
++            if not re.fullmatch("[a-fA-F0-9-]+", expected_uuid):
++                raise ValueError("Invalid storage volume UUID")
++            self.check_volume()
++        if self.root == Path("/mnt/sekai") or Path("/mnt/sekai") in self.root.parents:
++            raise ValueError("Sekai is not authorized for HeteroES storage")
++        self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
++        self.metadata_root = Path(metadata_root).resolve() if metadata_root is not None else None
++        if self.metadata_root is not None:
++            self.metadata_root.mkdir(parents=True, exist_ok=True, mode=0o700)
++            if os.name != "nt" and self.metadata_root.stat().st_mode & 0o077:
++                raise ValueError("Metadata storage directory must be private")
++        key_file = Path(key_file)
++        if key_file.is_symlink():
++            raise ValueError("Storage signing key cannot be a symlink")
++        key_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
++        if not key_file.exists():
++            with key_file.open("xb") as stream:
++                os.chmod(key_file, 0o600)
++                stream.write(secrets.token_bytes(32))
++        if os.name != "nt" and key_file.stat().st_mode & 0o077:
++            raise ValueError("Storage signing key must be private")
++        self.secret = key_file.read_bytes()
++        if len(self.secret) != 32:
++            raise ValueError("Invalid storage signing key")
++
++    def check_volume(self):
++        if self.expected_uuid is None:
++            return
++        import subprocess
++
++        candidate = self.root
++        while not candidate.exists():
++            candidate = candidate.parent
++        source = subprocess.run(
++            ["findmnt", "-rn", "-T", str(candidate), "-o", "SOURCE"],
++            check=True,
++            capture_output=True,
++            text=True,
++            timeout=5,
++        ).stdout.strip()
++        device = Path("/dev/disk/by-uuid") / self.expected_uuid
++        if not device.exists() or Path(source).resolve() != device.resolve():
++            raise ValueError("Selected storage volume is not mounted")
++
++    def path(self, key):
++        self.check_volume()
++        if not isinstance(key, str) or not KEY.fullmatch(key):
++            raise ValueError("Unsafe storage key")
++        root = self.metadata_root if self.metadata_root is not None and key.startswith("metadata/") else self.root
++        path = root / key
++        if path.resolve() != path or root not in path.parents:
++            raise ValueError("Storage symlinks are forbidden")
++        return path
++
++    def inventory(self):
++        self.check_volume()
++        total = 0
++        for root in [self.root] + (
++            [self.metadata_root]
++            if self.metadata_root is not None and not self.metadata_root.is_relative_to(self.root)
++            else []
++        ):
++            for path in root.rglob("*"):
++                if path.is_symlink():
++                    raise ValueError("Storage contains a symlink")
++                if path.is_file():
++                    total += path.stat().st_size
++        return total
++
++    def get(self, key):
++        with self.path(key).open("rb") as stream:
++            while chunk := stream.read(1024**2):
++                yield chunk
++
++    def read_version(self, key):
++        path = self.path(key)
++        # Uploads are published once and cannot be overwritten by upload rights.
++        return digest(path), self.get(key)
++
++    def publish_upload(self, source, destination, etag):
++        source_path, target = self.path(source), self.path(destination)
++        if digest(source_path) != etag or destination != "objects/" + etag:
++            raise ValueError("Verified upload changed before publication")
++        self._publish(target, self.get(source), etag)
++        source_path.unlink()
++
++    def _publish(self, target, chunks, expected=None):
++        target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
++        fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=target.parent)
++        temporary = Path(temporary)
++        actual = hashlib.sha256()
++        try:
++            with os.fdopen(fd, "wb") as stream:
++                for chunk in chunks:
++                    actual.update(chunk)
++                    stream.write(chunk)
++                stream.flush()
++                os.fsync(stream.fileno())
++            if expected is not None and actual.hexdigest() != expected:
++                raise ValueError("Publication hash mismatch")
++            try:
++                os.link(temporary, target)
++            except FileExistsError:
++                if digest(target) != actual.hexdigest():
++                    raise ValueError("Immutable object already has different contents")
++        finally:
++            temporary.unlink(missing_ok=True)
++
++    def put(self, key, data):
++        self._publish(self.path(key), [data])
++
++    def put_file(self, key, source, expected=None):
++        """Publish a large local file under `key` without reading it into memory."""
++
++        def chunks():
++            with open(source, "rb") as stream:
++                while chunk := stream.read(1024**2):
++                    yield chunk
++
++        self._publish(self.path(key), chunks(), expected)
++
++    def delete(self, key):
++        self.path(key).unlink(missing_ok=True)
++
++    def _token(self, method, key, size, lifetime):
++        self.path(key)
++        payload = json.dumps(
++            {"method": method, "key": key, "size": size, "expires": int(time.time()) + lifetime}, sort_keys=True
++        ).encode()
++        encoded = base64.urlsafe_b64encode(payload).rstrip(b"=").decode()
++        return encoded + "." + hmac.new(self.secret, encoded.encode(), hashlib.sha256).hexdigest()
++
++    def _url(self, method, key, size, lifetime):
++        return self.base_url + "/api/v1/local-storage/" + self._token(method, key, size, lifetime)
++
++    def public_study_url(self, public_base, key):
++        """A dataset object for a device without the private route (owner decision 2026-10-22): over the lab's public
++        HTTPS address, for 5 minutes, only for objects up to PUBLIC_STUDY_MAX_BYTES. Model weights never qualify."""
++        path = self.path(key)
++        if not key.startswith("objects/") or not path.is_file() or path.stat().st_size > PUBLIC_STUDY_MAX_BYTES:
++            return None
++        return public_base.rstrip("/") + "/api/v1/public-study/" + self._token("GET-PUBLIC", key, None, 300)
++
++    def grant(self, token, method):
++        try:
++            encoded, signature = token.split(".")
++            expected = hmac.new(self.secret, encoded.encode(), hashlib.sha256).hexdigest()
++            if not hmac.compare_digest(signature, expected):
++                raise ValueError("Invalid signature")
++            payload = json.loads(base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)))
++            if payload["method"] != method or payload["expires"] <= time.time():
++                raise ValueError("Wrong method or expired capability")
++            self.path(payload["key"])
++            return payload
++        except (ValueError, KeyError, TypeError, UnicodeError):
++            raise ServiceError(403, "Invalid or expired storage capability") from None
++
++    def upload_plan(self, key, size, public_base=None):
++        """A signed upload. With `public_base`, a dataset file up to PUBLIC_STUDY_MAX_BYTES also gets a link over the lab's
++        public HTTPS address, for a researcher without the private route (owner 2026-10-22: no Tailscale by default)."""
++        if not key.startswith("uploads/") or type(size) is not int or not 0 < size <= 5_000_000_000:
++            raise ValueError("Invalid upload size or key")
++        plan = {
++            "mode": "single",
++            "key": key,
++            "url": self._url("PUT", key, size, 900),
++            "headers": {"Content-Length": str(size)},
++        }
++        if public_base and size <= PUBLIC_STUDY_MAX_BYTES:
++            plan["publicUrl"] = (
++                public_base.rstrip("/") + "/api/v1/public-upload/" + self._token("PUT-PUBLIC", key, size, 900)
++            )
++        return plan
++
++    def download_url(self, key):
++        return self._url("GET", key, None, 60)
++
++    def _open_upload(self, session, token, content_length, method="PUT"):
++        with session.lock:
++            if session.closed:
++                raise RuntimeError("Upload already closed")
++            grant = self.grant(token, method)
++            if content_length != str(grant["size"]):
++                raise ServiceError(400, "Signed upload length required")
++            if shutil.disk_usage(self.root).free < grant["size"] + 64 * 1024**2:
++                raise ServiceError(507, "Local storage is full")
++            session.open(self.path(grant["key"]), grant["size"])
++
++    def install_routes(self, app):
++        from ..api.local_storage import install_routes
++
++        return install_routes(app, self)
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index 99091ec6..7e886bff 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -72,6 +72,13 @@ def test_account_layer_boundaries():
+         "services/study_registry.py",
+         "api/model_qualification.py",
+         "services/model_qualification.py",
++        "core/storage_models.py",
++        "core/filesystem.py",
++        "services/recovery_storage.py",
++        "services/metadata_backup.py",
++        "storage/local_backend.py",
++        "api/recovery_storage.py",
++        "api/local_storage.py",
+     ):
+         tree = ast.parse((backend / relative).read_text())
+         for node in ast.walk(tree):
+diff --git a/backend/tests/test_storage_layers.py b/backend/tests/test_storage_layers.py
+new file mode 100644
+index 00000000..07fad0e6
+--- /dev/null
++++ b/backend/tests/test_storage_layers.py
+@@ -0,0 +1,80 @@
++"""Filesystem capability validation remains usable without an HTTP dependency."""
++
++import pytest
++
++from backend.core.errors import ServiceError
++from backend.local_storage import LocalBackend
++from labkit import enable, pair, queued
++from test_recovery_routes import lab as recovery_fixture
++from test_recovery_storage import manifest
++
++
++@pytest.fixture
++def recovery_lab(tmp_path):
++    yield from recovery_fixture.__wrapped__(tmp_path)
++
++
++def test_signed_storage_grant_errors_are_plain_and_valid_grants_still_bind_method(tmp_path):
++    backend = LocalBackend(tmp_path / "objects", tmp_path / "key", "http://127.0.0.1:18052")
++    with pytest.raises(ServiceError) as invalid:
++        backend.grant("invalid-fixture-capability", "PUT")
++    assert invalid.value.status_code == 403
++    key = "uploads/" + "a" * 64 + "/" + "b" * 32
++    plan = backend.upload_plan(key, 7)
++    token = plan["url"].rsplit("/", 1)[1]
++    assert backend.grant(token, "PUT")["key"] == key
++    with pytest.raises(ServiceError) as wrong_method:
++        backend.grant(token, "GET")
++    assert wrong_method.value.status_code == 403
++
++
++def ready_ticket(lab):
++    client, store, runtime, owner = lab
++    device, auth = pair(lab)
++    enable(lab, device, auth)
++    run = queued(lab, device)
++    store.dispatch_once()
++    assignment = runtime.runs()[0]
++    document = manifest()
++    document["runId"] = run
++    plan = client.post(
++        "/api/v1/device/recovery-points",
++        headers=auth,
++        json={"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "manifest": document},
++    )
++    assert plan.status_code == 200
++    storage = client.app.state.storage
++    for obj in plan.json()["objects"]:
++        storage.backend.put(obj["key"], b"weights")
++    storage.verify(document["pointId"])
++    ticket = client.post(f"/api/v1/artifacts/{run}.{document['childWeightsSha256']}.bin/download-ticket", headers=owner)
++    assert ticket.status_code == 200
++    assert set(ticket.json()) == {"downloadUrl"}
++    return ticket.json()["downloadUrl"], ticket.cookies.get("heteroes-cloud-download")
++
++
++def test_download_ticket_requires_its_cookie_and_remains_available_after_a_bad_cookie(recovery_lab):
++    client, store, _, _ = recovery_lab
++    path, secret = ready_ticket(recovery_lab)
++    client.cookies.clear()
++    assert client.get(path, follow_redirects=False).status_code == 401
++    client.cookies.set("heteroes-cloud-download", "incorrect-fixture-cookie")
++    assert client.get(path, follow_redirects=False).status_code == 401
++    with store.db() as db:
++        assert db.execute("SELECT count(*) FROM cloud_downloads").fetchone()[0] == 1
++    client.cookies.clear()
++    client.cookies.set("heteroes-cloud-download", secret)
++    downloaded = client.get(path, follow_redirects=False)
++    assert downloaded.status_code == 303
++    assert downloaded.headers["referrer-policy"] == "no-referrer"
++    assert client.get(path, follow_redirects=False).status_code == 401
++
++
++def test_expired_download_ticket_is_rejected_even_with_the_correct_cookie(recovery_lab):
++    client, store, _, _ = recovery_lab
++    path, _ = ready_ticket(recovery_lab)
++    with store.db() as db:
++        db.execute("UPDATE cloud_downloads SET expires=0")
++    assert client.get(path, follow_redirects=False).status_code == 401
++    with store.db() as db:
++        assert db.execute("SELECT count(*) FROM cloud_downloads").fetchone()[0] == 1

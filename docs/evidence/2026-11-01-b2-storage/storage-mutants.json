@@ -1,0 +1,104 @@
+[
+  {
+    "name": "unsigned storage capability accepted",
+    "file": "backend/storage/local_backend.py",
+    "old": "if not hmac.compare_digest(signature, expected):",
+    "new": "if False:"
+  },
+  {
+    "name": "storage capability ignores method",
+    "file": "backend/storage/local_backend.py",
+    "old": "if payload[\"method\"] != method or payload[\"expires\"] <= time.time():",
+    "new": "if payload[\"expires\"] <= time.time():"
+  },
+  {
+    "name": "storage capability ignores expiry",
+    "file": "backend/storage/local_backend.py",
+    "old": "if payload[\"method\"] != method or payload[\"expires\"] <= time.time():",
+    "new": "if payload[\"method\"] != method:"
+  },
+  {
+    "name": "oversize upload changes its signed size",
+    "file": "backend/storage/local_backend.py",
+    "old": "if self.total > self.size:",
+    "new": "if False:"
+  },
+  {
+    "name": "short upload is published",
+    "file": "backend/storage/local_backend.py",
+    "old": "if self.total != self.size:",
+    "new": "if False:"
+  },
+  {
+    "name": "different bytes may reuse an upload",
+    "file": "backend/storage/local_backend.py",
+    "old": "if digest(self.target) != self.hasher.hexdigest():",
+    "new": "if False:"
+  },
+  {
+    "name": "chunk write blocks event loop",
+    "file": "backend/api/local_storage.py",
+    "old": "await run_in_threadpool(session.write, chunk)",
+    "new": "session.write(chunk)"
+  },
+  {
+    "name": "upload cleanup blocks event loop",
+    "file": "backend/api/local_storage.py",
+    "old": "await run_in_threadpool(session.close)",
+    "new": "session.close()"
+  },
+  {
+    "name": "recovery accepts wrong object checksum",
+    "file": "backend/services/recovery_storage.py",
+    "old": "if size != obj[\"size\"] or hasher.hexdigest() != sha:",
+    "new": "if False:"
+  },
+  {
+    "name": "recovery ignores storage reservations quota",
+    "file": "backend/services/recovery_storage.py",
+    "old": "if usage[\"observedBytes\"] + usage[\"reservedBytes\"] + new_bytes + len(json.dumps(m)) > self.quota:",
+    "new": "if False:"
+  },
+  {
+    "name": "verified manifest is never published",
+    "file": "backend/services/recovery_storage.py",
+    "old": "self.backend.put(\"manifests/\" + point_id + \".json\", json.dumps(m, sort_keys=True).encode())",
+    "new": "pass"
+  },
+  {
+    "name": "download ticket ignores cookie possession",
+    "file": "backend/services/recovery_storage.py",
+    "old": "if hashlib.sha256(secret.encode()).hexdigest() != ticket_digest:",
+    "new": "if False:"
+  },
+  {
+    "name": "download ticket ignores session revocation",
+    "file": "backend/services/recovery_storage.py",
+    "old": "if not repository.consume_select_sessions(",
+    "new": "if False and not repository.consume_select_sessions("
+  },
+  {
+    "name": "download ticket ignores expiry",
+    "file": "backend/repositories/recovery_storage.py",
+    "old": "SELECT * FROM cloud_downloads WHERE digest=? AND expires>?",
+    "new": "SELECT * FROM cloud_downloads WHERE digest=? AND (expires>? OR 1=1)"
+  },
+  {
+    "name": "download cookie is visible to scripts",
+    "file": "backend/api/recovery_storage.py",
+    "old": "httponly=True,",
+    "new": "httponly=False,"
+  },
+  {
+    "name": "metadata snapshot skips database contents",
+    "file": "backend/db/backups.py",
+    "old": "source.backup(destination)",
+    "new": "pass"
+  },
+  {
+    "name": "failed metadata publication claims success",
+    "file": "backend/services/metadata_backup.py",
+    "old": "\"status\": \"PENDING\",",
+    "new": "\"status\": \"READY\","
+  }
+]

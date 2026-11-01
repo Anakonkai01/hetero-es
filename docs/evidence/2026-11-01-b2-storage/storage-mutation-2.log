@@ -1,0 +1,20 @@
+control ok    | 28 passed, 1 warning in 2.14s
+killed       unsigned storage capability accepted | 1 failed, 27 passed, 1 warning in 2.16s
+killed       storage capability ignores method | 2 failed, 26 passed, 1 warning in 2.13s
+killed       storage capability ignores expiry | 1 failed, 27 passed, 1 warning in 2.07s
+killed       oversize upload changes its signed size | 1 failed, 27 passed, 1 warning in 2.21s
+killed       short upload is published | 1 failed, 27 passed, 1 warning in 2.14s
+killed       different bytes may reuse an upload | 1 failed, 27 passed, 1 warning in 2.12s
+killed       chunk write blocks event loop | 1 failed, 27 passed, 1 warning in 6.19s
+killed       upload cleanup blocks event loop | 1 failed, 27 passed, 1 warning in 4.13s
+killed       recovery accepts wrong object checksum | 2 failed, 26 passed, 1 warning in 2.16s
+killed       recovery ignores storage reservations quota | 1 failed, 27 passed, 1 warning in 2.17s
+killed       verified manifest is never published | 2 failed, 26 passed, 1 warning in 2.11s
+killed       download ticket ignores cookie possession | 1 failed, 27 passed, 1 warning in 2.16s
+killed       download ticket ignores session revocation | 1 failed, 27 passed, 1 warning in 2.14s
+killed       download ticket ignores expiry | 1 failed, 27 passed, 1 warning in 2.22s
+killed       download cookie is visible to scripts | 1 failed, 27 passed, 1 warning in 2.17s
+killed       metadata snapshot skips database contents | 1 failed, 27 passed, 1 warning in 2.14s
+killed       failed metadata publication claims success | 1 failed, 27 passed, 1 warning in 2.12s
+
+17 of 17 mutants killed.
