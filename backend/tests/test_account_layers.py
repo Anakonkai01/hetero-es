@@ -54,6 +54,10 @@ def test_account_layer_boundaries():
         "services/experiment_state.py",
         "api/history.py",
         "services/history.py",
+        "api/templates.py",
+        "services/templates.py",
+        "api/notifications.py",
+        "services/notifications.py",
     ):
         tree = ast.parse((backend / relative).read_text())
         for node in ast.walk(tree):
@@ -94,3 +98,19 @@ def test_explicit_write_transaction_rolls_back_uncommitted_changes():
         db.execute("INSERT INTO changes VALUES (1)")
         db.rollback()
         assert db.execute("SELECT count(*) FROM changes").fetchone()[0] == 0
+
+
+def test_template_service_uses_plain_errors_and_legacy_helper_keeps_http_errors():
+    from fastapi import HTTPException
+
+    from backend.api.templates import clean_config as http_config
+    from backend.services.templates import clean_config as service_config
+
+    valid = {"maxGenerations": 3, "workerIds": ["5070ti"]}
+    assert service_config(valid) == http_config(valid) == valid
+    with pytest.raises(ServiceError) as business:
+        service_config({"modelArtifactId": "not-a-portable-setting"})
+    with pytest.raises(HTTPException) as legacy:
+        http_config({"modelArtifactId": "not-a-portable-setting"})
+    assert business.value.status_code == legacy.value.status_code == 422
+    assert business.value.detail == legacy.value.detail
