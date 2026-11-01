@@ -1,0 +1,1 @@
+{"scope": "actual isolated local factory and HTTP with cloud/GPU imports forbidden", "authMode": "local", "health": 200, "unsignedSession": 401, "forbiddenImports": ["jwt", "cryptography", "psycopg", "boto3", "botocore", "torch"], "passed": true}

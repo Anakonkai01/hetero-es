@@ -1,0 +1,33 @@
+✔ runtime configuration selects local default and explicit OIDC basename without accepting malformed authority (0.812806ms)
+✔ OIDC selection before UI startup clears old local token and never writes tokens to browser storage (0.127713ms)
+✔ code flow keeps user/refresh tokens in memory and only PKCE transaction state in session storage (0.156724ms)
+✔ callback is processed before session queries and code/state disappear from the address bar, including failures (0.402213ms)
+✔ logout callback clears identity and returns to the base login route (0.114735ms)
+✖ an asynchronous counter read must reach the required value; a resolved Promise is not success (0.311411ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.267261
+
+✖ failing tests:
+
+test at frontend/tests/oidc.test.mjs:152:1
+✖ an asynchronous counter read must reach the required value; a resolved Promise is not success (0.311411ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/pc5070ti/projects/heteroes/scripts/lib/wait-for-counter.mjs' imported from /home/pc5070ti/projects/heteroes/frontend/tests/oidc.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+      at moduleResolve (node:internal/modules/esm/resolve:879:10)
+      at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+      at #resolve (node:internal/modules/esm/loader:687:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+      at node:internal/modules/esm/loader:636:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///home/pc5070ti/projects/heteroes/scripts/lib/wait-for-counter.mjs'
+  }

@@ -1,0 +1,126 @@
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 299 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../../../tmp/tmp.SvPiB2Ii5H/web/index.html                                                     1.24 kB │ gzip:   0.47 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/index-Cmpi45Qj.css                                    102.25 kB │ gzip:  19.57 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/workers-DRWjlWeg.js                                     0.15 kB │ gzip:   0.13 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/generations-BnRkAUFW.js                                 0.19 kB │ gzip:   0.14 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/token-BKbhUujT.js                                       0.24 kB │ gzip:   0.17 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/workerIdentity-_HZDvfKo.js                              0.24 kB │ gzip:   0.18 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/EmptyState-Ck9F44Y7.js                                  0.24 kB │ gzip:   0.19 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/navigation-BY5BXkRb.js                                  0.26 kB │ gzip:   0.18 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useGeneration-BOg_7PAY.js                               0.27 kB │ gzip:   0.21 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useArtifacts-B7T2ce66.js                                0.27 kB │ gzip:   0.21 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/Badge-D3dWLs8Z.js                                       0.27 kB │ gzip:   0.22 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useCandidates-fzOCi8mX.js                               0.28 kB │ gzip:   0.23 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useAttempt-ww9ozWFD.js                                  0.29 kB │ gzip:   0.23 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useEvents-DKhspNkX.js                                   0.33 kB │ gzip:   0.26 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/session-LT53NjQ0.js                                     0.34 kB │ gzip:   0.25 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/experiments-O4tHRfv-.js                                 0.45 kB │ gzip:   0.22 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/NotFoundPage-BXQvjxT5.js                                0.45 kB │ gzip:   0.29 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ProgressBar-Bm6UN9kb.js                                 0.46 kB │ gzip:   0.31 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/PageHeader-C7PMo_gu.js                                  0.46 kB │ gzip:   0.28 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ObjectNotFound-Czbiy62d.js                              0.58 kB │ gzip:   0.33 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/Pagination-CbAdB6Nl.js                                  0.65 kB │ gzip:   0.36 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/QueryState-CEeohEwh.js                                  0.66 kB │ gzip:   0.39 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useAccess-MLefMsUM.js                                   0.66 kB │ gzip:   0.35 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/rolldown-runtime-hePW80VL.js                            0.71 kB │ gzip:   0.42 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/KeyValue-C4vn02sQ.js                                    0.83 kB │ gzip:   0.44 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/Modal-D-6DVAgx.js                                       0.86 kB │ gzip:   0.50 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useQuery-DZYTZUKV.js                                    0.93 kB │ gzip:   0.57 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/EventRows-CNvddxcC.js                                   1.01 kB │ gzip:   0.52 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/MyWorkersPage-jPBOFegE.js                               1.24 kB │ gzip:   0.61 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useExperiment-DWJmR3K8.js                               1.80 kB │ gzip:   0.94 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ExperimentLive-Vw7o-0fX.js                              2.48 kB │ gzip:   1.20 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/client-B6JnI85L.js                                      2.81 kB │ gzip:   1.29 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/LabQueue-Do8o4dmS.js                                    3.05 kB │ gzip:   1.17 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/exportRun-D9UL4aFN.js                                   3.19 kB │ gzip:   1.68 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/RegisterPage-CtNBH-g1.js                                3.31 kB │ gzip:   1.38 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/GetStartedPage-DJuZaqj2.js                              3.43 kB │ gzip:   1.32 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/labels-DogylrAy.js                                      3.48 kB │ gzip:   1.37 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/LoginPage-BYLvAHG3.js                                   3.78 kB │ gzip:   1.49 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/WorkerDetailPage-eltlXTDT.js                            3.97 kB │ gzip:   1.59 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/WorkerFleet-B38dweO9.js                                 4.02 kB │ gzip:   1.27 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ExperimentCreatePage-JPCYVIG4.js                        4.52 kB │ gzip:   2.01 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/GenerationDetailPage-i8aRjt7R.js                        4.96 kB │ gzip:   1.63 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ProfilePage-BRQRxZ3W.js                                 5.13 kB │ gzip:   1.65 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/WorkspaceListPage-CSK0-tpR.js                           5.40 kB │ gzip:   1.91 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/CandidateDetailPage-Da1V0KO4.js                         6.19 kB │ gzip:   2.10 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/WorkspaceDetailRoute-DNHxyfUt.js                        6.24 kB │ gzip:   2.21 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/eventText-_FeeUOZ5.js                                   7.38 kB │ gzip:   2.30 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/EventsPage-DZopz4mR.js                                  7.64 kB │ gzip:   2.62 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ExperimentsPage-6rBc_SyH.js                             8.11 kB │ gzip:   2.61 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ExplainPage-DOOcZP20.js                                 8.82 kB │ gzip:   3.40 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ArtifactsPage-vbwCIt4s.js                               8.86 kB │ gzip:   3.22 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/LabOperationsPage-WMISsq7T.js                           9.50 kB │ gzip:   2.86 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/LabDevices-1LRg5ho5.js                                 10.27 kB │ gzip:   3.62 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/DashboardPage-BGyFP7aL.js                              12.39 kB │ gzip:   4.10 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ComparePage-DTwuMU7B.js                                13.38 kB │ gzip:   4.96 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ModelsPage-Bmt_M--z.js                                 14.06 kB │ gzip:   4.84 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/suspense-BtMO1dv7.js                                   22.08 kB │ gzip:   7.35 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/useExperimentMutations-CYpOA8vH.js                     30.52 kB │ gzip:   8.07 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/ExperimentDetailPage-QQYQ7xRH.js                       35.01 kB │ gzip:  10.30 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/src-DAFpyHGZ.js                                       151.54 kB │ gzip:  48.40 kB
+../../../../../tmp/tmp.SvPiB2Ii5H/web/assets/index-253XlIuJ.js                                     404.70 kB │ gzip: 122.82 kB
+
+✓ built in 167ms

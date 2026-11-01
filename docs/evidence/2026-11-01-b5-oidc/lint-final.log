@@ -1,0 +1,83 @@
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:20:1
+   |
+18 | sys.path.insert(0, str(ROOT / "runtime/src"))
+19 |
+20 | import jwt
+   | ^^^^^^^^^^
+21 | from cryptography.hazmat.primitives.asymmetric import rsa
+22 | from fastapi import HTTPException, Request
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:21:1
+   |
+20 | import jwt
+21 | from cryptography.hazmat.primitives.asymmetric import rsa
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+22 | from fastapi import HTTPException, Request
+23 | from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:22:1
+   |
+20 | import jwt
+21 | from cryptography.hazmat.primitives.asymmetric import rsa
+22 | from fastapi import HTTPException, Request
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23 | from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+24 | from fastapi.staticfiles import StaticFiles
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:23:1
+   |
+21 | from cryptography.hazmat.primitives.asymmetric import rsa
+22 | from fastapi import HTTPException, Request
+23 | from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+24 | from fastapi.staticfiles import StaticFiles
+25 | import uvicorn
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:24:1
+   |
+22 | from fastapi import HTTPException, Request
+23 | from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+24 | from fastapi.staticfiles import StaticFiles
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+25 | import uvicorn
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:25:1
+   |
+23 | from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+24 | from fastapi.staticfiles import StaticFiles
+25 | import uvicorn
+   | ^^^^^^^^^^^^^^
+26 |
+27 | from backend.apps.factory import create_app
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:27:1
+   |
+25 | import uvicorn
+26 |
+27 | from backend.apps.factory import create_app
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+28 | from backend.services.devices import AgentRuntime
+   |
+
+E402 Module level import not at top of file
+  --> scripts/serve-test-oidc.py:28:1
+   |
+27 | from backend.apps.factory import create_app
+28 | from backend.services.devices import AgentRuntime
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+Found 8 errors.

@@ -1,0 +1,33 @@
+import json
+from pathlib import Path
+items=[]
+def m(name,file,old,new):
+ assert Path(file).read_text().count(old)==1,(name,Path(file).read_text().count(old));items.append(dict(name=name,file=file,old=old,new=new))
+p='backend/services/oidc.py'
+m('signature verification disabled',p,'"verify_aud": False','"verify_aud": False, "verify_signature": False')
+m('expiry verification disabled',p,'"verify_aud": False','"verify_aud": False, "verify_exp": False')
+m('not-before verification disabled',p,'"verify_aud": False','"verify_aud": False, "verify_nbf": False')
+m('issuer comparison omitted',p,'issuer=self.issuer,','issuer=None,')
+m('audience and authorized-party guard omitted',p,'if self.client_id not in audience and claims.get("azp") != self.client_id:','if False:')
+m('expiry no longer required',p,'["exp", "iss", "sub"]','["iss", "sub"]')
+m('approved clock skew removed',p,'leeway=30,','leeway=0,')
+m('first rotation never refreshes',p,'if not refreshed and now - self._last_unknown >= 5:','if False:')
+m('unknown key IDs trigger unbounded fetches',p,'if not refreshed and now - self._last_unknown >= 5:','if not refreshed:')
+m('known keys never expire',p,'keys, now + 300','keys, float("inf")')
+m('JWKS errors are retried without a bound',p,'if now - self._last_fetch < 5:','if False:')
+m('JWKS follows redirects',p,'opener(proxy=False).open(self.jwks_url, timeout=5)','__import__("urllib.request", fromlist=["urlopen"]).urlopen(self.jwks_url, timeout=5)')
+m('JWKS uses ambient proxies',p,'opener(proxy=False)','opener(proxy=True)')
+m('JWKS size allowance grows',p,'_MAX_JWKS = 262144','_MAX_JWKS = 1048576')
+m('encryption keys become signing keys',p,'value.get("use", "sig") != "sig"','False')
+m('weak RSA accepted',p,'if key.key_size < 2048:','if False:')
+m('private bearer is exposed in error',p,'"Identity token expired or could not be verified"','"Identity token expired: " + token')
+m('every identity is an administrator',p,'administrator = isinstance(roles, list) and "lab-admin" in roles','administrator = True')
+m('restricted account is revived',p,'username=claims["preferred_username"],','accountStatus="ACTIVE", username=claims["preferred_username"],')
+m('restricted account retains platform role',p,'administrator and profile["accountStatus"] == "ACTIVE"','administrator')
+m('download tickets outlive JWT expiry',p,'min(time.time() + 60, claims["exp"])','time.time() + 60')
+m('OIDC logout leaves download tickets',p,'self.repository.delete_download_tickets(db, "oidc:" + hashlib.sha256(token.encode()).hexdigest())','pass')
+m('cloud factory seeds legacy password accounts','backend/apps/factory.py','passwords if auth_mode == "local" else {},','passwords,')
+m('cloud local login enabled','backend/api/auth.py','if app.state.auth_mode == "local":','if True:')
+m('cloud registration/password endpoints enabled','backend/api/accounts.py','if app.state.auth_mode == "oidc":','if False:')
+Path('.scratch/review-2026-11/B5/mutants.json').write_text(json.dumps(items,indent=2)+'\n')
+print(len(items),'mutants')

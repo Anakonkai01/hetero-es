@@ -1,0 +1,28 @@
+control ok    | 48 passed, 2 warnings in 4.95s
+killed       signature verification disabled | 6 failed, 42 passed, 2 warnings in 5.18s
+killed       expiry verification disabled | 1 failed, 47 passed, 2 warnings in 5.28s
+killed       not-before verification disabled | 1 failed, 47 passed, 2 warnings in 5.09s
+killed       issuer comparison omitted | 2 failed, 46 passed, 2 warnings in 5.16s
+killed       audience and authorized-party guard omitted | 2 failed, 46 passed, 2 warnings in 5.00s
+killed       expiry no longer required | 1 failed, 47 passed, 2 warnings in 4.96s
+killed       approved clock skew removed | 1 failed, 47 passed, 2 warnings in 5.13s
+killed       first rotation never refreshes | 1 failed, 47 passed, 2 warnings in 4.92s
+killed       unknown key IDs trigger unbounded fetches | 1 failed, 47 passed, 2 warnings in 5.85s
+killed       known keys never expire | 1 failed, 47 passed, 2 warnings in 4.97s
+killed       JWKS errors are retried without a bound | 1 failed, 47 passed, 2 warnings in 5.12s
+killed       JWKS follows redirects | 5 failed, 43 passed, 2 warnings in 4.67s
+killed       JWKS uses ambient proxies | 1 failed, 47 passed, 2 warnings in 4.75s
+killed       JWKS size allowance grows | 1 failed, 47 passed, 2 warnings in 4.78s
+killed       encryption keys become signing keys | 1 failed, 47 passed, 2 warnings in 4.75s
+killed       weak RSA accepted | 1 failed, 47 passed, 3 warnings in 4.74s
+killed       private bearer is exposed in error | 28 failed, 20 passed, 2 warnings in 4.66s
+killed       every identity is an administrator | 3 failed, 45 passed, 2 warnings in 4.83s
+killed       restricted account is revived | 1 failed, 47 passed, 2 warnings in 4.78s
+killed       restricted account retains platform role | 1 failed, 47 passed, 2 warnings in 4.95s
+killed       download tickets outlive JWT expiry | 1 failed, 47 passed, 2 warnings in 5.16s
+killed       OIDC logout leaves download tickets | 1 failed, 47 passed, 2 warnings in 5.18s
+killed       cloud factory seeds legacy password accounts | 1 failed, 47 passed, 2 warnings in 4.97s
+killed       cloud local login enabled | 2 failed, 46 passed, 2 warnings in 5.07s
+killed       cloud registration/password endpoints enabled | 3 failed, 45 passed, 2 warnings in 5.03s
+
+25 of 25 mutants killed.

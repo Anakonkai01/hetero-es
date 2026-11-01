@@ -1,0 +1,7 @@
+{
+  "phase": "signed-in account UI",
+  "errorType": "TimeoutError",
+  "checks": [
+    "OIDC UI has identity login and no local password form"
+  ]
+}

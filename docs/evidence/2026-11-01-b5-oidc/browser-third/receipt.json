@@ -1,0 +1,16 @@
+{
+  "scope": "real browser OIDC protocol fixture; not Keycloak deployment",
+  "checks": [
+    "OIDC UI has identity login and no local password form",
+    "real library Code+PKCE returns to /lab with callback query erased",
+    "access/refresh tokens absent from localStorage and sessionStorage",
+    "automatic silent renewal uses a real refresh grant",
+    "end-session logout returns to clean /lab/login"
+  ],
+  "provider": {
+    "pkceVerified": true,
+    "codeGrants": 1,
+    "refreshGrants": 0,
+    "logouts": 1
+  }
+}

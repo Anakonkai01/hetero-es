@@ -1,0 +1,868 @@
+diff --git a/backend/api/accounts.py b/backend/api/accounts.py
+index afe23341..81bb32fa 100644
+--- a/backend/api/accounts.py
++++ b/backend/api/accounts.py
+@@ -4,12 +4,28 @@ from fastapi import APIRouter, Depends, Header, Request, Response
+ 
+ from ..request_models import Registration, ProfileEdit, PasswordEdit
+ from ..throttle import client_address
++from ..core.errors import ServiceError
+ 
+ 
+ def install_routes(app, store, user):
+     router = APIRouter()
+     accounts = store.accounts
+ 
++    if app.state.auth_mode == "oidc":
++
++        @router.post("/api/v1/auth/register")
++        @router.post("/api/v1/auth/password")
++        @router.post("/api/v1/auth/revoke-other-sessions")
++        def external_accounts():
++            raise ServiceError(404, "Use HeteroES ID to manage sign-in and account security")
++
++        @router.patch("/api/v1/profile")
++        def edit_external_profile(body: ProfileEdit, current=Depends(user)):
++            return accounts.edit_profile(current["userId"], body.model_dump(exclude_none=True))
++
++        app.include_router(router)
++        return
++
+     @router.post("/api/v1/auth/register", status_code=201)
+     def register(body: Registration, request: Request):
+         address = client_address(request.client.host if request.client else None, request.headers)
+diff --git a/backend/api/auth.py b/backend/api/auth.py
+index 99554ad4..85d32643 100644
+--- a/backend/api/auth.py
++++ b/backend/api/auth.py
+@@ -4,23 +4,31 @@ from fastapi import APIRouter, Depends, Header, Request, Response
+ 
+ from ..request_models import Login
+ from ..throttle import client_address
++from ..core.errors import ServiceError
+ 
+ 
+ def install_routes(app, store, user, session):
+     router = APIRouter()
+     accounts = store.accounts
+ 
+-    @router.post("/api/v1/auth/login")
+-    def sign_in(body: Login, request: Request):
+-        address = client_address(request.client.host if request.client else None, request.headers)
+-        return accounts.sign_in(
+-            body.username,
+-            body.password,
+-            address,
+-            app.state.login_failures,
+-            app.state.login_failures_by_address,
+-            session,
+-        )
++    if app.state.auth_mode == "local":
++
++        @router.post("/api/v1/auth/login")
++        def sign_in(body: Login, request: Request):
++            address = client_address(request.client.host if request.client else None, request.headers)
++            return accounts.sign_in(
++                body.username,
++                body.password,
++                address,
++                app.state.login_failures,
++                app.state.login_failures_by_address,
++                session,
++            )
++    else:
++
++        @router.post("/api/v1/auth/login")
++        def external_login():
++            raise ServiceError(404, "Use HeteroES ID to manage sign-in and account security")
+ 
+     @router.get("/api/v1/auth/session")
+     def get_session(current=Depends(user)):
+@@ -28,7 +36,7 @@ def install_routes(app, store, user, session):
+ 
+     @router.post("/api/v1/auth/logout", status_code=204)
+     def sign_out(current=Depends(user), authorization: str = Header()):
+-        accounts.sign_out(authorization[7:])
++        store.authentication.sign_out(authorization[7:])
+         return Response(status_code=204)
+ 
+     app.include_router(router)
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+index 2541e4f6..33cb13a9 100644
+--- a/backend/apps/factory.py
++++ b/backend/apps/factory.py
+@@ -42,10 +42,27 @@ def create_app(
+     service="all",
+     database_url=None,
+     database_connect_args=None,
++    auth_mode="local",
++    oidc_issuer=None,
++    oidc_jwks_url=None,
+ ):
+     if service not in SERVICES:
+         raise ValueError("Unknown backend service")
+-    store = Store(path, passwords, runtime, database_url=database_url, database_connect_args=database_connect_args)
++    if auth_mode not in {"local", "oidc"}:
++        raise ValueError("Unknown authentication mode")
++    verifier = None
++    if auth_mode == "oidc":
++        from ..services.oidc import OIDCAccounts, OIDCVerifier
++
++        verifier = OIDCVerifier(oidc_issuer, oidc_jwks_url)
++    store = Store(
++        path,
++        passwords if auth_mode == "local" else {},
++        runtime,
++        database_url=database_url,
++        database_connect_args=database_connect_args,
++    )
++    store.authentication = OIDCAccounts(store, verifier) if verifier else store.accounts
+     from ..services.study_registry import Registry
+ 
+     registry = Registry(store)
+@@ -91,6 +108,7 @@ def create_app(
+     app.state.registrations = Throttle(10, 3600)
+     app.state.store = store
+     app.state.service = service
++    app.state.auth_mode = auth_mode
+     app.state.scheduler = scheduler
+     app.state.live = LiveStreams()
+ 
+@@ -99,7 +117,7 @@ def create_app(
+     async def handle_http(_request, error):
+         return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
+ 
+-    user = local_user(store.accounts)
++    user = local_user(store.authentication)
+     access = AccessService(store, runtime)
+ 
+     scoped = workspace_scope(access, user)
+@@ -231,4 +249,7 @@ def _app_from_config(root, credentials, config, writer, *, service="all", databa
+         writer_lock=writer,
+         service=service,
+         database_url=database_url,
++        auth_mode=os.environ.get("HETEROES_AUTH_MODE", config.get("authMode", "local")),
++        oidc_issuer=os.environ.get("HETEROES_OIDC_ISSUER", config.get("oidcIssuer")),
++        oidc_jwks_url=os.environ.get("HETEROES_OIDC_JWKS_URL", config.get("oidcJwksUrl")),
+     )
+diff --git a/backend/repositories/accounts.py b/backend/repositories/accounts.py
+index 6a8f846b..158b2223 100644
+--- a/backend/repositories/accounts.py
++++ b/backend/repositories/accounts.py
+@@ -35,6 +35,17 @@ class AccountsRepository:
+     def delete_session(db, digest):
+         db.execute("DELETE FROM sessions WHERE digest=:p0", (digest,))
+ 
++    @staticmethod
++    def delete_download_tickets(db, digest):
++        db.execute("DELETE FROM cloud_downloads WHERE session_digest=:p0", (digest,))
++
++    @staticmethod
++    def bootstrap_membership(db, user_id):
++        db.execute(
++            "INSERT INTO memberships(workspace_id,user_id,role) VALUES ('lab',:p0,'ADMIN') ON CONFLICT DO NOTHING",
++            (user_id,),
++        )
++
+     @staticmethod
+     def add_user(db, user_id, password_hash, profile):
+         try:
+diff --git a/backend/requirements-cloud.lock.txt b/backend/requirements-cloud.lock.txt
+index af6ad4d7..773db998 100644
+--- a/backend/requirements-cloud.lock.txt
++++ b/backend/requirements-cloud.lock.txt
+@@ -1,6 +1,8 @@
+ -r requirements.lock.txt
++PyJWT==2.15.1
+ boto3==1.43.111
+ botocore==1.43.111
++cryptography==50.0.2
+ jmespath==1.1.0
+ psycopg==3.3.6
+ psycopg-binary==3.3.6
+diff --git a/backend/requirements-cloud.txt b/backend/requirements-cloud.txt
+index 7478bd29..6b02c845 100644
+--- a/backend/requirements-cloud.txt
++++ b/backend/requirements-cloud.txt
+@@ -1,3 +1,5 @@
+ -r requirements.txt
+ psycopg[binary]==3.3.6
+ boto3==1.43.111
++PyJWT[crypto]==2.15.1
++cryptography==50.0.2
+diff --git a/backend/runtime_sources.py b/backend/runtime_sources.py
+index 5f115715..4f475f79 100644
+--- a/backend/runtime_sources.py
++++ b/backend/runtime_sources.py
+@@ -6,6 +6,7 @@ SHARED_MODULES = (
+     "__init__.py",
+     "catalog.py",
+     "canonical.py",
++    "http_safety.py",
+     "noise/__init__.py",
+     "noise/contracts.py",
+     "recovery_manifest.py",
+diff --git a/backend/services/accounts.py b/backend/services/accounts.py
+index 7b0aac0a..208bffea 100644
+--- a/backend/services/accounts.py
++++ b/backend/services/accounts.py
+@@ -6,7 +6,7 @@ import secrets
+ import time
+ import uuid
+ 
+-from argon2.exceptions import VerificationError
++from argon2.exceptions import InvalidHashError, VerificationError
+ 
+ from ..core.errors import ServiceError
+ from ..passwords import password_problem
+@@ -18,6 +18,8 @@ def _digest(token):
+ 
+ 
+ class AccountService:
++    mode = "local"
++
+     def __init__(self, store):
+         self.store = store
+         self.repository = AccountsRepository()
+@@ -45,7 +47,7 @@ class AccountService:
+             row = self.repository.by_username(db, username)
+             try:
+                 self.store.hasher.verify(row["hash"] if row else self.store.hasher.hash("unknown-user"), password)
+-            except VerificationError:
++            except (InvalidHashError, VerificationError):
+                 raise ServiceError(401, "Invalid username or password") from None
+             if not row:
+                 raise ServiceError(401, "Invalid username or password")
+@@ -74,6 +76,13 @@ class AccountService:
+         with self.store.db() as db:
+             self.repository.delete_session(db, _digest(token))
+ 
++    def download_session(self, token, user_id):
++        return _digest(token), time.time() + 60
++
++    @staticmethod
++    def external_download_session(digest):
++        return False
++
+     def register(self, username, password, display_name, address, registrations):
+         wait = registrations.retry_after(address)
+         if wait:
+diff --git a/backend/services/operations.py b/backend/services/operations.py
+index 02b4f2f2..107fa828 100644
+--- a/backend/services/operations.py
++++ b/backend/services/operations.py
+@@ -48,6 +48,8 @@ def operations(store, runtime, platform):
+             platform(current)
+             if not store.profile(user_id):
+                 raise ServiceError(404, "Account not found")
++            if store.authentication.mode == "oidc" and user_id.startswith("kc:"):
++                raise ServiceError(404, "Manage identity sessions in HeteroES ID")
+             if user_id == current["userId"]:
+                 raise ServiceError(409, "Use your account security page to sign out other sessions")
+             repository.revoke_sessions_delete_sessions(db, (user_id,))
+diff --git a/backend/services/recovery_storage.py b/backend/services/recovery_storage.py
+index 0dce81ab..3fab6357 100644
+--- a/backend/services/recovery_storage.py
++++ b/backend/services/recovery_storage.py
+@@ -380,11 +380,11 @@ def operations(store, storage, device_auth, user, scoped, authorized):
+             raise ServiceError(404, "Cloud checkpoint not ready")
+         secret = secrets.token_urlsafe(32)
+         td = hashlib.sha256(secret.encode()).hexdigest()
+-        session_digest = hashlib.sha256(token.encode()).hexdigest()
++        session_digest, ticket_expiry = store.authentication.download_session(token, current["userId"])
+         path = "/api/v1/cloud-downloads/" + td
+         with store.db() as db:
+             repository.ticket_insert_cloud_downloads(
+-                db, (td, current["userId"], session_digest, run_id, sha, time.time() + 60)
++                db, (td, current["userId"], session_digest, run_id, sha, ticket_expiry)
+             )
+         return {"downloadUrl": path, "secret": secret}
+ 
+@@ -395,9 +395,12 @@ def operations(store, storage, device_auth, user, scoped, authorized):
+             row = repository.consume_select_cloud_downloads(db, (ticket_digest, time.time())).fetchone()
+             if not row:
+                 raise ServiceError(401, "Download ticket expired")
+-            if not repository.consume_select_sessions(
+-                db, (row["session_digest"], row["user_id"], time.time())
+-            ).fetchone():
++            if (
++                not store.authentication.external_download_session(row["session_digest"])
++                and not repository.consume_select_sessions(
++                    db, (row["session_digest"], row["user_id"], time.time())
++                ).fetchone()
++            ):
+                 raise ServiceError(401, "Session revoked")
+             body = store.get(row["run_id"])
+             profile = store.profile(row["user_id"])
+diff --git a/backend/services/store.py b/backend/services/store.py
+index e223f3fe..c4b7d76e 100644
+--- a/backend/services/store.py
++++ b/backend/services/store.py
+@@ -29,6 +29,7 @@ class Store:
+         self.operation_lock = threading.RLock()
+         self.hasher = PasswordHasher()
+         self.accounts = AccountService(self)
++        self.authentication = self.accounts
+         self.audit_service = AuditService()
+         self.device_state = DeviceStateService(self)
+         self.scheduling = SchedulingService(self)
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index 980cec89..40f37f9c 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -14,7 +14,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
+ - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
+   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
+-- **Phần B tiếp theo:** backend chia lớp, Postgres, service riêng, Keycloak/OIDC, MinIO, metrics/log và router đồ án.
++- **Phần B đã xong B1–B5:** backend chia lớp, Postgres, service riêng và OIDC. Tiếp theo là S3/MinIO, metrics/log,
++  router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
+ - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
+   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
+@@ -94,6 +95,16 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   The MinIO image was built from pinned official source because the old upstream image was unavailable. Its test SDK
+   adapter proves actual backup I/O; production S3 integration remains B6. Linux app checks do not prove installed private
+   Python dependencies (B9/B10), Windows/GPU acceptance or deployment. B5–B10 and all C remain.
++  B5 complete: RS256/issuer/audience/expiry verification, bounded no-redirect JWKS rotation/cache, kc:sub identity,
++  durable approval/restriction checks and guided local-auth404. Device tokens remain independent. OIDC recovery tickets
++  retain only a digest, cannot outlive JWT expiry and recheck membership/account status. Web Code+PKCE uses memory-only
++  tokens, sessionStorage transaction state, callback cleanup, automatic renewal, SSO reload and provider logout.
++  Full SQLite596 / PostgreSQL620, zero skips; PG audit388 real PG +48 explicit SQLite Stores. Actual-PG mutation25/25,
++  frontend/harness11/11, browser protocol fixture6 contracts and all24 check-all steps pass. A counter0 refresh receipt
++  was rejected (B-011); the final receipt has two code grants, one refresh and one logout. The first full PG run exposed
++  a collection-time test clock and a missing packaged http_safety dependency; both are corrected with assertions intact.
++  A local factory/HTTP probe passes with optional cloud/GPU imports forbidden. Evidence `2026-11-01-b5-oidc`.
++  This is generated-key protocol/browser acceptance, not deployment of a real Keycloak realm. B6–B10 and all C remain.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+@@ -102,7 +113,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+ 
+ ## Remaining scope and limits
+ 
+-- Execute B1–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
++- B1–B5 are complete. Execute B6–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
+ - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
+   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index a403d5ff..2ec1284d 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -15,6 +15,7 @@ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original conce
+ | B-008 | Scheduler fencing transaction boundaries          | C    | P2       | Wrapping a whole scheduler tick in one transaction makes a handled job failure roll back already completed jobs and unrelated progress.                                                                                 | Bind independent business transactions to the dedicated leader session; fence connection loss while preserving each operation commit/rollback boundary.          | Fixed: independent-job regression and nine session/controller cases pass on PostgreSQL; core mutation16/16, full SQLite541/PostgreSQL559; evidence `2026-11-01-b4-service-scheduler-core`. |
+ | B-009 | Restore empty-target schema classification        | C    | P2       | SQL LIKE pg_% treats underscore as a wildcard and incorrectly ignores existing user data in a pgx schema, permitting a restore into a nonempty target.                                                                  | Use the exact reserved pg_ prefix; inspect user relations/functions/types and reject before restoration.                                                         | Fixed: real PostgreSQL pgx regression, checksum/identity guards and atomic failure rollback; backup mutation16/16.                                                                         |
+ | B-010 | Browser fixtures and full-check result accounting | T    | P1       | Additive DB columns broke old fixture INSERT statements; check-all skipped five browser contracts after startup failures and still printed ALL PASS because those failures never reached its failed list.               | Use explicit seed column lists; retain startup logs and make any fixture startup failure fail the entire command; test real seeding plus the shell failure path. | Fixed: replacement check-all passes all24 steps, SQLite548/PostgreSQL572; fixture mutation4/4. First false ALL PASS rejected; evidence `2026-11-01-b4-backup-restore`.                     |
++| B-011 | OIDC browser refresh evidence                     | T    | P2       | An early browser probe printed PASS while its final receipt still had refreshGrants=0, so it did not prove automatic renewal.                                                                                           | Explicitly await an actual HTTP counter and assert it again in the final receipt; reject zero/missing counters independently.                                    | Fixed: final browser receipt has refreshGrants=1 and codeGrants=2 (SSO reload), six contracts; frontend/harness mutation11/11. Early counter0 receipt rejected.                            |
+ | B-Q1  | Lab Server responsibilities                       | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                                 | Answered in A5 (architecture document)                                                                                                                                                     |
+ | B-Q2  | Data and backups                                  | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                            | Answered in A5                                                                                                                                                                             |
+ 
+diff --git a/frontend/package.json b/frontend/package.json
+index 3f2d62fd..74229011 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -11,11 +11,12 @@
+     "test:unit": "node --test tests/*.test.mjs"
+   },
+   "dependencies": {
++    "@heteroes/product-ui": "0.1.0",
+     "@tanstack/react-query": "^5.103.1",
++    "oidc-client-ts": "3.5.0",
+     "react": "^19.2.8",
+     "react-dom": "^19.2.8",
+-    "react-router": "^8.4.0",
+-    "@heteroes/product-ui": "0.1.0"
++    "react-router": "^8.4.0"
+   },
+   "devDependencies": {
+     "@eslint/js": "^10.0.1",
+diff --git a/frontend/src/api/client.ts b/frontend/src/api/client.ts
+index 91116f80..ec1c8e8e 100644
+--- a/frontend/src/api/client.ts
++++ b/frontend/src/api/client.ts
+@@ -1,13 +1,8 @@
+ import { SseParser, type SseMessage } from '../lib/sse';
+ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+-const TOKEN_KEY = 'heteroes.access-token';
+-let accessToken = sessionStorage.getItem(TOKEN_KEY) ?? '';
++import { getAccessToken } from './token';
++export { setAccessToken } from './token';
+ let workspaceId = '';
+-export function setAccessToken(token: string) {
+-  accessToken = token;
+-  if (token) sessionStorage.setItem(TOKEN_KEY, token);
+-  else sessionStorage.removeItem(TOKEN_KEY);
+-}
+ export function setActiveWorkspace(id: string) {
+   workspaceId = id;
+ }
+@@ -24,7 +19,7 @@ export function isNotFoundError(error: unknown): boolean {
+ }
+ async function request<T>(path: string, init?: RequestInit): Promise<T> {
+   const headers = new Headers(init?.headers);
+-  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
++  if (getAccessToken()) headers.set('Authorization', `Bearer ${getAccessToken()}`);
+   if (workspaceId) headers.set('X-Workspace-Id', workspaceId);
+   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+   if (!response.ok) {
+@@ -86,7 +81,7 @@ export async function downloadArtifact(id: string, name: string) {
+ }
+ async function downloadFile(path: string, name: string) {
+   const response = await fetch(`${API_BASE_URL}${path}`, {
+-    headers: { Authorization: `Bearer ${accessToken}`, 'X-Workspace-Id': workspaceId },
++    headers: { Authorization: `Bearer ${getAccessToken()}`, 'X-Workspace-Id': workspaceId },
+   });
+   if (!response.ok) throw new ApiError(response.status, 'Download failed');
+   const url = URL.createObjectURL(await response.blob());
+@@ -106,7 +101,7 @@ export async function readStream(
+   signal: AbortSignal,
+ ): Promise<void> {
+   const headers = new Headers({ Accept: 'text/event-stream' });
+-  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
++  if (getAccessToken()) headers.set('Authorization', `Bearer ${getAccessToken()}`);
+   if (workspaceId) headers.set('X-Workspace-Id', workspaceId);
+   const response = await fetch(`${API_BASE_URL}${path}`, { headers, signal });
+   if (!response.ok || !response.body) throw new ApiError(response.status, `Stream unavailable: ${response.status}`);
+diff --git a/frontend/src/app/SessionProvider.tsx b/frontend/src/app/SessionProvider.tsx
+index 60a75ee7..a9bd1083 100644
+--- a/frontend/src/app/SessionProvider.tsx
++++ b/frontend/src/app/SessionProvider.tsx
+@@ -1,8 +1,10 @@
+ import { useQuery, useQueryClient } from '@tanstack/react-query';
+-import { useRef, useState, type ReactNode } from 'react';
++import { useEffect, useRef, useState, type ReactNode } from 'react';
+ import { getSession, login, logout } from '../api/access';
+ import { ApiError, setAccessToken, setActiveWorkspace } from '../api/client';
+ import { SessionContext } from './session';
++import { getRuntimeConfig } from './runtimeConfig';
++import { signOutWithIdentity } from './identity';
+ const WORKSPACE_KEY = 'heteroes.demo-workspace';
+ export function SessionProvider({ children }: { children: ReactNode }) {
+   const queryClient = useQueryClient();
+@@ -36,6 +38,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
+   });
+   const session = query.error instanceof ApiError && query.error.status === 401 ? undefined : query.data;
+   const workspace = session?.workspaces.find((item) => item.workspaceId === workspaceId) ?? session?.workspaces[0];
++  useEffect(() => {
++    const changed = () => {
++      void queryClient.cancelQueries().then(() => {
++        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'session' });
++        void queryClient.invalidateQueries({ queryKey: ['session'] });
++      });
++    };
++    window.addEventListener('heteroes-identity-changed', changed);
++    return () => window.removeEventListener('heteroes-identity-changed', changed);
++  }, [queryClient]);
+   async function selectWorkspace(id: string) {
+     if (!session?.workspaces.some((item) => item.workspaceId === id)) return;
+     await queryClient.cancelQueries({ predicate: (query) => query.queryKey[0] !== 'session' });
+@@ -60,7 +72,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
+   }
+   async function signOut() {
+     // Preserve the session if the server cannot confirm revocation.
+-    await logout();
++    const external = getRuntimeConfig().authMode === 'oidc';
++    if (external) await logout().catch(() => undefined);
++    else await logout();
+     await queryClient.cancelQueries();
+     setAccessToken('');
+     setActiveWorkspace('');
+@@ -68,6 +82,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
+     setWorkspaceId('');
+     queryClient.clear();
+     queryClient.setQueryData(['session'], null);
++    if (external) await signOutWithIdentity();
+   }
+   async function refreshSession() {
+     await query.refetch();
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 7fb9f703..ca34b25d 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -5,6 +5,7 @@ import { AppLayout } from '../components/layout/AppLayout';
+ import { RequireSession } from '../components/layout/RequireSession';
+ import { HomePage } from '../pages/HomePage';
+ import { useSession } from './session';
++import { getRuntimeConfig } from './runtimeConfig';
+ const ProfilePage = lazy(() => import('../pages/ProfilePage').then((module) => ({ default: module.ProfilePage })));
+ const MyWorkersPage = lazy(() =>
+   import('../pages/MyWorkersPage').then((module) => ({ default: module.MyWorkersPage })),
+@@ -59,7 +60,12 @@ export function AppRouter() {
+         <Route path="/" element={<HomePage />} />
+         <Route path="/login" element={<LoginPage />} />
+         <Route path="/explain" element={<ExplainPage />} />
+-        {<Route path="/register" element={<RegisterPage />} />}
++        {
++          <Route
++            path="/register"
++            element={getRuntimeConfig().authMode === 'oidc' ? <Navigate to="/login" replace /> : <RegisterPage />}
++          />
++        }
+         <Route element={<RequireSession />}>
+           <Route element={<AppLayout />}>
+             <Route path="/get-started" element={<GetStartedPage />} />
+diff --git a/frontend/src/main.tsx b/frontend/src/main.tsx
+index 98b32c67..e0427147 100644
+--- a/frontend/src/main.tsx
++++ b/frontend/src/main.tsx
+@@ -5,16 +5,26 @@ import { createRoot } from 'react-dom/client';
+ import { BrowserRouter } from 'react-router';
+ import { AppProviders } from './app/providers';
+ import { AppRouter } from './app/router';
++import { loadRuntimeConfig } from './app/runtimeConfig';
++import { initializeIdentity } from './app/identity';
+ import './index.css';
+ import './product.css';
+-createRoot(document.getElementById('root')!).render(
+-  <StrictMode>
+-    <ProductProvider>
+-      <AppProviders>
+-        <BrowserRouter>
+-          <AppRouter />
+-        </BrowserRouter>
+-      </AppProviders>
+-    </ProductProvider>
+-  </StrictMode>,
+-);
++async function start() {
++  const config = await loadRuntimeConfig(import.meta.env.BASE_URL);
++  if (!(await initializeIdentity(config))) return;
++  createRoot(document.getElementById('root')!).render(
++    <StrictMode>
++      <ProductProvider>
++        <AppProviders>
++          <BrowserRouter basename={config.basePath}>
++            <AppRouter />
++          </BrowserRouter>
++        </AppProviders>
++      </ProductProvider>
++    </StrictMode>,
++  );
++}
++void start().catch(() => {
++  document.getElementById('root')!.textContent =
++    'Sign-in is unavailable. Please reload. / Không thể đăng nhập. Vui lòng tải lại.';
++});
+diff --git a/frontend/src/pages/LabProfile.tsx b/frontend/src/pages/LabProfile.tsx
+index 241ea551..f73826a2 100644
+--- a/frontend/src/pages/LabProfile.tsx
++++ b/frontend/src/pages/LabProfile.tsx
+@@ -2,6 +2,7 @@ import { Status, useProduct } from '@heteroes/product-ui';
+ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+ import { useState } from 'react';
+ import { apiGet, apiPatch, apiPost } from '../api/client';
++import { getRuntimeConfig } from '../app/runtimeConfig';
+ import { useSession } from '../app/session';
+ import { PageHeader } from '../components/ui/PageHeader';
+ import type { User, WorkspaceInvitation } from '../types/access';
+@@ -104,50 +105,54 @@ export function LabProfile() {
+           <div className="ch">
+             <h2>{t('Security')}</h2>
+           </div>
+-          <form
+-            className="cb demo-form"
+-            onSubmit={(e) => {
+-              e.preventDefault();
+-              password.mutate();
+-            }}
+-          >
+-            <label className="fg">
+-              {t('Current password')}
+-              <input
+-                className="inp"
+-                type="password"
+-                autoComplete="current-password"
+-                required
+-                value={currentPassword}
+-                onChange={(e) => setCurrent(e.target.value)}
+-              />
+-            </label>
+-            <label className="fg">
+-              {t('New password')}
+-              <input
+-                className="inp"
+-                type="password"
+-                autoComplete="new-password"
+-                required
+-                minLength={8}
+-                maxLength={200}
+-                value={newPassword}
+-                onChange={(e) => setNew(e.target.value)}
+-              />
+-            </label>
+-            <p className="hint">{t('At least 8 characters. Avoid common passwords.')}</p>
+-            <p className="hint">{t('Changing your password signs out all other sessions.')}</p>
+-            {password.error && <p role="alert">{password.error.message}</p>}
+-            {password.isSuccess && <p role="status">{t('Password changed.')}</p>}
+-            <button className="btn pri" disabled={password.isPending}>
+-              {t('Change password')}
+-            </button>
+-            <button type="button" className="btn" disabled={revoke.isPending} onClick={() => revoke.mutate()}>
+-              {t('Sign out other sessions')}
+-            </button>
+-            {revoke.error && <p role="alert">{revoke.error.message}</p>}
+-            {revoke.isSuccess && <p role="status">{t('Other sessions revoked.')}</p>}
+-          </form>
++          {getRuntimeConfig().authMode === 'oidc' ? (
++            <p className="cb">{t('Manage sign-in and password in HeteroES ID.')}</p>
++          ) : (
++            <form
++              className="cb demo-form"
++              onSubmit={(e) => {
++                e.preventDefault();
++                password.mutate();
++              }}
++            >
++              <label className="fg">
++                {t('Current password')}
++                <input
++                  className="inp"
++                  type="password"
++                  autoComplete="current-password"
++                  required
++                  value={currentPassword}
++                  onChange={(e) => setCurrent(e.target.value)}
++                />
++              </label>
++              <label className="fg">
++                {t('New password')}
++                <input
++                  className="inp"
++                  type="password"
++                  autoComplete="new-password"
++                  required
++                  minLength={8}
++                  maxLength={200}
++                  value={newPassword}
++                  onChange={(e) => setNew(e.target.value)}
++                />
++              </label>
++              <p className="hint">{t('At least 8 characters. Avoid common passwords.')}</p>
++              <p className="hint">{t('Changing your password signs out all other sessions.')}</p>
++              {password.error && <p role="alert">{password.error.message}</p>}
++              {password.isSuccess && <p role="status">{t('Password changed.')}</p>}
++              <button className="btn pri" disabled={password.isPending}>
++                {t('Change password')}
++              </button>
++              <button type="button" className="btn" disabled={revoke.isPending} onClick={() => revoke.mutate()}>
++                {t('Sign out other sessions')}
++              </button>
++              {revoke.error && <p role="alert">{revoke.error.message}</p>}
++              {revoke.isSuccess && <p role="status">{t('Other sessions revoked.')}</p>}
++            </form>
++          )}
+         </section>
+       </div>
+       {user.accountStatus === 'ACTIVE' && (
+diff --git a/frontend/src/pages/LoginPage.tsx b/frontend/src/pages/LoginPage.tsx
+index fa8a202e..6b17aab5 100644
+--- a/frontend/src/pages/LoginPage.tsx
++++ b/frontend/src/pages/LoginPage.tsx
+@@ -1,6 +1,8 @@
+ import { PreferencesControl, ProductMark, useProduct } from '@heteroes/product-ui';
+ import { useState, type FormEvent } from 'react';
+ import { Link, Navigate } from 'react-router';
++import { getRuntimeConfig } from '../app/runtimeConfig';
++import { signInWithIdentity } from '../app/identity';
+ import { useSession } from '../app/session';
+ import { LoadingState } from '../components/common/LoadingState';
+ export function LoginPage() {
+@@ -23,6 +25,16 @@ export function LoginPage() {
+       setSending(false);
+     }
+   }
++  async function identitySignIn() {
++    setSending(true);
++    setError('');
++    try {
++      await signInWithIdentity();
++    } catch {
++      setError(t('Could not sign in.'));
++      setSending(false);
++    }
++  }
+   if (pending)
+     return (
+       <div className="app auth-screen">
+@@ -62,55 +74,64 @@ export function LoginPage() {
+           <span className="eyebrow">HETEROES LAB</span>
+           <h1>{t('Welcome back.')}</h1>
+           <p className="auth-description">{t('Sign in to your lab to continue your research.')}</p>
+-          <form onSubmit={submit} className="demo-form">
+-            <label className="fg">
+-              {t('Username')}
+-              <input
+-                className="inp"
+-                autoFocus
+-                autoComplete="username"
+-                placeholder={t('Your username')}
+-                required
+-                value={username}
+-                onChange={(e) => setUsername(e.target.value)}
+-              />
+-            </label>
+-            <div className="fg">
+-              <label htmlFor="login-password">{t('Password')}</label>
+-              <span className="password-field">
++          {getRuntimeConfig().authMode === 'oidc' ? (
++            <div className="demo-form">
++              {error && <p role="alert">{error}</p>}
++              <button className="btn pri auth-submit" disabled={sending} onClick={() => void identitySignIn()}>
++                {t('Sign in with HeteroES ID')}
++              </button>
++            </div>
++          ) : (
++            <form onSubmit={submit} className="demo-form">
++              <label className="fg">
++                {t('Username')}
+                 <input
+-                  id="login-password"
+                   className="inp"
+-                  type={show ? 'text' : 'password'}
+-                  autoComplete={'current-password'}
+-                  placeholder={t('Your password')}
++                  autoFocus
++                  autoComplete="username"
++                  placeholder={t('Your username')}
+                   required
+-                  value={password}
+-                  onChange={(e) => setPassword(e.target.value)}
++                  value={username}
++                  onChange={(e) => setUsername(e.target.value)}
+                 />
+-                <button
+-                  type="button"
+-                  aria-label={t(show ? 'Hide password' : 'Show password')}
+-                  onClick={() => setShow(!show)}
+-                >
+-                  {t(show ? 'Hide' : 'Show')}
+-                </button>
+-              </span>
+-            </div>
+-            {error && (
+-              <div className="note err" role="alert">
+-                {error}
++              </label>
++              <div className="fg">
++                <label htmlFor="login-password">{t('Password')}</label>
++                <span className="password-field">
++                  <input
++                    id="login-password"
++                    className="inp"
++                    type={show ? 'text' : 'password'}
++                    autoComplete={'current-password'}
++                    placeholder={t('Your password')}
++                    required
++                    value={password}
++                    onChange={(e) => setPassword(e.target.value)}
++                  />
++                  <button
++                    type="button"
++                    aria-label={t(show ? 'Hide password' : 'Show password')}
++                    onClick={() => setShow(!show)}
++                  >
++                    {t(show ? 'Hide' : 'Show')}
++                  </button>
++                </span>
+               </div>
+-            )}
+-            <button type="submit" className="btn pri auth-submit" disabled={sending}>
+-              {t(sending ? 'Signing in…' : 'Sign in')} <span aria-hidden="true">→</span>
+-            </button>
+-            {
+-              <p className="auth-register">
+-                {t('New to this lab?')} <Link to="/register">{t('Create an account')}</Link>
+-              </p>
+-            }
+-          </form>
++              {error && (
++                <div className="note err" role="alert">
++                  {error}
++                </div>
++              )}
++              <button type="submit" className="btn pri auth-submit" disabled={sending}>
++                {t(sending ? 'Signing in…' : 'Sign in')} <span aria-hidden="true">→</span>
++              </button>
++              {
++                <p className="auth-register">
++                  {t('New to this lab?')} <Link to="/register">{t('Create an account')}</Link>
++                </p>
++              }
++            </form>
++          )}
+           <div className="auth-help">
+             {t('Your administrator approves access to shared resources.')}
+             <br />
+diff --git a/frontend/vite.config.ts b/frontend/vite.config.ts
+index 3cf04ef3..569d48ff 100644
+--- a/frontend/vite.config.ts
++++ b/frontend/vite.config.ts
+@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
+ 
+ // https://vite.dev/config/
+ export default defineConfig({
++  base: process.env.HETEROES_WEB_BASE ?? '/',
+   plugins: [react()],
+   // Static assets only. `public/downloads` holds links to installers for the lab manager and must never be copied into a build.
+   publicDir: 'static',
+diff --git a/package-lock.json b/package-lock.json
+index a124838f..4fb3d367 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -67,6 +67,7 @@
+       "dependencies": {
+         "@heteroes/product-ui": "0.1.0",
+         "@tanstack/react-query": "^5.103.1",
++        "oidc-client-ts": "3.5.0",
+         "react": "^19.2.8",
+         "react-dom": "^19.2.8",
+         "react-router": "^8.4.0"
+@@ -4198,6 +4199,15 @@
+         "graceful-fs": "^4.1.6"
+       }
+     },
++    "node_modules/jwt-decode": {
++      "version": "4.0.0",
++      "resolved": "https://registry.npmjs.org/jwt-decode/-/jwt-decode-4.0.0.tgz",
++      "integrity": "sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/keyv": {
+       "version": "4.5.4",
+       "resolved": "https://registry.npmjs.org/keyv/-/keyv-4.5.4.tgz",
+@@ -4819,6 +4829,18 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/oidc-client-ts": {
++      "version": "3.5.0",
++      "resolved": "https://registry.npmjs.org/oidc-client-ts/-/oidc-client-ts-3.5.0.tgz",
++      "integrity": "sha512-l2q8l9CTCTOlbX+AnK4p3M+4CEpKpyQhle6blQkdFhm0IsBqsxm15bYaSa11G7pWdsYr6epdsRZxJpCyCRbT8A==",
++      "license": "Apache-2.0",
++      "dependencies": {
++        "jwt-decode": "^4.0.0"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/once": {
+       "version": "1.4.0",
+       "resolved": "https://registry.npmjs.org/once/-/once-1.4.0.tgz",
+diff --git a/packages/product-ui/src/translations.ts b/packages/product-ui/src/translations.ts
+index a7b2fefd..e8e62b61 100644
+--- a/packages/product-ui/src/translations.ts
++++ b/packages/product-ui/src/translations.ts
+@@ -1366,6 +1366,8 @@ export const translations: Record<string, string> = {
+   'Or use the web form (built-in workloads and simple settings)':
+     'Hoặc dùng form trên web (bài có sẵn và cài đặt đơn giản)',
+   'Distributed experiment workflow': 'Quy trình thí nghiệm phân tán',
++  'Sign in with HeteroES ID': 'Đăng nhập bằng HeteroES ID',
++  'Manage sign-in and password in HeteroES ID.': 'Quản lý đăng nhập và mật khẩu trong HeteroES ID.',
+   'Could not sign in.': 'Không đăng nhập được.',
+   'Pinned revision': 'Phiên bản đã ghim',
+   'EVOLUTION STRATEGIES · DISTRIBUTED COMPUTE': 'EVOLUTION STRATEGIES · TÍNH TOÁN PHÂN TÁN',

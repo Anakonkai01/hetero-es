@@ -1,0 +1,14 @@
+✔ runtime configuration selects local default and explicit OIDC basename without accepting malformed authority (1.337505ms)
+✔ OIDC selection before UI startup clears old local token and never writes tokens to browser storage (0.124092ms)
+✔ code flow keeps user/refresh tokens in memory and only PKCE transaction state in session storage (0.15767ms)
+✔ callback is processed before session queries and code/state disappear from the address bar, including failures (0.432023ms)
+✔ logout callback clears identity and returns to the base login route (0.1169ms)
+✔ an asynchronous counter read must reach the required value; a resolved Promise is not success (13.167591ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 64.450142

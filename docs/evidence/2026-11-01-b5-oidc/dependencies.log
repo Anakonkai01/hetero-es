@@ -1,0 +1,14 @@
+Collecting PyJWT==2.15.1 (from PyJWT[crypto]==2.15.1)
+  Downloading pyjwt-2.15.1-py3-none-any.whl.metadata (3.5 kB)
+Collecting cryptography==50.0.2
+  Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
+Requirement already satisfied: cffi>=2.0.0 in ./.venv-backend/lib/python3.12/site-packages (from cryptography==50.0.2) (2.1.1)
+Requirement already satisfied: pycparser in ./.venv-backend/lib/python3.12/site-packages (from cffi>=2.0.0->cryptography==50.0.2) (3.11)
+Downloading pyjwt-2.15.1-py3-none-any.whl (33 kB)
+Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 16.2 MB/s eta 0:00:00
+Installing collected packages: PyJWT, cryptography
+Successfully installed PyJWT-2.15.1 cryptography-50.0.2
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: python -m pip install --upgrade pip

@@ -1,0 +1,152 @@
+[
+  {
+    "name": "signature verification disabled",
+    "file": "backend/services/oidc.py",
+    "old": "\"verify_aud\": False",
+    "new": "\"verify_aud\": False, \"verify_signature\": False"
+  },
+  {
+    "name": "expiry verification disabled",
+    "file": "backend/services/oidc.py",
+    "old": "\"verify_aud\": False",
+    "new": "\"verify_aud\": False, \"verify_exp\": False"
+  },
+  {
+    "name": "not-before verification disabled",
+    "file": "backend/services/oidc.py",
+    "old": "\"verify_aud\": False",
+    "new": "\"verify_aud\": False, \"verify_nbf\": False"
+  },
+  {
+    "name": "issuer comparison omitted",
+    "file": "backend/services/oidc.py",
+    "old": "issuer=self.issuer,",
+    "new": "issuer=None,"
+  },
+  {
+    "name": "audience and authorized-party guard omitted",
+    "file": "backend/services/oidc.py",
+    "old": "if self.client_id not in audience and claims.get(\"azp\") != self.client_id:",
+    "new": "if False:"
+  },
+  {
+    "name": "expiry no longer required",
+    "file": "backend/services/oidc.py",
+    "old": "[\"exp\", \"iss\", \"sub\"]",
+    "new": "[\"iss\", \"sub\"]"
+  },
+  {
+    "name": "approved clock skew removed",
+    "file": "backend/services/oidc.py",
+    "old": "leeway=30,",
+    "new": "leeway=0,"
+  },
+  {
+    "name": "first rotation never refreshes",
+    "file": "backend/services/oidc.py",
+    "old": "if not refreshed and now - self._last_unknown >= 5:",
+    "new": "if False:"
+  },
+  {
+    "name": "unknown key IDs trigger unbounded fetches",
+    "file": "backend/services/oidc.py",
+    "old": "if not refreshed and now - self._last_unknown >= 5:",
+    "new": "if not refreshed:"
+  },
+  {
+    "name": "known keys never expire",
+    "file": "backend/services/oidc.py",
+    "old": "keys, now + 300",
+    "new": "keys, float(\"inf\")"
+  },
+  {
+    "name": "JWKS errors are retried without a bound",
+    "file": "backend/services/oidc.py",
+    "old": "if now - self._last_fetch < 5:",
+    "new": "if False:"
+  },
+  {
+    "name": "JWKS follows redirects",
+    "file": "backend/services/oidc.py",
+    "old": "opener(proxy=False).open(self.jwks_url, timeout=5)",
+    "new": "__import__(\"urllib.request\", fromlist=[\"urlopen\"]).urlopen(self.jwks_url, timeout=5)"
+  },
+  {
+    "name": "JWKS uses ambient proxies",
+    "file": "backend/services/oidc.py",
+    "old": "opener(proxy=False)",
+    "new": "opener(proxy=True)"
+  },
+  {
+    "name": "JWKS size allowance grows",
+    "file": "backend/services/oidc.py",
+    "old": "_MAX_JWKS = 262144",
+    "new": "_MAX_JWKS = 1048576"
+  },
+  {
+    "name": "encryption keys become signing keys",
+    "file": "backend/services/oidc.py",
+    "old": "value.get(\"use\", \"sig\") != \"sig\"",
+    "new": "False"
+  },
+  {
+    "name": "weak RSA accepted",
+    "file": "backend/services/oidc.py",
+    "old": "if key.key_size < 2048:",
+    "new": "if False:"
+  },
+  {
+    "name": "private bearer is exposed in error",
+    "file": "backend/services/oidc.py",
+    "old": "\"Identity token expired or could not be verified\"",
+    "new": "\"Identity token expired: \" + token"
+  },
+  {
+    "name": "every identity is an administrator",
+    "file": "backend/services/oidc.py",
+    "old": "administrator = isinstance(roles, list) and \"lab-admin\" in roles",
+    "new": "administrator = True"
+  },
+  {
+    "name": "restricted account is revived",
+    "file": "backend/services/oidc.py",
+    "old": "username=claims[\"preferred_username\"],",
+    "new": "accountStatus=\"ACTIVE\", username=claims[\"preferred_username\"],"
+  },
+  {
+    "name": "restricted account retains platform role",
+    "file": "backend/services/oidc.py",
+    "old": "administrator and profile[\"accountStatus\"] == \"ACTIVE\"",
+    "new": "administrator"
+  },
+  {
+    "name": "download tickets outlive JWT expiry",
+    "file": "backend/services/oidc.py",
+    "old": "min(time.time() + 60, claims[\"exp\"])",
+    "new": "time.time() + 60"
+  },
+  {
+    "name": "OIDC logout leaves download tickets",
+    "file": "backend/services/oidc.py",
+    "old": "self.repository.delete_download_tickets(db, \"oidc:\" + hashlib.sha256(token.encode()).hexdigest())",
+    "new": "pass"
+  },
+  {
+    "name": "cloud factory seeds legacy password accounts",
+    "file": "backend/apps/factory.py",
+    "old": "passwords if auth_mode == \"local\" else {},",
+    "new": "passwords,"
+  },
+  {
+    "name": "cloud local login enabled",
+    "file": "backend/api/auth.py",
+    "old": "if app.state.auth_mode == \"local\":",
+    "new": "if True:"
+  },
+  {
+    "name": "cloud registration/password endpoints enabled",
+    "file": "backend/api/accounts.py",
+    "old": "if app.state.auth_mode == \"oidc\":",
+    "new": "if False:"
+  }
+]

@@ -1,0 +1,13 @@
+frontend/src/api/client.ts 40ms (unchanged)
+frontend/src/api/token.ts 2ms
+frontend/src/app/SessionProvider.tsx 10ms
+frontend/src/app/identity.ts 6ms
+frontend/src/app/runtimeConfig.ts 3ms
+frontend/src/app/router.tsx 11ms
+frontend/src/main.tsx 2ms
+frontend/src/pages/LoginPage.tsx 9ms
+frontend/src/pages/LabProfile.tsx 9ms
+frontend/static/config.json 4ms
+frontend/tests/oidc.test.mjs 9ms
+frontend/vite.config.ts 1ms (unchanged)
+packages/product-ui/src/translations.ts 30ms (unchanged)

@@ -1,0 +1,3 @@
+frontend/tests/oidc.test.mjs 27ms
+scripts/check-web-oidc.mjs 13ms
+scripts/lib/wait-for-counter.mjs 1ms

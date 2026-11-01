@@ -1,0 +1,14 @@
+control ok    | ℹ duration_ms 70.885443
+killed       implicit token flow |   }
+killed       PKCE disabled |   }
+killed       automatic renewal disabled |   }
+killed       user tokens written to session storage |   }
+killed       PKCE state is lost on redirect |   }
+killed       callback URL cleanup omitted |   }
+killed       callback error discloses raw provider error |   }
+killed       expired access token remains active |   }
+killed       OIDC stores access tokens on disk |   }
+killed       OIDC reuses a stale local session |   }
+killed       zero counter is treated as acceptance |   }
+
+11 of 11 mutants killed.

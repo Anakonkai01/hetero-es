@@ -1,0 +1,10 @@
+{
+  "phase": "memory-only SSO reload",
+  "errorType": "AssertionError",
+  "checks": [
+    "OIDC UI has identity login and no local password form",
+    "real library Code+PKCE returns to /lab with callback query erased",
+    "access/refresh tokens absent from localStorage and sessionStorage",
+    "automatic silent renewal uses a real refresh grant"
+  ]
+}

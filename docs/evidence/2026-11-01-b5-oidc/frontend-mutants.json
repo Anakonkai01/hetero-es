@@ -1,0 +1,68 @@
+[
+  {
+    "name": "implicit token flow",
+    "file": "frontend/src/app/identity.ts",
+    "old": "response_type: 'code'",
+    "new": "response_type: 'token'"
+  },
+  {
+    "name": "PKCE disabled",
+    "file": "frontend/src/app/identity.ts",
+    "old": "disablePKCE: false",
+    "new": "disablePKCE: true"
+  },
+  {
+    "name": "automatic renewal disabled",
+    "file": "frontend/src/app/identity.ts",
+    "old": "automaticSilentRenew: true",
+    "new": "automaticSilentRenew: false"
+  },
+  {
+    "name": "user tokens written to session storage",
+    "file": "frontend/src/app/identity.ts",
+    "old": "store: new InMemoryWebStorage()",
+    "new": "store: storage"
+  },
+  {
+    "name": "PKCE state is lost on redirect",
+    "file": "frontend/src/app/identity.ts",
+    "old": "stateStore: new WebStorageStateStore({ store: storage })",
+    "new": "stateStore: new WebStorageStateStore({ store: new InMemoryWebStorage() })"
+  },
+  {
+    "name": "callback URL cleanup omitted",
+    "file": "frontend/src/app/identity.ts",
+    "old": "browser.history.replaceState(null, '', config.basePath + (complete ? 'workspace' : 'login'));",
+    "new": "void complete;"
+  },
+  {
+    "name": "callback error discloses raw provider error",
+    "file": "frontend/src/app/identity.ts",
+    "old": "throw new Error('Identity sign-in could not complete');",
+    "new": "throw new Error('private-code');"
+  },
+  {
+    "name": "expired access token remains active",
+    "file": "frontend/src/app/identity.ts",
+    "old": "identity.events.addAccessTokenExpired(() => publish(''));",
+    "new": "identity.events.addAccessTokenExpired(() => {});"
+  },
+  {
+    "name": "OIDC stores access tokens on disk",
+    "file": "frontend/src/api/token.ts",
+    "old": "persistentStorage = mode === 'local' ? storage : undefined;",
+    "new": "persistentStorage = storage;"
+  },
+  {
+    "name": "OIDC reuses a stale local session",
+    "file": "frontend/src/api/token.ts",
+    "old": "accessToken = mode === 'local' ? (storage.getItem(TOKEN_KEY) ?? '') : '';",
+    "new": "accessToken = storage.getItem(TOKEN_KEY) ?? '';"
+  },
+  {
+    "name": "zero counter is treated as acceptance",
+    "file": "scripts/lib/wait-for-counter.mjs",
+    "old": "typeof receipt[name] === 'number' && receipt[name] >= minimum",
+    "new": "typeof receipt[name] === 'number'"
+  }
+]
