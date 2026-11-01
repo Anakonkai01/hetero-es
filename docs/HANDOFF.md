@@ -60,7 +60,10 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   unchanged. Seven initial surviving mutants led to nine independent guard regressions (B-005).
   Evidence `2026-11-01-b2-devices-agents`. Studies/models/qualification extracted: 489 backend tests, 15/15 mutants;
   six request contracts preserve their ASTs, 13 HTTP adapters and 31 SQL/write-boundary calls separated.
-  Evidence `2026-11-01-b2-studies-qualification`. Storage, operations and remaining Store work, B3–B10 and C remain.
+  Evidence `2026-11-01-b2-studies-qualification`. Storage extracted: 492 backend tests, 17/17 mutants;
+  recovery/ticket business and SQL, filesystem HTTP streaming, metadata snapshots and atomic publication separated.
+  Original tests and instrumentation namespace preserved. Evidence `2026-11-01-b2-storage`.
+  Operations/platform, application/core and remaining Store/diagnostic SQL work, B3–B10 and C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
