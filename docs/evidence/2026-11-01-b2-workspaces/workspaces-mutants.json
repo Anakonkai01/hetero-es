@@ -1,0 +1,38 @@
+[
+  {
+    "name": "workspace creation permission ignored",
+    "file": "backend/services/workspaces.py",
+    "old": "if not current.get(\"canCreateWorkspace\"):",
+    "new": "if False:"
+  },
+  {
+    "name": "workspace listing permission ignored",
+    "file": "backend/services/workspaces.py",
+    "old": "# a listed workspace appears in every active user's list and accepts join requests\n        workspace_admin(workspace_id, current)",
+    "new": "# a listed workspace appears in every active user's list and accepts join requests\n        pass"
+  },
+  {
+    "name": "rejected join still grants membership",
+    "file": "backend/services/workspaces.py",
+    "old": "if body.approve:",
+    "new": "if True:"
+  },
+  {
+    "name": "invitation accepted by another user",
+    "file": "backend/repositories/workspaces.py",
+    "old": "SELECT * FROM invitations WHERE id=? AND user_id=?",
+    "new": "SELECT * FROM invitations WHERE id=? AND ? IS NOT NULL"
+  },
+  {
+    "name": "membership removal leaves owned runs active",
+    "file": "backend/services/workspaces.py",
+    "old": "store.cancel_owned(db, user_id, workspace_id)",
+    "new": "pass"
+  },
+  {
+    "name": "driver constraint error escapes repository",
+    "file": "backend/repositories/base.py",
+    "old": "raise DatabaseConflict from None",
+    "new": "raise"
+  }
+]

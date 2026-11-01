@@ -1,0 +1,189 @@
+{
+  "sqlCalls": 30,
+  "businessFunctions": 17,
+  "httpFunctions": 13,
+  "businessAST": "identical except repository calls, plain service/conflict errors, dependency parameters and HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "create_workspace_insert_workspaces",
+      "scope": "create_workspace",
+      "sql": "INSERT INTO workspaces VALUES (?,?,?,?)",
+      "line": 27
+    },
+    {
+      "name": "create_workspace_insert_memberships",
+      "scope": "create_workspace",
+      "sql": "INSERT INTO memberships VALUES (?,?,?)",
+      "line": 28
+    },
+    {
+      "name": "invite_insert_invitations",
+      "scope": "invite",
+      "sql": "INSERT INTO invitations VALUES (?,?,?,?,?)",
+      "line": 53
+    },
+    {
+      "name": "invite_select_users",
+      "scope": "invite",
+      "sql": "SELECT id,profile FROM users WHERE json_extract(profile,'$.username')=?",
+      "line": 42
+    },
+    {
+      "name": "invite_select_memberships",
+      "scope": "invite",
+      "sql": "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?",
+      "line": 47
+    },
+    {
+      "name": "coordinator_devices_select_devices",
+      "scope": "coordinator_devices",
+      "sql": "SELECT d.id,d.self_test FROM devices d JOIN worker_assignments a ON a.worker_id=d.worker_id WHERE d.status=\"APPROVED\" AND a.workspace_id=?",
+      "line": 64
+    },
+    {
+      "name": "settings_select_workspace_settings",
+      "scope": "settings",
+      "sql": "SELECT body FROM workspace_settings WHERE workspace_id=?",
+      "line": 72
+    },
+    {
+      "name": "save_settings_insert_workspace_settings",
+      "scope": "save_settings",
+      "sql": "INSERT OR REPLACE INTO workspace_settings VALUES (?,?)",
+      "line": 77
+    },
+    {
+      "name": "listed_workspaces_select_workspaces",
+      "scope": "listed_workspaces",
+      "sql": "SELECT w.* FROM workspaces w ORDER BY w.rowid",
+      "line": 109
+    },
+    {
+      "name": "listed_workspaces_select_memberships",
+      "scope": "listed_workspaces",
+      "sql": "SELECT workspace_id FROM memberships WHERE user_id=?",
+      "line": 111
+    },
+    {
+      "name": "listed_workspaces_select_join_requests",
+      "scope": "listed_workspaces",
+      "sql": "SELECT workspace_id FROM join_requests WHERE user_id=? AND status=\"PENDING\"",
+      "line": 115
+    },
+    {
+      "name": "ask_to_join_insert_join_requests",
+      "scope": "ask_to_join",
+      "sql": "INSERT INTO join_requests VALUES (?,?,?,?,?)",
+      "line": 144
+    },
+    {
+      "name": "ask_to_join_select_memberships",
+      "scope": "ask_to_join",
+      "sql": "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?",
+      "line": 138
+    },
+    {
+      "name": "ask_to_join_select_workspaces",
+      "scope": "ask_to_join",
+      "sql": "SELECT 1 FROM workspaces WHERE id=?",
+      "line": 134
+    },
+    {
+      "name": "join_requests_select_join_requests",
+      "scope": "join_requests",
+      "sql": "SELECT j.*,u.profile FROM join_requests j JOIN users u ON u.id=j.user_id WHERE j.workspace_id=? AND j.status=\"PENDING\" ORDER BY j.rowid",
+      "line": 165
+    },
+    {
+      "name": "decide_join_update_join_requests",
+      "scope": "decide_join",
+      "sql": "UPDATE join_requests SET status=? WHERE id=?",
+      "line": 185
+    },
+    {
+      "name": "decide_join_insert_memberships",
+      "scope": "decide_join",
+      "sql": "INSERT OR IGNORE INTO memberships VALUES (?,?,?)",
+      "line": 182
+    },
+    {
+      "name": "decide_join_select_join_requests",
+      "scope": "decide_join",
+      "sql": "SELECT * FROM join_requests WHERE id=? AND workspace_id=?",
+      "line": 175
+    },
+    {
+      "name": "invitations_select_invitations",
+      "scope": "invitations",
+      "sql": "SELECT i.*,w.name FROM invitations i JOIN workspaces w ON w.id=i.workspace_id WHERE i.user_id=? AND i.status=\"PENDING\"",
+      "line": 202
+    },
+    {
+      "name": "accept_insert_memberships",
+      "scope": "accept",
+      "sql": "INSERT OR IGNORE INTO memberships VALUES (?,?,?)",
+      "line": 217
+    },
+    {
+      "name": "accept_update_invitations",
+      "scope": "accept",
+      "sql": "UPDATE invitations SET status=\"ACCEPTED\" WHERE id=?",
+      "line": 221
+    },
+    {
+      "name": "accept_select_invitations",
+      "scope": "accept",
+      "sql": "SELECT * FROM invitations WHERE id=? AND user_id=?",
+      "line": 212
+    },
+    {
+      "name": "member_change_update_memberships",
+      "scope": "member_change",
+      "sql": "UPDATE memberships SET role=? WHERE workspace_id=? AND user_id=?",
+      "line": 242
+    },
+    {
+      "name": "member_change_delete_memberships",
+      "scope": "member_change",
+      "sql": "DELETE FROM memberships WHERE workspace_id=? AND user_id=?",
+      "line": 246
+    },
+    {
+      "name": "member_change_update_invitations",
+      "scope": "member_change",
+      "sql": "UPDATE invitations SET status=\"REVOKED\" WHERE workspace_id=? AND user_id=? AND status=\"PENDING\"",
+      "line": 247
+    },
+    {
+      "name": "member_change_select_memberships",
+      "scope": "member_change",
+      "sql": "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?",
+      "line": 227
+    },
+    {
+      "name": "member_change_select_worker_assignments",
+      "scope": "member_change",
+      "sql": "SELECT worker_id FROM worker_assignments WHERE owner=? AND workspace_id=?",
+      "line": 253
+    },
+    {
+      "name": "member_change_select_memberships_2",
+      "scope": "member_change",
+      "sql": "SELECT count(*) FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=? AND m.role='ADMIN' AND m.user_id<>? AND json_extract(u.profile,'$.accountStatus')='ACTIVE'",
+      "line": 233
+    },
+    {
+      "name": "queue_select_experiments",
+      "scope": "queue",
+      "sql": "SELECT body FROM experiments",
+      "line": 281
+    },
+    {
+      "name": "queue_select_queue",
+      "scope": "queue",
+      "sql": "SELECT run_id FROM queue ORDER BY sequence",
+      "line": 278
+    }
+  ]
+}

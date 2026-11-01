@@ -1,0 +1,9 @@
+control ok    | 27 passed, 1 warning in 6.02s
+killed       workspace creation permission ignored | 1 failed, 4 passed, 1 warning in 0.43s
+killed       workspace listing permission ignored | 1 failed, 14 passed, 1 warning in 3.44s
+killed       rejected join still grants membership | 1 failed, 13 passed, 1 warning in 3.22s
+killed       invitation accepted by another user | 1 failed, 6 passed, 1 warning in 1.13s
+killed       membership removal leaves owned runs active | 1 failed, 6 passed, 1 warning in 1.13s
+killed       driver constraint error escapes repository | 1 failed, 3 passed, 1 warning in 0.11s
+
+6 of 6 mutants killed.
