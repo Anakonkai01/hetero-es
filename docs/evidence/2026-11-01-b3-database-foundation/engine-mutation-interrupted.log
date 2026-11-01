@@ -1,0 +1,4 @@
+control ok    | 12 passed, 1 warning in 0.73s
+killed       PostgreSQL does not acquire root serialization lock | 1 failed, 11 passed, 1 warning in 0.54s
+killed       SQLite writer starts deferred | 1 failed, 11 passed, 1 warning in 0.53s
+killed       successful transaction rolls back | 5 failed, 1 passed, 1 warning, 6 errors in 1.45s

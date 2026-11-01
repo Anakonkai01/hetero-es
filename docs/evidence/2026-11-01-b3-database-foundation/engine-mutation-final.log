@@ -1,0 +1,9 @@
+control ok    | 12 passed, 1 warning in 0.70s
+killed       PostgreSQL does not acquire root serialization lock | 1 failed, 11 passed, 1 warning in 0.56s
+killed       SQLite writer starts deferred | 1 failed, 11 passed, 1 warning in 0.51s
+killed       successful transaction rolls back | 5 failed, 1 passed, 1 warning, 6 errors in 1.42s
+killed       nested calls allocate a second transaction | 4 failed, 8 passed, 1 warning in 45.14s
+killed       handled nested failure permits partial commit | 2 failed, 10 passed, 1 warning in 0.73s
+killed       borrowed connection stays valid after scope | 2 failed, 10 passed, 1 warning in 0.83s
+
+6 of 6 mutants killed.

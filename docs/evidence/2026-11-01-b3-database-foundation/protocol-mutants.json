@@ -1,0 +1,38 @@
+[
+  {
+    "name": "boolean binding loses integer representation",
+    "file": "backend/db/bindings.py",
+    "old": "int(value) if isinstance(value, bool) else value",
+    "new": "value"
+  },
+  {
+    "name": "SQL literal question marks treated as binds",
+    "file": "backend/db/bindings.py",
+    "old": "if char in {\"'\", '\"'}:",
+    "new": "if False:"
+  },
+  {
+    "name": "wrong binding count ignored",
+    "file": "backend/db/bindings.py",
+    "old": "if set(values) != expected:",
+    "new": "if False:"
+  },
+  {
+    "name": "row iterates column names instead of values",
+    "file": "backend/db/rows.py",
+    "old": "return iter(self._values)",
+    "new": "return iter(self._keys)"
+  },
+  {
+    "name": "duplicate names resolve the final column",
+    "file": "backend/db/rows.py",
+    "old": "self._positions.setdefault(key.lower() if key.isascii() else key, index)",
+    "new": "self._positions[key.lower() if key.isascii() else key] = index"
+  },
+  {
+    "name": "DML rowcount is discarded",
+    "file": "backend/db/rows.py",
+    "old": "return self._result.rowcount",
+    "new": "return 0"
+  }
+]

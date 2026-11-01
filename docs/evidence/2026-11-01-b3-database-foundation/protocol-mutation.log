@@ -1,0 +1,9 @@
+control ok    | 12 passed, 1 warning in 0.08s
+killed       boolean binding loses integer representation | 1 failed, 11 passed, 1 warning in 0.09s
+killed       SQL literal question marks treated as binds | 1 failed, 11 passed, 1 warning in 0.09s
+killed       wrong binding count ignored | 3 failed, 9 passed, 1 warning in 0.10s
+killed       row iterates column names instead of values | 3 failed, 9 passed, 1 warning in 0.09s
+killed       duplicate names resolve the final column | 1 failed, 11 passed, 1 warning in 0.09s
+killed       DML rowcount is discarded | 1 failed, 11 passed, 1 warning in 0.09s
+
+6 of 6 mutants killed.

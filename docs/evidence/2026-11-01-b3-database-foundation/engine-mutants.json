@@ -1,0 +1,38 @@
+[
+  {
+    "name": "PostgreSQL does not acquire root serialization lock",
+    "file": "backend/db/engine.py",
+    "old": "if self.dialect == \"postgresql\" and writable:",
+    "new": "if False:"
+  },
+  {
+    "name": "SQLite writer starts deferred",
+    "file": "backend/db/engine.py",
+    "old": "\"BEGIN IMMEDIATE\" if connection.info.get(\"heteroes_write\", True) else \"BEGIN\"",
+    "new": "\"BEGIN\""
+  },
+  {
+    "name": "successful transaction rolls back",
+    "file": "backend/db/engine.py",
+    "old": "transaction.commit()",
+    "new": "transaction.rollback()"
+  },
+  {
+    "name": "nested calls allocate a second transaction",
+    "file": "backend/db/engine.py",
+    "old": "if existing is not None:",
+    "new": "if False:"
+  },
+  {
+    "name": "handled nested failure permits partial commit",
+    "file": "backend/db/engine.py",
+    "old": "existing.rollback_only = True",
+    "new": "existing.rollback_only = False"
+  },
+  {
+    "name": "borrowed connection stays valid after scope",
+    "file": "backend/db/engine.py",
+    "old": "borrowed.closed = True",
+    "new": "borrowed.closed = False"
+  }
+]

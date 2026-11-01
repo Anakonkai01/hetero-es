@@ -1,0 +1,11 @@
+{
+  "backend/db/bindings.py": "fdb8d8d0baae83be908d8b280a29bed7411acbb4faa3b8f04d7060dea9b90d73",
+  "backend/db/rows.py": "1e15c3d19a26af73d9f57ef453e1dd6f8bf6cdbec4be5b765745a1ae560d8bb2",
+  "backend/db/engine.py": "30852bfc131519d567eeb6d30af5ae55efcdd5a820b7db76d5e6cd3eec338ee5",
+  "backend/tests/test_database_protocol.py": "686171f8ddfcf85fab79e3f96e03815c9a0207b17a97f1a2bb761af05d887ba9",
+  "backend/tests/test_database_engine.py": "247a4c9b8065d0d66c1584a28a8a5cdc9b523af66f450516a34d3519dd89c8bf",
+  "backend/requirements.txt": "dd421e098664c93b3dc634d27718d8bcb0818f5ee8aa9e77e789c3a211e5c687",
+  "backend/requirements.lock.txt": "29c406f0c37260c4330ac2e2c34f36452d0913649b8a4ea91144782b2e490787",
+  "backend/requirements-cloud.txt": "89f50832bd91937e51a0393d097bd72f7657230032ea893e310f0bbd03def959",
+  "backend/requirements-cloud.lock.txt": "bff894c0c3c9b19d6b7088049bb77c341e021b197e7eab18a354fb5e89f5f089"
+}
