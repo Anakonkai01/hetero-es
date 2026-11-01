@@ -14,7 +14,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
 - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
-- **Phần B đã xong B1–B5:** backend chia lớp, Postgres, service riêng và OIDC. Tiếp theo là S3/MinIO, metrics/log,
+- **Phần B đã xong B1–B6:** backend chia lớp, Postgres, service riêng, OIDC và S3/MinIO. Tiếp theo là metrics/log,
   router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
@@ -105,6 +105,16 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   a collection-time test clock and a missing packaged http_safety dependency; both are corrected with assertions intact.
   A local factory/HTTP probe passes with optional cloud/GPU imports forbidden. Evidence `2026-11-01-b5-oidc`.
   This is generated-key protocol/browser acceptance, not deployment of a real Keycloak realm. B6–B10 and all C remain.
+  B6 complete: production S3Backend uses separate internal/private device clients, SigV4/path addressing, three explicit
+  buckets and byte quotas including incomplete multipart parts. Dataset/model APIs and frozen device grants select
+  their proper bucket. The bounded public dataset proxy preserves private bulk transfer, scoped capabilities and
+  streaming cleanup; local storage accepts both metadata payload formats. S3 service union remains111 product pairs.
+  Full actual-MinIO-enabled SQLite627 / PostgreSQL652, zero skips; PG audit403 PG +48 explicit SQLite Stores. Production
+  S3 pg_dump upload/download/fresh restore passes with sessions revoked, reservations retained and dispatch held.
+  Mutation: config8/8 and actual-PG/MinIO I/O21/21 killed; one initial private-origin mutant is equivalent because the
+  signer independently enforces the same rule (separate probe retained). B-012/013 format/header-coverage issues fixed.
+  Evidence `2026-11-01-b6-s3-minio`; source-package imports and lint/format pass. B7–B10 and all C remain, including the
+  environment-only overlay, packaged Python dependencies and real Keycloak/GPU/deployment acceptance.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
@@ -113,7 +123,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Remaining scope and limits
 
-- B1–B5 are complete. Execute B6–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+- B1–B6 are complete. Execute B7–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.

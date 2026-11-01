@@ -19,7 +19,7 @@ from ..core.errors import ServiceError
 
 KEY = re.compile(
     r"(?:uploads/[a-f0-9]{64}/[a-f0-9]{32}|objects/[a-f0-9]{64}|"
-    r"manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.sqlite|manifest\.json))"
+    r"manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.(?:sqlite|pgdump)|manifest\.json))"
 )
 
 

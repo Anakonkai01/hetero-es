@@ -94,9 +94,14 @@ def create_app(
                 await run_in_threadpool(metadata_thread.join)
             if dispatcher_started:
                 await run_in_threadpool(thread.join)
-            store.close()
-            if writer_lock is not None:
-                writer_lock.close()
+            try:
+                storage_backend = getattr(runtime, "storage_backend", None)
+                if hasattr(storage_backend, "close"):
+                    await run_in_threadpool(storage_backend.close)
+            finally:
+                store.close()
+                if writer_lock is not None:
+                    writer_lock.close()
 
     # The interactive documentation lists every route: keep it for development, not for a served lab.
     private_docs = (
@@ -222,8 +227,8 @@ def app_from_environment(*, service=None):
 def _app_from_config(root, credentials, config, writer, *, service="all", database_url=None):
     if config.get("deploymentMode") != "agent":
         raise ValueError("Only agent deployment mode is supported")
-    if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
-        raise ValueError("Only local recovery storage is supported")
+    if config.get("storageMode") not in (None, "local", "s3") or config.get("storageFile"):
+        raise ValueError("Use local or S3 recovery storage configuration")
     from ..services.devices import AgentRuntime
 
     storage_backend = None
@@ -237,6 +242,11 @@ def _app_from_config(root, credentials, config, writer, *, service="all", databa
             config.get("storageVolumeUUID"),
             config.get("metadataStorageDirectory"),
         )
+        storage_backend.quota_bytes = config.get("storageQuotaBytes", 200_000_000_000)
+    elif config.get("storageMode") == "s3":
+        from ..storage.s3_backend import S3Backend
+
+        storage_backend = S3Backend(config["s3"])
         storage_backend.quota_bytes = config.get("storageQuotaBytes", 200_000_000_000)
     runtime = AgentRuntime(storage_backend)
     runtime.server_instance_id = config.get("serverInstanceId")

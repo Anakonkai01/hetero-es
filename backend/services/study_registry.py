@@ -49,10 +49,11 @@ class Registry:
 
 
 def operations(registry, runtime, scoped, device_auth):
-    def backend():
+    def backend(purpose="recovery"):
         if runtime.storage_backend is None:
             raise ServiceError(409, "Configure local artifact storage first")
-        return runtime.storage_backend
+        value = runtime.storage_backend
+        return value.for_purpose(purpose) if hasattr(value, "for_purpose") else value
 
     def import_data(body: ImportData, *, current):
         try:
@@ -67,7 +68,7 @@ def operations(registry, runtime, scoped, device_auth):
         if len(payload) > 10_000_000:
             raise ServiceError(422, "Dataset document exceeds 10 MB")
         digest = hashlib.sha256(payload).hexdigest()
-        store_backend = backend()
+        store_backend = backend("datasets")
         if hasattr(store_backend, "inventory") and store_backend.inventory() + len(payload) > getattr(
             store_backend, "quota_bytes", 200_000_000_000
         ):
@@ -116,7 +117,7 @@ def operations(registry, runtime, scoped, device_auth):
             raise ServiceError(
                 422, f"Give one file or three splits (.jsonl, .csv or .json) of at most {limits['maxBytes']} bytes"
             )
-        b = backend()
+        b = backend("datasets")
         if hasattr(b, "inventory") and b.inventory() + 3 * sum(f["sizeBytes"] for f in body.files.values()) > getattr(
             b, "quota_bytes", 200_000_000_000
         ):
@@ -141,7 +142,7 @@ def operations(registry, runtime, scoped, device_auth):
         mapping = body.mapping or {"prompt": "prompt"}
         if set(mapping) != {"prompt"} or not isinstance(mapping["prompt"], str) or not mapping["prompt"]:
             raise ServiceError(422, "Map the prompt field; the scorer selects its other columns")
-        limits, b = dataset_limits(registry.store), backend()
+        limits, b = dataset_limits(registry.store), backend("datasets")
         work = Path(tempfile.mkdtemp(prefix=".dataset-build-", dir=b.root))
         try:
             sources = {}
@@ -298,11 +299,12 @@ def operations(registry, runtime, scoped, device_auth):
             sha = body.get("sha256")
             if sha not in allowed or not isinstance(sha, str):
                 raise ServiceError(403, "Object is outside the frozen assignment")
-        grant = {"url": backend().download_url("objects/" + sha), "sha256": sha}
+        selected = backend("datasets" if sha in datasets else "recovery")
+        grant = {"url": selected.download_url("objects/" + sha), "sha256": sha}
         public = runtime.public_web_url()
         if public and sha in datasets:
             # for a device that cannot reach the private route (no Tailscale): small dataset files only
-            if url := backend().public_study_url(public, "objects/" + sha):
+            if url := selected.public_study_url(public, "objects/" + sha):
                 grant["publicUrl"] = url
         return grant
 
