@@ -1,0 +1,15 @@
+control ok    | 48 passed, 1 warning in 9.62s
+killed       administrator may remove own access | 4 failed, 44 passed, 1 warning in 9.73s
+killed       suspension preserves sessions and queued work | 1 failed, 47 passed, 1 warning in 9.83s
+killed       administrator revokes own current session | 1 failed, 47 passed, 1 warning in 9.66s
+killed       maintenance resumes unknown imported workers | 1 failed, 47 passed, 1 warning in 9.81s
+killed       resume leaves admission held | 1 failed, 47 passed, 1 warning in 9.75s
+killed       resume leaves stale maintenance flags | 1 failed, 47 passed, 1 warning in 9.87s
+killed       public health leaks private control address | 1 failed, 47 passed, 1 warning in 9.47s
+killed       disabled workers are forgotten | 2 failed, 46 passed, 1 warning in 9.40s
+killed       unknown process state counts as stopped | 1 failed, 47 passed, 1 warning in 9.41s
+killed       physical or probe ownership ignored | 1 failed, 47 passed, 1 warning in 9.41s
+killed       missing coordinator is not validated | 1 failed, 47 passed, 1 warning in 9.39s
+killed       legacy validation changes HTTP status | 7 failed, 41 passed, 1 warning in 9.45s
+
+12 of 12 mutants killed.

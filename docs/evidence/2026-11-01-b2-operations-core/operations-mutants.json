@@ -1,0 +1,74 @@
+[
+  {
+    "name": "administrator may remove own access",
+    "file": "backend/services/operations.py",
+    "old": "if user_id == current[\"userId\"] and (",
+    "new": "if False and ("
+  },
+  {
+    "name": "suspension preserves sessions and queued work",
+    "file": "backend/services/operations.py",
+    "old": "if updated[\"accountStatus\"] != \"ACTIVE\":",
+    "new": "if False:"
+  },
+  {
+    "name": "administrator revokes own current session",
+    "file": "backend/services/operations.py",
+    "old": "if user_id == current[\"userId\"]:",
+    "new": "if False:"
+  },
+  {
+    "name": "maintenance resumes unknown imported workers",
+    "file": "backend/services/operations.py",
+    "old": "if not selected <= set(cap[\"workerIds\"]):",
+    "new": "if False:"
+  },
+  {
+    "name": "resume leaves admission held",
+    "file": "backend/repositories/operations.py",
+    "old": "UPDATE settings SET value=\"false\" WHERE key=\"dispatchHold\"",
+    "new": "UPDATE settings SET value=\"true\" WHERE key=\"dispatchHold\""
+  },
+  {
+    "name": "resume leaves stale maintenance flags",
+    "file": "backend/repositories/operations.py",
+    "old": "DELETE FROM settings WHERE key IN (\"maintenanceId\",\"agentMaintenance\")",
+    "new": "DELETE FROM settings WHERE key IN (\"unused-fixture-key\",\"another-unused-key\")"
+  },
+  {
+    "name": "public health leaks private control address",
+    "file": "backend/services/inventory.py",
+    "old": "\"serverInstanceId\": getattr(runtime, \"server_instance_id\", None),",
+    "new": "\"serverInstanceId\": getattr(runtime, \"server_instance_id\", None), \"privateLabUrl\": _private_config().get(\"apiUrl\"),"
+  },
+  {
+    "name": "disabled workers are forgotten",
+    "file": "backend/services/policies.py",
+    "old": "json.dumps(sorted(workers))",
+    "new": "json.dumps([])"
+  },
+  {
+    "name": "unknown process state counts as stopped",
+    "file": "backend/services/policies.py",
+    "old": "p.get(\"coordinatorAlive\") is False and p.get(\"workerAlive\") is False",
+    "new": "p.get(\"coordinatorAlive\") is not True and p.get(\"workerAlive\") is not True"
+  },
+  {
+    "name": "physical or probe ownership ignored",
+    "file": "backend/services/policies.py",
+    "old": "return bool(reserved or physical or probe)",
+    "new": "return bool(reserved)"
+  },
+  {
+    "name": "missing coordinator is not validated",
+    "file": "backend/services/validation.py",
+    "old": "not co\n        or co[\"approvalStatus\"] != \"APPROVED\"",
+    "new": "False\n        or co[\"approvalStatus\"] != \"APPROVED\""
+  },
+  {
+    "name": "legacy validation changes HTTP status",
+    "file": "backend/api/validation.py",
+    "old": "HTTPException(error.status_code, error.detail, headers=error.headers)",
+    "new": "HTTPException(400, error.detail, headers=error.headers)"
+  }
+]

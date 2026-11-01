@@ -1,0 +1,27 @@
+{
+  "domain": "inventory",
+  "sqlCalls": 2,
+  "businessFunctions": 7,
+  "httpFunctions": 7,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "get_capabilities_select_workspace_settings",
+      "scope": "get_capabilities",
+      "statement": "\"SELECT json_extract(body,'$.defaultCoordinatorDeviceId') FROM workspace_settings WHERE workspace_id=?\"",
+      "dynamic": false,
+      "free": [],
+      "line": 65
+    },
+    {
+      "name": "resources_select_memberships",
+      "scope": "resources",
+      "statement": "'SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 94
+    }
+  ]
+}

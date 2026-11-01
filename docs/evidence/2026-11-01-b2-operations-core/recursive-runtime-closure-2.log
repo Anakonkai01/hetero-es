@@ -1,0 +1,7 @@
+{
+  "originalFile": "backend/tests/test_shared_runtime.py",
+  "originalSha256": "ef0d4ba5276e834efa87272fc3998d8b655348c167657b4dd5bb2d52d2970dd1",
+  "originalUnmodified": true,
+  "scratchTransform": "recursive production backend traversal, tests excluded as in packaging; bare-package resolver added; every original assertion preserved",
+  "result": "PASS"
+}

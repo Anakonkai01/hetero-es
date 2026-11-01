@@ -1,0 +1,22 @@
+........................................................................ [ 14%]
+........................................................................ [ 29%]
+........................................................................ [ 43%]
+........................................................................ [ 58%]
+........................................................................ [ 72%]
+......................F................................................. [ 87%]
+................................................................         [100%]
+=================================== FAILURES ===================================
+_ test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs __
+backend/tests/test_shared_runtime.py:90: in test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs
+    assert "catalog.py" in needed  # premise: the scan sees the backend's use of the catalog
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert 'catalog.py' in {'product/telemetry.py', 'v3/options.py', 'v3/scoring.py'}
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_shared_runtime.py::test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs
+1 failed, 495 passed, 1 warning in 76.23s (0:01:16)

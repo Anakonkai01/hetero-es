@@ -1,0 +1,48 @@
+{
+  "base": "9d7d481b",
+  "proof": [
+    {
+      "module": "config",
+      "AST": "identical except Strict import where needed",
+      "bytesIdentical": true
+    },
+    {
+      "module": "addresses",
+      "AST": "identical except Strict import where needed",
+      "bytesIdentical": true
+    },
+    {
+      "module": "request_models",
+      "AST": "identical except Strict import where needed",
+      "bytesIdentical": false
+    },
+    {
+      "module": "monitor_models",
+      "AST": "identical except Strict import where needed",
+      "bytesIdentical": true
+    },
+    {
+      "module": "throttle",
+      "AST": "identical except Strict import where needed",
+      "bytesIdentical": true
+    },
+    {
+      "class": "RuntimeRejected",
+      "AST": "identical"
+    },
+    {
+      "module": "policies",
+      "functions": 14,
+      "sqlCalls": 5,
+      "bodyAST": "same except repository forwarding/plain service error class",
+      "legacyValidationError": null
+    },
+    {
+      "module": "validation",
+      "functions": 2,
+      "sqlCalls": 0,
+      "bodyAST": "same except repository forwarding/plain service error class",
+      "legacyValidationError": "HTTP boundary wrapper keeps old direct caller contract"
+    }
+  ]
+}

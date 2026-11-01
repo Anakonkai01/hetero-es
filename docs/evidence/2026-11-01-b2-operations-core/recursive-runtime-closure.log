@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B2/check-recursive-runtime-closure.py", line 12, in <module>
+    scope['test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs']()
+  File "/home/pc5070ti/projects/heteroes/backend/tests/test_shared_runtime.py", line 78, in test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs
+    needed |= {file_of(m) for m in _runtime_imports(path, "backend")} - {None}
+               ^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/backend/tests/test_shared_runtime.py", line 71, in file_of
+    for candidate in (relative.with_suffix(".py"), relative / "__init__.py"):
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/ai/lib/python3.12/pathlib.py", line 654, in with_suffix
+    raise ValueError("%r has an empty name" % (self,))
+ValueError: PosixPath('.') has an empty name

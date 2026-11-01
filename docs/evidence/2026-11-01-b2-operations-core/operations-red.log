@@ -1,0 +1,34 @@
+FF..F...                                                                 [100%]
+=================================== FAILURES ===================================
+___ test_shared_authorization_uses_plain_errors_and_rechecks_durable_access ____
+backend/tests/test_operations_layers.py:16: in test_shared_authorization_uses_plain_errors_and_rechecks_durable_access
+    active_profile(store, {"userId": "missing"})
+backend/policies.py:34: in active_profile
+    raise HTTPException(403, message)
+E   fastapi.exceptions.HTTPException: 403: Active account required
+_ test_configuration_service_errors_and_legacy_http_errors_keep_the_same_contract _
+backend/tests/test_operations_layers.py:26: in test_configuration_service_errors_and_legacy_http_errors_keep_the_same_contract
+    from backend.services.validation import validate_configuration
+E   ModuleNotFoundError: No module named 'backend.services.validation'
+________________________ test_account_layer_boundaries _________________________
+backend/tests/test_account_layers.py:94: in test_account_layer_boundaries
+    tree = ast.parse((backend / relative).read_text())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/backend/api/operations.py'
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_operations_layers.py::test_shared_authorization_uses_plain_errors_and_rechecks_durable_access
+FAILED backend/tests/test_operations_layers.py::test_configuration_service_errors_and_legacy_http_errors_keep_the_same_contract
+FAILED backend/tests/test_account_layers.py::test_account_layer_boundaries - ...
+3 failed, 5 passed, 1 warning in 0.26s

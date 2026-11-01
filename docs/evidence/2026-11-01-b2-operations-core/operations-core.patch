@@ -1,0 +1,2579 @@
+diff --git a/backend/addresses.py b/backend/addresses.py
+index 3b02961e..62473aa2 100644
+--- a/backend/addresses.py
++++ b/backend/addresses.py
+@@ -1,52 +1,6 @@
+-"""Separate authenticated control endpoints from private bulk transfer origins."""
++"""Compatibility namespace retained during core extraction."""
+ 
+-import ipaddress
+-import re
+-from urllib.parse import urlsplit
++import sys
++from .core import addresses as _implementation
+ 
+-
+-def endpoint(value, *, private=False):
+-    if not isinstance(value, str) or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in value):
+-        raise ValueError("Endpoint cannot contain whitespace or control characters")
+-    parsed = urlsplit(value)
+-    try:
+-        port = parsed.port
+-    except ValueError:
+-        raise ValueError("Invalid endpoint port") from None
+-    if (
+-        parsed.scheme not in ("http", "https")
+-        or not parsed.hostname
+-        or parsed.username
+-        or parsed.password
+-        or parsed.query
+-        or parsed.fragment
+-        or parsed.path not in ("", "/")
+-        or (port is not None and not 1 <= port <= 65535)
+-    ):
+-        raise ValueError("Use an endpoint origin without credentials, path or query")
+-    try:
+-        address = ipaddress.ip_address(parsed.hostname)
+-    except ValueError:
+-        if private:
+-            raise ValueError("Use a numeric private/Tailscale address") from None
+-        if parsed.scheme != "https" or not re.fullmatch(
+-            r"(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}", parsed.hostname
+-        ):
+-            raise ValueError("Public control requires an HTTPS hostname")
+-    else:
+-        allowed = (address.is_private or address in ipaddress.ip_network("100.64.0.0/10")) and not (
+-            address.is_unspecified or address.is_multicast or (address.is_reserved and not address.is_loopback)
+-        )
+-        if private and not allowed:
+-            raise ValueError("Use a private/Tailscale endpoint")
+-        if not allowed and parsed.scheme != "https":
+-            raise ValueError("Public control requires HTTPS")
+-    return value.rstrip("/")
+-
+-
+-def is_private(value):
+-    try:
+-        endpoint(value, private=True)
+-        return True
+-    except ValueError:
+-        return False
++sys.modules[__name__] = _implementation
+diff --git a/backend/api/inventory.py b/backend/api/inventory.py
+new file mode 100644
+index 00000000..2ac023f5
+--- /dev/null
++++ b/backend/api/inventory.py
+@@ -0,0 +1,40 @@
++"""Inventory HTTP adapters."""
++
++from fastapi import Depends
++from fastapi import APIRouter
++from ..services.inventory import operations as business_operations
++
++
++def install_routes(app, store, runtime, scoped, visible, capabilities, registry):
++    service = business_operations(store, runtime, scoped, visible, capabilities, registry)
++    router = APIRouter()
++
++    @router.get("/api/v1/health")
++    def health():
++        return service.health()
++
++    @router.get("/api/v1/capabilities")
++    def get_capabilities(current=Depends(scoped)):
++        return service.get_capabilities(current=current)
++
++    @router.get("/api/v1/resources")
++    def resources(current=Depends(scoped)):
++        return service.resources(current=current)
++
++    @router.get("/api/v1/models")
++    def models(current=Depends(scoped)):
++        return service.models(current=current)
++
++    @router.get("/api/v1/workers")
++    def workers(current=Depends(scoped)):
++        return service.workers(current=current)
++
++    @router.get("/api/v1/workers/{worker_id}")
++    def worker(worker_id: str, current=Depends(scoped)):
++        return service.worker(worker_id=worker_id, current=current)
++
++    @router.get("/api/v1/datasets")
++    def datasets(current=Depends(scoped)):
++        return service.datasets(current=current)
++
++    app.include_router(router)
+diff --git a/backend/api/operations.py b/backend/api/operations.py
+new file mode 100644
+index 00000000..037dbe5e
+--- /dev/null
++++ b/backend/api/operations.py
+@@ -0,0 +1,38 @@
++"""Operations HTTP adapters."""
++
++from ..core.request_models import AccountEdit, Resume
++from fastapi import Depends, Response
++from fastapi import APIRouter
++from ..services.operations import operations as business_operations
++
++
++def install_routes(app, store, runtime, platform):
++    service = business_operations(store, runtime, platform)
++    router = APIRouter()
++
++    @router.get("/api/v1/platform/users")
++    def users(current=Depends(platform)):
++        return service.users(current=current)
++
++    @router.patch("/api/v1/platform/users/{user_id}")
++    def edit_account(user_id: str, body: AccountEdit, current=Depends(platform)):
++        return service.edit_account(user_id=user_id, body=body, current=current)
++
++    @router.post("/api/v1/platform/users/{user_id}/revoke-sessions", status_code=204)
++    def revoke_sessions(user_id: str, current=Depends(platform)):
++        service.revoke_sessions(user_id=user_id, current=current)
++        return Response(status_code=204)
++
++    @router.get("/api/v1/platform/audit")
++    def platform_audit(current=Depends(platform)):
++        return service.platform_audit(current=current)
++
++    @router.get("/api/v1/platform/operations")
++    def operations(current=Depends(platform)):
++        return service.operations(current=current)
++
++    @router.post("/api/v1/platform/maintenance/resume")
++    def resume(body: Resume, current=Depends(platform)):
++        return service.resume(body=body, current=current)
++
++    app.include_router(router)
+diff --git a/backend/api/validation.py b/backend/api/validation.py
+new file mode 100644
+index 00000000..7e0fc020
+--- /dev/null
++++ b/backend/api/validation.py
+@@ -0,0 +1,14 @@
++"""Legacy validation HTTP boundary; configuration rules live in services."""
++
++from fastapi import HTTPException
++from ..core.errors import ServiceError
++from ..services.validation import validate_configuration as _validate_configuration
++
++
++def validate_configuration(config, current, *, store, runtime, registry, scoped, capabilities):
++    try:
++        return _validate_configuration(
++            config, current, store=store, runtime=runtime, registry=registry, scoped=scoped, capabilities=capabilities
++        )
++    except ServiceError as error:
++        raise HTTPException(error.status_code, error.detail, headers=error.headers) from None
+diff --git a/backend/config.py b/backend/config.py
+index 65dca84d..fed16194 100644
+--- a/backend/config.py
++++ b/backend/config.py
+@@ -1,19 +1,6 @@
+-"""Read private configuration on demand so rotated public URLs are observed."""
++"""Compatibility namespace retained during core extraction."""
+ 
+-import json
+-import os
+-from pathlib import Path
++import sys
++from .core import config as _implementation
+ 
+-
+-def load_config(root=None, *, optional=False):
+-    root = root or os.environ.get("HETEROES_PRIVATE_CONFIG")
+-    if not root:
+-        if optional:
+-            return {}
+-        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
+-    try:
+-        return json.loads((Path(root) / "config.json").read_text())
+-    except (OSError, ValueError):
+-        if optional:
+-            return {}
+-        raise
++sys.modules[__name__] = _implementation
+diff --git a/backend/core/addresses.py b/backend/core/addresses.py
+new file mode 100644
+index 00000000..3b02961e
+--- /dev/null
++++ b/backend/core/addresses.py
+@@ -0,0 +1,52 @@
++"""Separate authenticated control endpoints from private bulk transfer origins."""
++
++import ipaddress
++import re
++from urllib.parse import urlsplit
++
++
++def endpoint(value, *, private=False):
++    if not isinstance(value, str) or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in value):
++        raise ValueError("Endpoint cannot contain whitespace or control characters")
++    parsed = urlsplit(value)
++    try:
++        port = parsed.port
++    except ValueError:
++        raise ValueError("Invalid endpoint port") from None
++    if (
++        parsed.scheme not in ("http", "https")
++        or not parsed.hostname
++        or parsed.username
++        or parsed.password
++        or parsed.query
++        or parsed.fragment
++        or parsed.path not in ("", "/")
++        or (port is not None and not 1 <= port <= 65535)
++    ):
++        raise ValueError("Use an endpoint origin without credentials, path or query")
++    try:
++        address = ipaddress.ip_address(parsed.hostname)
++    except ValueError:
++        if private:
++            raise ValueError("Use a numeric private/Tailscale address") from None
++        if parsed.scheme != "https" or not re.fullmatch(
++            r"(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}", parsed.hostname
++        ):
++            raise ValueError("Public control requires an HTTPS hostname")
++    else:
++        allowed = (address.is_private or address in ipaddress.ip_network("100.64.0.0/10")) and not (
++            address.is_unspecified or address.is_multicast or (address.is_reserved and not address.is_loopback)
++        )
++        if private and not allowed:
++            raise ValueError("Use a private/Tailscale endpoint")
++        if not allowed and parsed.scheme != "https":
++            raise ValueError("Public control requires HTTPS")
++    return value.rstrip("/")
++
++
++def is_private(value):
++    try:
++        endpoint(value, private=True)
++        return True
++    except ValueError:
++        return False
+diff --git a/backend/core/config.py b/backend/core/config.py
+new file mode 100644
+index 00000000..65dca84d
+--- /dev/null
++++ b/backend/core/config.py
+@@ -0,0 +1,19 @@
++"""Read private configuration on demand so rotated public URLs are observed."""
++
++import json
++import os
++from pathlib import Path
++
++
++def load_config(root=None, *, optional=False):
++    root = root or os.environ.get("HETEROES_PRIVATE_CONFIG")
++    if not root:
++        if optional:
++            return {}
++        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
++    try:
++        return json.loads((Path(root) / "config.json").read_text())
++    except (OSError, ValueError):
++        if optional:
++            return {}
++        raise
+diff --git a/backend/core/errors.py b/backend/core/errors.py
+index 2f26c304..c09a7eef 100644
+--- a/backend/core/errors.py
++++ b/backend/core/errors.py
+@@ -11,3 +11,7 @@ class ServiceError(Exception):
+ 
+ class DatabaseConflict(Exception):
+     """A persistence constraint conflict; callers decide its business meaning."""
++
++
++class RuntimeRejected(Exception):
++    """The runtime definitively rejected a new configuration without launching it."""
+diff --git a/backend/core/monitor_models.py b/backend/core/monitor_models.py
+new file mode 100644
+index 00000000..8b2068ad
+--- /dev/null
++++ b/backend/core/monitor_models.py
+@@ -0,0 +1,93 @@
++"""Bounded observations, not control commands or per-job billing."""
++
++from typing import Literal
++from pydantic import BaseModel, ConfigDict, Field
++
++
++class Observation(BaseModel):
++    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
++
++
++class Core(Observation):
++    id: str = Field(max_length=30)
++    utilizationPercent: float | None = Field(default=None, ge=0, le=100)
++    clockMhz: float | None = Field(default=None, ge=0, le=100000)
++
++
++class Interface(Observation):
++    name: str = Field(max_length=100)
++    state: str | None = Field(default=None, max_length=30)
++    rxBytes: int = Field(ge=0)
++    txBytes: int = Field(ge=0)
++    rxBytesPerSecond: float | None = Field(default=None, ge=0)
++    txBytesPerSecond: float | None = Field(default=None, ge=0)
++    speedMbps: int | None = Field(default=None, ge=0)
++
++
++class BlockDevice(Observation):
++    name: str = Field(max_length=100)
++    readBytes: int = Field(ge=0)
++    writtenBytes: int = Field(ge=0)
++    inFlight: int = Field(ge=0)
++    readBytesPerSecond: float | None = Field(default=None, ge=0)
++    writeBytesPerSecond: float | None = Field(default=None, ge=0)
++    busyPercent: float | None = Field(default=None, ge=0, le=100)
++
++
++class HostProcess(Observation):
++    pid: int = Field(ge=1)
++    name: str = Field(max_length=100)
++    state: str = Field(max_length=10)
++    cpuPercent: float | None = Field(default=None, ge=0)
++    ramBytes: int = Field(ge=0)
++    threads: int = Field(ge=0)
++
++
++class GPUProcess(Observation):
++    pid: int = Field(ge=1)
++    name: str = Field(max_length=100)
++    vramMb: float | None = Field(default=None, ge=0)
++
++
++class Sensor(Observation):
++    id: str = Field(max_length=150)
++    group: str = Field(max_length=100)
++    label: str = Field(max_length=100)
++    kind: Literal["temperature", "fan", "voltage", "power"]
++    value: float
++    unit: Literal["°C", "RPM", "V", "W"]
++
++
++class Energy(Observation):
++    sessionWh: float = Field(ge=0)
++    todayWh: float = Field(ge=0)
++    monthWh: float = Field(ge=0)
++    lifetimeWh: float = Field(ge=0)
++    sessionSampledSeconds: float = Field(ge=0)
++    sampledSeconds: float = Field(ge=0)
++    todaySampledSeconds: float = Field(ge=0)
++    monthSampledSeconds: float = Field(ge=0)
++    since: float | None = Field(default=None, ge=0)
++    day: str = Field(max_length=10)
++    month: str = Field(max_length=7)
++    timezone: str = Field(max_length=100)
++
++
++class PowerComponent(Observation):
++    id: str = Field(max_length=200)
++    label: str = Field(max_length=100)
++    kind: Literal["cpu-package", "cpu-domain", "dram", "gpu", "wall"]
++    powerW: float | None = Field(default=None, ge=0, le=100000)
++    includedInSubtotal: bool
++    method: Literal["rapl-counter", "sampled-gpu", "external-meter", "unavailable"]
++    energy: Energy
++
++
++class Power(Observation):
++    hostId: str = Field(min_length=32, max_length=32, pattern="^[a-f0-9]{32}$")
++    components: list[PowerComponent] = Field(max_length=66)
++    componentSubtotalW: float | None = Field(default=None, ge=0)
++    wholeMachineW: float | None = Field(default=None, ge=0)
++    wholeMachineSource: str | None = Field(default=None, max_length=100)
++    wholeMachineUnavailableReason: str | None = Field(default=None, max_length=100)
++    cpuUnavailableReason: str | None = Field(default=None, max_length=100)
+diff --git a/backend/core/request_models.py b/backend/core/request_models.py
+new file mode 100644
+index 00000000..a0ef5383
+--- /dev/null
++++ b/backend/core/request_models.py
+@@ -0,0 +1,125 @@
++"""HTTP request contracts shared by route modules."""
++
++from typing import Literal
++from pydantic import BaseModel, ConfigDict, Field
++from .models import Strict
++from heteroes.catalog import DEFAULT_SCHEDULER_POLICY, SYNC_MODES
++
++
++class Login(BaseModel):
++    username: str = Field(max_length=100)
++    password: str = Field(max_length=200)
++
++
++class BackupPolicy(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    interval: int = Field(ge=1, le=1000, strict=True)
++    retain: int = Field(ge=1, le=1000, strict=True)
++
++
++class Configuration(BaseModel):
++    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
++    name: str = Field(min_length=3, max_length=160)
++    modelName: str
++    modelArtifactId: str = "qwen-pinned"
++    schedulerPolicy: str = DEFAULT_SCHEDULER_POLICY
++    allowJoin: bool = Field(default=False, strict=True)  # idle eligible workers may join while it runs (ADR-009)
++    syncMode: str = SYNC_MODES[0]
++    workerIds: list[str] = Field(min_length=1, max_length=10)
++    task: str = "arith16"
++    maxGenerations: int = Field(default=3, ge=1, le=1000, strict=True)
++    candidatesPerGeneration: int = Field(default=8, ge=2, le=256, strict=True)
++    alpha: float = Field(default=0.001, gt=0, le=1)
++    sigma: float = Field(default=0.001, gt=0, le=1)
++    decodeEngine: str = "hf_generate"
++    datasetIds: list[str] = Field(default_factory=list)
++    coordinatorDeviceId: str | None = None
++    backupPolicy: dict | None = None
++    recipeVersion: int = Field(default=1, ge=1, le=3, strict=True)
++    noiseEngineVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1", "pcg64_u32_to_f16_normal_quantile_v2"] | None = None
++    batchSize: int = Field(default=32, ge=1, le=1024, strict=True)
++    batchSeed: int = Field(default=11, ge=0, lt=2**53, strict=True)
++    sigmaSchedule: str = "constant"
++    sigmaMinimum: float = Field(default=0.00025, gt=0, le=1)
++    maxNewTokens: int = Field(default=512, ge=1, le=2048, strict=True)
++    weightSpace: dict = Field(default_factory=lambda: {"kind": "full"})
++    antithetic: bool = Field(default=False, strict=True)
++    scorer: dict | None = None
++    coefficientRule: str = "zscore@1"
++    # the update formula of Recipe v3 (heteroes.v3.coefficients): alpha schedule, momentum, prompts per generate() call
++    alphaSchedule: str = "constant"
++    alphaMinimum: float | None = Field(default=None, gt=0, le=1)
++    momentumBeta: float | None = Field(default=None, gt=0, lt=1)
++    momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
++    evalDtype: Literal["float32", "float16"] | None = None  # strict_b22_v1 requires float16 (ADR-013)
++    evalChunk: int | None = Field(default=None, strict=True)
++    evalChunks: list[int] | None = Field(default=None, max_length=8)  # ADR-010: chunks a worker may use
++    sampler: str = Field(default="sha256-python-random-sample-v1", max_length=80)  # or python@1:<sha256>
++    candidateSeedNamespace: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
++    systemPrompt: str | None = Field(default=None, max_length=4000)
++    promptFormat: Literal["chat", "raw"] | None = None
++    validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
++    auditRate: float = Field(default=0.05, ge=0, le=1, strict=True)
++    # D11 watchdog: explicit finite hard cap per generation and stage-progress stall time (operational, seconds)
++    hardCapSeconds: float | None = Field(default=None, ge=60, le=7 * 86400)
++    stallSeconds: float | None = Field(default=None, ge=30, le=7 * 86400)
++    # Recipe v3 Python scorer / coefficient rule: [{role, name, function, source}] (the lab adds codeSha256)
++    pythonCode: list[dict] = Field(default_factory=list, max_length=3)  # scorer, coefficients, sampler
++
++
++class Registration(Strict):
++    username: str = Field(min_length=3, max_length=64, pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_.-]*$")
++    password: str = Field(max_length=200)
++    displayName: str = Field(min_length=1, max_length=100)
++
++
++class ProfileEdit(Strict):
++    displayName: str | None = Field(default=None, min_length=1, max_length=100)
++    email: str | None = Field(default=None, max_length=200)
++    bio: str | None = Field(default=None, max_length=1000)
++
++
++class AccountEdit(Strict):
++    accountStatus: Literal["PENDING", "ACTIVE", "REJECTED", "SUSPENDED"] | None = None
++    canCreateWorkspace: bool | None = None
++    platformAdmin: bool | None = None
++
++
++class PasswordEdit(Strict):
++    currentPassword: str = Field(max_length=200)
++    newPassword: str = Field(max_length=200)
++
++
++class WorkspaceCreate(Strict):
++    name: str = Field(min_length=3, max_length=100)
++    description: str = Field(default="", max_length=1000)
++
++
++class Listing(Strict):
++    listed: bool = Field(strict=True)
++
++
++class DefaultCoordinator(Strict):
++    deviceId: str | None = Field(max_length=64)
++
++
++class JoinDecision(Strict):
++    approve: bool = Field(strict=True)
++
++
++class Invite(Strict):
++    username: str = Field(min_length=3, max_length=64)
++
++
++class MemberEdit(Strict):
++    role: Literal["ADMIN", "PARTICIPANT"]
++
++
++class Resume(Strict):
++    workerConfigurationConfirmed: Literal[True]
++
++
++class MembershipRequest(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    workerId: str = Field(min_length=1, max_length=100)
++    action: Literal["add", "remove", "retry"]
+diff --git a/backend/core/throttle.py b/backend/core/throttle.py
+new file mode 100644
+index 00000000..77510f92
+--- /dev/null
++++ b/backend/core/throttle.py
+@@ -0,0 +1,75 @@
++"""Slow down password guessing and registration spam. Kept in memory: a restart forgets it, which is acceptable."""
++
++from collections import deque
++import ipaddress
++import threading
++import time
++
++TAILSCALE = ipaddress.ip_network("100.64.0.0/10")
++
++
++class Throttle:
++    """At most `limit` recorded attempts per key within `window` seconds."""
++
++    def __init__(self, limit, window, clock=time.monotonic):
++        self.limit, self.window, self.clock = limit, window, clock
++        self.attempts = {}
++        self.lock = threading.Lock()
++
++    def _recent(self, key, now):
++        queue = self.attempts.get(key)
++        if queue is None:
++            return None
++        while queue and now - queue[0] >= self.window:
++            queue.popleft()
++        if not queue:
++            del self.attempts[key]
++            return None
++        return queue
++
++    def retry_after(self, key):
++        """Seconds to wait before this key may try again; 0 if it may try now."""
++        with self.lock:
++            now = self.clock()
++            queue = self._recent(key, now)
++            if queue is None or len(queue) < self.limit:
++                return 0
++            return max(1, int(queue[0] + self.window - now + 0.999))
++
++    def record(self, key):
++        with self.lock:
++            now = self.clock()
++            if len(self.attempts) > 256:
++                for stale in list(self.attempts):
++                    self._recent(stale, now)
++            queue = self._recent(key, now)
++            if queue is None:
++                queue = self.attempts.setdefault(key, deque())
++            queue.append(now)
++
++    def clear(self, key):
++        with self.lock:
++            self.attempts.pop(key, None)
++
++
++def client_address(peer, headers):
++    """The caller's address. Forwarding headers are believed only when the direct peer is a local proxy
++    (loopback, private or Tailscale); a public peer cannot choose its own identity."""
++    if not peer:
++        return "unknown"
++    try:
++        address = ipaddress.ip_address(peer)
++    except ValueError:
++        return peer
++    if not (address.is_loopback or address.is_private or address in TAILSCALE):
++        return peer
++
++    def header(name):
++        return next((value for key, value in headers.items() if key.lower() == name), "")
++
++    for value in (header("cf-connecting-ip"), header("x-forwarded-for").split(",")[0]):
++        try:
++            return str(ipaddress.ip_address(value.strip()))
++        except ValueError:
++            continue
++    return peer
+diff --git a/backend/errors.py b/backend/errors.py
+index 4c999bb2..5776c9ae 100644
+--- a/backend/errors.py
++++ b/backend/errors.py
+@@ -1,5 +1,3 @@
+-"""Shared runtime admission errors."""
++"""Compatibility export for runtime admission errors."""
+ 
+-
+-class RuntimeRejected(Exception):
+-    """The runtime definitively rejected a new configuration without launching it."""
++from .core.errors import RuntimeRejected as RuntimeRejected
+diff --git a/backend/monitor_models.py b/backend/monitor_models.py
+index 8b2068ad..cdacab97 100644
+--- a/backend/monitor_models.py
++++ b/backend/monitor_models.py
+@@ -1,93 +1,6 @@
+-"""Bounded observations, not control commands or per-job billing."""
++"""Compatibility namespace retained during core extraction."""
+ 
+-from typing import Literal
+-from pydantic import BaseModel, ConfigDict, Field
++import sys
++from .core import monitor_models as _implementation
+ 
+-
+-class Observation(BaseModel):
+-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+-
+-
+-class Core(Observation):
+-    id: str = Field(max_length=30)
+-    utilizationPercent: float | None = Field(default=None, ge=0, le=100)
+-    clockMhz: float | None = Field(default=None, ge=0, le=100000)
+-
+-
+-class Interface(Observation):
+-    name: str = Field(max_length=100)
+-    state: str | None = Field(default=None, max_length=30)
+-    rxBytes: int = Field(ge=0)
+-    txBytes: int = Field(ge=0)
+-    rxBytesPerSecond: float | None = Field(default=None, ge=0)
+-    txBytesPerSecond: float | None = Field(default=None, ge=0)
+-    speedMbps: int | None = Field(default=None, ge=0)
+-
+-
+-class BlockDevice(Observation):
+-    name: str = Field(max_length=100)
+-    readBytes: int = Field(ge=0)
+-    writtenBytes: int = Field(ge=0)
+-    inFlight: int = Field(ge=0)
+-    readBytesPerSecond: float | None = Field(default=None, ge=0)
+-    writeBytesPerSecond: float | None = Field(default=None, ge=0)
+-    busyPercent: float | None = Field(default=None, ge=0, le=100)
+-
+-
+-class HostProcess(Observation):
+-    pid: int = Field(ge=1)
+-    name: str = Field(max_length=100)
+-    state: str = Field(max_length=10)
+-    cpuPercent: float | None = Field(default=None, ge=0)
+-    ramBytes: int = Field(ge=0)
+-    threads: int = Field(ge=0)
+-
+-
+-class GPUProcess(Observation):
+-    pid: int = Field(ge=1)
+-    name: str = Field(max_length=100)
+-    vramMb: float | None = Field(default=None, ge=0)
+-
+-
+-class Sensor(Observation):
+-    id: str = Field(max_length=150)
+-    group: str = Field(max_length=100)
+-    label: str = Field(max_length=100)
+-    kind: Literal["temperature", "fan", "voltage", "power"]
+-    value: float
+-    unit: Literal["°C", "RPM", "V", "W"]
+-
+-
+-class Energy(Observation):
+-    sessionWh: float = Field(ge=0)
+-    todayWh: float = Field(ge=0)
+-    monthWh: float = Field(ge=0)
+-    lifetimeWh: float = Field(ge=0)
+-    sessionSampledSeconds: float = Field(ge=0)
+-    sampledSeconds: float = Field(ge=0)
+-    todaySampledSeconds: float = Field(ge=0)
+-    monthSampledSeconds: float = Field(ge=0)
+-    since: float | None = Field(default=None, ge=0)
+-    day: str = Field(max_length=10)
+-    month: str = Field(max_length=7)
+-    timezone: str = Field(max_length=100)
+-
+-
+-class PowerComponent(Observation):
+-    id: str = Field(max_length=200)
+-    label: str = Field(max_length=100)
+-    kind: Literal["cpu-package", "cpu-domain", "dram", "gpu", "wall"]
+-    powerW: float | None = Field(default=None, ge=0, le=100000)
+-    includedInSubtotal: bool
+-    method: Literal["rapl-counter", "sampled-gpu", "external-meter", "unavailable"]
+-    energy: Energy
+-
+-
+-class Power(Observation):
+-    hostId: str = Field(min_length=32, max_length=32, pattern="^[a-f0-9]{32}$")
+-    components: list[PowerComponent] = Field(max_length=66)
+-    componentSubtotalW: float | None = Field(default=None, ge=0)
+-    wholeMachineW: float | None = Field(default=None, ge=0)
+-    wholeMachineSource: str | None = Field(default=None, max_length=100)
+-    wholeMachineUnavailableReason: str | None = Field(default=None, max_length=100)
+-    cpuUnavailableReason: str | None = Field(default=None, max_length=100)
++sys.modules[__name__] = _implementation
+diff --git a/backend/policies.py b/backend/policies.py
+index 599fcb63..9dcf2d08 100644
+--- a/backend/policies.py
++++ b/backend/policies.py
+@@ -1,145 +1,6 @@
+-"""Shared product validation and durable settings operations."""
++"""Compatibility policy namespace retained during service extraction."""
+ 
+-import json
+-from fastapi import HTTPException
+-from .core.models import Strict as Strict, FiniteStrict as FiniteStrict
++import sys
++from .services import policies as _implementation
+ 
+-
+-def backup_policy(value):
+-    if (
+-        not isinstance(value, dict)
+-        or set(value) != {"interval", "retain"}
+-        or any(type(item) is not int or not 1 <= item <= 1000 for item in value.values())
+-    ):
+-        raise ValueError("Backup interval and retention must be integers from 1 to 1000")
+-    return dict(value)
+-
+-
+-def read_setting(db, key, default=None):
+-    row = db.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+-    return json.loads(row[0]) if row else default
+-
+-
+-def dispatch_held(db):
+-    return read_setting(db, "dispatchHold", False)
+-
+-
+-def set_disabled_workers(db, workers):
+-    db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("disabledWorkers", json.dumps(sorted(workers))))
+-
+-
+-def active_profile(store, current, message="Active account required"):
+-    profile = store.profile(current["userId"])
+-    if not profile or profile["accountStatus"] != "ACTIVE":
+-        raise HTTPException(403, message)
+-    return profile
+-
+-
+-def platform_profile(profile, message="Platform administrator required"):
+-    if not profile.get("platformAdmin"):
+-        raise HTTPException(403, message)
+-    return profile
+-
+-
+-def v2_qualification(profile, model_hash):
+-    if profile.get("platform") == "windows" or 2 not in profile.get("recipeVersions", []):
+-        return "recipe"
+-    if model_hash not in profile.get("qualifiedModelHashes", []):
+-        return "model"
+-    return None
+-
+-
+-def v3_qualification(profile, model_hash, engine=None, decoder=None):
+-    # A native Windows profile reaches [3] only through the reference-bound worker-only validation of SelfTest.
+-    if profile.get("recipeVersions") != [3]:
+-        return "recipe"
+-    from heteroes.noise.contracts import ENGINE_VERSION
+-    from heteroes.product.model_qualification import qualification_key
+-
+-    engine = engine or ENGINE_VERSION
+-    key = qualification_key(engine, decoder if decoder in (None, "strict_b22_v1") else None)
+-    by_engine = profile.get("qualifiedModelsByNoiseEngine")
+-    hashes = (
+-        by_engine.get(key, [])
+-        if by_engine is not None
+-        else (
+-            profile.get("qualifiedModelHashes", [])
+-            if key == engine and profile.get("noiseVersion", ENGINE_VERSION) == engine
+-            else []
+-        )
+-    )
+-    if model_hash not in hashes:
+-        return "model"
+-    return None
+-
+-
+-def strict_layout(body, coordinator, workers):
+-    """
+-    Why a strict run cannot use these devices, or None (D1, ADR-013: one weight set per GPU). The coordinator validates
+-    and exports with the strict decoder, so it needs a GPU, and that GPU holds its model for the whole run: no worker of
+-    the run may be the same device or the same physical GPU. Earlier recipes keep their layouts.
+-    """
+-    if body.get("decodeEngine") != "strict_b22_v1" or coordinator is None:
+-        return None
+-    from heteroes.product.cpu_coordinator import coordinator_only
+-
+-    if coordinator_only(coordinator["selfTest"]):
+-        return "A strict run needs a GPU coordinator: its validation and export use the strict decoder"
+-    gpu = coordinator.get("physicalResourceId")
+-    if any(
+-        w["deviceId"] == coordinator["deviceId"] or (gpu is not None and w.get("physicalResourceId") == gpu)
+-        for w in workers
+-        if w
+-    ):
+-        return "A strict run keeps one weight set per GPU: its coordinator's GPU cannot also be one of its workers"
+-    return None
+-
+-
+-def noise_qualification(profile, engine):
+-    """Legacy reports prove v1 only; connectivity never proves engine support."""
+-    from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
+-
+-    engines = profile.get("supportedNoiseEngines")
+-    if engines is None:
+-        return None if engine == ENGINE_VERSION else "noise"
+-    expected = CPU_NOISE_FINGERPRINTS.get(engine)
+-    return None if expected is not None and engines.get(engine) == expected else "noise"
+-
+-
+-def display_identity(device, *, source="recorded"):
+-    """Display metadata only: never part of a recipe, seed or config hash."""
+-    import time
+-
+-    profile = device.get("selfTest") or {}
+-    return {
+-        "name": device.get("displayName") or device["workerId"],
+-        "gpuName": profile.get("gpuName"),
+-        "gpuIndex": profile.get("gpuIndex"),
+-        "gpuUUID": device.get("physicalResourceId"),
+-        "deviceId": device.get("deviceId"),
+-        "ownerUserId": device.get("ownerUserId"),
+-        "capturedAt": time.time(),
+-        "source": source,
+-    }
+-
+-
+-def storage_status(runtime):
+-    backend = runtime.storage_backend
+-    return {
+-        "cloudStorageConfigured": False,
+-        "recoveryStorageConfigured": backend is not None,
+-        "recoveryStorageMode": getattr(backend, "mode", "local") if backend else None,
+-    }
+-
+-
+-def has_device_reservation(db, device_id, gpu_uuid=None):
+-    reserved = db.execute("SELECT 1 FROM device_reservations WHERE device_id=?", (device_id,)).fetchone()
+-    physical = db.execute("SELECT 1 FROM physical_reservations WHERE resource_id=?", (gpu_uuid,)).fetchone()
+-    probe = db.execute(
+-        "SELECT 1 FROM model_probe_reservations WHERE device_id=? OR resource_id=?", (device_id, gpu_uuid)
+-    ).fetchone()
+-    return bool(reserved or physical or probe)
+-
+-
+-def processes_drained(processes):
+-    return all(p.get("coordinatorAlive") is False and p.get("workerAlive") is False for p in processes)
++sys.modules[__name__] = _implementation
+diff --git a/backend/repositories/inventory.py b/backend/repositories/inventory.py
+new file mode 100644
+index 00000000..d885463c
+--- /dev/null
++++ b/backend/repositories/inventory.py
+@@ -0,0 +1,21 @@
++"""Inventory SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class InventoryRepository:
++    @staticmethod
++    def get_capabilities_select_workspace_settings(db, parameters=()):
++        return execute(
++            db,
++            "SELECT json_extract(body,'$.defaultCoordinatorDeviceId') FROM workspace_settings WHERE workspace_id=?",
++            parameters,
++        )
++
++    @staticmethod
++    def resources_select_memberships(db, parameters=()):
++        return execute(
++            db,
++            "SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?",
++            parameters,
++        )
+diff --git a/backend/repositories/operations.py b/backend/repositories/operations.py
+new file mode 100644
+index 00000000..7eb52825
+--- /dev/null
++++ b/backend/repositories/operations.py
+@@ -0,0 +1,51 @@
++"""Operations SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class OperationsRepository:
++    @staticmethod
++    def users_select_users(db, parameters=()):
++        return execute(db, "SELECT profile FROM users ORDER BY rowid", parameters)
++
++    @staticmethod
++    def edit_account_update_users(db, parameters=()):
++        return execute(db, "UPDATE users SET profile=? WHERE id=?", parameters)
++
++    @staticmethod
++    def edit_account_delete_sessions(db, parameters=()):
++        return execute(db, "DELETE FROM sessions WHERE user_id=?", parameters)
++
++    @staticmethod
++    def edit_account_select_users(db, parameters=()):
++        return execute(db, "SELECT profile FROM users WHERE id<>?", parameters)
++
++    @staticmethod
++    def edit_account_select_worker_assignments(db, parameters=()):
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE owner=?", parameters)
++
++    @staticmethod
++    def revoke_sessions_delete_sessions(db, parameters=()):
++        return execute(db, "DELETE FROM sessions WHERE user_id=?", parameters)
++
++    @staticmethod
++    def platform_audit_select_audit(db, parameters=()):
++        return execute(
++            db, "SELECT * FROM audit WHERE workspace_id IS NULL ORDER BY sequence DESC LIMIT 200", parameters
++        )
++
++    @staticmethod
++    def operations_select_settings(db, parameters=()):
++        return execute(db, 'SELECT value FROM settings WHERE key="metadataBackupStatus"', parameters)
++
++    @staticmethod
++    def operations_select_queue(db, parameters=()):
++        return execute(db, "SELECT count(*) FROM queue", parameters)
++
++    @staticmethod
++    def resume_update_settings(db, parameters=()):
++        return execute(db, 'UPDATE settings SET value="false" WHERE key="dispatchHold"', parameters)
++
++    @staticmethod
++    def resume_delete_settings(db, parameters=()):
++        return execute(db, 'DELETE FROM settings WHERE key IN ("maintenanceId","agentMaintenance")', parameters)
+diff --git a/backend/repositories/policies.py b/backend/repositories/policies.py
+new file mode 100644
+index 00000000..9338d015
+--- /dev/null
++++ b/backend/repositories/policies.py
+@@ -0,0 +1,25 @@
++"""Shared product policy SQL."""
++
++from .base import execute
++
++
++class PoliciesRepository:
++    @staticmethod
++    def read_setting_settings(db, parameters=()):
++        return execute(db, "SELECT value FROM settings WHERE key=?", parameters)
++
++    @staticmethod
++    def set_disabled_workers_settings(db, parameters=()):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
++
++    @staticmethod
++    def has_device_reservation_device_reservations(db, parameters=()):
++        return execute(db, "SELECT 1 FROM device_reservations WHERE device_id=?", parameters)
++
++    @staticmethod
++    def has_device_reservation_physical_reservations(db, parameters=()):
++        return execute(db, "SELECT 1 FROM physical_reservations WHERE resource_id=?", parameters)
++
++    @staticmethod
++    def has_device_reservation_model_probe_reservations(db, parameters=()):
++        return execute(db, "SELECT 1 FROM model_probe_reservations WHERE device_id=? OR resource_id=?", parameters)
+diff --git a/backend/request_models.py b/backend/request_models.py
+index a3c83ffb..8959a784 100644
+--- a/backend/request_models.py
++++ b/backend/request_models.py
+@@ -1,125 +1,7 @@
+-"""HTTP request contracts shared by route modules."""
++"""Compatibility namespace retained during core extraction."""
+ 
+-from typing import Literal
+-from pydantic import BaseModel, ConfigDict, Field
+-from .policies import Strict
+-from heteroes.catalog import DEFAULT_SCHEDULER_POLICY, SYNC_MODES
++import sys
++from .core import request_models as _implementation
++from heteroes.catalog import DEFAULT_SCHEDULER_POLICY as DEFAULT_SCHEDULER_POLICY, SYNC_MODES as SYNC_MODES
+ 
+-
+-class Login(BaseModel):
+-    username: str = Field(max_length=100)
+-    password: str = Field(max_length=200)
+-
+-
+-class BackupPolicy(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    interval: int = Field(ge=1, le=1000, strict=True)
+-    retain: int = Field(ge=1, le=1000, strict=True)
+-
+-
+-class Configuration(BaseModel):
+-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+-    name: str = Field(min_length=3, max_length=160)
+-    modelName: str
+-    modelArtifactId: str = "qwen-pinned"
+-    schedulerPolicy: str = DEFAULT_SCHEDULER_POLICY
+-    allowJoin: bool = Field(default=False, strict=True)  # idle eligible workers may join while it runs (ADR-009)
+-    syncMode: str = SYNC_MODES[0]
+-    workerIds: list[str] = Field(min_length=1, max_length=10)
+-    task: str = "arith16"
+-    maxGenerations: int = Field(default=3, ge=1, le=1000, strict=True)
+-    candidatesPerGeneration: int = Field(default=8, ge=2, le=256, strict=True)
+-    alpha: float = Field(default=0.001, gt=0, le=1)
+-    sigma: float = Field(default=0.001, gt=0, le=1)
+-    decodeEngine: str = "hf_generate"
+-    datasetIds: list[str] = Field(default_factory=list)
+-    coordinatorDeviceId: str | None = None
+-    backupPolicy: dict | None = None
+-    recipeVersion: int = Field(default=1, ge=1, le=3, strict=True)
+-    noiseEngineVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1", "pcg64_u32_to_f16_normal_quantile_v2"] | None = None
+-    batchSize: int = Field(default=32, ge=1, le=1024, strict=True)
+-    batchSeed: int = Field(default=11, ge=0, lt=2**53, strict=True)
+-    sigmaSchedule: str = "constant"
+-    sigmaMinimum: float = Field(default=0.00025, gt=0, le=1)
+-    maxNewTokens: int = Field(default=512, ge=1, le=2048, strict=True)
+-    weightSpace: dict = Field(default_factory=lambda: {"kind": "full"})
+-    antithetic: bool = Field(default=False, strict=True)
+-    scorer: dict | None = None
+-    coefficientRule: str = "zscore@1"
+-    # the update formula of Recipe v3 (heteroes.v3.coefficients): alpha schedule, momentum, prompts per generate() call
+-    alphaSchedule: str = "constant"
+-    alphaMinimum: float | None = Field(default=None, gt=0, le=1)
+-    momentumBeta: float | None = Field(default=None, gt=0, lt=1)
+-    momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
+-    evalDtype: Literal["float32", "float16"] | None = None  # strict_b22_v1 requires float16 (ADR-013)
+-    evalChunk: int | None = Field(default=None, strict=True)
+-    evalChunks: list[int] | None = Field(default=None, max_length=8)  # ADR-010: chunks a worker may use
+-    sampler: str = Field(default="sha256-python-random-sample-v1", max_length=80)  # or python@1:<sha256>
+-    candidateSeedNamespace: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
+-    systemPrompt: str | None = Field(default=None, max_length=4000)
+-    promptFormat: Literal["chat", "raw"] | None = None
+-    validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
+-    auditRate: float = Field(default=0.05, ge=0, le=1, strict=True)
+-    # D11 watchdog: explicit finite hard cap per generation and stage-progress stall time (operational, seconds)
+-    hardCapSeconds: float | None = Field(default=None, ge=60, le=7 * 86400)
+-    stallSeconds: float | None = Field(default=None, ge=30, le=7 * 86400)
+-    # Recipe v3 Python scorer / coefficient rule: [{role, name, function, source}] (the lab adds codeSha256)
+-    pythonCode: list[dict] = Field(default_factory=list, max_length=3)  # scorer, coefficients, sampler
+-
+-
+-class Registration(Strict):
+-    username: str = Field(min_length=3, max_length=64, pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_.-]*$")
+-    password: str = Field(max_length=200)
+-    displayName: str = Field(min_length=1, max_length=100)
+-
+-
+-class ProfileEdit(Strict):
+-    displayName: str | None = Field(default=None, min_length=1, max_length=100)
+-    email: str | None = Field(default=None, max_length=200)
+-    bio: str | None = Field(default=None, max_length=1000)
+-
+-
+-class AccountEdit(Strict):
+-    accountStatus: Literal["PENDING", "ACTIVE", "REJECTED", "SUSPENDED"] | None = None
+-    canCreateWorkspace: bool | None = None
+-    platformAdmin: bool | None = None
+-
+-
+-class PasswordEdit(Strict):
+-    currentPassword: str = Field(max_length=200)
+-    newPassword: str = Field(max_length=200)
+-
+-
+-class WorkspaceCreate(Strict):
+-    name: str = Field(min_length=3, max_length=100)
+-    description: str = Field(default="", max_length=1000)
+-
+-
+-class Listing(Strict):
+-    listed: bool = Field(strict=True)
+-
+-
+-class DefaultCoordinator(Strict):
+-    deviceId: str | None = Field(max_length=64)
+-
+-
+-class JoinDecision(Strict):
+-    approve: bool = Field(strict=True)
+-
+-
+-class Invite(Strict):
+-    username: str = Field(min_length=3, max_length=64)
+-
+-
+-class MemberEdit(Strict):
+-    role: Literal["ADMIN", "PARTICIPANT"]
+-
+-
+-class Resume(Strict):
+-    workerConfigurationConfirmed: Literal[True]
+-
+-
+-class MembershipRequest(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    workerId: str = Field(min_length=1, max_length=100)
+-    action: Literal["add", "remove", "retry"]
++sys.modules[__name__] = _implementation
+diff --git a/backend/routes_inventory.py b/backend/routes_inventory.py
+index 8bb6f347..c111994d 100644
+--- a/backend/routes_inventory.py
++++ b/backend/routes_inventory.py
+@@ -1,156 +1,3 @@
+-from .policies import storage_status
+-from .config import load_config
+-import json
+-import os
++"""Compatibility import retained during the three-layer extraction."""
+ 
+-from fastapi import Depends, HTTPException
+-
+-from .store import ACTIVE
+-
+-
+-from fastapi import APIRouter
+-
+-
+-def _private_config():
+-    private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-    if not private_root:
+-        return {}
+-    try:
+-        return load_config(private_root)
+-    except (OSError, ValueError):
+-        return {}
+-
+-
+-def install_routes(app, store, runtime, scoped, visible, capabilities, registry):
+-    router = APIRouter()
+-
+-    @router.get("/api/v1/health")
+-    def health():
+-        # Quick URLs can rotate while this CPU service retains its identity.
+-        ui_url = _private_config().get("publicWebUrl") or os.environ.get("HETEROES_UI_URL")
+-        backend = getattr(runtime, "storage_backend", None)
+-        return {
+-            "ok": True,
+-            "dataSource": "real",
+-            "runtimeIssue": store.last_error,
+-            # Shipped r10 apps require these protocol capability fields.
+-            "agentMode": True,
+-            "deviceConfiguration": True,
+-            "recipeVersions": [1, 2, 3],
+-            **storage_status(runtime),
+-            "serverInstanceId": getattr(runtime, "server_instance_id", None),
+-            **({"uiUrl": ui_url} if ui_url else {}),
+-            # the private lab address is for signed-in members only: see /api/v1/capabilities (SECURITY-NOTES)
+-        }
+-
+-    @router.get("/api/v1/capabilities")
+-    def get_capabilities(current=Depends(scoped)):
+-        cap = capabilities()
+-        assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
+-        coordinators = [
+-            {
+-                "deviceId": d["deviceId"],
+-                "workerId": d["workerId"],
+-                "displayName": d["displayName"],
+-                "platform": d["selfTest"].get("platform", "linux"),
+-                # measured by the device's self-test: the form shows seconds per generation from it
+-                "updateSecondsPerSeed": d["selfTest"].get("updateSecondsPerSeed"),
+-            }
+-            for d in runtime.devices()
+-            if d["workspaceId"] == current["workspaceId"]
+-            and d["approvalStatus"] == "APPROVED"
+-            and d["selfTest"]["coordinator"]
+-        ]
+-        with store.db() as db:
+-            row = db.execute(
+-                "SELECT json_extract(body,'$.defaultCoordinatorDeviceId') FROM workspace_settings WHERE workspace_id=?",
+-                (current["workspaceId"],),
+-            ).fetchone()
+-        default = row[0] if row else None
+-        private = _private_config()
+-        return {
+-            **cap,
+-            "workerIds": [w for w in store.assignments(current["workspaceId"]) if w in cap["workerIds"]],
+-            "coordinatorDevices": coordinators,
+-            # the lab's default, only while it is still an approved coordinator here
+-            "defaultCoordinatorDeviceId": default if any(d["deviceId"] == default for d in coordinators) else None,
+-            "quarantinedWorkerIds": [w for w in cap.get("quarantinedWorkerIds", []) if w in assigned],
+-            # the private lab address, for members (moved here from the public health check, SECURITY-NOTES)
+-            **({"privateLabUrl": private.get("bulkApiUrl", private["apiUrl"])} if private.get("apiUrl") else {}),
+-        }
+-
+-    @router.get("/api/v1/resources")
+-    def resources(current=Depends(scoped)):
+-        with store.db() as db:
+-            members = [
+-                {
+-                    "user": {
+-                        k: v
+-                        for k, v in json.loads(row["profile"]).items()
+-                        if k not in ("platformAdmin", "accountStatus")
+-                    },
+-                    "role": row["role"],
+-                }
+-                for row in db.execute(
+-                    "SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?",
+-                    (current["workspaceId"],),
+-                )
+-            ]
+-        assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
+-        busy = list(
+-            {worker for run in store.list() if run["status"] in ACTIVE for worker in run["workerIds"]} & assigned
+-        )
+-        return {"members": members, "busyWorkerIds": busy, "reservedWorkerIds": busy}
+-
+-    @router.get("/api/v1/models")
+-    def models(current=Depends(scoped)):
+-        cap = capabilities()
+-        return [
+-            {
+-                "modelArtifactId": "qwen-pinned",
+-                "workspaceId": current["workspaceId"],
+-                "ownerUserId": "runtime",
+-                "name": cap["modelId"],
+-                "reference": cap["modelId"],
+-                "revision": cap["modelRevision"],
+-                "source": "REFERENCE",
+-                "status": "REGISTERED",
+-            }
+-        ] + registry.list(current["workspaceId"], "model")
+-
+-    @router.get("/api/v1/workers")
+-    def workers(current=Depends(scoped)):
+-        try:
+-            values = runtime.workers()
+-        except Exception:
+-            raise HTTPException(503, "Worker registry unavailable") from None
+-        # Shared GPU ownership is visible; another participant's experiment details are private.
+-        permitted = {body["experimentId"] for body in visible(current)}
+-        assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
+-        enabled = set(store.assignments(current["workspaceId"]))
+-        return [
+-            {
+-                **value,
+-                "contributionEnabled": value["workerId"] in enabled and value.get("contributionEnabled", True),
+-                "allocatedTo": value.get("allocatedTo")
+-                if value.get("allocatedTo") in permitted
+-                else "Workspace pool busy"
+-                if value.get("allocatedTo")
+-                else None,
+-            }
+-            for value in values
+-            if value["workerId"] in assigned
+-        ]
+-
+-    @router.get("/api/v1/workers/{worker_id}")
+-    def worker(worker_id: str, current=Depends(scoped)):
+-        value = next((value for value in workers(current) if value["workerId"] == worker_id), None)
+-        if not value:
+-            raise HTTPException(404, "Worker not found")
+-        return value
+-
+-    @router.get("/api/v1/datasets")
+-    def datasets(current=Depends(scoped)):
+-        return registry.list(current["workspaceId"], "dataset")
+-
+-    app.include_router(router)
++from .api.inventory import install_routes as install_routes
+diff --git a/backend/routes_operations.py b/backend/routes_operations.py
+index d06008ee..a273260e 100644
+--- a/backend/routes_operations.py
++++ b/backend/routes_operations.py
+@@ -1,136 +1,3 @@
+-"""Identity and membership operations, independent of runtime numerical state."""
++"""Compatibility import retained during the three-layer extraction."""
+ 
+-from .request_models import AccountEdit, Resume
+-from .policies import dispatch_held, set_disabled_workers, storage_status
+-import json
+-
+-from fastapi import Depends, HTTPException, Response
+-
+-from .store import ACTIVE
+-
+-
+-from fastapi import APIRouter
+-
+-
+-def install_routes(app, store, runtime, platform):
+-    router = APIRouter()
+-
+-    @router.get("/api/v1/platform/users")
+-    def users(current=Depends(platform)):
+-        with store.db() as db:
+-            return [json.loads(r[0]) for r in db.execute("SELECT profile FROM users ORDER BY rowid")]
+-
+-    @router.patch("/api/v1/platform/users/{user_id}")
+-    def edit_account(user_id: str, body: AccountEdit, current=Depends(platform)):
+-        with store.db() as db:
+-            platform(current)
+-            old = store.profile(user_id)
+-            if not old:
+-                raise HTTPException(404, "Account not found")
+-            updated = {**old, **body.model_dump(exclude_none=True)}
+-            if old.get("platformAdmin") and (not updated["platformAdmin"] or updated["accountStatus"] != "ACTIVE"):
+-                others = [json.loads(r[0]) for r in db.execute("SELECT profile FROM users WHERE id<>?", (user_id,))]
+-                if not any(p.get("platformAdmin") and p["accountStatus"] == "ACTIVE" for p in others):
+-                    raise HTTPException(409, "Keep at least one active platform administrator")
+-            if user_id == current["userId"] and (
+-                updated.get("accountStatus") != "ACTIVE"
+-                or (old.get("platformAdmin") and not updated.get("platformAdmin"))
+-                or (old.get("canCreateWorkspace") and not updated.get("canCreateWorkspace"))
+-            ):
+-                raise HTTPException(409, "You cannot remove your own access or permissions")
+-            db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(updated), user_id))
+-            if updated["accountStatus"] != "ACTIVE":
+-                db.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
+-                store.cancel_owned(db, user_id)
+-                disabled = store.disabled_workers(db)
+-                for r in db.execute("SELECT worker_id FROM worker_assignments WHERE owner=?", (user_id,)).fetchall():
+-                    disabled.add(r[0])
+-                    store.cancel_selected(db, r[0])
+-                set_disabled_workers(db, disabled)
+-            store.audit(db, current["userId"], "ACCOUNT_UPDATE", user_id)
+-            return updated
+-
+-    @router.post("/api/v1/platform/users/{user_id}/revoke-sessions", status_code=204)
+-    def revoke_sessions(user_id: str, current=Depends(platform)):
+-        with store.db() as db:
+-            platform(current)
+-            if not store.profile(user_id):
+-                raise HTTPException(404, "Account not found")
+-            if user_id == current["userId"]:
+-                raise HTTPException(409, "Use your account security page to sign out other sessions")
+-            db.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
+-            store.audit(db, current["userId"], "REVOKE_SESSIONS", user_id)
+-        return Response(status_code=204)
+-
+-    @router.get("/api/v1/platform/audit")
+-    def platform_audit(current=Depends(platform)):
+-        with store.db() as db:
+-            return [
+-                dict(r)
+-                for r in db.execute("SELECT * FROM audit WHERE workspace_id IS NULL ORDER BY sequence DESC LIMIT 200")
+-            ]
+-
+-    @router.get("/api/v1/platform/operations")
+-    def operations(current=Depends(platform)):
+-        with store.db() as db:
+-            held = dispatch_held(db)
+-            queue_count = db.execute("SELECT count(*) FROM queue").fetchone()[0]
+-            metadata = db.execute('SELECT value FROM settings WHERE key="metadataBackupStatus"').fetchone()
+-        result = {
+-            "dispatchHeld": held,
+-            "queueCount": queue_count,
+-            "runtimeIssue": store.last_error,
+-            **storage_status(runtime),
+-            "metadataBackup": json.loads(metadata[0]) if metadata else None,
+-            "productService": "ONLINE",
+-            "runtimeService": "UNAVAILABLE",
+-            "workers": [],
+-            "reservations": [],
+-        }
+-        try:
+-            cap = runtime.capabilities()
+-            store.ensure_workers(cap["workerIds"])
+-            runs = runtime.runs()
+-            result.update(
+-                runtimeService="ONLINE",
+-                workers=runtime.workers(),
+-                quarantinedWorkerIds=cap.get("quarantinedWorkerIds", []),
+-                reservations=[
+-                    {
+-                        "runId": r["runId"],
+-                        "status": r["status"],
+-                        "workerStates": r.get("workerStates", {}),
+-                        "failureReason": r.get("failureReason"),
+-                    }
+-                    for r in runs
+-                    if r["status"] in ACTIVE
+-                ],
+-                recentFailures=[
+-                    {"runId": r["runId"], "status": r["status"], "failureReason": r.get("failureReason")}
+-                    for r in sorted(runs, key=lambda r: r.get("startedAt", 0), reverse=True)
+-                    if r.get("failureReason")
+-                ][:20],
+-            )
+-        except Exception as error:
+-            result["runtimeIssue"] = type(error).__name__
+-        return result
+-
+-    @router.post("/api/v1/platform/maintenance/resume")
+-    def resume(body: Resume, current=Depends(platform)):
+-        with store.operation_lock:
+-            platform(current)
+-            cap = runtime.capabilities()
+-            with store.db() as db:
+-                selected = {wid for b in store.list() if b["status"] == "QUEUED" for wid in b["workerIds"]}
+-                if not selected <= set(cap["workerIds"]):
+-                    raise HTTPException(
+-                        409,
+-                        "Configure all imported queued worker IDs or cancel their queued experiments before resuming",
+-                    )
+-                db.execute('UPDATE settings SET value="false" WHERE key="dispatchHold"')
+-                # Holds left by the removed M1 maintenance (begin_maintenance) are cleared too.
+-                db.execute('DELETE FROM settings WHERE key IN ("maintenanceId","agentMaintenance")')
+-                store.audit(db, current["userId"], "MAINTENANCE_END", "deployment")
+-        return {"dispatchHeld": False}
+-
+-    app.include_router(router)
++from .api.operations import install_routes as install_routes
+diff --git a/backend/services/agent_polling.py b/backend/services/agent_polling.py
+index b64ffd21..eabed63d 100644
+--- a/backend/services/agent_polling.py
++++ b/backend/services/agent_polling.py
+@@ -79,7 +79,7 @@ class AgentPolling:
+         if body.selfTest is not None:
+             previous = json.loads(old["self_test"])
+             updated = body.selfTest.model_dump()
+-            from ..policies import has_device_reservation
++            from .policies import has_device_reservation
+ 
+             reserved = has_device_reservation(db, device["id"], previous.get("gpuUUID"))
+             if reserved and (
+diff --git a/backend/services/agent_scheduling.py b/backend/services/agent_scheduling.py
+index 7918e492..21f56ecc 100644
+--- a/backend/services/agent_scheduling.py
++++ b/backend/services/agent_scheduling.py
+@@ -2,7 +2,7 @@
+ 
+ from ..constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
+ 
+-from ..policies import (
++from .policies import (
+     v2_qualification as v2_qualification,
+     v3_qualification as v3_qualification,
+     noise_qualification as noise_qualification,
+diff --git a/backend/services/device_state.py b/backend/services/device_state.py
+index 48c0f76e..b7341f56 100644
+--- a/backend/services/device_state.py
++++ b/backend/services/device_state.py
+@@ -1,7 +1,7 @@
+ """DeviceStateService business operations behind the Store facade."""
+ 
+ import json
+-from ..policies import read_setting, set_disabled_workers
++from .policies import read_setting, set_disabled_workers
+ from ..repositories.device_state import DeviceStateRepository as repository
+ 
+ 
+diff --git a/backend/services/devices.py b/backend/services/devices.py
+index 8fffc1a6..32028355 100644
+--- a/backend/services/devices.py
++++ b/backend/services/devices.py
+@@ -30,8 +30,8 @@ from ..agent_commands import AgentCommands
+ from ..agent_polling import AgentPolling
+ from ..model_qualification import ModelQualifications
+ from ..db.migrations import initialize_agent_schema
+-from ..policies import has_device_reservation, processes_drained
+-from ..policies import set_disabled_workers, active_profile, platform_profile
++from .policies import has_device_reservation, processes_drained
++from .policies import set_disabled_workers, active_profile, platform_profile
+ from ..config import load_config
+ import hashlib
+ import json
+diff --git a/backend/services/experiments.py b/backend/services/experiments.py
+index 732afd2a..1f9cdf33 100644
+--- a/backend/services/experiments.py
++++ b/backend/services/experiments.py
+@@ -2,7 +2,7 @@
+ 
+ from ..errors import RuntimeRejected
+ from ..request_models import BackupPolicy, Configuration, MembershipRequest
+-from ..policies import dispatch_held
++from .policies import dispatch_held
+ import hashlib
+ import json
+ import secrets
+diff --git a/backend/services/inventory.py b/backend/services/inventory.py
+new file mode 100644
+index 00000000..0853ce69
+--- /dev/null
++++ b/backend/services/inventory.py
+@@ -0,0 +1,148 @@
++"""Inventory business operations; HTTP responses stay in api/."""
++
++from .policies import storage_status
++from ..core.config import load_config
++import json
++import os
++from ..core.constants import ACTIVE
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.inventory import InventoryRepository as repository
++
++
++def _private_config():
++    private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
++    if not private_root:
++        return {}
++    try:
++        return load_config(private_root)
++    except (OSError, ValueError):
++        return {}
++
++
++def operations(store, runtime, scoped, visible, capabilities, registry):
++    def health():
++        # Quick URLs can rotate while this CPU service retains its identity.
++        ui_url = _private_config().get("publicWebUrl") or os.environ.get("HETEROES_UI_URL")
++        backend = getattr(runtime, "storage_backend", None)
++        return {
++            "ok": True,
++            "dataSource": "real",
++            "runtimeIssue": store.last_error,
++            # Shipped r10 apps require these protocol capability fields.
++            "agentMode": True,
++            "deviceConfiguration": True,
++            "recipeVersions": [1, 2, 3],
++            **storage_status(runtime),
++            "serverInstanceId": getattr(runtime, "server_instance_id", None),
++            **({"uiUrl": ui_url} if ui_url else {}),
++            # the private lab address is for signed-in members only: see /api/v1/capabilities (SECURITY-NOTES)
++        }
++
++    def get_capabilities(*, current):
++        cap = capabilities()
++        assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
++        coordinators = [
++            {
++                "deviceId": d["deviceId"],
++                "workerId": d["workerId"],
++                "displayName": d["displayName"],
++                "platform": d["selfTest"].get("platform", "linux"),
++                # measured by the device's self-test: the form shows seconds per generation from it
++                "updateSecondsPerSeed": d["selfTest"].get("updateSecondsPerSeed"),
++            }
++            for d in runtime.devices()
++            if d["workspaceId"] == current["workspaceId"]
++            and d["approvalStatus"] == "APPROVED"
++            and d["selfTest"]["coordinator"]
++        ]
++        with store.db() as db:
++            row = repository.get_capabilities_select_workspace_settings(db, (current["workspaceId"],)).fetchone()
++        default = row[0] if row else None
++        private = _private_config()
++        return {
++            **cap,
++            "workerIds": [w for w in store.assignments(current["workspaceId"]) if w in cap["workerIds"]],
++            "coordinatorDevices": coordinators,
++            # the lab's default, only while it is still an approved coordinator here
++            "defaultCoordinatorDeviceId": default if any(d["deviceId"] == default for d in coordinators) else None,
++            "quarantinedWorkerIds": [w for w in cap.get("quarantinedWorkerIds", []) if w in assigned],
++            # the private lab address, for members (moved here from the public health check, SECURITY-NOTES)
++            **({"privateLabUrl": private.get("bulkApiUrl", private["apiUrl"])} if private.get("apiUrl") else {}),
++        }
++
++    def resources(*, current):
++        with store.db() as db:
++            members = [
++                {
++                    "user": {
++                        k: v
++                        for k, v in json.loads(row["profile"]).items()
++                        if k not in ("platformAdmin", "accountStatus")
++                    },
++                    "role": row["role"],
++                }
++                for row in repository.resources_select_memberships(db, (current["workspaceId"],))
++            ]
++        assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
++        busy = list(
++            {worker for run in store.list() if run["status"] in ACTIVE for worker in run["workerIds"]} & assigned
++        )
++        return {"members": members, "busyWorkerIds": busy, "reservedWorkerIds": busy}
++
++    def models(*, current):
++        cap = capabilities()
++        return [
++            {
++                "modelArtifactId": "qwen-pinned",
++                "workspaceId": current["workspaceId"],
++                "ownerUserId": "runtime",
++                "name": cap["modelId"],
++                "reference": cap["modelId"],
++                "revision": cap["modelRevision"],
++                "source": "REFERENCE",
++                "status": "REGISTERED",
++            }
++        ] + registry.list(current["workspaceId"], "model")
++
++    def workers(*, current):
++        try:
++            values = runtime.workers()
++        except Exception:
++            raise ServiceError(503, "Worker registry unavailable") from None
++        # Shared GPU ownership is visible; another participant's experiment details are private.
++        permitted = {body["experimentId"] for body in visible(current)}
++        assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
++        enabled = set(store.assignments(current["workspaceId"]))
++        return [
++            {
++                **value,
++                "contributionEnabled": value["workerId"] in enabled and value.get("contributionEnabled", True),
++                "allocatedTo": value.get("allocatedTo")
++                if value.get("allocatedTo") in permitted
++                else "Workspace pool busy"
++                if value.get("allocatedTo")
++                else None,
++            }
++            for value in values
++            if value["workerId"] in assigned
++        ]
++
++    def worker(worker_id: str, *, current):
++        value = next((value for value in workers(current=current) if value["workerId"] == worker_id), None)
++        if not value:
++            raise ServiceError(404, "Worker not found")
++        return value
++
++    def datasets(*, current):
++        return registry.list(current["workspaceId"], "dataset")
++
++    return SimpleNamespace(
++        health=health,
++        get_capabilities=get_capabilities,
++        resources=resources,
++        models=models,
++        workers=workers,
++        worker=worker,
++        datasets=datasets,
++    )
+diff --git a/backend/services/model_qualification.py b/backend/services/model_qualification.py
+index 0d19c146..7af9e689 100644
+--- a/backend/services/model_qualification.py
++++ b/backend/services/model_qualification.py
+@@ -7,7 +7,7 @@ import time
+ import uuid
+ from heteroes.canonical import canonical_json_hash
+ from heteroes.product.model_qualification import STRICT_DECODER, check_reference, qualification_key, verify_observations
+-from ..policies import has_device_reservation, noise_qualification
++from .policies import has_device_reservation, noise_qualification
+ from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
+ from heteroes.product.cpu_coordinator import coordinator_only
+ from types import SimpleNamespace
+diff --git a/backend/services/operations.py b/backend/services/operations.py
+new file mode 100644
+index 00000000..02b4f2f2
+--- /dev/null
++++ b/backend/services/operations.py
+@@ -0,0 +1,129 @@
++"""Operations business operations; HTTP responses stay in api/."""
++
++from ..core.request_models import AccountEdit, Resume
++from .policies import dispatch_held, set_disabled_workers, storage_status
++import json
++from ..core.constants import ACTIVE
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.operations import OperationsRepository as repository
++
++
++def operations(store, runtime, platform):
++    def users(*, current):
++        with store.db() as db:
++            return [json.loads(r[0]) for r in repository.users_select_users(db, ())]
++
++    def edit_account(user_id: str, body: AccountEdit, *, current):
++        with store.db() as db:
++            platform(current)
++            old = store.profile(user_id)
++            if not old:
++                raise ServiceError(404, "Account not found")
++            updated = {**old, **body.model_dump(exclude_none=True)}
++            if old.get("platformAdmin") and (not updated["platformAdmin"] or updated["accountStatus"] != "ACTIVE"):
++                others = [json.loads(r[0]) for r in repository.edit_account_select_users(db, (user_id,))]
++                if not any(p.get("platformAdmin") and p["accountStatus"] == "ACTIVE" for p in others):
++                    raise ServiceError(409, "Keep at least one active platform administrator")
++            if user_id == current["userId"] and (
++                updated.get("accountStatus") != "ACTIVE"
++                or (old.get("platformAdmin") and not updated.get("platformAdmin"))
++                or (old.get("canCreateWorkspace") and not updated.get("canCreateWorkspace"))
++            ):
++                raise ServiceError(409, "You cannot remove your own access or permissions")
++            repository.edit_account_update_users(db, (json.dumps(updated), user_id))
++            if updated["accountStatus"] != "ACTIVE":
++                repository.edit_account_delete_sessions(db, (user_id,))
++                store.cancel_owned(db, user_id)
++                disabled = store.disabled_workers(db)
++                for r in repository.edit_account_select_worker_assignments(db, (user_id,)).fetchall():
++                    disabled.add(r[0])
++                    store.cancel_selected(db, r[0])
++                set_disabled_workers(db, disabled)
++            store.audit(db, current["userId"], "ACCOUNT_UPDATE", user_id)
++            return updated
++
++    def revoke_sessions(user_id: str, *, current):
++        with store.db() as db:
++            platform(current)
++            if not store.profile(user_id):
++                raise ServiceError(404, "Account not found")
++            if user_id == current["userId"]:
++                raise ServiceError(409, "Use your account security page to sign out other sessions")
++            repository.revoke_sessions_delete_sessions(db, (user_id,))
++            store.audit(db, current["userId"], "REVOKE_SESSIONS", user_id)
++        return None
++
++    def platform_audit(*, current):
++        with store.db() as db:
++            return [dict(r) for r in repository.platform_audit_select_audit(db, ())]
++
++    def operations(*, current):
++        with store.db() as db:
++            held = dispatch_held(db)
++            queue_count = repository.operations_select_queue(db, ()).fetchone()[0]
++            metadata = repository.operations_select_settings(db, ()).fetchone()
++        result = {
++            "dispatchHeld": held,
++            "queueCount": queue_count,
++            "runtimeIssue": store.last_error,
++            **storage_status(runtime),
++            "metadataBackup": json.loads(metadata[0]) if metadata else None,
++            "productService": "ONLINE",
++            "runtimeService": "UNAVAILABLE",
++            "workers": [],
++            "reservations": [],
++        }
++        try:
++            cap = runtime.capabilities()
++            store.ensure_workers(cap["workerIds"])
++            runs = runtime.runs()
++            result.update(
++                runtimeService="ONLINE",
++                workers=runtime.workers(),
++                quarantinedWorkerIds=cap.get("quarantinedWorkerIds", []),
++                reservations=[
++                    {
++                        "runId": r["runId"],
++                        "status": r["status"],
++                        "workerStates": r.get("workerStates", {}),
++                        "failureReason": r.get("failureReason"),
++                    }
++                    for r in runs
++                    if r["status"] in ACTIVE
++                ],
++                recentFailures=[
++                    {"runId": r["runId"], "status": r["status"], "failureReason": r.get("failureReason")}
++                    for r in sorted(runs, key=lambda r: r.get("startedAt", 0), reverse=True)
++                    if r.get("failureReason")
++                ][:20],
++            )
++        except Exception as error:
++            result["runtimeIssue"] = type(error).__name__
++        return result
++
++    def resume(body: Resume, *, current):
++        with store.operation_lock:
++            platform(current)
++            cap = runtime.capabilities()
++            with store.db() as db:
++                selected = {wid for b in store.list() if b["status"] == "QUEUED" for wid in b["workerIds"]}
++                if not selected <= set(cap["workerIds"]):
++                    raise ServiceError(
++                        409,
++                        "Configure all imported queued worker IDs or cancel their queued experiments before resuming",
++                    )
++                repository.resume_update_settings(db, ())
++                # Holds left by the removed M1 maintenance (begin_maintenance) are cleared too.
++                repository.resume_delete_settings(db, ())
++                store.audit(db, current["userId"], "MAINTENANCE_END", "deployment")
++        return {"dispatchHeld": False}
++
++    return SimpleNamespace(
++        users=users,
++        edit_account=edit_account,
++        revoke_sessions=revoke_sessions,
++        platform_audit=platform_audit,
++        operations=operations,
++        resume=resume,
++    )
+diff --git a/backend/services/policies.py b/backend/services/policies.py
+new file mode 100644
+index 00000000..d3aee862
+--- /dev/null
++++ b/backend/services/policies.py
+@@ -0,0 +1,144 @@
++"""Shared product validation and durable settings operations."""
++
++from ..repositories.policies import PoliciesRepository as repository
++import json
++from ..core.errors import ServiceError
++from ..core.models import Strict as Strict, FiniteStrict as FiniteStrict
++
++
++def backup_policy(value):
++    if (
++        not isinstance(value, dict)
++        or set(value) != {"interval", "retain"}
++        or any(type(item) is not int or not 1 <= item <= 1000 for item in value.values())
++    ):
++        raise ValueError("Backup interval and retention must be integers from 1 to 1000")
++    return dict(value)
++
++
++def read_setting(db, key, default=None):
++    row = repository.read_setting_settings(db, (key,)).fetchone()
++    return json.loads(row[0]) if row else default
++
++
++def dispatch_held(db):
++    return read_setting(db, "dispatchHold", False)
++
++
++def set_disabled_workers(db, workers):
++    repository.set_disabled_workers_settings(db, ("disabledWorkers", json.dumps(sorted(workers))))
++
++
++def active_profile(store, current, message="Active account required"):
++    profile = store.profile(current["userId"])
++    if not profile or profile["accountStatus"] != "ACTIVE":
++        raise ServiceError(403, message)
++    return profile
++
++
++def platform_profile(profile, message="Platform administrator required"):
++    if not profile.get("platformAdmin"):
++        raise ServiceError(403, message)
++    return profile
++
++
++def v2_qualification(profile, model_hash):
++    if profile.get("platform") == "windows" or 2 not in profile.get("recipeVersions", []):
++        return "recipe"
++    if model_hash not in profile.get("qualifiedModelHashes", []):
++        return "model"
++    return None
++
++
++def v3_qualification(profile, model_hash, engine=None, decoder=None):
++    # A native Windows profile reaches [3] only through the reference-bound worker-only validation of SelfTest.
++    if profile.get("recipeVersions") != [3]:
++        return "recipe"
++    from heteroes.noise.contracts import ENGINE_VERSION
++    from heteroes.product.model_qualification import qualification_key
++
++    engine = engine or ENGINE_VERSION
++    key = qualification_key(engine, decoder if decoder in (None, "strict_b22_v1") else None)
++    by_engine = profile.get("qualifiedModelsByNoiseEngine")
++    hashes = (
++        by_engine.get(key, [])
++        if by_engine is not None
++        else (
++            profile.get("qualifiedModelHashes", [])
++            if key == engine and profile.get("noiseVersion", ENGINE_VERSION) == engine
++            else []
++        )
++    )
++    if model_hash not in hashes:
++        return "model"
++    return None
++
++
++def strict_layout(body, coordinator, workers):
++    """
++    Why a strict run cannot use these devices, or None (D1, ADR-013: one weight set per GPU). The coordinator validates
++    and exports with the strict decoder, so it needs a GPU, and that GPU holds its model for the whole run: no worker of
++    the run may be the same device or the same physical GPU. Earlier recipes keep their layouts.
++    """
++    if body.get("decodeEngine") != "strict_b22_v1" or coordinator is None:
++        return None
++    from heteroes.product.cpu_coordinator import coordinator_only
++
++    if coordinator_only(coordinator["selfTest"]):
++        return "A strict run needs a GPU coordinator: its validation and export use the strict decoder"
++    gpu = coordinator.get("physicalResourceId")
++    if any(
++        w["deviceId"] == coordinator["deviceId"] or (gpu is not None and w.get("physicalResourceId") == gpu)
++        for w in workers
++        if w
++    ):
++        return "A strict run keeps one weight set per GPU: its coordinator's GPU cannot also be one of its workers"
++    return None
++
++
++def noise_qualification(profile, engine):
++    """Legacy reports prove v1 only; connectivity never proves engine support."""
++    from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
++
++    engines = profile.get("supportedNoiseEngines")
++    if engines is None:
++        return None if engine == ENGINE_VERSION else "noise"
++    expected = CPU_NOISE_FINGERPRINTS.get(engine)
++    return None if expected is not None and engines.get(engine) == expected else "noise"
++
++
++def display_identity(device, *, source="recorded"):
++    """Display metadata only: never part of a recipe, seed or config hash."""
++    import time
++
++    profile = device.get("selfTest") or {}
++    return {
++        "name": device.get("displayName") or device["workerId"],
++        "gpuName": profile.get("gpuName"),
++        "gpuIndex": profile.get("gpuIndex"),
++        "gpuUUID": device.get("physicalResourceId"),
++        "deviceId": device.get("deviceId"),
++        "ownerUserId": device.get("ownerUserId"),
++        "capturedAt": time.time(),
++        "source": source,
++    }
++
++
++def storage_status(runtime):
++    backend = runtime.storage_backend
++    return {
++        "cloudStorageConfigured": False,
++        "recoveryStorageConfigured": backend is not None,
++        "recoveryStorageMode": getattr(backend, "mode", "local") if backend else None,
++    }
++
++
++def has_device_reservation(db, device_id, gpu_uuid=None):
++    reserved = repository.has_device_reservation_device_reservations(db, (device_id,)).fetchone()
++    physical = repository.has_device_reservation_physical_reservations(db, (gpu_uuid,)).fetchone()
++    probe = repository.has_device_reservation_model_probe_reservations(db, (device_id, gpu_uuid)).fetchone()
++    return bool(reserved or physical or probe)
++
++
++def processes_drained(processes):
++    return all(p.get("coordinatorAlive") is False and p.get("workerAlive") is False for p in processes)
+diff --git a/backend/services/recovery_storage.py b/backend/services/recovery_storage.py
+index 25cebbe9..0dce81ab 100644
+--- a/backend/services/recovery_storage.py
++++ b/backend/services/recovery_storage.py
+@@ -4,7 +4,7 @@ from ..core.storage_models import Begin, Finish
+ import secrets
+ import logging
+ from ..db.migrations import initialize_recovery_schema, initialize_recovery_downloads_schema
+-from ..policies import backup_policy
++from .policies import backup_policy
+ import hashlib
+ import json
+ import re
+diff --git a/backend/services/scheduling.py b/backend/services/scheduling.py
+index 4f79eb00..803104b6 100644
+--- a/backend/services/scheduling.py
++++ b/backend/services/scheduling.py
+@@ -4,7 +4,7 @@ import json
+ from ..core.clock import now
+ from ..core.constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
+ from ..errors import RuntimeRejected
+-from ..policies import dispatch_held
++from .policies import dispatch_held
+ from ..repositories.scheduling import SchedulingRepository as repository
+ from ..db.transactions import begin_write
+ 
+diff --git a/backend/services/study_registry.py b/backend/services/study_registry.py
+index 97368209..04a9dd5b 100644
+--- a/backend/services/study_registry.py
++++ b/backend/services/study_registry.py
+@@ -9,7 +9,7 @@ import uuid
+ from heteroes.study.data import dataset, canonical
+ from heteroes.study.models import validate as validate_model
+ from heteroes.v3 import data as v3data
+-from ..policies import platform_profile
++from .policies import platform_profile
+ from types import SimpleNamespace
+ from ..core.errors import ServiceError
+ from ..repositories.study_registry import StudyRegistryRepository as repository
+diff --git a/backend/services/validation.py b/backend/services/validation.py
+new file mode 100644
+index 00000000..abd0b7eb
+--- /dev/null
++++ b/backend/services/validation.py
+@@ -0,0 +1,183 @@
++from .policies import backup_policy as validated_backup_policy, strict_layout, v2_qualification, v3_qualification
++
++from ..core.errors import ServiceError
++from ..core.constants import V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
++from heteroes.catalog import DECODE_ENGINES
++from heteroes.product.cpu_coordinator import coordinator_only
++
++
++def freeze_python_code(body):
++    """
++    Pin uploaded researcher code (owner 2026-10-20: Python rewards are open on the web lab). Each file gets its SHA-256,
++    which also completes a Python scorer spec and a `python@1` coefficient rule; validate_options then checks that the plan
++    pins exactly these files. The code runs only on the coordinator device, in a child process with a time limit.
++    """
++    from heteroes.v3.scoring import source_sha256
++
++    entries = body.get("pythonCode") or []
++    if not entries:
++        body.pop("pythonCode", None)
++        return
++    frozen = []
++    for entry in entries:
++        if set(entry) - {"codeSha256"} != {"role", "name", "function", "source"} or not isinstance(
++            entry["source"], str
++        ):
++            raise ValueError("A Python code file has a role, name, function and source")
++        frozen.append({**entry, "codeSha256": source_sha256(str(entry["name"]), entry["source"].encode())})
++    for entry in frozen:
++        if entry["role"] == "scorer" and body["scorer"].get("kind") == "python":
++            body["scorer"] = {**body["scorer"], "codeSha256": entry["codeSha256"]}
++        if entry["role"] == "coefficients" and body["coefficientRule"].startswith("python@1"):  # also a re-upload
++            body["coefficientRule"] = "python@1:" + entry["codeSha256"]
++        if entry["role"] == "sampler" and str(body.get("sampler", "")).startswith("python@1"):
++            body["sampler"] = "python@1:" + entry["codeSha256"]
++    body["pythonCode"] = frozen
++
++
++def validate_configuration(config, current, *, store, runtime, registry, scoped, capabilities):
++    current = scoped(current, current["workspaceId"])
++    cap = capabilities()
++    body = config.model_dump()
++    if body.get("recipeVersion") == 3:
++        from heteroes.noise.contracts import ENGINE_V2
++
++        body["noiseEngineVersion"] = body.get("noiseEngineVersion") or ENGINE_V2
++    else:
++        body.pop("noiseEngineVersion", None)
++    if body.get("candidateSeedNamespace") is None:
++        body.pop("candidateSeedNamespace", None)
++    if body.get("promptFormat") is None:
++        body.pop("promptFormat", None)
++    co = next((d for d in runtime.devices() if d["deviceId"] == body["coordinatorDeviceId"]), None)
++    if (
++        not co
++        or co["approvalStatus"] != "APPROVED"
++        or co["workspaceId"] != current["workspaceId"]
++        or not co["selfTest"]["coordinator"]
++    ):
++        raise ServiceError(422, "Select an approved coordinator in this workspace")
++    if coordinator_only(co["selfTest"]) and body.get("recipeVersion") != 3:
++        raise ServiceError(422, "CPU coordinators require Recipe v3")
++    # Windows draws another initial LoRA adapter from the same seed (torch uniform_), so it never creates one
++    if (
++        body.get("recipeVersion") == 3
++        and (body.get("weightSpace") or {}).get("kind") == "lora"
++        and co["selfTest"].get("platform") == "windows"
++    ):
++        raise ServiceError(422, "A Windows coordinator cannot create the LoRA adapter; choose a Linux coordinator")
++    try:
++        body["backupPolicy"] = validated_backup_policy(body.get("backupPolicy") or {"interval": 1, "retain": 3})
++    except ValueError as error:
++        raise ServiceError(422, str(error)) from None
++    if body["recipeVersion"] in (2, 3):
++        model = registry.get(body["modelArtifactId"], current["workspaceId"], "model")
++        if model["status"] not in ("READY", "REGISTERED") or model["reference"] != body["modelName"]:
++            raise ServiceError(422, "Model is unavailable or its name differs")
++        if len(body["datasetIds"]) != 1:
++            raise ServiceError(422, "Select one frozen dataset")
++        data = registry.get(body["datasetIds"][0], current["workspaceId"], "dataset")
++        if (
++            body["batchSize"] > data["counts"]["train"]
++            or body["sigmaSchedule"] not in ("constant", "cosine")
++            or body["sigmaMinimum"] > body["sigma"]
++        ):
++            raise ServiceError(422, "Invalid batch size or sigma schedule")
++        version = body["recipeVersion"]
++        if version == 2:
++            from heteroes.study.models import validate as validate_model
++
++            try:
++                validate_model(model["manifest"])
++            except ValueError as error:
++                raise ServiceError(422, str(error)) from None
++        if data.get("recipeVersion", 2) != version:
++            raise ServiceError(422, "Dataset format differs from the selected recipe")
++        if version == 3:
++            from heteroes.v3.options import validate_options
++
++            # Earlier managed runs carry no evalDtype and keep their documents; only the strict decoder sets it (FP16)
++            if body.get("evalDtype") is not None and body["decodeEngine"] != "strict_b22_v1":
++                raise ServiceError(422, "evalDtype is set only for the strict decoder")
++            if body.get("evalDtype") is None:
++                body.pop("evalDtype", None)
++            try:
++                freeze_python_code(body)
++                validate_options(body, allow_python=True)
++                config = body["scorer"]["config"]
++                fields = [config[k] for k in sorted(config) if k.endswith("Field")] or ["answer"]
++                # a Python scorer reads the rows itself; a declarative one names its columns
++                if body["scorer"]["kind"] == "declarative" and not set(fields) <= set(data.get("columns", [])):
++                    raise ValueError("Scorer fields must exist in every dataset row")
++            except (ValueError, TypeError, KeyError) as error:
++                raise ServiceError(422, str(error)) from None
++        # Recipe v3 may choose the compacting decoder (validate_options above); Recipe v2 keeps generate()
++        if body["task"] != ("text_v3" if version == 3 else "text_math_v2") or (
++            version == 2 and body["decodeEngine"] != "hf_generate"
++        ):
++            raise ServiceError(422, "Recipe v2 uses exact math and the HF decoder")
++        selected = [
++            d
++            for d in runtime.devices()
++            if d["deviceId"] == body["coordinatorDeviceId"] or d["workerId"] in body["workerIds"]
++        ]
++        coordinator = next((d for d in selected if d["deviceId"] == body["coordinatorDeviceId"]), None)
++        workers = [d for d in selected if d["workerId"] in body["workerIds"]]
++        if version == 3 and (reason := strict_layout(body, coordinator, workers)):
++            raise ServiceError(422, reason)
++        for d in selected:
++            profile = d["selfTest"]
++            if version == 3 and coordinator_only(profile) and d["deviceId"] == body["coordinatorDeviceId"]:
++                continue  # coordination proves update arithmetic, not GPU-compatible texts for every model
++            qualification = (
++                v3_qualification(profile, model["manifestHash"], body["noiseEngineVersion"], body["decodeEngine"])
++                if version == 3
++                else v2_qualification(profile, model["manifestHash"])
++            )
++            if qualification == "recipe":
++                raise ServiceError(
++                    422, f"Selected device requires Recipe v{version} qualification; Windows remains v1 worker-only"
++                )
++            if qualification == "model":
++                raise ServiceError(
++                    422,
++                    "Qualify every selected device for this pinned model with the strict decoder"
++                    if body["decodeEngine"] == "strict_b22_v1"
++                    else "Qualify every selected device for this pinned model",
++                )
++        body.update(
++            modelManifest=model["manifest"],
++            modelSource=model["source"],
++            datasetObjectSha256=data["objectSha256"],
++            datasetIdentity=data["identity"],
++        )
++        if data.get("splitObjects"):  # a file-backed dataset: its split files may be transferred too
++            body["datasetSplitObjects"] = data["splitObjects"]
++    else:
++        if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
++            raise ServiceError(422, "Only the pinned Qwen model is supported for Recipe v1")
++        if body["task"] not in cap["workloads"] or body["decodeEngine"] not in DECODE_ENGINES or body["datasetIds"]:
++            raise ServiceError(422, "Select a built-in workload and decoder for Recipe v1")
++        for key in (
++            "recipeVersion",
++            "batchSize",
++            "batchSeed",
++            "sigmaSchedule",
++            "sigmaMinimum",
++            "maxNewTokens",
++            "validationInterval",
++        ):
++            body.pop(key)
++    if body.get("recipeVersion") != 3:
++        for key in (*V3_KEYS, *V3_UPDATE_KEYS, *V3_CODE_KEYS):
++            body.pop(key, None)
++    if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
++        raise ServiceError(422, "Unsupported scheduling policy or synchronization mode")
++    if len(set(body["workerIds"])) != len(body["workerIds"]) or not set(body["workerIds"]) <= set(cap["workerIds"]):
++        raise ServiceError(422, "Select configured workers without duplicates")
++    if set(body["workerIds"]) & set(cap.get("quarantinedWorkerIds", [])):
++        raise ServiceError(422, "Selected worker is quarantined after a restore mismatch")
++    store.ensure_workers(cap["workerIds"])
++    if not set(body["workerIds"]) <= set(store.assignments(current["workspaceId"])):
++        raise ServiceError(422, "Select GPUs assigned to this workspace")
++    return body
+diff --git a/backend/services/workspaces.py b/backend/services/workspaces.py
+index 6719022d..1d0e50a6 100644
+--- a/backend/services/workspaces.py
++++ b/backend/services/workspaces.py
+@@ -4,7 +4,7 @@ import json
+ import uuid
+ from types import SimpleNamespace
+ from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+-from ..policies import set_disabled_workers
++from .policies import set_disabled_workers
+ from ..core.clock import now
+ from ..core.errors import ServiceError, DatabaseConflict
+ from ..repositories.workspaces import WorkspacesRepository as repository
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index 7e886bff..3c423ce5 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -79,6 +79,17 @@ def test_account_layer_boundaries():
+         "storage/local_backend.py",
+         "api/recovery_storage.py",
+         "api/local_storage.py",
++        "api/operations.py",
++        "services/operations.py",
++        "api/inventory.py",
++        "services/inventory.py",
++        "services/policies.py",
++        "services/validation.py",
++        "core/request_models.py",
++        "core/config.py",
++        "core/throttle.py",
++        "core/addresses.py",
++        "core/monitor_models.py",
+     ):
+         tree = ast.parse((backend / relative).read_text())
+         for node in ast.walk(tree):
+diff --git a/backend/tests/test_operations_layers.py b/backend/tests/test_operations_layers.py
+new file mode 100644
+index 00000000..d03145d3
+--- /dev/null
++++ b/backend/tests/test_operations_layers.py
+@@ -0,0 +1,87 @@
++"""Shared business authorization and validation do not require transport errors."""
++
++from types import SimpleNamespace
++import pytest
++from fastapi import HTTPException
++
++from backend.core.errors import ServiceError
++from backend.policies import active_profile, platform_profile
++from backend.request_models import Configuration
++from backend.validation import validate_configuration as legacy_validate
++
++
++def test_shared_authorization_uses_plain_errors_and_rechecks_durable_access(lab):
++    _, store, _, _ = lab
++    with pytest.raises(ServiceError) as missing:
++        active_profile(store, {"userId": "missing"})
++    assert missing.value.status_code == 403
++    profile = active_profile(store, {"userId": "admin"})
++    assert platform_profile(profile) is profile
++    with pytest.raises(ServiceError) as denied:
++        platform_profile({"platformAdmin": False})
++    assert denied.value.status_code == 403
++
++
++def test_configuration_service_errors_and_legacy_http_errors_keep_the_same_contract():
++    from backend.services.validation import validate_configuration
++
++    config = Configuration(
++        name="Layer fixture", modelName="fixture-model", workerIds=["worker"], coordinatorDeviceId="missing"
++    )
++    current = {"workspaceId": "lab"}
++    dependencies = dict(
++        store=None,
++        runtime=SimpleNamespace(devices=lambda: []),
++        registry=None,
++        scoped=lambda c, w: c,
++        capabilities=lambda: {},
++    )
++    with pytest.raises(ServiceError) as business:
++        validate_configuration(config, current, **dependencies)
++    with pytest.raises(HTTPException) as http:
++        legacy_validate(config, current, **dependencies)
++    assert business.value.status_code == http.value.status_code == 422
++    assert business.value.detail == http.value.detail
++
++
++def test_explicit_resume_clears_the_hold_and_old_maintenance_flags(lab):
++    client, store, _, owner = lab
++    with store.db() as db:
++        for key, value in (
++            ("dispatchHold", "true"),
++            ("maintenanceId", '"old-fixture-maintenance"'),
++            ("agentMaintenance", "true"),
++        ):
++            db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, value))
++    response = client.post(
++        "/api/v1/platform/maintenance/resume", headers=owner, json={"workerConfigurationConfirmed": True}
++    )
++    assert response.status_code == 200 and response.json() == {"dispatchHeld": False}
++    with store.db() as db:
++        assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0] == "false"
++        assert (
++            db.execute("SELECT count(*) FROM settings WHERE key IN ('maintenanceId','agentMaintenance')").fetchone()[0]
++            == 0
++        )
++        assert db.execute("SELECT count(*) FROM audit WHERE action='MAINTENANCE_END'").fetchone()[0] == 1
++
++
++def test_resume_keeps_hold_when_imported_queued_workers_are_not_configured(lab):
++    from labkit import pair, queued
++
++    client, store, runtime, owner = lab
++    device, _ = pair(lab)
++    run = queued(lab, device)
++    body = store.get(run)
++    body["workerIds"] = ["unknown-imported-worker"]
++    with store.db() as db:
++        store.save(db, body)
++        db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("dispatchHold", "true"))
++    response = client.post(
++        "/api/v1/platform/maintenance/resume", headers=owner, json={"workerConfigurationConfirmed": True}
++    )
++    assert response.status_code == 409
++    assert store.get(run)["status"] == "QUEUED" and runtime.runs() == []
++    with store.db() as db:
++        assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0] == "true"
++        assert db.execute("SELECT count(*) FROM audit WHERE action='MAINTENANCE_END'").fetchone()[0] == 0
+diff --git a/backend/throttle.py b/backend/throttle.py
+index 77510f92..68d6e0a8 100644
+--- a/backend/throttle.py
++++ b/backend/throttle.py
+@@ -1,75 +1,6 @@
+-"""Slow down password guessing and registration spam. Kept in memory: a restart forgets it, which is acceptable."""
++"""Compatibility namespace retained during core extraction."""
+ 
+-from collections import deque
+-import ipaddress
+-import threading
+-import time
++import sys
++from .core import throttle as _implementation
+ 
+-TAILSCALE = ipaddress.ip_network("100.64.0.0/10")
+-
+-
+-class Throttle:
+-    """At most `limit` recorded attempts per key within `window` seconds."""
+-
+-    def __init__(self, limit, window, clock=time.monotonic):
+-        self.limit, self.window, self.clock = limit, window, clock
+-        self.attempts = {}
+-        self.lock = threading.Lock()
+-
+-    def _recent(self, key, now):
+-        queue = self.attempts.get(key)
+-        if queue is None:
+-            return None
+-        while queue and now - queue[0] >= self.window:
+-            queue.popleft()
+-        if not queue:
+-            del self.attempts[key]
+-            return None
+-        return queue
+-
+-    def retry_after(self, key):
+-        """Seconds to wait before this key may try again; 0 if it may try now."""
+-        with self.lock:
+-            now = self.clock()
+-            queue = self._recent(key, now)
+-            if queue is None or len(queue) < self.limit:
+-                return 0
+-            return max(1, int(queue[0] + self.window - now + 0.999))
+-
+-    def record(self, key):
+-        with self.lock:
+-            now = self.clock()
+-            if len(self.attempts) > 256:
+-                for stale in list(self.attempts):
+-                    self._recent(stale, now)
+-            queue = self._recent(key, now)
+-            if queue is None:
+-                queue = self.attempts.setdefault(key, deque())
+-            queue.append(now)
+-
+-    def clear(self, key):
+-        with self.lock:
+-            self.attempts.pop(key, None)
+-
+-
+-def client_address(peer, headers):
+-    """The caller's address. Forwarding headers are believed only when the direct peer is a local proxy
+-    (loopback, private or Tailscale); a public peer cannot choose its own identity."""
+-    if not peer:
+-        return "unknown"
+-    try:
+-        address = ipaddress.ip_address(peer)
+-    except ValueError:
+-        return peer
+-    if not (address.is_loopback or address.is_private or address in TAILSCALE):
+-        return peer
+-
+-    def header(name):
+-        return next((value for key, value in headers.items() if key.lower() == name), "")
+-
+-    for value in (header("cf-connecting-ip"), header("x-forwarded-for").split(",")[0]):
+-        try:
+-            return str(ipaddress.ip_address(value.strip()))
+-        except ValueError:
+-            continue
+-    return peer
++sys.modules[__name__] = _implementation
+diff --git a/backend/validation.py b/backend/validation.py
+index 0e797328..7e738b1a 100644
+--- a/backend/validation.py
++++ b/backend/validation.py
+@@ -1,183 +1,4 @@
+-from .policies import backup_policy as validated_backup_policy, strict_layout, v2_qualification, v3_qualification
++"""Compatibility validation exports."""
+ 
+-from fastapi import HTTPException
+-from .constants import V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
+-from heteroes.catalog import DECODE_ENGINES
+-from heteroes.product.cpu_coordinator import coordinator_only
+-
+-
+-def freeze_python_code(body):
+-    """
+-    Pin uploaded researcher code (owner 2026-10-20: Python rewards are open on the web lab). Each file gets its SHA-256,
+-    which also completes a Python scorer spec and a `python@1` coefficient rule; validate_options then checks that the plan
+-    pins exactly these files. The code runs only on the coordinator device, in a child process with a time limit.
+-    """
+-    from heteroes.v3.scoring import source_sha256
+-
+-    entries = body.get("pythonCode") or []
+-    if not entries:
+-        body.pop("pythonCode", None)
+-        return
+-    frozen = []
+-    for entry in entries:
+-        if set(entry) - {"codeSha256"} != {"role", "name", "function", "source"} or not isinstance(
+-            entry["source"], str
+-        ):
+-            raise ValueError("A Python code file has a role, name, function and source")
+-        frozen.append({**entry, "codeSha256": source_sha256(str(entry["name"]), entry["source"].encode())})
+-    for entry in frozen:
+-        if entry["role"] == "scorer" and body["scorer"].get("kind") == "python":
+-            body["scorer"] = {**body["scorer"], "codeSha256": entry["codeSha256"]}
+-        if entry["role"] == "coefficients" and body["coefficientRule"].startswith("python@1"):  # also a re-upload
+-            body["coefficientRule"] = "python@1:" + entry["codeSha256"]
+-        if entry["role"] == "sampler" and str(body.get("sampler", "")).startswith("python@1"):
+-            body["sampler"] = "python@1:" + entry["codeSha256"]
+-    body["pythonCode"] = frozen
+-
+-
+-def validate_configuration(config, current, *, store, runtime, registry, scoped, capabilities):
+-    current = scoped(current, current["workspaceId"])
+-    cap = capabilities()
+-    body = config.model_dump()
+-    if body.get("recipeVersion") == 3:
+-        from heteroes.noise.contracts import ENGINE_V2
+-
+-        body["noiseEngineVersion"] = body.get("noiseEngineVersion") or ENGINE_V2
+-    else:
+-        body.pop("noiseEngineVersion", None)
+-    if body.get("candidateSeedNamespace") is None:
+-        body.pop("candidateSeedNamespace", None)
+-    if body.get("promptFormat") is None:
+-        body.pop("promptFormat", None)
+-    co = next((d for d in runtime.devices() if d["deviceId"] == body["coordinatorDeviceId"]), None)
+-    if (
+-        not co
+-        or co["approvalStatus"] != "APPROVED"
+-        or co["workspaceId"] != current["workspaceId"]
+-        or not co["selfTest"]["coordinator"]
+-    ):
+-        raise HTTPException(422, "Select an approved coordinator in this workspace")
+-    if coordinator_only(co["selfTest"]) and body.get("recipeVersion") != 3:
+-        raise HTTPException(422, "CPU coordinators require Recipe v3")
+-    # Windows draws another initial LoRA adapter from the same seed (torch uniform_), so it never creates one
+-    if (
+-        body.get("recipeVersion") == 3
+-        and (body.get("weightSpace") or {}).get("kind") == "lora"
+-        and co["selfTest"].get("platform") == "windows"
+-    ):
+-        raise HTTPException(422, "A Windows coordinator cannot create the LoRA adapter; choose a Linux coordinator")
+-    try:
+-        body["backupPolicy"] = validated_backup_policy(body.get("backupPolicy") or {"interval": 1, "retain": 3})
+-    except ValueError as error:
+-        raise HTTPException(422, str(error)) from None
+-    if body["recipeVersion"] in (2, 3):
+-        model = registry.get(body["modelArtifactId"], current["workspaceId"], "model")
+-        if model["status"] not in ("READY", "REGISTERED") or model["reference"] != body["modelName"]:
+-            raise HTTPException(422, "Model is unavailable or its name differs")
+-        if len(body["datasetIds"]) != 1:
+-            raise HTTPException(422, "Select one frozen dataset")
+-        data = registry.get(body["datasetIds"][0], current["workspaceId"], "dataset")
+-        if (
+-            body["batchSize"] > data["counts"]["train"]
+-            or body["sigmaSchedule"] not in ("constant", "cosine")
+-            or body["sigmaMinimum"] > body["sigma"]
+-        ):
+-            raise HTTPException(422, "Invalid batch size or sigma schedule")
+-        version = body["recipeVersion"]
+-        if version == 2:
+-            from heteroes.study.models import validate as validate_model
+-
+-            try:
+-                validate_model(model["manifest"])
+-            except ValueError as error:
+-                raise HTTPException(422, str(error)) from None
+-        if data.get("recipeVersion", 2) != version:
+-            raise HTTPException(422, "Dataset format differs from the selected recipe")
+-        if version == 3:
+-            from heteroes.v3.options import validate_options
+-
+-            # Earlier managed runs carry no evalDtype and keep their documents; only the strict decoder sets it (FP16)
+-            if body.get("evalDtype") is not None and body["decodeEngine"] != "strict_b22_v1":
+-                raise HTTPException(422, "evalDtype is set only for the strict decoder")
+-            if body.get("evalDtype") is None:
+-                body.pop("evalDtype", None)
+-            try:
+-                freeze_python_code(body)
+-                validate_options(body, allow_python=True)
+-                config = body["scorer"]["config"]
+-                fields = [config[k] for k in sorted(config) if k.endswith("Field")] or ["answer"]
+-                # a Python scorer reads the rows itself; a declarative one names its columns
+-                if body["scorer"]["kind"] == "declarative" and not set(fields) <= set(data.get("columns", [])):
+-                    raise ValueError("Scorer fields must exist in every dataset row")
+-            except (ValueError, TypeError, KeyError) as error:
+-                raise HTTPException(422, str(error)) from None
+-        # Recipe v3 may choose the compacting decoder (validate_options above); Recipe v2 keeps generate()
+-        if body["task"] != ("text_v3" if version == 3 else "text_math_v2") or (
+-            version == 2 and body["decodeEngine"] != "hf_generate"
+-        ):
+-            raise HTTPException(422, "Recipe v2 uses exact math and the HF decoder")
+-        selected = [
+-            d
+-            for d in runtime.devices()
+-            if d["deviceId"] == body["coordinatorDeviceId"] or d["workerId"] in body["workerIds"]
+-        ]
+-        coordinator = next((d for d in selected if d["deviceId"] == body["coordinatorDeviceId"]), None)
+-        workers = [d for d in selected if d["workerId"] in body["workerIds"]]
+-        if version == 3 and (reason := strict_layout(body, coordinator, workers)):
+-            raise HTTPException(422, reason)
+-        for d in selected:
+-            profile = d["selfTest"]
+-            if version == 3 and coordinator_only(profile) and d["deviceId"] == body["coordinatorDeviceId"]:
+-                continue  # coordination proves update arithmetic, not GPU-compatible texts for every model
+-            qualification = (
+-                v3_qualification(profile, model["manifestHash"], body["noiseEngineVersion"], body["decodeEngine"])
+-                if version == 3
+-                else v2_qualification(profile, model["manifestHash"])
+-            )
+-            if qualification == "recipe":
+-                raise HTTPException(
+-                    422, f"Selected device requires Recipe v{version} qualification; Windows remains v1 worker-only"
+-                )
+-            if qualification == "model":
+-                raise HTTPException(
+-                    422,
+-                    "Qualify every selected device for this pinned model with the strict decoder"
+-                    if body["decodeEngine"] == "strict_b22_v1"
+-                    else "Qualify every selected device for this pinned model",
+-                )
+-        body.update(
+-            modelManifest=model["manifest"],
+-            modelSource=model["source"],
+-            datasetObjectSha256=data["objectSha256"],
+-            datasetIdentity=data["identity"],
+-        )
+-        if data.get("splitObjects"):  # a file-backed dataset: its split files may be transferred too
+-            body["datasetSplitObjects"] = data["splitObjects"]
+-    else:
+-        if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
+-            raise HTTPException(422, "Only the pinned Qwen model is supported for Recipe v1")
+-        if body["task"] not in cap["workloads"] or body["decodeEngine"] not in DECODE_ENGINES or body["datasetIds"]:
+-            raise HTTPException(422, "Select a built-in workload and decoder for Recipe v1")
+-        for key in (
+-            "recipeVersion",
+-            "batchSize",
+-            "batchSeed",
+-            "sigmaSchedule",
+-            "sigmaMinimum",
+-            "maxNewTokens",
+-            "validationInterval",
+-        ):
+-            body.pop(key)
+-    if body.get("recipeVersion") != 3:
+-        for key in (*V3_KEYS, *V3_UPDATE_KEYS, *V3_CODE_KEYS):
+-            body.pop(key, None)
+-    if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
+-        raise HTTPException(422, "Unsupported scheduling policy or synchronization mode")
+-    if len(set(body["workerIds"])) != len(body["workerIds"]) or not set(body["workerIds"]) <= set(cap["workerIds"]):
+-        raise HTTPException(422, "Select configured workers without duplicates")
+-    if set(body["workerIds"]) & set(cap.get("quarantinedWorkerIds", [])):
+-        raise HTTPException(422, "Selected worker is quarantined after a restore mismatch")
+-    store.ensure_workers(cap["workerIds"])
+-    if not set(body["workerIds"]) <= set(store.assignments(current["workspaceId"])):
+-        raise HTTPException(422, "Select GPUs assigned to this workspace")
+-    return body
++from .api.validation import validate_configuration as validate_configuration
++from .services.validation import freeze_python_code as freeze_python_code

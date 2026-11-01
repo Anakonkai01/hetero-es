@@ -1,0 +1,99 @@
+{
+  "domain": "operations",
+  "sqlCalls": 11,
+  "businessFunctions": 6,
+  "httpFunctions": 6,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "users_select_users",
+      "scope": "users",
+      "statement": "'SELECT profile FROM users ORDER BY rowid'",
+      "dynamic": false,
+      "free": [],
+      "line": 21
+    },
+    {
+      "name": "edit_account_update_users",
+      "scope": "edit_account",
+      "statement": "'UPDATE users SET profile=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 41
+    },
+    {
+      "name": "edit_account_delete_sessions",
+      "scope": "edit_account",
+      "statement": "'DELETE FROM sessions WHERE user_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 43
+    },
+    {
+      "name": "edit_account_select_users",
+      "scope": "edit_account",
+      "statement": "'SELECT profile FROM users WHERE id<>?'",
+      "dynamic": false,
+      "free": [],
+      "line": 32
+    },
+    {
+      "name": "edit_account_select_worker_assignments",
+      "scope": "edit_account",
+      "statement": "'SELECT worker_id FROM worker_assignments WHERE owner=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 46
+    },
+    {
+      "name": "revoke_sessions_delete_sessions",
+      "scope": "revoke_sessions",
+      "statement": "'DELETE FROM sessions WHERE user_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 61
+    },
+    {
+      "name": "platform_audit_select_audit",
+      "scope": "platform_audit",
+      "statement": "'SELECT * FROM audit WHERE workspace_id IS NULL ORDER BY sequence DESC LIMIT 200'",
+      "dynamic": false,
+      "free": [],
+      "line": 70
+    },
+    {
+      "name": "operations_select_settings",
+      "scope": "operations",
+      "statement": "'SELECT value FROM settings WHERE key=\"metadataBackupStatus\"'",
+      "dynamic": false,
+      "free": [],
+      "line": 78
+    },
+    {
+      "name": "operations_select_queue",
+      "scope": "operations",
+      "statement": "'SELECT count(*) FROM queue'",
+      "dynamic": false,
+      "free": [],
+      "line": 77
+    },
+    {
+      "name": "resume_update_settings",
+      "scope": "resume",
+      "statement": "'UPDATE settings SET value=\"false\" WHERE key=\"dispatchHold\"'",
+      "dynamic": false,
+      "free": [],
+      "line": 130
+    },
+    {
+      "name": "resume_delete_settings",
+      "scope": "resume",
+      "statement": "'DELETE FROM settings WHERE key IN (\"maintenanceId\",\"agentMaintenance\")'",
+      "dynamic": false,
+      "free": [],
+      "line": 132
+    }
+  ]
+}

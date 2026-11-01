@@ -1,0 +1,1433 @@
+E...F...FEE.EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.............EEEEFEFF.EEEEEE [ 53%]
+EEEEEEEEEEEEEEEEE.EEE..............EEEEEEEEEEEEEEEEEEEE.E.EEEEE          [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_shared_authorization_uses_plain_errors_and_rechecks_durable_access _
+backend/tests/conftest.py:15: in lab
+    app = create_app(tmp_path / "lab.sqlite", {"admin": USERS["admin"]}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_platform_operations_are_denied_to_workspace_participant _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+__ ERROR at setup of test_newly_configured_gpu_starts_unassigned_and_disabled __
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_admin_cannot_remove_own_access_or_permissions[changes0] _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_admin_cannot_remove_own_access_or_permissions[changes1] _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_admin_cannot_remove_own_access_or_permissions[changes2] _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_admin_cannot_remove_own_access_or_permissions[changes3] _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_admin_uses_personal_security_api_instead_of_self_revoke _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_workspace_admin_cannot_remove_own_membership_or_role[PATCH] _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_workspace_admin_cannot_remove_own_membership_or_role[DELETE] _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_pending_registration_requires_approval_and_creation_permission _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_workspace_and_every_child_route_are_isolated_even_for_platform_admin _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_invitation_acceptance_last_admin_and_membership_revocation _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_suspension_revokes_sessions_cancels_queue_and_preserves_evidence _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_password_change_revokes_other_sessions_and_does_not_allow_privilege_edits _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+____ ERROR at setup of test_migration_preserves_legacy_bytes_queue_and_ids _____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_____ ERROR at setup of test_dispatch_revalidates_assignment_before_launch _____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_platform_privilege_is_persisted_independently_of_username _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_real_session_revocation_and_workspace_enforcement ___
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+______ ERROR at setup of test_participant_cannot_read_or_cancel_admin_run ______
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_runs_on_the_same_gpu_wait_in_order_and_submit_is_idempotent _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_________ ERROR at setup of test_queued_cancel_never_contacts_runtime __________
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes0] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes1] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes2] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes3] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes4] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes5] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_invalid_or_unsupported_config_rejected[changes6] ____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_new_experiments_default_to_tail_aware_scheduling_and_greedy_stays_available _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_________ ERROR at setup of test_config_is_immutable_after_submission __________
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_credentials_are_hashed_and_no_lease_secrets_in_product _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_restart_after_lost_start_response_uses_same_run_and_queue _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_child_objects_and_downloads_share_experiment_authorization _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_rejected_start_fails_truthfully_and_releases_queue_claim _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_five_wrong_passwords_lock_that_caller_out_even_for_the_right_password _
+backend/tests/test_throttle.py:82: in lab
+    app = create_app(tmp_path / "state.sqlite", {"admin": "test-admin-pass"}, AgentRuntime(), dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_____ ERROR at setup of test_a_successful_sign_in_forgets_earlier_mistakes _____
+backend/tests/test_throttle.py:82: in lab
+    app = create_app(tmp_path / "state.sqlite", {"admin": "test-admin-pass"}, AgentRuntime(), dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+______ ERROR at setup of test_unknown_users_are_throttled_like_known_ones ______
+backend/tests/test_throttle.py:82: in lab
+    app = create_app(tmp_path / "state.sqlite", {"admin": "test-admin-pass"}, AgentRuntime(), dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_one_address_trying_many_usernames_is_stopped_as_a_whole _
+backend/tests/test_throttle.py:82: in lab
+    app = create_app(tmp_path / "state.sqlite", {"admin": "test-admin-pass"}, AgentRuntime(), dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+__________ ERROR at setup of test_registration_is_limited_per_address __________
+backend/tests/test_throttle.py:82: in lab
+    app = create_app(tmp_path / "state.sqlite", {"admin": "test-admin-pass"}, AgentRuntime(), dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_first_reference_then_second_device_reproduces_it ____
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_completion_does_not_release_an_unknown_or_living_process[None] _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_completion_does_not_release_an_unknown_or_living_process[True] _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+__ ERROR at setup of test_lab_independently_rejects_corrupted_reports[repeat] __
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_lab_independently_rejects_corrupted_reports[restore] __
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+__ ERROR at setup of test_lab_independently_rejects_corrupted_reports[config] __
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_lab_independently_rejects_corrupted_reports[manifest] _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_lab_independently_rejects_corrupted_reports[negative] _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_restore_failure_from_the_child_quarantines_the_device _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_cancel_is_fenced_and_other_devices_cannot_release_the_gpu _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_qualification_invalidates_when_the_native_profile_changes _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_probe_requires_current_capabilities_workspace_and_contribution _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_upload_grants_are_limited_to_the_active_probe_and_exact_manifest _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_stopped_contribution_cannot_change_endpoints_while_the_probe_is_still_unknown _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_qualification_keeps_what_the_gpu_measured_per_chunk_and_drops_anything_else _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_old_and_new_references_coexist_without_cross_engine_admission _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_new_engine_probe_rejects_a_valid_old_engine_reference _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_strict_qualification_is_separate_from_the_plain_one _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_______ ERROR at setup of test_a_strict_probe_rejects_a_plain_reference ________
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_______ ERROR at setup of test_a_plain_probe_rejects_a_strict_reference ________
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+__________ ERROR at setup of test_an_unknown_probe_decoder_is_refused __________
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_strict_experiment_needs_the_strict_qualification_of_every_device _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_pending_probe_blocks_only_probes_of_the_same_reference _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_plain_experiment_keeps_its_document_and_a_strict_one_submits_fp16 _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_strict_run_never_shares_its_coordinators_gpu_with_a_worker _
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_________ ERROR at setup of test_a_strict_run_needs_a_gpu_coordinator __________
+backend/tests/test_model_qualification.py:17: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+______ ERROR at setup of test_v3_import_keeps_columns_and_rejects_leakage ______
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_v3_config_and_worker_command_preserve_the_frozen_options _
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change0] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change1] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change2] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change3] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change4] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change5] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change6] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change7] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change8] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change9] ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change10] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change11] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change12] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change13] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change14] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change15] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_v3_invalid_options_never_become_a_draft[change16] ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+____ ERROR at setup of test_v3_scorer_columns_are_every_field_of_its_config ____
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_queued_v3_work_stops_when_a_device_loses_v3_qualification _
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_editing_a_v3_draft_replaces_its_old_recipe_fields ___
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_only_current_v3_coordinator_can_quarantine_its_selected_worker _
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_v3_python_code_is_frozen_and_reaches_only_the_coordinator _
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ ERROR at setup of test_a_windows_coordinator_is_admitted_but_never_creates_a_lora_adapter _
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+___ ERROR at setup of test_raw_prompt_and_boxed_reward_reach_the_assignment ____
+backend/tests/test_research_options.py:11: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_v3_study.py:13: in v3_study
+    yield from study_fixture.__wrapped__(tmp_path)
+backend/tests/test_study.py:15: in study
+    app = create_app(tmp_path / "lab.sqlite", {"admin": "test-admin-pass"}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+=================================== FAILURES ===================================
+________________________ test_account_layer_boundaries _________________________
+backend/tests/test_account_layers.py:94: in test_account_layer_boundaries
+    tree = ast.parse((backend / relative).read_text())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/backend/api/inventory.py'
+_______ test_product_route_contract_matches_archived_pre_split_inventory _______
+backend/tests/test_route_contract.py:19: in test_product_route_contract_matches_archived_pre_split_inventory
+    app = create_app(
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_______ test_an_attacker_cannot_lock_the_owner_out_from_another_address ________
+backend/tests/test_throttle.py:132: in test_an_attacker_cannot_lock_the_owner_out_from_another_address
+    app = create_app(tmp_path / "state.sqlite", {"admin": "test-admin-pass"}, AgentRuntime(), dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+_ test_interactive_api_documentation_is_not_public_when_the_web_app_is_served __
+backend/tests/test_throttle.py:163: in test_interactive_api_documentation_is_not_public_when_the_web_app_is_served
+    app = create_app(
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+________ test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash _________
+backend/tests/test_server.py:29: in test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash
+    app = app_from_environment()
+          ^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:172: in app_from_environment
+    return _app_from_config(root, credentials, config, writer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/app.py:199: in _app_from_config
+    return create_app(
+backend/app.py:133: in create_app
+    install_lab_routes(app, store, user, scoped, runtime)
+backend/lab.py:26: in install_lab_routes
+    install_operations_routes(app, store, runtime, platform)
+backend/api/operations.py:10: in install_routes
+    service = operations(store, runtime, platform)
+              ^^^^^^^^^^
+E   UnboundLocalError: cannot access local variable 'operations' where it is not associated with a value
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_account_layers.py::test_account_layer_boundaries - ...
+FAILED backend/tests/test_route_contract.py::test_product_route_contract_matches_archived_pre_split_inventory
+FAILED backend/tests/test_throttle.py::test_an_attacker_cannot_lock_the_owner_out_from_another_address
+FAILED backend/tests/test_throttle.py::test_interactive_api_documentation_is_not_public_when_the_web_app_is_served
+FAILED backend/tests/test_server.py::test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash
+ERROR backend/tests/test_operations_layers.py::test_shared_authorization_uses_plain_errors_and_rechecks_durable_access
+ERROR backend/tests/test_operations.py::test_platform_operations_are_denied_to_workspace_participant
+ERROR backend/tests/test_operations.py::test_newly_configured_gpu_starts_unassigned_and_disabled
+ERROR backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes0]
+ERROR backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes1]
+ERROR backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes2]
+ERROR backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes3]
+ERROR backend/tests/test_self_administration.py::test_admin_uses_personal_security_api_instead_of_self_revoke
+ERROR backend/tests/test_self_administration.py::test_workspace_admin_cannot_remove_own_membership_or_role[PATCH]
+ERROR backend/tests/test_self_administration.py::test_workspace_admin_cannot_remove_own_membership_or_role[DELETE]
+ERROR backend/tests/test_lab.py::test_pending_registration_requires_approval_and_creation_permission
+ERROR backend/tests/test_lab.py::test_workspace_and_every_child_route_are_isolated_even_for_platform_admin
+ERROR backend/tests/test_lab.py::test_invitation_acceptance_last_admin_and_membership_revocation
+ERROR backend/tests/test_lab.py::test_suspension_revokes_sessions_cancels_queue_and_preserves_evidence
+ERROR backend/tests/test_lab.py::test_password_change_revokes_other_sessions_and_does_not_allow_privilege_edits
+ERROR backend/tests/test_lab.py::test_migration_preserves_legacy_bytes_queue_and_ids
+ERROR backend/tests/test_lab.py::test_dispatch_revalidates_assignment_before_launch
+ERROR backend/tests/test_lab.py::test_platform_privilege_is_persisted_independently_of_username
+ERROR backend/tests/test_api.py::test_real_session_revocation_and_workspace_enforcement
+ERROR backend/tests/test_api.py::test_participant_cannot_read_or_cancel_admin_run
+ERROR backend/tests/test_api.py::test_runs_on_the_same_gpu_wait_in_order_and_submit_is_idempotent
+ERROR backend/tests/test_api.py::test_queued_cancel_never_contacts_runtime - ...
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes0]
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes1]
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes2]
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes3]
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes4]
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes5]
+ERROR backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes6]
+ERROR backend/tests/test_api.py::test_new_experiments_default_to_tail_aware_scheduling_and_greedy_stays_available
+ERROR backend/tests/test_api.py::test_config_is_immutable_after_submission - ...
+ERROR backend/tests/test_api.py::test_credentials_are_hashed_and_no_lease_secrets_in_product
+ERROR backend/tests/test_api.py::test_restart_after_lost_start_response_uses_same_run_and_queue
+ERROR backend/tests/test_api.py::test_child_objects_and_downloads_share_experiment_authorization
+ERROR backend/tests/test_api.py::test_rejected_start_fails_truthfully_and_releases_queue_claim
+ERROR backend/tests/test_throttle.py::test_five_wrong_passwords_lock_that_caller_out_even_for_the_right_password
+ERROR backend/tests/test_throttle.py::test_a_successful_sign_in_forgets_earlier_mistakes
+ERROR backend/tests/test_throttle.py::test_unknown_users_are_throttled_like_known_ones
+ERROR backend/tests/test_throttle.py::test_one_address_trying_many_usernames_is_stopped_as_a_whole
+ERROR backend/tests/test_throttle.py::test_registration_is_limited_per_address
+ERROR backend/tests/test_model_qualification.py::test_first_reference_then_second_device_reproduces_it
+ERROR backend/tests/test_model_qualification.py::test_completion_does_not_release_an_unknown_or_living_process[None]
+ERROR backend/tests/test_model_qualification.py::test_completion_does_not_release_an_unknown_or_living_process[True]
+ERROR backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[repeat]
+ERROR backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[restore]
+ERROR backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[config]
+ERROR backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[manifest]
+ERROR backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[negative]
+ERROR backend/tests/test_model_qualification.py::test_restore_failure_from_the_child_quarantines_the_device
+ERROR backend/tests/test_model_qualification.py::test_cancel_is_fenced_and_other_devices_cannot_release_the_gpu
+ERROR backend/tests/test_model_qualification.py::test_qualification_invalidates_when_the_native_profile_changes
+ERROR backend/tests/test_model_qualification.py::test_probe_requires_current_capabilities_workspace_and_contribution
+ERROR backend/tests/test_model_qualification.py::test_upload_grants_are_limited_to_the_active_probe_and_exact_manifest
+ERROR backend/tests/test_model_qualification.py::test_stopped_contribution_cannot_change_endpoints_while_the_probe_is_still_unknown
+ERROR backend/tests/test_model_qualification.py::test_a_qualification_keeps_what_the_gpu_measured_per_chunk_and_drops_anything_else
+ERROR backend/tests/test_model_qualification.py::test_old_and_new_references_coexist_without_cross_engine_admission
+ERROR backend/tests/test_model_qualification.py::test_new_engine_probe_rejects_a_valid_old_engine_reference
+ERROR backend/tests/test_model_qualification.py::test_a_strict_qualification_is_separate_from_the_plain_one
+ERROR backend/tests/test_model_qualification.py::test_a_strict_probe_rejects_a_plain_reference
+ERROR backend/tests/test_model_qualification.py::test_a_plain_probe_rejects_a_strict_reference
+ERROR backend/tests/test_model_qualification.py::test_an_unknown_probe_decoder_is_refused
+ERROR backend/tests/test_model_qualification.py::test_a_strict_experiment_needs_the_strict_qualification_of_every_device
+ERROR backend/tests/test_model_qualification.py::test_a_pending_probe_blocks_only_probes_of_the_same_reference
+ERROR backend/tests/test_model_qualification.py::test_a_plain_experiment_keeps_its_document_and_a_strict_one_submits_fp16
+ERROR backend/tests/test_model_qualification.py::test_a_strict_run_never_shares_its_coordinators_gpu_with_a_worker
+ERROR backend/tests/test_model_qualification.py::test_a_strict_run_needs_a_gpu_coordinator
+ERROR backend/tests/test_v3_study.py::test_v3_import_keeps_columns_and_rejects_leakage
+ERROR backend/tests/test_v3_study.py::test_v3_config_and_worker_command_preserve_the_frozen_options
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change0]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change1]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change2]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change3]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change4]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change5]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change6]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change7]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change8]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change9]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change10]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change11]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change12]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change13]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change14]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change15]
+ERROR backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change16]
+ERROR backend/tests/test_v3_study.py::test_v3_scorer_columns_are_every_field_of_its_config
+ERROR backend/tests/test_v3_study.py::test_queued_v3_work_stops_when_a_device_loses_v3_qualification
+ERROR backend/tests/test_v3_study.py::test_editing_a_v3_draft_replaces_its_old_recipe_fields
+ERROR backend/tests/test_v3_study.py::test_only_current_v3_coordinator_can_quarantine_its_selected_worker
+ERROR backend/tests/test_v3_study.py::test_v3_python_code_is_frozen_and_reaches_only_the_coordinator
+ERROR backend/tests/test_v3_study.py::test_a_windows_coordinator_is_admitted_but_never_creates_a_lora_adapter
+ERROR backend/tests/test_research_options.py::test_raw_prompt_and_boxed_reward_reach_the_assignment
+5 failed, 38 passed, 1 warning, 92 errors in 9.08s
