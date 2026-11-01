@@ -1,0 +1,92 @@
+....................FF.F..                                               [100%]
+=================================== FAILURES ===================================
+____________ test_inline_dataset_object_is_in_datasets_bucket_only _____________
+
+cloud_lab = (<starlette.testclient.TestClient object at 0x70ac81e98f50>, <backend.services.store.Store object at 0x70ac8344eb70>, ...calhost:32771', ...}, {'Authorization': 'Bearer <redacted>', 'X-Workspace-Id': 'lab'})
+
+    def test_inline_dataset_object_is_in_datasets_bucket_only(cloud_lab):
+        client,_,backend,config,auth=cloud_lab;data=imported(client,auth);key='objects/'+data['objectSha256']
+>       datasets=backend.for_purpose('datasets');payload=b''.join(datasets.get(key))
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_s3_study.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/storage/s3_backend.py:156: in get
+    response = self._call("get_object", Bucket=self._bucket(key), Key=key)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.storage.s3_backend.S3Backend object at 0x70ac81eccfe0>
+operation = 'get_object'
+parameters = {'Bucket': 'heteroes-test-datasets-7feef08d8bc648f2a0740c07eed053f7', 'Key': 'objects/3d429cafaf1bcc46d5b186db5054e0c3c1bb96af38d27eb11d99ef215c4b597a'}
+BotoCoreError = <class 'botocore.exceptions.BotoCoreError'>
+ClientError = <class 'botocore.exceptions.ClientError'>, code = 'NoSuchKey'
+
+    def _call(self, operation, **parameters):
+        from botocore.exceptions import BotoCoreError, ClientError
+    
+        try:
+            return getattr(self.client, operation)(**parameters)
+        except ClientError as error:
+            code = error.response.get("Error", {}).get("Code")
+            if operation == "abort_multipart_upload" and code == "NoSuchUpload":
+                return None
+            if code in {"NoSuchKey", "NotFound", "404"}:
+>               raise FileNotFoundError("Storage object unavailable") from None
+E               FileNotFoundError: Storage object unavailable
+
+backend/storage/s3_backend.py:129: FileNotFoundError
+______ test_dataset_upload_build_and_split_publication_use_dataset_bucket ______
+
+cloud_lab = (<starlette.testclient.TestClient object at 0x70ac81e53230>, <backend.services.store.Store object at 0x70ac81273b30>, ...calhost:32771', ...}, {'Authorization': 'Bearer <redacted>', 'X-Workspace-Id': 'lab'})
+
+    def test_dataset_upload_build_and_split_publication_use_dataset_bucket(cloud_lab):
+        client,_,backend,config,auth=cloud_lab
+        payload=''.join(json.dumps({'question':f'Q{i}','label':'A'})+'\n' for i in range(20)).encode()
+        result=client.post('/api/v1/datasets/upload-plan',headers=auth,json={'name':'files','files':{'all':{'format':'jsonl','sizeBytes':len(payload)}}})
+        assert result.status_code==201
+        plan=result.json();target=plan['files']['all']
+>       assert 'publicUrl' in target
+E       AssertionError: assert 'publicUrl' in {'headers': {'Content-Length': '670'}, 'key': 'uploads/9096561e1a6c0f4204d39689abcae06bddbc882e6bd053962d1d04bb5d7ebe2...-SignedHeaders=content-length%3Bhost&X-Amz-Signature=<redacted>'}
+
+backend/tests/test_s3_study.py:64: AssertionError
+_ test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only _
+
+cloud_lab = (<starlette.testclient.TestClient object at 0x70ac803919a0>, <backend.services.store.Store object at 0x70ac8053b440>, ...calhost:32771', ...}, {'Authorization': 'Bearer <redacted>', 'X-Workspace-Id': 'lab'})
+
+    def test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only(cloud_lab):
+        client,store,backend,config,auth=cloud_lab;data=imported(client,auth);model,files=published_model(client,auth)
+        device,device_auth=pair((client,store,store.runtime,auth),'s3-test-device')
+        run_id,assignment='e'*32,'f'*32
+        frozen={'deviceIds':[device['deviceId']],'config':{'datasetObjectSha256':data['objectSha256'],
+            'datasetSplitObjects':[],'modelSource':'UPLOAD','modelManifest':model['manifest']}}
+        with store.db() as db:
+            db.execute('INSERT INTO experiments(id,owner,body,snapshot) VALUES (:p0,:p1,:p2,NULL)',
+                (run_id,'admin',json.dumps({'experimentId':run_id,'workspaceId':'lab','ownerUserId':'admin','status':'RUNNING'})))
+            db.execute("INSERT INTO assignments(id,run_id,epoch,coordinator,body,snapshot,released) VALUES (:p0,:p1,1,:p2,:p3,'{}',0)",
+                (assignment,run_id,device['deviceId'],json.dumps(frozen)))
+        model_sha=next(iter(model['manifest']['files'].values()))
+        for sha,purpose in [(data['objectSha256'],'datasets'),(model_sha,'recovery')]:
+            response=client.post('/api/v1/device/study-transfer',headers=device_auth,json={'assignmentId':assignment,'epoch':1,'sha256':sha})
+            assert response.status_code==200
+>           grant=response.json();assert urlsplit(grant['url']).path.startswith('/'+config['buckets'][purpose]+'/')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: assert False
+E            +  where False = <built-in method startswith of str object at 0x70ac8475ca80>((('/' + 'heteroes-test-datasets-107d032827374647bec41d26ddbcba1d') + '/'))
+E            +    where <built-in method startswith of str object at 0x70ac8475ca80> = '/heteroes-test-recovery-107d032827374647bec41d26ddbcba1d/objects/3d429cafaf1bcc46d5b186db5054e0c3c1bb96af38d27eb11d99ef215c4b597a'.startswith
+E            +      where '/heteroes-test-recovery-107d032827374647bec41d26ddbcba1d/objects/3d429cafaf1bcc46d5b186db5054e0c3c1bb96af38d27eb11d99ef215c4b597a' = SplitResult(scheme='http', netloc='127.0.0.1:32771', path='/heteroes-test-recovery-107d032827374647bec41d26ddbcba1d/ob...-Amz-SignedHeaders=host&X-Amz-Signature=<redacted>', fragment='').path
+E            +        where SplitResult(scheme='http', netloc='127.0.0.1:32771', path='/heteroes-test-recovery-107d032827374647bec41d26ddbcba1d/ob...-Amz-SignedHeaders=host&X-Amz-Signature=<redacted>', fragment='') = urlsplit('http://127.0.0.1:32771/heteroes-test-recovery-107d032827374647bec41d26ddbcba1d/objects/3d429cafaf1bcc46d5b186db5054e0...z-Expires=60&X-Amz-SignedHeaders=host&X-Amz-Signature=<redacted>')
+
+backend/tests/test_s3_study.py:99: AssertionError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 5; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_s3_study.py::test_inline_dataset_object_is_in_datasets_bucket_only
+FAILED backend/tests/test_s3_study.py::test_dataset_upload_build_and_split_publication_use_dataset_bucket
+FAILED backend/tests/test_s3_study.py::test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only
+3 failed, 23 passed, 1 warning in 1.82s

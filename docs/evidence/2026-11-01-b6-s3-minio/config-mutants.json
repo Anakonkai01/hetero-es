@@ -1,0 +1,50 @@
+[
+  {
+    "name": "public HTTP or path-bearing internal endpoint accepted",
+    "file": "backend/storage/s3_backend.py",
+    "old": "return endpoint(value)",
+    "new": "return value.rstrip(\"/\")"
+  },
+  {
+    "name": "ambient credentials permitted",
+    "file": "backend/storage/s3_backend.py",
+    "old": "not isinstance(config.get(name), str) or not config[name]",
+    "new": "False"
+  },
+  {
+    "name": "logical buckets share a namespace",
+    "file": "backend/storage/s3_backend.py",
+    "old": "or len(set(buckets.values())) != 3",
+    "new": "or False"
+  },
+  {
+    "name": "old R2 account gate restored",
+    "file": "backend/storage/s3_backend.py",
+    "old": "internal = _internal_endpoint(config[\"endpointUrl\"])",
+    "new": "if not config.get(\"exclusiveAccountConfirmed\"):\n            raise ValueError(\"R2 confirmation required\")\n        internal = _internal_endpoint(config[\"endpointUrl\"])"
+  },
+  {
+    "name": "SigV4 disabled",
+    "file": "backend/storage/s3_backend.py",
+    "old": "signature_version=\"s3v4\"",
+    "new": "signature_version=\"s3\""
+  },
+  {
+    "name": "path-style addressing disabled",
+    "file": "backend/storage/s3_backend.py",
+    "old": "s3={\"addressing_style\": \"path\"}",
+    "new": "s3={\"addressing_style\": \"virtual\"}"
+  },
+  {
+    "name": "ambient proxy configuration enabled",
+    "file": "backend/storage/s3_backend.py",
+    "old": "proxies={},",
+    "new": "proxies=None,"
+  },
+  {
+    "name": "unsafe storage keys accepted",
+    "file": "backend/storage/s3_backend.py",
+    "old": "if not isinstance(key, str) or not KEY.fullmatch(key):",
+    "new": "if False:"
+  }
+]

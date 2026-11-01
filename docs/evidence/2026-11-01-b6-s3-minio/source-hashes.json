@@ -1,0 +1,16 @@
+{
+  "baseline": "c44a2226",
+  "files": {
+    "backend/api/s3_storage.py": "8d338e6649f6430fbefde10ffc42e8fc5d69fd70bc1193735361909f4fde88f5",
+    "backend/apps/factory.py": "93b6350cb16962579031af60b6dba7dc68fc1b86c6e900c2d4e2f10533cf3f84",
+    "backend/services/study_registry.py": "2709f513211ac8e0e318dfb484b5905009ddfb8d78094839a66ad041ecfc0cfd",
+    "backend/storage/local_backend.py": "016160071d2704e5da59245a97d8021628a72238f19ace8763396d586249914e",
+    "backend/storage/s3_backend.py": "58e5f48c6275c2018d70a01516be9ed260722dc7d6e779c23996f75545e30f81",
+    "backend/tests/test_s3_backend.py": "29ed4783e4762034475774901bf38bdcd1cff16ca4e61a3a52438c617a07bc20",
+    "backend/tests/test_s3_public_storage.py": "90104f485c2978f15108cdf10204e1108f5accbf48a34746442af4412fa61973",
+    "backend/tests/test_s3_study.py": "9ac6d0beefdd39444ab580b35bd5cc16db6549028713c3132f538b9edf868722",
+    "backend/tests/test_storage_backends.py": "939b8bc3c2fac6f52be56838b07152eb61b8ae7c5b43ba1726a51778eafe00a0",
+    "backend/tests/test_storage_formats.py": "6f927dcd8e686afbddbeec1d60f3687c8ed749c3ea67758c34e6b0bd7e0ef0ea",
+    "docs/design/s3-storage.md": "62b6f9b211221c018f57672aff62c93ec0dd25402ea22fe9607983a2a5f09ba8"
+  }
+}

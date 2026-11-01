@@ -1,0 +1,170 @@
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+index 33cb13a9..a91d076a 100644
+--- a/backend/apps/factory.py
++++ b/backend/apps/factory.py
+@@ -94,9 +94,14 @@ def create_app(
+                 await run_in_threadpool(metadata_thread.join)
+             if dispatcher_started:
+                 await run_in_threadpool(thread.join)
+-            store.close()
+-            if writer_lock is not None:
+-                writer_lock.close()
++            try:
++                storage_backend = getattr(runtime, "storage_backend", None)
++                if hasattr(storage_backend, "close"):
++                    await run_in_threadpool(storage_backend.close)
++            finally:
++                store.close()
++                if writer_lock is not None:
++                    writer_lock.close()
+ 
+     # The interactive documentation lists every route: keep it for development, not for a served lab.
+     private_docs = (
+@@ -222,8 +227,8 @@ def app_from_environment(*, service=None):
+ def _app_from_config(root, credentials, config, writer, *, service="all", database_url=None):
+     if config.get("deploymentMode") != "agent":
+         raise ValueError("Only agent deployment mode is supported")
+-    if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
+-        raise ValueError("Only local recovery storage is supported")
++    if config.get("storageMode") not in (None, "local", "s3") or config.get("storageFile"):
++        raise ValueError("Use local or S3 recovery storage configuration")
+     from ..services.devices import AgentRuntime
+ 
+     storage_backend = None
+@@ -238,6 +243,11 @@ def _app_from_config(root, credentials, config, writer, *, service="all", databa
+             config.get("metadataStorageDirectory"),
+         )
+         storage_backend.quota_bytes = config.get("storageQuotaBytes", 200_000_000_000)
++    elif config.get("storageMode") == "s3":
++        from ..storage.s3_backend import S3Backend
++
++        storage_backend = S3Backend(config["s3"])
++        storage_backend.quota_bytes = config.get("storageQuotaBytes", 200_000_000_000)
+     runtime = AgentRuntime(storage_backend)
+     runtime.server_instance_id = config.get("serverInstanceId")
+     return create_app(
+diff --git a/backend/services/study_registry.py b/backend/services/study_registry.py
+index 04a9dd5b..c8ef8a36 100644
+--- a/backend/services/study_registry.py
++++ b/backend/services/study_registry.py
+@@ -49,10 +49,11 @@ class Registry:
+ 
+ 
+ def operations(registry, runtime, scoped, device_auth):
+-    def backend():
++    def backend(purpose="recovery"):
+         if runtime.storage_backend is None:
+             raise ServiceError(409, "Configure local artifact storage first")
+-        return runtime.storage_backend
++        value = runtime.storage_backend
++        return value.for_purpose(purpose) if hasattr(value, "for_purpose") else value
+ 
+     def import_data(body: ImportData, *, current):
+         try:
+@@ -67,7 +68,7 @@ def operations(registry, runtime, scoped, device_auth):
+         if len(payload) > 10_000_000:
+             raise ServiceError(422, "Dataset document exceeds 10 MB")
+         digest = hashlib.sha256(payload).hexdigest()
+-        store_backend = backend()
++        store_backend = backend("datasets")
+         if hasattr(store_backend, "inventory") and store_backend.inventory() + len(payload) > getattr(
+             store_backend, "quota_bytes", 200_000_000_000
+         ):
+@@ -116,7 +117,7 @@ def operations(registry, runtime, scoped, device_auth):
+             raise ServiceError(
+                 422, f"Give one file or three splits (.jsonl, .csv or .json) of at most {limits['maxBytes']} bytes"
+             )
+-        b = backend()
++        b = backend("datasets")
+         if hasattr(b, "inventory") and b.inventory() + 3 * sum(f["sizeBytes"] for f in body.files.values()) > getattr(
+             b, "quota_bytes", 200_000_000_000
+         ):
+@@ -141,7 +142,7 @@ def operations(registry, runtime, scoped, device_auth):
+         mapping = body.mapping or {"prompt": "prompt"}
+         if set(mapping) != {"prompt"} or not isinstance(mapping["prompt"], str) or not mapping["prompt"]:
+             raise ServiceError(422, "Map the prompt field; the scorer selects its other columns")
+-        limits, b = dataset_limits(registry.store), backend()
++        limits, b = dataset_limits(registry.store), backend("datasets")
+         work = Path(tempfile.mkdtemp(prefix=".dataset-build-", dir=b.root))
+         try:
+             sources = {}
+@@ -298,11 +299,12 @@ def operations(registry, runtime, scoped, device_auth):
+             sha = body.get("sha256")
+             if sha not in allowed or not isinstance(sha, str):
+                 raise ServiceError(403, "Object is outside the frozen assignment")
+-        grant = {"url": backend().download_url("objects/" + sha), "sha256": sha}
++        selected = backend("datasets" if sha in datasets else "recovery")
++        grant = {"url": selected.download_url("objects/" + sha), "sha256": sha}
+         public = runtime.public_web_url()
+         if public and sha in datasets:
+             # for a device that cannot reach the private route (no Tailscale): small dataset files only
+-            if url := backend().public_study_url(public, "objects/" + sha):
++            if url := selected.public_study_url(public, "objects/" + sha):
+                 grant["publicUrl"] = url
+         return grant
+ 
+diff --git a/backend/storage/local_backend.py b/backend/storage/local_backend.py
+index 0fd7ccca..3a53fce3 100644
+--- a/backend/storage/local_backend.py
++++ b/backend/storage/local_backend.py
+@@ -19,7 +19,7 @@ from ..core.errors import ServiceError
+ 
+ KEY = re.compile(
+     r"(?:uploads/[a-f0-9]{64}/[a-f0-9]{32}|objects/[a-f0-9]{64}|"
+-    r"manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.sqlite|manifest\.json))"
++    r"manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.(?:sqlite|pgdump)|manifest\.json))"
+ )
+ 
+ 
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index 40f37f9c..d4de635a 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -14,7 +14,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
+ - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
+   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
+-- **Phần B đã xong B1–B5:** backend chia lớp, Postgres, service riêng và OIDC. Tiếp theo là S3/MinIO, metrics/log,
++- **Phần B đã xong B1–B6:** backend chia lớp, Postgres, service riêng, OIDC và S3/MinIO. Tiếp theo là metrics/log,
+   router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
+ - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
+@@ -105,6 +105,16 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   a collection-time test clock and a missing packaged http_safety dependency; both are corrected with assertions intact.
+   A local factory/HTTP probe passes with optional cloud/GPU imports forbidden. Evidence `2026-11-01-b5-oidc`.
+   This is generated-key protocol/browser acceptance, not deployment of a real Keycloak realm. B6–B10 and all C remain.
++  B6 complete: production S3Backend uses separate internal/private device clients, SigV4/path addressing, three explicit
++  buckets and byte quotas including incomplete multipart parts. Dataset/model APIs and frozen device grants select
++  their proper bucket. The bounded public dataset proxy preserves private bulk transfer, scoped capabilities and
++  streaming cleanup; local storage accepts both metadata payload formats. S3 service union remains111 product pairs.
++  Full actual-MinIO-enabled SQLite627 / PostgreSQL652, zero skips; PG audit403 PG +48 explicit SQLite Stores. Production
++  S3 pg_dump upload/download/fresh restore passes with sessions revoked, reservations retained and dispatch held.
++  Mutation: config8/8 and actual-PG/MinIO I/O21/21 killed; one initial private-origin mutant is equivalent because the
++  signer independently enforces the same rule (separate probe retained). B-012/013 format/header-coverage issues fixed.
++  Evidence `2026-11-01-b6-s3-minio`; source-package imports and lint/format pass. B7–B10 and all C remain, including the
++  environment-only overlay, packaged Python dependencies and real Keycloak/GPU/deployment acceptance.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+@@ -113,7 +123,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+ 
+ ## Remaining scope and limits
+ 
+-- B1–B5 are complete. Execute B6–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
++- B1–B6 are complete. Execute B7–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
+ - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
+   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index 2ec1284d..6e2c943d 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -16,6 +16,8 @@ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original conce
+ | B-009 | Restore empty-target schema classification        | C    | P2       | SQL LIKE pg_% treats underscore as a wildcard and incorrectly ignores existing user data in a pgx schema, permitting a restore into a nonempty target.                                                                  | Use the exact reserved pg_ prefix; inspect user relations/functions/types and reject before restoration.                                                         | Fixed: real PostgreSQL pgx regression, checksum/identity guards and atomic failure rollback; backup mutation16/16.                                                                         |
+ | B-010 | Browser fixtures and full-check result accounting | T    | P1       | Additive DB columns broke old fixture INSERT statements; check-all skipped five browser contracts after startup failures and still printed ALL PASS because those failures never reached its failed list.               | Use explicit seed column lists; retain startup logs and make any fixture startup failure fail the entire command; test real seeding plus the shell failure path. | Fixed: replacement check-all passes all24 steps, SQLite548/PostgreSQL572; fixture mutation4/4. First false ALL PASS rejected; evidence `2026-11-01-b4-backup-restore`.                     |
+ | B-011 | OIDC browser refresh evidence                     | T    | P2       | An early browser probe printed PASS while its final receipt still had refreshGrants=0, so it did not prove automatic renewal.                                                                                           | Explicitly await an actual HTTP counter and assert it again in the final receipt; reject zero/missing counters independently.                                    | Fixed: final browser receipt has refreshGrants=1 and codeGrants=2 (SSO reload), six contracts; frontend/harness mutation11/11. Early counter0 receipt rejected.                            |
++| B-012 | Local metadata payload formats                    | C    | P2       | The filesystem key whitelist accepted product.sqlite but rejected PostgreSQL product.pgdump, leaving local-mode PostgreSQL backups pending.                                                                             | Permit the PostgreSQL payload in the existing private metadata namespace and retain SQLite behavior.                                                             | Fixed: both actual local payload formats pass, and removing pgdump support is killed by the storage mutation suite.                                                                        |
++| B-013 | Independent public-upload length guard coverage   | T    | P2       | The initial mutation removing the Content-Length guard survived because the short-body regression also failed at final byte-count validation.                                                                           | Send a complete valid body with a mismatched declared length to isolate the early header guard.                                                                  | Fixed: independent header regression; I/O mutation21/21, full SQLite627/PostgreSQL652 pass. Original 20/21 result retained; evidence `2026-11-01-b6-s3-minio`.                             |
+ | B-Q1  | Lab Server responsibilities                       | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                                 | Answered in A5 (architecture document)                                                                                                                                                     |
+ | B-Q2  | Data and backups                                  | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                            | Answered in A5                                                                                                                                                                             |
+ 

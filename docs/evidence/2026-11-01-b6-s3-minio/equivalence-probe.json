@@ -1,0 +1,6 @@
+{
+  "initialPrivateEndpointGuardBypassed": true,
+  "independentSignerGuardRejectedPublicEndpoint": true,
+  "beforeS3ClientCreation": true,
+  "equivalent": true
+}

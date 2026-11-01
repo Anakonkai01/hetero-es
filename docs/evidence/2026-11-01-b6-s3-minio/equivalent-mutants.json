@@ -1,0 +1,9 @@
+[
+  {
+    "name": "public bulk endpoint accepted",
+    "file": "backend/storage/s3_backend.py",
+    "old": "private = endpoint(config[\"deviceEndpointUrl\"], private=True)",
+    "new": "private = _internal_endpoint(config[\"deviceEndpointUrl\"])",
+    "equivalence": "The initial private endpoint check is independently enforced by LocalBackend via Enrollment.private_compute in _signer_for, before S3 clients/presigner creation. Removing only the initial check still rejects public device origins."
+  }
+]

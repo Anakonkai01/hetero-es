@@ -1,0 +1,11 @@
+control ok    | 10 passed, 5 deselected, 1 warning in 0.50s
+killed       public HTTP or path-bearing internal endpoint accepted | 2 failed, 8 passed, 5 deselected, 1 warning in 0.39s
+killed       ambient credentials permitted | 2 failed, 8 passed, 5 deselected, 1 warning in 0.41s
+killed       logical buckets share a namespace | 1 failed, 9 passed, 5 deselected, 1 warning in 0.33s
+killed       old R2 account gate restored | 1 failed, 9 passed, 5 deselected, 1 warning in 0.23s
+killed       SigV4 disabled | 1 failed, 9 passed, 5 deselected, 1 warning in 0.34s
+killed       path-style addressing disabled | 1 failed, 9 passed, 5 deselected, 1 warning in 0.49s
+killed       ambient proxy configuration enabled | 1 failed, 9 passed, 5 deselected, 1 warning in 0.38s
+killed       unsafe storage keys accepted | 1 failed, 9 passed, 5 deselected, 1 warning in 0.36s
+
+8 of 8 mutants killed.

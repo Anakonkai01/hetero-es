@@ -1,0 +1,259 @@
+....................FF.F..                                               [100%]
+=================================== FAILURES ===================================
+____________ test_inline_dataset_object_is_in_datasets_bucket_only _____________
+
+cloud_lab = (<starlette.testclient.TestClient object at 0x7bb53ee84c50>, <backend.services.store.Store object at 0x7bb5407c2ba0>, ...calhost:32771', ...}, {'Authorization': 'Bearer <redacted>', 'X-Workspace-Id': 'lab'})
+
+    def test_inline_dataset_object_is_in_datasets_bucket_only(cloud_lab):
+        client,_,backend,config,auth=cloud_lab;data=imported(client,auth);key='objects/'+data['objectSha256']
+>       datasets=backend.for_purpose('datasets');payload=b''.join(datasets.get(key))
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_s3_study.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/storage/s3_backend.py:156: in get
+    response = self._call("get_object", Bucket=self._bucket(key), Key=key)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.storage.s3_backend.S3Backend object at 0x7bb53ee7cfb0>
+operation = 'get_object'
+parameters = {'Bucket': 'heteroes-test-datasets-f2f3baab25324750a700043d54d0225e', 'Key': 'objects/3d429cafaf1bcc46d5b186db5054e0c3c1bb96af38d27eb11d99ef215c4b597a'}
+BotoCoreError = <class 'botocore.exceptions.BotoCoreError'>
+ClientError = <class 'botocore.exceptions.ClientError'>, code = 'NoSuchKey'
+
+    def _call(self, operation, **parameters):
+        from botocore.exceptions import BotoCoreError, ClientError
+    
+        try:
+            return getattr(self.client, operation)(**parameters)
+        except ClientError as error:
+            code = error.response.get("Error", {}).get("Code")
+            if operation == "abort_multipart_upload" and code == "NoSuchUpload":
+                return None
+            if code in {"NoSuchKey", "NotFound", "404"}:
+>               raise FileNotFoundError("Storage object unavailable") from None
+E               FileNotFoundError: Storage object unavailable
+
+backend/storage/s3_backend.py:129: FileNotFoundError
+______ test_dataset_upload_build_and_split_publication_use_dataset_bucket ______
+
+cloud_lab = (<starlette.testclient.TestClient object at 0x7bb53ee1f440>, <backend.services.store.Store object at 0x7bb53e4601a0>, ...calhost:32771', ...}, {'Authorization': 'Bearer <redacted>', 'X-Workspace-Id': 'lab'})
+
+    def test_dataset_upload_build_and_split_publication_use_dataset_bucket(cloud_lab):
+        client,_,backend,config,auth=cloud_lab
+        payload=''.join(json.dumps({'question':f'Q{i}','label':'A'})+'\n' for i in range(20)).encode()
+        result=client.post('/api/v1/datasets/upload-plan',headers=auth,json={'name':'files','files':{'all':{'format':'jsonl','sizeBytes':len(payload)}}})
+        assert result.status_code==201
+        plan=result.json();target=plan['files']['all']
+>       assert 'publicUrl' in target
+E       AssertionError: assert 'publicUrl' in {'headers': {'Content-Length': '670'}, 'key': 'uploads/04b1d0b08f6e6baf4d22200d9a62799fbe2b6ac6304531f6f2a4bd29b09ff8a...-SignedHeaders=content-length%3Bhost&X-Amz-Signature=<redacted>'}
+
+backend/tests/test_s3_study.py:65: AssertionError
+_ test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only _
+
+self = <sqlalchemy.engine.base.Connection object at 0x7bb53d552540>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x7bb53d997ce0>
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x7bb53d5e44a0>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x7bb53d5e6c60>
+parameters = [('ffffffffffffffffffffffffffffffff', 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', '686cbf60c73540a1b070863166d54be7', '{"devic...a8feb75980066e7a26cc4bb2d", "tokenizer.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"}}}}')]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1976: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x7bb53d997ce0>
+cursor = <sqlite3.Cursor object at 0x7bb53c42d440>
+statement = 'INSERT INTO assignments(id,run_id,epoch,coordinator,body,released) VALUES (?,?,1,?,?,0)'
+parameters = ('ffffffffffffffffffffffffffffffff', 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', '686cbf60c73540a1b070863166d54be7', '{"device...ca8feb75980066e7a26cc4bb2d", "tokenizer.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"}}}}')
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x7bb53d5e44a0>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: NOT NULL constraint failed: assignments.snapshot
+
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/default.py:964: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+cloud_lab = (<starlette.testclient.TestClient object at 0x7bb53d582660>, <backend.services.store.Store object at 0x7bb53d72ba40>, ...calhost:32771', ...}, {'Authorization': 'Bearer <redacted>', 'X-Workspace-Id': 'lab'})
+
+    def test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only(cloud_lab):
+        client,store,backend,config,auth=cloud_lab;data=imported(client,auth);model,files=published_model(client,auth)
+        device,device_auth=pair((client,store,store.runtime,auth),'s3-test-device')
+        run_id,assignment='e'*32,'f'*32
+        frozen={'deviceIds':[device['deviceId']],'config':{'datasetObjectSha256':data['objectSha256'],
+            'datasetSplitObjects':[],'modelSource':'UPLOAD','modelManifest':model['manifest']}}
+        with store.db() as db:
+            db.execute('INSERT INTO experiments(id,owner,body,snapshot) VALUES (:p0,:p1,:p2,NULL)',
+                (run_id,'admin',json.dumps({'experimentId':run_id,'workspaceId':'lab','ownerUserId':'admin','status':'RUNNING'})))
+>           db.execute('INSERT INTO assignments(id,run_id,epoch,coordinator,body,released) VALUES (:p0,:p1,1,:p2,:p3,0)',
+                (assignment,run_id,device['deviceId'],json.dumps(frozen)))
+
+backend/tests/test_s3_study.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/db/engine.py:44: in execute
+    result = self._connection.execute(text(sql), bindings)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1428: in execute
+    return meth(
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1650: in _execute_clauseelement
+    ret = self._execute_context(
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1855: in _execute_context
+    return self._exec_single_context(
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1995: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:2372: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1976: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x7bb53d997ce0>
+cursor = <sqlite3.Cursor object at 0x7bb53c42d440>
+statement = 'INSERT INTO assignments(id,run_id,epoch,coordinator,body,released) VALUES (?,?,1,?,?,0)'
+parameters = ('ffffffffffffffffffffffffffffffff', 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', '686cbf60c73540a1b070863166d54be7', '{"device...ca8feb75980066e7a26cc4bb2d", "tokenizer.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"}}}}')
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x7bb53d5e44a0>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: assignments.snapshot
+E       [SQL: INSERT INTO assignments(id,run_id,epoch,coordinator,body,released) VALUES (?,?,1,?,?,0)]
+E       [SQL parameters hidden due to hide_parameters=True]
+E       (Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/default.py:964: IntegrityError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 5; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_s3_study.py::test_inline_dataset_object_is_in_datasets_bucket_only
+FAILED backend/tests/test_s3_study.py::test_dataset_upload_build_and_split_publication_use_dataset_bucket
+FAILED backend/tests/test_s3_study.py::test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only
+3 failed, 23 passed, 1 warning in 1.90s

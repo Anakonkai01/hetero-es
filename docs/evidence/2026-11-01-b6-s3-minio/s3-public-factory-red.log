@@ -1,0 +1,132 @@
+...............EEEEF..                                                   [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_real_public_dataset_upload_then_download_goes_to_the_dataset_bucket _
+
+s3 = (<backend.storage.s3_backend.S3Backend object at 0x72cb94b41550>, {'accessKeyId': '<redacted>', 'buckets': {'bac...344ae99b8639e228f78b41'}, 'deviceEndpointUrl': 'http://127.0.0.1:32771', 'endpointUrl': 'http://localhost:32771', ...})
+
+    @pytest.fixture
+    def public(s3):
+        backend,config=s3
+>       app=FastAPI();backend.install_routes(app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_s3_public_storage.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.storage.s3_backend.S3Backend object at 0x72cb94b41550>
+app = <fastapi.applications.FastAPI object at 0x72cb949e81a0>
+
+    def install_routes(self, app):
+>       from ..api.s3_storage import install_routes
+E       ModuleNotFoundError: No module named 'backend.api.s3_storage'
+
+backend/storage/s3_backend.py:261: ModuleNotFoundError
+_ ERROR at setup of test_public_capabilities_reject_tamper_method_and_bucket_confusion _
+
+s3 = (<backend.storage.s3_backend.S3Backend object at 0x72cb94b42360>, {'accessKeyId': '<redacted>', 'buckets': {'bac...ed4f7d8ba40976be574722'}, 'deviceEndpointUrl': 'http://127.0.0.1:32771', 'endpointUrl': 'http://localhost:32771', ...})
+
+    @pytest.fixture
+    def public(s3):
+        backend,config=s3
+>       app=FastAPI();backend.install_routes(app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_s3_public_storage.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.storage.s3_backend.S3Backend object at 0x72cb94b42360>
+app = <fastapi.applications.FastAPI object at 0x72cb94a720f0>
+
+    def install_routes(self, app):
+>       from ..api.s3_storage import install_routes
+E       ModuleNotFoundError: No module named 'backend.api.s3_storage'
+
+backend/storage/s3_backend.py:261: ModuleNotFoundError
+_ ERROR at setup of test_signed_length_and_public_size_limit_are_checked_again_at_the_proxy _
+
+s3 = (<backend.storage.s3_backend.S3Backend object at 0x72cb94791730>, {'accessKeyId': '<redacted>', 'buckets': {'bac...7b42898b16974bdc9688a8'}, 'deviceEndpointUrl': 'http://127.0.0.1:32771', 'endpointUrl': 'http://localhost:32771', ...})
+
+    @pytest.fixture
+    def public(s3):
+        backend,config=s3
+>       app=FastAPI();backend.install_routes(app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_s3_public_storage.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.storage.s3_backend.S3Backend object at 0x72cb94791730>
+app = <fastapi.applications.FastAPI object at 0x72cb94790200>
+
+    def install_routes(self, app):
+>       from ..api.s3_storage import install_routes
+E       ModuleNotFoundError: No module named 'backend.api.s3_storage'
+
+backend/storage/s3_backend.py:261: ModuleNotFoundError
+_ ERROR at setup of test_public_signing_key_is_stable_across_replicas_and_upload_scratch_is_removed _
+
+s3 = (<backend.storage.s3_backend.S3Backend object at 0x72cb94647e30>, {'accessKeyId': '<redacted>', 'buckets': {'bac...4f421ea3722b45e6242c4d'}, 'deviceEndpointUrl': 'http://127.0.0.1:32771', 'endpointUrl': 'http://localhost:32771', ...})
+
+    @pytest.fixture
+    def public(s3):
+        backend,config=s3
+>       app=FastAPI();backend.install_routes(app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_s3_public_storage.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.storage.s3_backend.S3Backend object at 0x72cb94647e30>
+app = <fastapi.applications.FastAPI object at 0x72cb94645fd0>
+
+    def install_routes(self, app):
+>       from ..api.s3_storage import install_routes
+E       ModuleNotFoundError: No module named 'backend.api.s3_storage'
+
+backend/storage/s3_backend.py:261: ModuleNotFoundError
+=================================== FAILURES ===================================
+_ test_s3_factory_selects_cloud_backend_and_closes_it_after_background_threads _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-848/test_s3_factory_selects_cloud_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72cb9458d2b0>
+
+    def test_s3_factory_selects_cloud_backend_and_closes_it_after_background_threads(tmp_path,monkeypatch):
+        from backend.apps.factory import _app_from_config
+        from backend.storage.s3_backend import S3Backend
+        closed=[];original=S3Backend.close
+        def close(self):
+            closed.append(self);return original(self)
+        monkeypatch.setattr(S3Backend,'close',close)
+>       app=_app_from_config(tmp_path,{'users':{}},{'deploymentMode':'agent','productStateDirectory':str(tmp_path/'state'),
+            'apiUrl':'https://cloud.example.test','storageMode':'s3','s3':configuration(tmp_path)},None)
+
+backend/tests/test_s3_public_storage.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/tmp/pytest-of-pc5070ti/pytest-848/test_s3_factory_selects_cloud_0')
+credentials = {'users': {}}
+config = {'apiUrl': 'https://cloud.example.test', 'deploymentMode': 'agent', 'productStateDirectory': '/tmp/pytest-of-pc5070ti/...y': 'heteroes-recovery'}, 'deviceEndpointUrl': 'http://127.0.0.1:19000', 'endpointUrl': 'http://minio:9000', ...}, ...}
+writer = None
+
+    def _app_from_config(root, credentials, config, writer, *, service="all", database_url=None):
+        if config.get("deploymentMode") != "agent":
+            raise ValueError("Only agent deployment mode is supported")
+        if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
+>           raise ValueError("Only local recovery storage is supported")
+E           ValueError: Only local recovery storage is supported
+
+backend/apps/factory.py:226: ValueError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 0; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_s3_public_storage.py::test_s3_factory_selects_cloud_backend_and_closes_it_after_background_threads
+ERROR backend/tests/test_s3_public_storage.py::test_real_public_dataset_upload_then_download_goes_to_the_dataset_bucket
+ERROR backend/tests/test_s3_public_storage.py::test_public_capabilities_reject_tamper_method_and_bucket_confusion
+ERROR backend/tests/test_s3_public_storage.py::test_signed_length_and_public_size_limit_are_checked_again_at_the_proxy
+ERROR backend/tests/test_s3_public_storage.py::test_public_signing_key_is_stable_across_replicas_and_upload_scratch_is_removed
+1 failed, 17 passed, 1 warning, 4 errors in 0.65s

@@ -1,0 +1,128 @@
+[
+  {
+    "name": "device URLs signed for internal hostname",
+    "file": "backend/storage/s3_backend.py",
+    "old": "endpoint_url=private",
+    "new": "endpoint_url=internal"
+  },
+  {
+    "name": "incomplete multipart bytes excluded from quota",
+    "file": "backend/storage/s3_backend.py",
+    "old": "total += sum(item[\"Size\"] for item in parts.get(\"Parts\", []))",
+    "new": "total += 0"
+  },
+  {
+    "name": "dataset and backup bytes excluded from shared quota",
+    "file": "backend/storage/s3_backend.py",
+    "old": "for bucket in self._buckets.values():\n            for page in self.client.get_paginator(\"list_objects_v2\")",
+    "new": "for bucket in [self._buckets[\"recovery\"]]:\n            for page in self.client.get_paginator(\"list_objects_v2\")"
+  },
+  {
+    "name": "changed upload may publish after verification",
+    "file": "backend/storage/s3_backend.py",
+    "old": "            CopySourceIfMatch=etag,\n",
+    "new": ""
+  },
+  {
+    "name": "published staging upload remains visible",
+    "file": "backend/storage/s3_backend.py",
+    "old": "        self.delete(source)",
+    "new": "        pass"
+  },
+  {
+    "name": "file publication ignores expected checksum",
+    "file": "backend/storage/s3_backend.py",
+    "old": "if expected is not None:",
+    "new": "if False:"
+  },
+  {
+    "name": "metadata dumps go to recovery bucket",
+    "file": "backend/storage/s3_backend.py",
+    "old": "return self._buckets[\"backups\"]",
+    "new": "return self._buckets[\"recovery\"]"
+  },
+  {
+    "name": "dataset view becomes recovery storage",
+    "file": "backend/storage/s3_backend.py",
+    "old": "view._purpose = purpose",
+    "new": "view._purpose = \"recovery\""
+  },
+  {
+    "name": "public capabilities lose bucket binding",
+    "file": "backend/storage/s3_backend.py",
+    "old": "signer.secret = hmac.new(signer.secret, self._buckets[purpose].encode(), hashlib.sha256).digest()",
+    "new": "pass"
+  },
+  {
+    "name": "public upload length header ignored",
+    "file": "backend/storage/s3_backend.py",
+    "old": "if content_length != str(grant[\"size\"]):",
+    "new": "if False:"
+  },
+  {
+    "name": "public upload size cap ignored at consumption",
+    "file": "backend/storage/s3_backend.py",
+    "old": "or not 0 < grant[\"size\"] <= PUBLIC_STUDY_MAX_BYTES",
+    "new": "or False"
+  },
+  {
+    "name": "oversized dataset public URLs minted",
+    "file": "backend/storage/s3_backend.py",
+    "old": "if size > PUBLIC_STUDY_MAX_BYTES:",
+    "new": "if False:"
+  },
+  {
+    "name": "oversized public download is relayed",
+    "file": "backend/storage/s3_backend.py",
+    "old": "if response[\"ContentLength\"] > PUBLIC_STUDY_MAX_BYTES:",
+    "new": "if False:"
+  },
+  {
+    "name": "public proxy temporary files retained",
+    "file": "backend/api/s3_storage.py",
+    "old": "await run_in_threadpool(shutil.rmtree, work, True)",
+    "new": "pass"
+  },
+  {
+    "name": "reserved bulk API relays are exposed",
+    "file": "backend/api/s3_storage.py",
+    "old": "raise HTTPException(403, \"Private LAN/Tailscale transfer required\")",
+    "new": "return {\"relayed\": True}"
+  },
+  {
+    "name": "S3 clients left open on app shutdown",
+    "file": "backend/apps/factory.py",
+    "old": "if hasattr(storage_backend, \"close\"):",
+    "new": "if False:"
+  },
+  {
+    "name": "inline dataset goes to model bucket",
+    "file": "backend/services/study_registry.py",
+    "old": "store_backend = backend(\"datasets\")",
+    "new": "store_backend = backend()"
+  },
+  {
+    "name": "dataset upload plan goes to model bucket",
+    "file": "backend/services/study_registry.py",
+    "old": "b = backend(\"datasets\")",
+    "new": "b = backend()"
+  },
+  {
+    "name": "built dataset goes to model bucket",
+    "file": "backend/services/study_registry.py",
+    "old": "limits, b = dataset_limits(registry.store), backend(\"datasets\")",
+    "new": "limits, b = dataset_limits(registry.store), backend()"
+  },
+  {
+    "name": "frozen dataset transfers use recovery bucket",
+    "file": "backend/services/study_registry.py",
+    "old": "selected = backend(\"datasets\" if sha in datasets else \"recovery\")",
+    "new": "selected = backend()"
+  },
+  {
+    "name": "local storage rejects PostgreSQL metadata",
+    "file": "backend/storage/local_backend.py",
+    "old": "product\\.(?:sqlite|pgdump)",
+    "new": "product\\.sqlite"
+  }
+]

@@ -1,0 +1,24 @@
+control ok    | 31 passed, 1 warning in 4.48s
+killed       device URLs signed for internal hostname | 3 failed, 28 passed, 1 warning in 4.41s
+killed       incomplete multipart bytes excluded from quota | 1 failed, 30 passed, 1 warning in 4.20s
+killed       dataset and backup bytes excluded from shared quota | 1 failed, 30 passed, 1 warning in 4.09s
+killed       changed upload may publish after verification | 1 failed, 30 passed, 1 warning in 4.13s
+killed       published staging upload remains visible | 1 failed, 30 passed, 1 warning in 4.21s
+killed       file publication ignores expected checksum | 1 failed, 30 passed, 1 warning in 4.28s
+killed       metadata dumps go to recovery bucket | 1 failed, 30 passed, 1 warning in 4.25s
+killed       dataset view becomes recovery storage | 9 failed, 22 passed, 1 warning in 4.06s
+killed       public capabilities lose bucket binding | 1 failed, 30 passed, 1 warning in 4.16s
+SURVIVED     public upload length header ignored | 31 passed, 1 warning in 4.17s
+killed       public upload size cap ignored at consumption | 1 failed, 30 passed, 1 warning in 4.09s
+killed       oversized dataset public URLs minted | 1 failed, 30 passed, 1 warning in 4.23s
+killed       oversized public download is relayed | 1 failed, 30 passed, 1 warning in 4.13s
+killed       public proxy temporary files retained | 1 failed, 30 passed, 1 warning in 4.16s
+killed       reserved bulk API relays are exposed | 1 failed, 30 passed, 1 warning in 4.22s
+killed       S3 clients left open on app shutdown | 1 failed, 30 passed, 1 warning in 4.27s
+killed       inline dataset goes to model bucket | 2 failed, 29 passed, 1 warning in 4.18s
+killed       dataset upload plan goes to model bucket | 1 failed, 30 passed, 1 warning in 4.09s
+killed       built dataset goes to model bucket | 1 failed, 30 passed, 1 warning in 4.12s
+killed       frozen dataset transfers use recovery bucket | 1 failed, 30 passed, 1 warning in 4.07s
+killed       local storage rejects PostgreSQL metadata | 2 failed, 29 passed, 1 warning in 4.10s
+
+20 of 21 mutants killed.

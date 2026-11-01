@@ -1,0 +1,236 @@
+[
+  {
+    "file": "config-mutation-final.log",
+    "originalSha256": "48df91175fc6b78c7bc1323d0106c4b82ce00298fcc7c9646129910cfd13d43f",
+    "archivedSha256": "48df91175fc6b78c7bc1323d0106c4b82ce00298fcc7c9646129910cfd13d43f",
+    "redacted": false
+  },
+  {
+    "file": "config-mutation.log",
+    "originalSha256": "b63ca3004e418b274071b912e0b757cdb3869de764b08c82c4f6f7e479526ff1",
+    "archivedSha256": "b63ca3004e418b274071b912e0b757cdb3869de764b08c82c4f6f7e479526ff1",
+    "redacted": false
+  },
+  {
+    "file": "docs-format.log",
+    "originalSha256": "943d234d04da17e7138d60e9d4a2b4defb5e5cfddf32903ef40db55565bbef46",
+    "archivedSha256": "943d234d04da17e7138d60e9d4a2b4defb5e5cfddf32903ef40db55565bbef46",
+    "redacted": false
+  },
+  {
+    "file": "explicit-credentials-red.log",
+    "originalSha256": "12667d1e4245ce3d62bc580a13e91ff7dddf5875ff7c42492ea4870a80c2553b",
+    "archivedSha256": "12667d1e4245ce3d62bc580a13e91ff7dddf5875ff7c42492ea4870a80c2553b",
+    "redacted": false
+  },
+  {
+    "file": "format-contracts.log",
+    "originalSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "archivedSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "redacted": false
+  },
+  {
+    "file": "format-core.log",
+    "originalSha256": "878d50bf4ab752ab41ae942ac518b87e744d994b21bb15dca142ed7a470b3b3a",
+    "archivedSha256": "878d50bf4ab752ab41ae942ac518b87e744d994b21bb15dca142ed7a470b3b3a",
+    "redacted": false
+  },
+  {
+    "file": "format-final-before-full.log",
+    "originalSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "archivedSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "redacted": false
+  },
+  {
+    "file": "format-final.log",
+    "originalSha256": "2aa3e93bf512a5eda0644d90b3b7f94de9efa7352373793e0afadd90fe9ecff1",
+    "archivedSha256": "2aa3e93bf512a5eda0644d90b3b7f94de9efa7352373793e0afadd90fe9ecff1",
+    "redacted": false
+  },
+  {
+    "file": "format-public.log",
+    "originalSha256": "1dc6a19feae160e87088a6a505f8844ac8bfdaf9001c9c3cc558beceb0f6c9d9",
+    "archivedSha256": "1dc6a19feae160e87088a6a505f8844ac8bfdaf9001c9c3cc558beceb0f6c9d9",
+    "redacted": false
+  },
+  {
+    "file": "format-s3-routes.log",
+    "originalSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "archivedSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "redacted": false
+  },
+  {
+    "file": "format-study.log",
+    "originalSha256": "10869b88a75066aa23546ef1f95fcd4678c3fb92a56ed46ef91688052b67976a",
+    "archivedSha256": "10869b88a75066aa23546ef1f95fcd4678c3fb92a56ed46ef91688052b67976a",
+    "redacted": false
+  },
+  {
+    "file": "full-postgres-final.log",
+    "originalSha256": "96098466768be94839d15e086ab9eb071a0892251a1326cde1f6a10f81786579",
+    "archivedSha256": "96098466768be94839d15e086ab9eb071a0892251a1326cde1f6a10f81786579",
+    "redacted": false
+  },
+  {
+    "file": "full-postgres.log",
+    "originalSha256": "ed0da21d7f8672a12334a94a99f39edae9b5abbfbf2efc44ab1f97f3b21defec",
+    "archivedSha256": "ed0da21d7f8672a12334a94a99f39edae9b5abbfbf2efc44ab1f97f3b21defec",
+    "redacted": false
+  },
+  {
+    "file": "full-sqlite-final.log",
+    "originalSha256": "052af746dc0c440eb1f76c6cfcbe348e7c87cd1fa6af7cd13df762fdf52f7c1a",
+    "archivedSha256": "052af746dc0c440eb1f76c6cfcbe348e7c87cd1fa6af7cd13df762fdf52f7c1a",
+    "redacted": false
+  },
+  {
+    "file": "full-sqlite.log",
+    "originalSha256": "175e0edd398d30e1e4d1226e90f4437fd821e139933d22f867bd671979b2ac26",
+    "archivedSha256": "175e0edd398d30e1e4d1226e90f4437fd821e139933d22f867bd671979b2ac26",
+    "redacted": false
+  },
+  {
+    "file": "handoff-format.log",
+    "originalSha256": "e874f95495065ec9aac198bdad94f798688fc148f7d428f69b46b6bfb2e01669",
+    "archivedSha256": "e874f95495065ec9aac198bdad94f798688fc148f7d428f69b46b6bfb2e01669",
+    "redacted": false
+  },
+  {
+    "file": "header-guard-final.log",
+    "originalSha256": "6170425a87fd95b8a77fd8e6713acddea72f87490ca28fd2c7a2700d3641aa71",
+    "archivedSha256": "6170425a87fd95b8a77fd8e6713acddea72f87490ca28fd2c7a2700d3641aa71",
+    "redacted": false
+  },
+  {
+    "file": "header-guard-format.log",
+    "originalSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "archivedSha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127",
+    "redacted": false
+  },
+  {
+    "file": "io-mutation-final.log",
+    "originalSha256": "8d664683045c955668f26717c3e576f41e6ecfd0ac37c20ee465a30ac844d5a0",
+    "archivedSha256": "8d664683045c955668f26717c3e576f41e6ecfd0ac37c20ee465a30ac844d5a0",
+    "redacted": false
+  },
+  {
+    "file": "io-mutation-first.log",
+    "originalSha256": "36625726f8efab2257c2dc72f348df88285e7ab9d69ae226bd906b228c55e48e",
+    "archivedSha256": "36625726f8efab2257c2dc72f348df88285e7ab9d69ae226bd906b228c55e48e",
+    "redacted": false
+  },
+  {
+    "file": "lint-before-full.log",
+    "originalSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "archivedSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "redacted": false
+  },
+  {
+    "file": "lint-before-matrix.log",
+    "originalSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "archivedSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "redacted": false
+  },
+  {
+    "file": "lint-current.log",
+    "originalSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "archivedSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "redacted": false
+  },
+  {
+    "file": "lint-final.log",
+    "originalSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "archivedSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "redacted": false
+  },
+  {
+    "file": "local-metadata-format-red.log",
+    "originalSha256": "ba1be1bba95d25ba19a7aa6d261bae569a1228ae0c3f7ca247214f48fde43991",
+    "archivedSha256": "ba1be1bba95d25ba19a7aa6d261bae569a1228ae0c3f7ca247214f48fde43991",
+    "redacted": false
+  },
+  {
+    "file": "s3-contracts-first.log",
+    "originalSha256": "5196e58932d445d80e61d1bff76e32a364ee77eceb61e0c7e0bc4e6c6d87a61a",
+    "archivedSha256": "5196e58932d445d80e61d1bff76e32a364ee77eceb61e0c7e0bc4e6c6d87a61a",
+    "redacted": false
+  },
+  {
+    "file": "s3-core-red.log",
+    "originalSha256": "10651779cbd4053915b8c4608dc103988cc76e960676c13eaf3e2a1cc4a73585",
+    "archivedSha256": "10651779cbd4053915b8c4608dc103988cc76e960676c13eaf3e2a1cc4a73585",
+    "redacted": false
+  },
+  {
+    "file": "s3-public-factory-first.log",
+    "originalSha256": "6ed182bb2af661a88b2297c73bef3dc2afa1083841eb651ce6d280bda7d084cd",
+    "archivedSha256": "6ed182bb2af661a88b2297c73bef3dc2afa1083841eb651ce6d280bda7d084cd",
+    "redacted": false
+  },
+  {
+    "file": "s3-public-factory-red.log",
+    "originalSha256": "51c993a841dca3d8f376f4495fdb4c56efc6c86eaee4d5d978e6ff5c0faa2d0b",
+    "archivedSha256": "cf94d24a72a37e6f204a1b2fefc535d24eb1cdea4307c38b6548f336e42e3f8e",
+    "redacted": true
+  },
+  {
+    "file": "s3-pure-first.log",
+    "originalSha256": "66674882343f8b253ff02e79b9fbd6f5775dd4de473bbee73a1d1dc0d120c7a7",
+    "archivedSha256": "66674882343f8b253ff02e79b9fbd6f5775dd4de473bbee73a1d1dc0d120c7a7",
+    "redacted": false
+  },
+  {
+    "file": "s3-real-core.log",
+    "originalSha256": "fc721fc276230f54fff43e11f46a88d78d99f3bcdec589fef0490a4cdc29b036",
+    "archivedSha256": "fc721fc276230f54fff43e11f46a88d78d99f3bcdec589fef0490a4cdc29b036",
+    "redacted": false
+  },
+  {
+    "file": "s3-real-first.log",
+    "originalSha256": "4def57210b5a39339df322f2e852222979c10c8ebb3b45ee673f4ecf003ce92f",
+    "archivedSha256": "4def57210b5a39339df322f2e852222979c10c8ebb3b45ee673f4ecf003ce92f",
+    "redacted": false
+  },
+  {
+    "file": "s3-routes-contracts.log",
+    "originalSha256": "7afe2dc446526ccb6ed9d5d274bb271d3c9f5ba4769d4097cf45f1d6e7366fd2",
+    "archivedSha256": "7afe2dc446526ccb6ed9d5d274bb271d3c9f5ba4769d4097cf45f1d6e7366fd2",
+    "redacted": false
+  },
+  {
+    "file": "s3-study-first.log",
+    "originalSha256": "7a13da208888e6e106b2e6ec7050fa070227f00eea99a10fbe51905400f28596",
+    "archivedSha256": "7a13da208888e6e106b2e6ec7050fa070227f00eea99a10fbe51905400f28596",
+    "redacted": false
+  },
+  {
+    "file": "s3-study-red.log",
+    "originalSha256": "39cd1fe3911c8a558dcbbffc613e15ff22332f2f37d5edf770462d154fe74338",
+    "archivedSha256": "bcf9a74d380b16596561c01781fa44548df81fc15338ebb680875b1ac8b0572a",
+    "redacted": true
+  },
+  {
+    "file": "s3-study-seed-corrected-red.log",
+    "originalSha256": "c2f20ee37af6ccddb5be8900f47e9b8a54884fef1467c0ff2f793a1cdedbe7b3",
+    "archivedSha256": "e0b44719b508ee25e3a67c881da8895a5d361bcaf15f9f89bdd038b3daf0f474",
+    "redacted": true
+  },
+  {
+    "file": "source-packages.log",
+    "originalSha256": "b92203aac0f8e0ad046d343bc31dc46e85bf3160e9d7381cdf211b1531d507c2",
+    "archivedSha256": "b92203aac0f8e0ad046d343bc31dc46e85bf3160e9d7381cdf211b1531d507c2",
+    "redacted": false
+  },
+  {
+    "file": "fresh-postgres/pytest.log",
+    "originalSha256": "77126e3bab4cb38ea28ecad0faa6fd5ac7907a00be3a73119a5e80e89e7f5637",
+    "archivedSha256": "77126e3bab4cb38ea28ecad0faa6fd5ac7907a00be3a73119a5e80e89e7f5637",
+    "redacted": false
+  },
+  {
+    "file": "fresh-postgres-final/pytest.log",
+    "originalSha256": "5dcd8f558edb27be798680576338535e45a809dc63d8cb5fb5f205780b5bb703",
+    "archivedSha256": "5dcd8f558edb27be798680576338535e45a809dc63d8cb5fb5f205780b5bb703",
+    "redacted": false
+  }
+]
