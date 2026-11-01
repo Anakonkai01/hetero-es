@@ -1,0 +1,7 @@
+control ok    | 2 passed, 1 warning in 0.25s
+killed       experiment fixture inserts depend on the old column count | 1 failed, 1 passed, 1 warning in 0.38s
+killed       assignment fixture inserts depend on the old column count | 1 failed, 1 passed, 1 warning in 0.31s
+killed       fixture startup failures disappear from the overall result | 1 failed, 1 passed, 1 warning in 0.26s
+killed       fixture startup diagnostics vanish with temporary cleanup | 1 failed, 1 passed, 1 warning in 0.26s
+
+4 of 4 mutants killed.

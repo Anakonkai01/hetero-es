@@ -1,0 +1,26 @@
+[
+  {
+    "name": "experiment fixture inserts depend on the old column count",
+    "file": "scripts/serve-test-lab.py",
+    "old": "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
+    "new": "INSERT INTO experiments VALUES (?,?,?,?)"
+  },
+  {
+    "name": "assignment fixture inserts depend on the old column count",
+    "file": "scripts/serve-test-lab.py",
+    "old": "INSERT INTO assignments(id,run_id,coordinator,epoch,body,snapshot,released) VALUES (?,?,?,?,?,?,0)",
+    "new": "INSERT INTO assignments VALUES (?,?,?,?,?,?,0)"
+  },
+  {
+    "name": "fixture startup failures disappear from the overall result",
+    "file": "scripts/check-all.sh",
+    "old": "  failed+=(\"fixture-lab-$port\")",
+    "new": "  :"
+  },
+  {
+    "name": "fixture startup diagnostics vanish with temporary cleanup",
+    "file": "scripts/check-all.sh",
+    "old": "> \"$OUT/lab-$port.log\" 2>&1 &",
+    "new": "> \"$WORK/lab-$port.log\" 2>&1 &"
+  }
+]

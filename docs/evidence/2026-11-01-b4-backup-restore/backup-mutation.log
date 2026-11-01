@@ -1,0 +1,19 @@
+control ok    | 12 passed, 1 warning in 4.87s
+killed       snapshot uses the wrong archive format | 3 failed, 9 passed, 1 warning in 3.50s
+killed       client major version is not checked | 1 failed, 11 passed, 1 warning in 4.69s
+killed       ambient libpq service configuration survives | 1 failed, 11 passed, 1 warning in 4.79s
+killed       restore checksum and manifest validation is omitted | 1 failed, 11 passed, 1 warning in 4.54s
+killed       user pgx schemas are mistaken for system schemas | 1 failed, 11 passed, 1 warning in 4.94s
+killed       nonempty restore targets are accepted | 1 failed, 11 passed, 1 warning in 4.62s
+killed       restore data and quarantine commit separately | 1 failed, 11 passed, 1 warning in 5.83s
+killed       psql reports success after a restore validation error | 1 failed, 11 passed, 1 warning in 4.75s
+killed       restored browser sessions remain valid | 2 failed, 10 passed, 1 warning in 4.89s
+killed       restored unknown GPU ownership is erased | 2 failed, 10 passed, 1 warning in 4.72s
+killed       restored dispatch is opened immediately | 2 failed, 10 passed, 1 warning in 4.77s
+killed       uploaded metadata content is never verified | 1 failed, 11 passed, 1 warning in 4.74s
+killed       failed cloud backup removes its local copy | 2 failed, 10 passed, 1 warning in 4.89s
+killed       retention deletes only SQLite payloads | 1 failed, 11 passed, 1 warning in 4.82s
+killed       metadata cloud quota is ignored | 1 failed, 11 passed, 1 warning in 4.90s
+killed       private tool stderr is exposed in an exception | 1 failed, 11 passed, 1 warning in 4.69s
+
+16 of 16 mutants killed.

@@ -1,0 +1,14 @@
+{
+  "container": "heteroes-minicloud-miniotest-20261101-141530-c3b2d8",
+  "port": 32771,
+  "consolePort": 32772,
+  "binding": "127.0.0.1",
+  "image": "heteroes-minicloud/minio:9e49d5e7a648",
+  "imageId": "sha256:53a01453ab7082b3bd4150be80ab07c036ab5e7fe0aad86914b3a68632858269",
+  "sourceCommit": "9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a",
+  "sourceArchiveSha256": "45521908307306e925c98d629e1c17d78c8b72b6ee242b1bfb1409f7d8ee5841",
+  "dockerfileSha256": "3f24a0dbfe24beec0781667cd0f660614f494d6067ed262dba627f248f161c02",
+  "version": "minio version RELEASE.2025-10-15T17-29-55Z (commit-id=9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a)",
+  "health": 200,
+  "privateRecordMode": "0o600"
+}

@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "3cadc1ca9c4a84f8dc9212e37a012021c6e992af",
+  "linuxOnly": true,
+  "published": false,
+  "apps": [
+    {
+      "app": "worker",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B4/apps-check-final/worker/linux-unpacked",
+      "sharedModulesImport": true
+    },
+    {
+      "app": "server",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B4/apps-check-final/server/linux-unpacked",
+      "sharedModulesImport": true
+    }
+  ]
+}

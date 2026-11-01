@@ -1,0 +1,27 @@
+{
+  "sourceContainer": "heteroes-minicloud-pgtest-20261101-125206-c672c4",
+  "image": "postgres:17-alpine",
+  "libraries": [
+    "/lib/ld-musl-x86_64.so.1",
+    "/usr/lib/libcom_err.so.2",
+    "/usr/lib/libcrypto.so.3",
+    "/usr/lib/libedit.so.0",
+    "/usr/lib/libgssapi_krb5.so.2",
+    "/usr/lib/libk5crypto.so.3",
+    "/usr/lib/libkeyutils.so.1",
+    "/usr/lib/libkrb5.so.3",
+    "/usr/lib/libkrb5support.so.0",
+    "/usr/lib/liblber.so.2",
+    "/usr/lib/libldap.so.2",
+    "/usr/lib/liblz4.so.1",
+    "/usr/lib/libncursesw.so.6",
+    "/usr/lib/libsasl2.so.3",
+    "/usr/lib/libssl.so.3",
+    "/usr/lib/libz.so.1",
+    "/usr/lib/libzstd.so.1",
+    "/usr/local/lib/libpq.so.5"
+  ],
+  "dumpVersion": "pg_dump (PostgreSQL) 17.11",
+  "restoreVersion": "pg_restore (PostgreSQL) 17.11",
+  "psqlVersion": "psql (PostgreSQL) 17.11"
+}

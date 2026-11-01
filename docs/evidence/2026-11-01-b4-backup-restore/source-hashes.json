@@ -1,0 +1,20 @@
+{
+  "baseline": "3cadc1ca",
+  "files": {
+    "backend/db/postgres_backup.py": "33e0898a8bf525e4685299e40f5c11844f302941d07a52f9e723d13dc8face4a",
+    "backend/requirements-cloud.lock.txt": "be2c4ee8439b53ce0fc85629af441e78574210fbcf01c20d0288f3f9e0c07f92",
+    "backend/requirements-cloud.txt": "af15d721e286bc2907f6d827c7dc6710348580e3d301a1e1357b5ee341b6be7c",
+    "backend/services/metadata_backup.py": "060a9e9cfbbc52cafb025bd2c3842f6127078b630898e96b371f0275d41a5099",
+    "backend/services/store.py": "141ae4a46f13b6ef5a56215799e8a2ca1e033723b129f1d36a32588eba20e81b",
+    "backend/tests/conftest.py": "34921b85b05f2b75f4155e67b03d8766a360ea58462705b9203fc3e77bed3f39",
+    "backend/tests/dbkit.py": "eb374d7b0b910bb92ab9a426c936f153cf70149477cd5a05ba88d5531fb572e6",
+    "backend/tests/test_fixture_lab_seed.py": "eb4ed939c188c98b2d4ac685df693d62b574e0410a41e42302059447cef80d19",
+    "backend/tests/test_postgres_backup.py": "cfc3b4bafefc42dff938a24c8aec0db483436ece434085636d381ef35bd374bb",
+    "backend/tests/test_postgres_backup_minio.py": "6e2878b240bc432cebcc4e247da6de877842fdc009824441ce2d1c654937b06b",
+    "docs/design/postgres-metadata-backup.md": "9b0f1f9acf17742b89cb335c9bb9e0a01713948b0a26a0e7761e96fcb1f02232",
+    "scripts/backend-postgres-test.py": "0861688248d22424a95640ece39137ecdd34630ac9a580bbae45b044e8840251",
+    "scripts/check-all.sh": "c92ba633f7c3d08433277e0436e58c78b60ed755f0dbe879d07e7775cd28a72d",
+    "scripts/restore-postgres-metadata.py": "7400ac0c2bb956409c65523dfd10f9a119659b7c9cdaac50f715078aad114729",
+    "scripts/serve-test-lab.py": "875cfedbd986af41b61a14952705d433539bd40d6648db59529152c12e5d24cb"
+  }
+}

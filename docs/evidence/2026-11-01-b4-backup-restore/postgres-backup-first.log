@@ -1,0 +1,122 @@
+.E..                                                                     [100%]
+==================================== ERRORS ====================================
+_ ERROR at teardown of test_libpq_credentials_use_only_a_private_environment_and_ignore_ambient_services _
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:144: in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:3326: in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:448: in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:1320: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:712: in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/impl.py:178: in _do_get
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/impl.py:176: in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:389: in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:674: in __init__
+    self.__connect()
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:921: in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:917: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/create.py:667: in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/default.py:642: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/psycopg/connection.py:126: in connect
+    raise last_ex.with_traceback(None)
+E   psycopg.OperationalError: connection is bad: definition of service "unrelated-service" not found
+
+The above exception was the direct cause of the following exception:
+backend/tests/dbkit.py:97: in product_database_target
+    with administrator.transaction() as db:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+backend/db/engine.py:124: in transaction
+    owner = self.engine.connect()
+            ^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:3302: in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:146: in __init__
+    Connection._handle_dbapi_exception_noconnection(
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:2457: in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:144: in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/base.py:3326: in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:448: in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:1320: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:712: in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/impl.py:178: in _do_get
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/impl.py:176: in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:389: in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:674: in __init__
+    self.__connect()
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:921: in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/pool/base.py:917: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/create.py:667: in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/sqlalchemy/engine/default.py:642: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/psycopg/connection.py:126: in connect
+    raise last_ex.with_traceback(None)
+E   sqlalchemy.exc.OperationalError: (psycopg.OperationalError) connection is bad: definition of service "unrelated-service" not found
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 2, SQLite 0; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+ERROR backend/tests/test_postgres_backup.py::test_libpq_credentials_use_only_a_private_environment_and_ignore_ambient_services
+3 passed, 1 warning, 1 error in 1.65s

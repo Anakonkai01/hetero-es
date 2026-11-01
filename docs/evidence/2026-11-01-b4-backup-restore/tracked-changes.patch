@@ -1,0 +1,342 @@
+diff --git a/backend/requirements-cloud.lock.txt b/backend/requirements-cloud.lock.txt
+index cb68738b..af6ad4d7 100644
+--- a/backend/requirements-cloud.lock.txt
++++ b/backend/requirements-cloud.lock.txt
+@@ -1,3 +1,10 @@
+ -r requirements.lock.txt
++boto3==1.43.111
++botocore==1.43.111
++jmespath==1.1.0
+ psycopg==3.3.6
+ psycopg-binary==3.3.6
++python-dateutil==2.9.0.post0
++s3transfer==0.19.2
++six==1.17.0
++urllib3==2.8.0
+diff --git a/backend/requirements-cloud.txt b/backend/requirements-cloud.txt
+index 5ca53a4c..7478bd29 100644
+--- a/backend/requirements-cloud.txt
++++ b/backend/requirements-cloud.txt
+@@ -1,2 +1,3 @@
+ -r requirements.txt
+ psycopg[binary]==3.3.6
++boto3==1.43.111
+diff --git a/backend/services/metadata_backup.py b/backend/services/metadata_backup.py
+index 6506df82..5f761a34 100644
+--- a/backend/services/metadata_backup.py
++++ b/backend/services/metadata_backup.py
+@@ -1,6 +1,7 @@
+ """Hourly consistent product metadata backup; recovery storage failure leaves a local copy."""
+ 
+ from ..db.backups import backup_sqlite
++from ..db.postgres_backup import snapshot_postgres
+ from ..repositories.metadata import MetadataRepository as repository
+ import logging
+ import hashlib
+@@ -13,38 +14,45 @@ import uuid
+ 
+ def create_metadata_backup(store, storage):
+     root = Path(store.path).parent / "metadata-backups"
+-    root.mkdir(mode=0o700, exist_ok=True)
++    root.mkdir(mode=0o700, exist_ok=True, parents=True)
+     point = root / uuid.uuid4().hex
+     point.mkdir(mode=0o700)
+-    database = point / "product.sqlite"
+-    backup_sqlite(store, database)
++    postgres = store.database.dialect == "postgresql"
++    database = point / ("product.pgdump" if postgres else "product.sqlite")
++    details = snapshot_postgres(store.database, database) if postgres else {}
++    if not postgres:
++        backup_sqlite(store, database)
+     os.chmod(database, 0o600)
+     with open(database, "rb") as stream:
+         sha = hashlib.file_digest(stream, "sha256").hexdigest()
+-    data = database.read_bytes()
++    size_bytes = database.stat().st_size
+     manifest = {
+         "formatVersion": 1,
+         "component": "heteroes-product-metadata",
+         "createdAt": time.time(),
+         "sha256": sha,
+-        "sizeBytes": len(data),
+-        "objectKey": "metadata/" + point.name + "/product.sqlite",
++        "sizeBytes": size_bytes,
++        "objectKey": "metadata/" + point.name + "/" + database.name,
++        **details,
+     }
+     (point / "manifest.json").write_text(json.dumps(manifest))
+     os.chmod(point / "manifest.json", 0o600)
+     try:
+         with storage.lock:
+             usage = storage.usage()
+-            if usage["observedBytes"] + usage["reservedBytes"] + len(data) + len(json.dumps(manifest)) > storage.quota:
++            if usage["observedBytes"] + usage["reservedBytes"] + size_bytes + len(json.dumps(manifest)) > storage.quota:
+                 raise RuntimeError("Cloud quota reached")
+ 
+-            storage.backend.put(manifest["objectKey"], data)
++            if hasattr(storage.backend, "put_file"):
++                storage.backend.put_file(manifest["objectKey"], database)
++            else:
++                storage.backend.put(manifest["objectKey"], database.read_bytes())
+             check = hashlib.sha256()
+             size = 0
+             for chunk in storage.backend.get(manifest["objectKey"]):
+                 check.update(chunk)
+                 size += len(chunk)
+-            if size != len(data) or check.hexdigest() != sha:
++            if size != size_bytes or check.hexdigest() != sha:
+                 raise ValueError("Metadata checksum mismatch")
+             storage.backend.put("metadata/" + point.name + "/manifest.json", json.dumps(manifest).encode())
+         status = {"status": "READY", "pointId": point.name, "createdAt": manifest["createdAt"]}
+@@ -65,7 +73,8 @@ def create_metadata_backup(store, storage):
+     for old in points[24:]:
+         if (old / "cloud-state.json").exists():
+             storage.backend.delete("metadata/" + old.name + "/manifest.json")
+-            storage.backend.delete("metadata/" + old.name + "/product.sqlite")
++            old_manifest = json.loads((old / "manifest.json").read_text())
++            storage.backend.delete(old_manifest["objectKey"])
+         shutil.rmtree(old)
+     return status
+ 
+diff --git a/backend/services/store.py b/backend/services/store.py
+index 60a92880..e223f3fe 100644
+--- a/backend/services/store.py
++++ b/backend/services/store.py
+@@ -21,7 +21,10 @@ from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
+ 
+ class Store:
+     def __init__(self, path, passwords, runtime, *, database_url=None, database_connect_args=None):
++        if "://" in str(path):
++            raise ValueError("Store requires a local state path; pass database_url separately")
+         self.path, self.runtime = str(path), runtime
++        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+         self.lock = threading.RLock()
+         self.operation_lock = threading.RLock()
+         self.hasher = PasswordHasher()
+diff --git a/backend/tests/conftest.py b/backend/tests/conftest.py
+index 83a3e6ee..71e441d6 100644
+--- a/backend/tests/conftest.py
++++ b/backend/tests/conftest.py
+@@ -3,7 +3,11 @@
+ from fastapi.testclient import TestClient
+ import pytest
+ 
+-from dbkit import database as database, product_database_target as product_database_target
++from dbkit import (
++    database as database,
++    product_database_target as product_database_target,
++    fresh_postgres_database as fresh_postgres_database,
++)
+ 
+ from backend.app import create_app
+ from backend.devices import AgentRuntime
+diff --git a/backend/tests/dbkit.py b/backend/tests/dbkit.py
+index cce12d1e..0b85eca6 100644
+--- a/backend/tests/dbkit.py
++++ b/backend/tests/dbkit.py
+@@ -99,3 +99,28 @@ def product_database_target(request, monkeypatch):
+                         db.execute("DROP SCHEMA " + schema + " CASCADE")
+             finally:
+                 administrator.close()
++
++
++@pytest.fixture
++def fresh_postgres_database():
++    """Create/drop only this test's fresh databases in the explicit owned PostgreSQL test server."""
++    from sqlalchemy import text
++    from sqlalchemy.engine import make_url
++
++    target = make_url(os.environ["HETEROES_TEST_DATABASE_URL"])
++    created = []
++    with Database(target) as administration:
++
++        def create():
++            name = "backup_restore_test_" + uuid.uuid4().hex
++            with administration.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as db:
++                db.execute(text("CREATE DATABASE " + name))
++            created.append(name)
++            return target.set(database=name, query={})
++
++        try:
++            yield create
++        finally:
++            for name in created:
++                with administration.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as db:
++                    db.execute(text("DROP DATABASE " + name + " WITH (FORCE)"))
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index 70d5c914..980cec89 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -79,12 +79,21 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   Fresh `scripts/check-backend-postgres.sh` invocation passed and removed its owned container. Original assertions in
+   all 70 B2 test modules remain; recursive runtime scanner and doctor instrumentation paths modernized before B9.
+   Evidence `2026-11-01-b3-portable-backend`: schema/SQL mutation 12/12, integrated engine mutation 6/6; B3 complete.
+-  B4–B10 and C remain; PostgreSQL metadata dump/restore belongs to B4, recursive package resources/shim removal to B9.
++  Recursive package resources/shim removal belong to B9; B5–B10 and C remain.
+   B4 core: route partition/export and five role entrypoints implemented; product union remains 111 (API67/devices21/
+   storage23) plus two mounts and three shared operational routes. PostgreSQL cluster identity/diagnostics persist.
+   Dedicated scheduler session leadership and active/standby controller preserve job commit boundaries and fence lost
+   connections; graceful and process-death takeover pass real PG tests. Core SQLite541 / PostgreSQL559, zero skips; mutation16/16. Evidence
+-  `2026-11-01-b4-service-scheduler-core`. B4 still needs PostgreSQL metadata dump/restore; B5–B10 and all C remain.
++  `2026-11-01-b4-service-scheduler-core`.
++  B4 complete: PostgreSQL17 custom dumps upload to real MinIO, pass read-back checks and restore into a fresh database
++  atomically with sessions revoked, reservations preserved and dispatch held. Backup mutation16/16; fixture mutation4/4.
++  Full SQLite548 / PostgreSQL572, zero skips; PostgreSQL audit371 PG +48 explicit SQLite Stores. All24 check-all steps
++  and Linux build-apps --check pass. The first check-all falsely reported success after fixture startup failures; it is
++  rejected. Explicit seed columns and mandatory startup-failure accounting fix B-010; the replacement runs every browser
++  contract and retains all seven startup logs. Evidence `2026-11-01-b4-backup-restore` records failures and final results.
++  The MinIO image was built from pinned official source because the old upstream image was unavailable. Its test SDK
++  adapter proves actual backup I/O; production S3 integration remains B6. Linux app checks do not prove installed private
++  Python dependencies (B9/B10), Windows/GPU acceptance or deployment. B5–B10 and all C remain.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index 10d36654..a403d5ff 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -3,18 +3,20 @@
+ Source: owner's colleague's notes in `~/projects/app_finding.md`, imported 2026-10-31.
+ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original concerns are preserved below.
+ 
+-| ID    | Area                                     | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                                                     | Status                                                                                                                                                                                     |
+-| ----- | ---------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+-| B-001 | `backend/`                               | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.                                      | Open                                                                                                                                                                                       |
+-| B-002 | `backend/routes_*.py`                    | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                                                                | Open                                                                                                                                                                                       |
+-| B-003 | `backend/store.py`                       | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                                                         | Open                                                                                                                                                                                       |
+-| B-004 | Experiment submission maintenance hold   | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.                                             | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                                                      |
+-| B-005 | Independent device lifecycle guards      | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.                                       | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                                              |
+-| B-006 | Experiment-list owner privacy            | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.                                                | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                                                 |
+-| B-007 | Empty dynamic SQL filters on PostgreSQL  | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects.                                   | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`.                            |
+-| B-008 | Scheduler fencing transaction boundaries | C    | P2       | Wrapping a whole scheduler tick in one transaction makes a handled job failure roll back already completed jobs and unrelated progress.                                                                                 | Bind independent business transactions to the dedicated leader session; fence connection loss while preserving each operation commit/rollback boundary. | Fixed: independent-job regression and nine session/controller cases pass on PostgreSQL; core mutation16/16, full SQLite541/PostgreSQL559; evidence `2026-11-01-b4-service-scheduler-core`. |
+-| B-Q1  | Lab Server responsibilities              | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                        | Answered in A5 (architecture document)                                                                                                                                                     |
+-| B-Q2  | Data and backups                         | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                   | Answered in A5                                                                                                                                                                             |
++| ID    | Area                                              | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                                                              | Status                                                                                                                                                                                     |
++| ----- | ------------------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
++| B-001 | `backend/`                                        | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.                                               | Open                                                                                                                                                                                       |
++| B-002 | `backend/routes_*.py`                             | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                                                                         | Open                                                                                                                                                                                       |
++| B-003 | `backend/store.py`                                | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                                                                  | Open                                                                                                                                                                                       |
++| B-004 | Experiment submission maintenance hold            | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.                                                      | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                                                      |
++| B-005 | Independent device lifecycle guards               | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.                                                | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                                              |
++| B-006 | Experiment-list owner privacy                     | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.                                                         | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                                                 |
++| B-007 | Empty dynamic SQL filters on PostgreSQL           | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects.                                            | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`.                            |
++| B-008 | Scheduler fencing transaction boundaries          | C    | P2       | Wrapping a whole scheduler tick in one transaction makes a handled job failure roll back already completed jobs and unrelated progress.                                                                                 | Bind independent business transactions to the dedicated leader session; fence connection loss while preserving each operation commit/rollback boundary.          | Fixed: independent-job regression and nine session/controller cases pass on PostgreSQL; core mutation16/16, full SQLite541/PostgreSQL559; evidence `2026-11-01-b4-service-scheduler-core`. |
++| B-009 | Restore empty-target schema classification        | C    | P2       | SQL LIKE pg_% treats underscore as a wildcard and incorrectly ignores existing user data in a pgx schema, permitting a restore into a nonempty target.                                                                  | Use the exact reserved pg_ prefix; inspect user relations/functions/types and reject before restoration.                                                         | Fixed: real PostgreSQL pgx regression, checksum/identity guards and atomic failure rollback; backup mutation16/16.                                                                         |
++| B-010 | Browser fixtures and full-check result accounting | T    | P1       | Additive DB columns broke old fixture INSERT statements; check-all skipped five browser contracts after startup failures and still printed ALL PASS because those failures never reached its failed list.               | Use explicit seed column lists; retain startup logs and make any fixture startup failure fail the entire command; test real seeding plus the shell failure path. | Fixed: replacement check-all passes all24 steps, SQLite548/PostgreSQL572; fixture mutation4/4. First false ALL PASS rejected; evidence `2026-11-01-b4-backup-restore`.                     |
++| B-Q1  | Lab Server responsibilities                       | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                                 | Answered in A5 (architecture document)                                                                                                                                                     |
++| B-Q2  | Data and backups                                  | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                            | Answered in A5                                                                                                                                                                             |
+ 
+ The colleague's parenthetical text denotes examples, English explanations or personal comments. These notes do not claim
+ that the existing modular monolith is a correctness defect; the approved multi-service work is tracked as architecture.
+diff --git a/scripts/backend-postgres-test.py b/scripts/backend-postgres-test.py
+index 08461e48..9eea8cc8 100644
+--- a/scripts/backend-postgres-test.py
++++ b/scripts/backend-postgres-test.py
+@@ -8,6 +8,7 @@ import os
+ from pathlib import Path
+ import re
+ import secrets
++import shlex
+ import subprocess
+ import sys
+ import time
+@@ -33,6 +34,41 @@ def docker(*arguments, environment=None):
+     return result.stdout.strip()
+ 
+ 
++def postgres_tools(container, output):
++    """Extract this owned Alpine container's matching Linux client tools without changing host packages/environments."""
++    root = output / "pg-client17"
++    root.mkdir(mode=0o700)
++    libraries, aliases = set(), {}
++    for program in ("pg_dump", "pg_restore", "psql"):
++        linked = docker("exec", container, "ldd", "/usr/local/bin/" + program)
++        libraries.update(re.findall(r"(/[^\s()]+)", linked))
++        for alias, path in re.findall(r"(\S+) => (/[^\s()]+)", linked):
++            aliases[alias] = Path(path).name
++    for library in sorted(libraries):
++        docker("cp", "--follow-link", container + ":" + library, str(root / Path(library).name))
++    for alias, target in aliases.items():
++        if not (root / alias).exists():
++            (root / alias).symlink_to(target)
++    loader = next(root / Path(path).name for path in libraries if Path(path).name.startswith("ld-musl-"))
++    environment, versions = {}, {}
++    for program, variable in (
++        ("pg_dump", "HETEROES_PG_DUMP"),
++        ("pg_restore", "HETEROES_PG_RESTORE"),
++        ("psql", "HETEROES_PSQL"),
++    ):
++        binary, wrapper = root / (program + ".bin"), root / program
++        docker("cp", container + ":/usr/local/bin/" + program, str(binary))
++        wrapper.write_text(
++            "#!/bin/sh\nexec "
++            + " ".join(map(shlex.quote, (str(loader), "--library-path", str(root), str(binary))))
++            + ' "$@"\n'
++        )
++        wrapper.chmod(0o700)
++        environment[variable] = str(wrapper)
++        versions[program] = subprocess.check_output([str(wrapper), "--version"], text=True).strip()
++    return environment, versions
++
++
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument(
+@@ -120,6 +156,8 @@ def main():
+             "HETEROES_TEST_DATABASE_URL": url.render_as_string(hide_password=False),
+             "HETEROES_TEST_DATABASE_AUDIT_FILE": str(output / "database-targets.json"),
+         }
++        tools_environment, receipt["pgClients"] = postgres_tools(name, output)
++        test_environment.update(tools_environment)
+         with (output / "pytest.log").open("w") as log:
+             completed = subprocess.run(
+                 [sys.executable, "-m", "pytest", "-q", "--tb=short", "backend/tests"],
+diff --git a/scripts/check-all.sh b/scripts/check-all.sh
+index ba9828ce..54d20248 100755
+--- a/scripts/check-all.sh
++++ b/scripts/check-all.sh
+@@ -41,10 +41,15 @@ step worker-build npm run build --workspace @heteroes/worker
+ 
+ lab() {   # lab <port> [extra serve-test-lab args...]
+   local port=$1; shift
+-  "$PYTHON" scripts/serve-test-lab.py --web "$WORK/web" --port "$port" "$@" > "$WORK/lab-$port.log" 2>&1 &
++  "$PYTHON" scripts/serve-test-lab.py --web "$WORK/web" --port "$port" "$@" > "$OUT/lab-$port.log" 2>&1 &
+   LAB=$!
+-  for _ in $(seq 1 25); do sleep 1; curl -s -m 2 "http://127.0.0.1:$port/api/v1/health" > /dev/null && return 0; done
+-  echo "fixture lab on $port did not start" >&2; return 1
++  for _ in $(seq 1 25); do
++    sleep 1
++    kill -0 "$LAB" 2>/dev/null || break
++    curl -s -m 2 "http://127.0.0.1:$port/api/v1/health" > /dev/null && return 0
++  done
++  failed+=("fixture-lab-$port")
++  echo "fixture lab on $port did not start (see $OUT/lab-$port.log)" >&2; return 1
+ }
+ stop_lab() { kill "$LAB" 2>/dev/null; wait "$LAB" 2>/dev/null; LAB=; }
+ SEEDS=(--seed-run backend/tests/fixtures/run-d09d6ea8.json --seed-run backend/tests/fixtures/run-95b34770.json)
+diff --git a/scripts/serve-test-lab.py b/scripts/serve-test-lab.py
+index 434ca935..65be920d 100644
+--- a/scripts/serve-test-lab.py
++++ b/scripts/serve-test-lab.py
+@@ -88,7 +88,8 @@ def load_run(store, recorded):
+                     item[key] = item[key].replace(recorded["body"]["experimentId"], run_id)
+     with store.db() as db:
+         db.execute(
+-            "INSERT INTO experiments VALUES (?,?,?,?)", (run_id, admin[0], json.dumps(body), json.dumps(snapshot))
++            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
++            (run_id, admin[0], json.dumps(body), json.dumps(snapshot)),
+         )
+     return run_id
+ 
+@@ -132,7 +133,10 @@ def load_stuck_run(store, recorded):
+             "UPDATE experiments SET body=?, snapshot=? WHERE id=?", (json.dumps(body), json.dumps(empty), run_id)
+         )
+         assignment = uuid.uuid4().hex
+-        db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,0)", (assignment, run_id, "test-device", 1, "{}", "{}"))
++        db.execute(
++            "INSERT INTO assignments(id,run_id,coordinator,epoch,body,snapshot,released) VALUES (?,?,?,?,?,?,0)",
++            (assignment, run_id, "test-device", 1, "{}", "{}"),
++        )
+         event = {
+             "event": "agent_command_deferred",
+             "commandId": "coordinate",

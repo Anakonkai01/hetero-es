@@ -1,0 +1,98 @@
+[
+  {
+    "name": "snapshot uses the wrong archive format",
+    "file": "backend/db/postgres_backup.py",
+    "old": "\"--format=custom\"",
+    "new": "\"--format=plain\""
+  },
+  {
+    "name": "client major version is not checked",
+    "file": "backend/db/postgres_backup.py",
+    "old": "if not re.search(r\"\\(PostgreSQL\\)\\s+17(?:\\.|$)\", version):",
+    "new": "if False:"
+  },
+  {
+    "name": "ambient libpq service configuration survives",
+    "file": "backend/db/postgres_backup.py",
+    "old": "environment = {key: value for key, value in os.environ.items() if not key.startswith(\"PG\")}",
+    "new": "environment = dict(os.environ)"
+  },
+  {
+    "name": "restore checksum and manifest validation is omitted",
+    "file": "backend/db/postgres_backup.py",
+    "old": "    _verify(source, manifest)\n",
+    "new": "    pass\n"
+  },
+  {
+    "name": "user pgx schemas are mistaken for system schemas",
+    "file": "backend/db/postgres_backup.py",
+    "old": "left(n.nspname,3) <> 'pg_'",
+    "new": "n.nspname NOT LIKE 'pg_%'"
+  },
+  {
+    "name": "nonempty restore targets are accepted",
+    "file": "backend/db/postgres_backup.py",
+    "old": "def _empty(database):\n    with database.transaction(write=False) as db:\n        return (\n            db.execute(\"\"\"\n            SELECT count(*) FROM (\n                SELECT relnamespace AS namespace FROM pg_class WHERE relkind IN ('r','p','S','v','m','f')\n                UNION ALL SELECT pronamespace FROM pg_proc\n                UNION ALL SELECT typnamespace FROM pg_type WHERE typtype IN ('c','d','e','r','m')\n            ) objects JOIN pg_namespace n ON n.oid=objects.namespace\n            WHERE left(n.nspname,3) <> 'pg_' AND n.nspname <> 'information_schema'\n        \"\"\").fetchone()[0]\n            == 0\n        )",
+    "new": "def _empty(database):\n    return True"
+  },
+  {
+    "name": "restore data and quarantine commit separately",
+    "file": "backend/db/postgres_backup.py",
+    "old": "\"--single-transaction\",",
+    "new": ""
+  },
+  {
+    "name": "psql reports success after a restore validation error",
+    "file": "backend/db/postgres_backup.py",
+    "old": "\"--set=ON_ERROR_STOP=1\"",
+    "new": "\"--set=ON_ERROR_STOP=0\""
+  },
+  {
+    "name": "restored browser sessions remain valid",
+    "file": "backend/db/postgres_backup.py",
+    "old": "DELETE FROM sessions;",
+    "new": "SELECT 1;"
+  },
+  {
+    "name": "restored unknown GPU ownership is erased",
+    "file": "backend/db/postgres_backup.py",
+    "old": "DELETE FROM cloud_downloads;",
+    "new": "DELETE FROM cloud_downloads;\nDELETE FROM device_reservations;"
+  },
+  {
+    "name": "restored dispatch is opened immediately",
+    "file": "backend/db/postgres_backup.py",
+    "old": "VALUES ('dispatchHold','true')",
+    "new": "VALUES ('dispatchHold','false')"
+  },
+  {
+    "name": "uploaded metadata content is never verified",
+    "file": "backend/services/metadata_backup.py",
+    "old": "if size != size_bytes or check.hexdigest() != sha:",
+    "new": "if False:"
+  },
+  {
+    "name": "failed cloud backup removes its local copy",
+    "file": "backend/services/metadata_backup.py",
+    "old": "except Exception as error:\n        status = {",
+    "new": "except Exception as error:\n        database.unlink()\n        status = {"
+  },
+  {
+    "name": "retention deletes only SQLite payloads",
+    "file": "backend/services/metadata_backup.py",
+    "old": "storage.backend.delete(old_manifest[\"objectKey\"])",
+    "new": "storage.backend.delete(\"metadata/\" + old.name + \"/product.sqlite\")"
+  },
+  {
+    "name": "metadata cloud quota is ignored",
+    "file": "backend/services/metadata_backup.py",
+    "old": "if usage[\"observedBytes\"] + usage[\"reservedBytes\"] + size_bytes + len(json.dumps(manifest)) > storage.quota:",
+    "new": "if False:"
+  },
+  {
+    "name": "private tool stderr is exposed in an exception",
+    "file": "backend/db/postgres_backup.py",
+    "old": "raise PostgresBackupError(\"PostgreSQL metadata tool failed\")",
+    "new": "raise PostgresBackupError(completed.stderr)"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "scope": "actual PostgreSQL17 dump -> actual MinIO bucket -> download -> fresh PostgreSQL restore",
+  "sha256": "f4c8d96b67c0ca1bf02cad8a4a13e3537c11e054f5b40836a394478f570705be",
+  "sizeBytes": 54222,
+  "bucket": "heteroes-backups",
+  "status": "READY",
+  "restored": true,
+  "dispatchHeld": true,
+  "sessionsRevoked": true,
+  "reservationsPreserved": true,
+  "schemaName": "public"
+}
