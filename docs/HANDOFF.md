@@ -49,7 +49,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   58 acceptance selftests; final matrix and immutable evidence. All 10 strict notes and numerical-contract §15–17 read.
 - B1 done: [architecture inventory](design/lab-server-architecture.md) publishes 111 product method/path pairs + two static mounts,
   37 tables / 177 columns, 358 SQL calls in 24 modules, proposed state/route ownership and implementation pitfalls.
-  Evidence `2026-11-01-backend-inventory` uses isolated temporary state. B2 starts with accounts/auth; B3–B10 and C remain.
+  Evidence `2026-11-01-backend-inventory` uses isolated temporary state. B2 accounts/auth extracted: 467 backend tests passed, 7/7 mutants killed, all 62 original test files unchanged.
+  Evidence `2026-11-01-b2-accounts`; workspaces is next. Remaining domains, B3–B10 and C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.

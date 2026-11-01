@@ -8,12 +8,10 @@ from .validation import validate_configuration
 from .policies import active_profile
 from .config import load_config
 from contextlib import asynccontextmanager
-import hashlib
 import json
 import os
 from pathlib import Path
 import threading
-import time
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
@@ -25,6 +23,8 @@ from .live import LiveStreams
 from .templates import install_template_routes
 from .notifications import install_notification_routes
 from .throttle import Throttle
+from .api.security import local_user
+from .core.errors import ServiceError
 
 
 def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
@@ -71,22 +71,12 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     app.state.store = store
     app.state.live = LiveStreams()
 
+    @app.exception_handler(ServiceError)
     @app.exception_handler(HTTPException)
     async def handle_http(_request, error):
         return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
 
-    def user(authorization: str = Header(default="")):
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(401, "Sign in to continue")
-        digest = hashlib.sha256(authorization[7:].encode()).hexdigest()
-        with store.db() as db:
-            row = db.execute(
-                "SELECT users.profile FROM sessions JOIN users ON users.id=sessions.user_id WHERE digest=? AND expires>?",
-                (digest, time.time()),
-            ).fetchone()
-        if not row:
-            raise HTTPException(401, "Session expired or revoked")
-        return json.loads(row[0])
+    user = local_user(store.accounts)
 
     def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
         profile = active_profile(store, current, "Your account must be active to access lab resources")
@@ -95,11 +85,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             raise HTTPException(403, "Select a workspace you belong to")
         return {**profile, "workspaceId": x_workspace_id, "workspaceRole": membership["role"]}
 
-    def session(current):
-        return {
-            "user": current,
-            "workspaces": store.workspaces(current["userId"]) if current["accountStatus"] == "ACTIVE" else [],
-        }
+    session = store.accounts.session
 
     def visible(current):
         return [

@@ -18,6 +18,7 @@ from .errors import RuntimeRejected
 from .migrations import initialize_workspace_extras, migrate
 
 from .constants import ACTIVE, TERMINAL, REVISION, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
+from .services.accounts import AccountService
 
 
 def now():
@@ -31,6 +32,7 @@ class Store:
         self.lock = threading.RLock()
         self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()
+        self.accounts = AccountService(self)
         self.last_error = None
         with self.db() as db:
             initialize_product_schema(db)
@@ -91,9 +93,7 @@ class Store:
             self.last_error = None
 
     def profile(self, user_id):
-        with self.db() as db:
-            row = db.execute("SELECT profile FROM users WHERE id=?", (user_id,)).fetchone()
-            return json.loads(row[0]) if row else None
+        return self.accounts.profile(user_id)
 
     def workspaces(self, user_id):
         with self.db() as db:
