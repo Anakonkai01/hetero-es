@@ -70,6 +70,9 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   final mutation 12/12; B-006 list-owner coverage fixed. All 62 original tests unchanged, 111 routes + two mounts retained.
   All 278 unique SQL expression ASTs and the fresh 37-table/177-column schema match B1; every SQL/snapshot call belongs
   to DB/repositories. Every service imports with FastAPI/Starlette/Torch blocked. Evidence `2026-11-01-b2-composition`.
+  B3 foundation: SQLAlchemy Core transaction/row/binding owner tested on SQLite and real PostgreSQL 17.11;
+  full SQLite backend 520, dedicated matrix 24, protocol/engine mutation 6/6 each. Store integration and full PostgreSQL
+  backend remain in progress; this is not full B3 acceptance. Evidence `2026-11-01-b3-database-foundation`.
   B3–B10 and C remain. Before B9, strengthen the old runtime scanner and modernize doctor instrumentation paths.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
