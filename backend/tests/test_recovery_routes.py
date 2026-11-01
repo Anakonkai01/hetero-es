@@ -109,7 +109,10 @@ def test_historical_import_requires_final_lineage_and_scoped_admin(lab):
         "modelVersion": m["childWeightsSha256"],
     }
     with s.db() as db:
-        db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (rid, "admin", __import__("json").dumps(body)))
+        db.execute(
+            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,NULL)",
+            (rid, "admin", __import__("json").dumps(body)),
+        )
     path = "/api/v1/experiments/" + rid + "/recovery-import"
     assert c.post(path, headers=a, json={**m, "childWeightsSha256": "0" * 64}).status_code == 422
     assert c.post(path, headers=login(c, "participant"), json=m).status_code == 404

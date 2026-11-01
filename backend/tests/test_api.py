@@ -96,6 +96,7 @@ def test_config_is_immutable_after_submission(setup):
     )
 
 
+@pytest.mark.sqlite_file(reason="inspects the SQLite database file for plaintext credentials")
 def test_credentials_are_hashed_and_no_lease_secrets_in_product(setup):
     client, store, _ = setup
     headers = login(client, "admin")

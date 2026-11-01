@@ -43,6 +43,7 @@ def test_public_downloads_are_opt_in_and_open_only_the_installers():
         caddyfile({**base, "publicDownloads": "yes"})
 
 
+@pytest.mark.sqlite_file(reason="local deployment guard reads the actual SQLite state file")
 def test_private_config_and_idle_guard(tmp_path):
     root = tmp_path / "private"
     initialize(

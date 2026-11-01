@@ -59,6 +59,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 await run_in_threadpool(metadata_thread.join)
             if dispatcher_started:
                 await run_in_threadpool(thread.join)
+            store.close()
             if writer_lock is not None:
                 writer_lock.close()
 

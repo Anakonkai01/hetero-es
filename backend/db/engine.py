@@ -21,9 +21,10 @@ _DML = re.compile(r"^\s*(INSERT|UPDATE|DELETE)\b", re.IGNORECASE)
 class Connection:
     """One borrowed transaction connection, with the repository's row/binding protocol."""
 
-    def __init__(self, connection, dialect, write):
+    def __init__(self, connection, dialect, write, schema_ready=False):
         self._connection, self.dialect, self.write = connection, dialect, write
         self.closed, self.rollback_only = False, False
+        self.schema_ready = schema_ready
 
     def _check(self, statement):
         if self.closed:
@@ -80,6 +81,7 @@ class Database:
         if url.drivername not in {"sqlite", "sqlite+pysqlite", "postgresql+psycopg"}:
             raise ValueError("Only SQLite and PostgreSQL with psycopg 3 are supported")
         self.lock = lock if lock is not None else threading.RLock()
+        self.schema_ready = False
         self._local = threading.local()
         options = {"hide_parameters": True, "pool_pre_ping": True}
         arguments = dict(connect_args or {})
@@ -118,7 +120,7 @@ class Database:
                 connection_info = physical.info
                 connection_info["heteroes_write"] = writable
                 transaction = physical.begin()
-                borrowed = Connection(physical, self.dialect, writable)
+                borrowed = Connection(physical, self.dialect, writable, self.schema_ready)
                 try:
                     if self.dialect == "postgresql" and writable:
                         physical.execute(
@@ -142,3 +144,14 @@ class Database:
 
     def close(self):
         self.engine.dispose()
+
+    def initialize(self, passwords, hasher):
+        from .schema import initialize_database
+
+        initialize_database(self, passwords, hasher)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc):
+        self.close()

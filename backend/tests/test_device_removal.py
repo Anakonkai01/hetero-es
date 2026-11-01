@@ -77,7 +77,7 @@ def test_a_quarantined_device_cannot_be_removed(lab):
     c, s, r, a = lab
     d, h = pair(lab, "quarantined-pc")
     with s.db() as db:
-        db.execute('UPDATE devices SET status="QUARANTINED" WHERE id=?', (d["deviceId"],))
+        db.execute("UPDATE devices SET status='QUARANTINED' WHERE id=?", (d["deviceId"],))
     response = c.delete(path(d), headers=a)
     assert response.status_code == 409
     assert "quarantine" in response.text.lower(), 'the owner is told why, not only "revoke first"'
@@ -159,7 +159,7 @@ def test_one_step_delete_never_cancels_a_run_nor_removes_a_quarantined_device(la
     with s.db() as db:
         assert db.execute("SELECT status FROM devices WHERE id=?", (d["deviceId"],)).fetchone()[0] == "APPROVED"
         db.execute("DELETE FROM device_reservations")
-        db.execute('UPDATE devices SET status="QUARANTINED" WHERE id=?', (d["deviceId"],))
+        db.execute("UPDATE devices SET status='QUARANTINED' WHERE id=?", (d["deviceId"],))
     assert c.delete(own(d), headers=a).status_code == 409
     assert "busy-pc" in listed(lab)
 

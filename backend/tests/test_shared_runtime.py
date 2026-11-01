@@ -67,6 +67,8 @@ def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs(
     root = repo / "runtime/src/heteroes"
 
     def file_of(module):
+        if module == "heteroes":
+            return "__init__.py"
         relative = Path(*module.split(".")[1:])
         for candidate in (relative.with_suffix(".py"), relative / "__init__.py"):
             if (root / candidate).is_file():
@@ -74,7 +76,9 @@ def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs(
         return None  # a name imported FROM a module (a function, a constant), not a module
 
     needed = set()
-    for path in (repo / "backend").glob("*.py"):
+    for path in (repo / "backend").rglob("*.py"):
+        if "tests" in path.relative_to(repo / "backend").parts:
+            continue
         needed |= {file_of(m) for m in _runtime_imports(path, "backend")} - {None}
     queue = list(needed)
     while queue:

@@ -8,6 +8,9 @@ import sys
 
 import pytest
 
+pytestmark = pytest.mark.sqlite_file(reason="installed local-lab SQLite management adapter")
+
+
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "local-lab.py"
 
 
@@ -102,7 +105,8 @@ def add_run(db_path, status):
 
     with sqlite3.connect(db_path) as db:
         db.execute(
-            "INSERT INTO experiments VALUES (?,?,?,NULL)", (status + "-run", "admin", json.dumps({"status": status}))
+            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,NULL)",
+            (status + "-run", "admin", json.dumps({"status": status})),
         )
 
 

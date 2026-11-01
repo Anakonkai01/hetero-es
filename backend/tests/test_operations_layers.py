@@ -52,7 +52,10 @@ def test_explicit_resume_clears_the_hold_and_old_maintenance_flags(lab):
             ("maintenanceId", '"old-fixture-maintenance"'),
             ("agentMaintenance", "true"),
         ):
-            db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, value))
+            db.execute(
+                "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                (key, value),
+            )
     response = client.post(
         "/api/v1/platform/maintenance/resume", headers=owner, json={"workerConfigurationConfirmed": True}
     )
@@ -76,7 +79,10 @@ def test_resume_keeps_hold_when_imported_queued_workers_are_not_configured(lab):
     body["workerIds"] = ["unknown-imported-worker"]
     with store.db() as db:
         store.save(db, body)
-        db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("dispatchHold", "true"))
+        db.execute(
+            "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            ("dispatchHold", "true"),
+        )
     response = client.post(
         "/api/v1/platform/maintenance/resume", headers=owner, json={"workerConfigurationConfirmed": True}
     )

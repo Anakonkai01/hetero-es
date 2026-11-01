@@ -1,9 +1,12 @@
 import json
 import sqlite3
 import pytest
+
 from fastapi.testclient import TestClient
 from backend.app import app_from_environment
 from backend.server import initialize
+
+pytestmark = pytest.mark.sqlite_file(reason="desktop/local SQLite bootstrap and file publication")
 
 
 def test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash(tmp_path, monkeypatch):

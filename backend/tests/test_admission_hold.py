@@ -7,7 +7,7 @@ from test_pause_resume import paused_report, stopped
 
 def hold(store, value=True):
     with store.db() as db:
-        db.execute('UPDATE settings SET value=? WHERE key="dispatchHold"', (json.dumps(value),))
+        db.execute("UPDATE settings SET value=? WHERE key='dispatchHold'", (json.dumps(value),))
 
 
 def test_held_queue_stays_queued_without_creating_an_assignment(lab):

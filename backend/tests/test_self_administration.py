@@ -49,7 +49,10 @@ def test_workspace_admin_cannot_remove_own_membership_or_role(lab, method):
     client, store, _, admin = lab
     users = accounts(lab)
     with store.db() as db:
-        db.execute("INSERT OR REPLACE INTO memberships VALUES (?,?,?)", ("lab", users["participant"], "ADMIN"))
+        db.execute(
+            "INSERT INTO memberships(workspace_id,user_id,role) VALUES (?,?,?) ON CONFLICT(workspace_id,user_id) DO UPDATE SET role=excluded.role",
+            ("lab", users["participant"], "ADMIN"),
+        )
     path = f"/api/v1/workspaces/lab/members/{users['admin']}"
     response = (
         client.patch(path, headers=admin, json={"role": "PARTICIPANT"})

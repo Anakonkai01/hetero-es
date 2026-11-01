@@ -29,7 +29,7 @@ def test_shared_settings_preserve_hold_and_sorted_disabled_workers(lab):
     _, store, _, _ = lab
     with store.db() as db:
         assert dispatch_held(db) is False
-        db.execute('UPDATE settings SET value=? WHERE key="dispatchHold"', ("true",))
+        db.execute("UPDATE settings SET value=? WHERE key='dispatchHold'", ("true",))
         assert dispatch_held(db) is True
         set_disabled_workers(db, {"z", "a"})
         assert read_setting(db, "disabledWorkers") == ["a", "z"]

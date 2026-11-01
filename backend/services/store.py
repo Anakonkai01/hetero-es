@@ -13,15 +13,14 @@ from .scheduling import SchedulingService
 from .experiment_state import ExperimentStateService
 from .workspaces import WorkspaceStateService
 from ..core.clock import now as now
-from ..db.database import SQLiteDatabase
+from ..db.engine import Database
 from .audit import AuditService
 from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
 
 
 class Store:
-    def __init__(self, path, passwords, runtime):
+    def __init__(self, path, passwords, runtime, *, database_url=None, database_connect_args=None):
         self.path, self.runtime = str(path), runtime
-        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lock = threading.RLock()
         self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()
@@ -32,9 +31,11 @@ class Store:
         self.experiments = ExperimentStateService(self)
         self.workspace_state = WorkspaceStateService(self)
         self.last_error = None
-        self.database = SQLiteDatabase(self.path, self.lock)
+        self.database = Database(database_url or path, lock=self.lock, connect_args=database_connect_args)
         self.database.initialize(passwords, self.hasher)
-        os.chmod(path, 0o600)
+        if self.database.dialect == "sqlite":
+            self.path = self.database.url.database
+            os.chmod(self.path, 0o600)
         runtime.attach_store(self)
         try:
             self.ensure_workers(runtime.capabilities()["workerIds"])
@@ -43,8 +44,11 @@ class Store:
 
     @contextmanager
     def db(self):
-        with self.database.connection() as connection:
+        with self.database.transaction() as connection:
             yield connection
+
+    def close(self):
+        self.database.close()
 
     def audit(self, db, actor, action, target, workspace_id=None):
         return self.audit_service.audit(db=db, actor=actor, action=action, target=target, workspace_id=workspace_id)

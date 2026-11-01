@@ -3,6 +3,8 @@
 from fastapi.testclient import TestClient
 import pytest
 
+from dbkit import database as database, product_database_target as product_database_target
+
 from backend.app import create_app
 from backend.devices import AgentRuntime
 from labkit import USERS, enable, login, pair
@@ -28,3 +30,30 @@ def setup(tmp_path):
         for alias in ("5070ti", "3060"):
             enable(kit, *pair(kit, alias))
         yield client, app.state.store, runtime
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "sqlite_file: explicit legacy SQLite file-format, migration, backup or local deployment contract"
+    )
+
+
+def pytest_sessionfinish(session, exitstatus):
+    import json
+    import os
+    from pathlib import Path
+
+    destination = os.environ.get("HETEROES_TEST_DATABASE_AUDIT_FILE")
+    audit = getattr(session.config, "_heteroes_database_audit", None)
+    if destination and audit is not None:
+        Path(destination).write_text(json.dumps(audit, indent=2) + "\n")
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    audit = getattr(config, "_heteroes_database_audit", None)
+    if audit is not None:
+        counts = audit["productStores"]
+        terminalreporter.write_line(
+            f"Product database targets: PostgreSQL {counts['postgresql']}, SQLite {counts['sqlite']}; "
+            f"explicit SQLite file contracts {len(audit['explicitSQLiteContracts'])}."
+        )

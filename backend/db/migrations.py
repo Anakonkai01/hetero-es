@@ -65,6 +65,13 @@ def initialize_workspace_extras(db):
 
 
 def initialize_agent_schema(store):
+    if getattr(getattr(store, "database", None), "schema_ready", False):
+        with store.db() as db:
+            db.execute(
+                "INSERT INTO settings(key,value) VALUES (:p0,:p1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                ("controlMode", "agent-v2"),
+            )
+        return
     with store.db() as db:
         db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("controlMode", "agent-v2"))
         db.executescript(
@@ -101,6 +108,8 @@ def initialize_agent_schema(store):
 
 
 def initialize_model_qualification_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.executescript("""
         CREATE TABLE IF NOT EXISTS model_engine_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
             reference_hash TEXT NOT NULL,body TEXT NOT NULL,engine TEXT NOT NULL,
@@ -121,36 +130,48 @@ def initialize_model_qualification_schema(db):
 
 
 def initialize_product_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.executescript(
         "\n                PRAGMA journal_mode=WAL;\n                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);\n                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);\n                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);\n            "
     )
 
 
 def initialize_study_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.executescript(
         "\n                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);\n            "
     )
 
 
 def initialize_templates_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.execute(
         "CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)"
     )
 
 
 def initialize_notifications_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.execute(
         "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)"
     )
 
 
 def initialize_recovery_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.execute(
         "CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)"
     )
 
 
 def initialize_recovery_downloads_schema(db):
+    if getattr(db, "schema_ready", False):
+        return
     db.executescript(
         "CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);"
     )

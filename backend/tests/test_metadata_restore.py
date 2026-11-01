@@ -6,8 +6,12 @@ import json
 from pathlib import Path
 import sqlite3
 import pytest
+
 from backend.devices import AgentRuntime
 from backend.store import Store
+from backend.db.backups import backup_sqlite
+
+pytestmark = pytest.mark.sqlite_file(reason="SQLite snapshot file restoration and corruption checks")
 
 spec = importlib.util.spec_from_file_location("restore_m2", Path(__file__).parents[2] / "scripts/restore-metadata.py")
 module = importlib.util.module_from_spec(spec)
@@ -21,8 +25,7 @@ def test_metadata_restore_preserves_unknown_ownership_and_rejects_corruption(tmp
         db.execute("INSERT INTO device_reservations VALUES (?,?)", ("offline-device", "unknown-assignment"))
         db.execute("INSERT INTO sessions VALUES (?,?,?)", ("old-session", "admin", 9999999999))
     source = tmp_path / "snapshot.sqlite"
-    with store.db() as old, sqlite3.connect(source) as new:
-        old.backup(new)
+    backup_sqlite(store, source)
     data = source.read_bytes()
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
@@ -40,7 +43,7 @@ def test_metadata_restore_preserves_unknown_ownership_and_rejects_corruption(tmp
     with sqlite3.connect(target / "state/product.sqlite") as db:
         assert db.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
         assert db.execute("SELECT * FROM device_reservations").fetchone() == ("offline-device", "unknown-assignment")
-        assert db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0] == "true"
+        assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0] == "true"
     assert len(json.loads((target / "credentials.json").read_text())["users"]["admin"]) >= 12
     with pytest.raises(FileExistsError):
         module.restore(source, manifest, target)

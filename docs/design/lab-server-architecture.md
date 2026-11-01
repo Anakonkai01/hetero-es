@@ -71,8 +71,8 @@ point on the coordinator. The runtime's write-ahead generation record prevents s
 
 ## Implemented layering after B2 (2026-11-01)
 
-The working branch now separates HTTP, business policy and persistence. It still runs the combined SQLite service;
-process separation and PostgreSQL belong to B3–B4. Compatibility namespaces remain until B9.
+At the end of B2, HTTP, business policy and persistence were separated while the combined service still used SQLite.
+The B3 portability result is recorded below; process separation belongs to B4. Compatibility namespaces remain until B9.
 
 | Responsibility                                                                    | Current owner                                                                    |
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
@@ -93,9 +93,40 @@ Independent audits preserve all 278 unique SQL expression ASTs and the full fres
 not add or remove a distinct expression. Final composition mutations pass 12/12 after closing the same-workspace list
 owner coverage gap. Evidence: `2026-11-01-b2-composition` on `evidence-archive`.
 
-This is source/CPU layering evidence. PostgreSQL, separate replicas/leadership, OIDC, MinIO and recursive packaged apps
-are still pending. A scratch recursive production import-closure check passes; the original flat-only test remains
-unchanged for B2 and must be strengthened during post-B2 adaptation before B9 removes its compatibility premise.
+This historical B2 result establishes source/CPU layering only. PostgreSQL and recursive runtime scanning are covered
+by B3 below; separate replicas/leadership, OIDC, MinIO and recursive packaged apps remain later work.
+
+## Database portability after B3 (2026-11-01)
+
+The combined application now uses `backend/db/engine.py`: SQLAlchemy Core owns SQLite and PostgreSQL connections,
+transactions, pools and result adaptation. psycopg 3 is an optional cloud dependency. Repository source uses named
+parameters, explicit INSERT/public SELECT columns, portable ON CONFLICT, deliberate dialect JSON text projections and
+explicit `_insert_order`; it does not translate SQLite DML at runtime. Positional binding compatibility remains for
+existing direct callers. Empty positive IN lists use IN (NULL), since PostgreSQL rejects SQLite's accepted IN ().
+
+SQLite keeps its original version-one migration and `PRAGMA user_version=1`. Additive migrations preserve old row
+order and exact experiment bodies/snapshots; ten private order columns never enter public rows. PostgreSQL 17 uses
+`db/postgres_schema.sql`, BIGINT/double precision and identity sequences. The logical schema is now 38 tables and
+189 columns: the original 37/177, ten order columns and a two-column `schema_versions` table. Real-dialect inspection
+compares columns/type affinity, primary keys and unique columns; behavioral tests enforce username and partial uniqueness.
+Tests also detect 32-bit upload-size truncation and float4 timestamp rounding.
+
+Outer writes acquire SQLite BEGIN IMMEDIATE or the PostgreSQL lab advisory transaction lock before any business read.
+Nested calls reuse the outer connection; caught nested-scope errors force outer rollback. PostgreSQL statement savepoints
+allow deliberate integrity-error recovery without losing the root serialization lock. Consistent SQLite backups use a
+separate read connection; PostgreSQL pg_dump/restore and scheduler session leadership are B4 work.
+
+Full backend: SQLite 528 tests; PostgreSQL invocation 538 (ten extra real-dialect engine/schema/repository cases), zero
+skips, one existing dependency warning each. Its audit records 334 actual PostgreSQL product Stores and 39 SQLite Stores
+in 35 explicitly marked file/migration/corruption/local-deployment contracts. No dummy SQLite files or silent PostgreSQL
+fallbacks are used. Two independent product processes racing for one device and physical GPU grant exactly one assignment.
+`scripts/check-backend-postgres.sh` reproduces the whole invocation on an owned PostgreSQL 17 container bound to a random
+loopback port, writes its target audit/receipt and removes that container. Evidence: `2026-11-01-b3-portable-backend`.
+
+B3 legitimately modernizes test SQL, marks SQLite file contracts, uses the dedicated snapshot API, strengthens the
+runtime closure scanner to recursive production traversal and updates doctor instrumentation paths. Every baseline
+assertion from the 70 B2 test modules is retained (SQL literal quoting normalized in the proof). This is separate from
+B9's later import-only shim-removal proof. Services still run together; B4–B10 and MiniCloud C remain unfinished.
 
 ## Planned service boundaries
 

@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+import pytest
 
 from backend.store import Store
 from labkit import draft, login, pending_commands, submitted
@@ -133,6 +134,7 @@ def test_password_change_revokes_other_sessions_and_does_not_allow_privilege_edi
     assert client.patch("/api/v1/profile", json={"canCreateWorkspace": True}, headers=first).status_code == 422
 
 
+@pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
 def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
     _, _, runtime = setup
     path = tmp_path / "legacy.sqlite"
@@ -152,11 +154,11 @@ def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
         CREATE TABLE audit(sequence INTEGER PRIMARY KEY AUTOINCREMENT,actor TEXT,action TEXT,target TEXT,created TEXT);""")
         for name in ("admin", "participant"):
             db.execute(
-                "INSERT INTO users VALUES (?,?,?)",
+                "INSERT INTO users(id,hash,profile) VALUES (?,?,?)",
                 (name, "preserved-hash", json.dumps({"userId": name, "username": name})),
             )
         db.execute(
-            "INSERT INTO experiments VALUES (?,?,?,?)",
+            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
             ("fixed-id", "participant", json.dumps(body), "preserved-snapshot"),
         )
         db.execute("INSERT INTO queue VALUES (?,?)", (42, "fixed-id"))
@@ -169,7 +171,7 @@ def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
             "preserved-snapshot",
         )
         assert db.execute("SELECT sequence,run_id FROM queue").fetchone() == (42, "fixed-id")
-        assert db.execute('SELECT hash FROM users WHERE id="admin"').fetchone()[0] == "preserved-hash"
+        assert db.execute("SELECT hash FROM users WHERE id='admin'").fetchone()[0] == "preserved-hash"
         assert db.execute("SELECT count(*) FROM memberships").fetchone()[0] == 2
 
 
@@ -181,7 +183,7 @@ def test_dispatch_revalidates_assignment_before_launch(setup):
     rid = draft(client, admin, coordinatorDeviceId=coordinator, workerIds=["5070ti"]).json()["experimentId"]
     client.post(f"/api/v1/experiments/{rid}/submit", headers=admin)
     with store.db() as db:
-        db.execute('UPDATE worker_assignments SET workspace_id=NULL WHERE worker_id="5070ti"')
+        db.execute("UPDATE worker_assignments SET workspace_id=NULL WHERE worker_id='5070ti'")
     store.dispatch_once()
     assert submitted(runtime) == []
     assert store.get(rid)["status"] == "CANCELLED"
@@ -196,7 +198,7 @@ def test_platform_privilege_is_persisted_independently_of_username(setup):
     with store.db() as db:
         p = store.profile("admin")
         p["username"] = "operator"
-        db.execute('UPDATE users SET profile=? WHERE id="admin"', (json.dumps(p),))
+        db.execute("UPDATE users SET profile=? WHERE id='admin'", (json.dumps(p),))
     response = client.post("/api/v1/auth/login", json={"username": "operator", "password": "test-admin-pass"})
     assert response.status_code == 200
     headers = {"Authorization": "Bearer " + response.json()["accessToken"]}

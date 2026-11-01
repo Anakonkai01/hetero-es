@@ -126,6 +126,7 @@ def test_unsafe_paths_and_changed_point_identity_are_rejected(storage):
         st.begin({**m, "generation": 1})
 
 
+@pytest.mark.sqlite_file(reason="SQLite metadata backup and integrity_check")
 def test_metadata_backup_is_consistent_and_keeps_local_copy(storage):
     from backend.metadata_backup import create_metadata_backup
     from pathlib import Path

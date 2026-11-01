@@ -1,43 +1,8 @@
 """The same transaction contract runs on SQLite files and a real PostgreSQL test schema."""
 
-from contextlib import ExitStack
-import os
 import threading
-import uuid
 
 import pytest
-
-from backend.db.engine import Database
-
-_DIALECTS = ["sqlite"] + (["postgresql"] if os.environ.get("HETEROES_TEST_DATABASE_URL") else [])
-
-
-@pytest.fixture(params=_DIALECTS)
-def database(request, tmp_path):
-    with ExitStack() as cleanup:
-        options = {}
-        if request.param == "sqlite":
-            target = tmp_path / "engine.sqlite"
-        else:
-            target = os.environ["HETEROES_TEST_DATABASE_URL"]
-            administrator = Database(target)
-            cleanup.callback(administrator.close)
-            schema = "engine_test_" + uuid.uuid4().hex
-            with administrator.transaction() as connection:
-                connection.execute("CREATE SCHEMA " + schema)
-
-            def drop_schema():
-                with administrator.transaction() as connection:
-                    connection.execute("DROP SCHEMA " + schema + " CASCADE")
-
-            cleanup.callback(drop_schema)
-            # A broken nested-transaction implementation must fail instead of waiting indefinitely on itself.
-            options = {"options": "-csearch_path=" + schema + " -clock_timeout=2000"}
-        owner = Database(target, connect_args=options)
-        cleanup.callback(owner.close)
-        with owner.transaction() as connection:
-            connection.execute("CREATE TABLE entries(id BIGINT PRIMARY KEY,value TEXT,enabled BIGINT,large BIGINT)")
-        yield owner, lambda: Database(target, connect_args=options)
 
 
 def test_database_commit_row_protocol_and_integer_parity(database):
@@ -50,7 +15,7 @@ def test_database_commit_row_protocol_and_integer_parity(database):
         row = connection.execute("SELECT id,value,enabled,large FROM entries").fetchone()
         assert dict(row) == {"id": 1, "value": "fixture", "enabled": 1, "large": 2**34}
         assert type(row["enabled"]) is int and tuple(row) == (1, "fixture", 1, 2**34)
-    assert owner.dialect in _DIALECTS
+    assert owner.dialect in {"sqlite", "postgresql"}
 
 
 def test_failure_rolls_back_and_nested_calls_reuse_the_outer_connection(database):

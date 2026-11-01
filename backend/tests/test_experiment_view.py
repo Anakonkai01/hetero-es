@@ -35,7 +35,8 @@ def test_completed_run_clears_stale_shutdown_notice_and_counts_audits_after_reco
     original = copy.deepcopy(body)
     with store.db() as db:
         db.execute(
-            "INSERT INTO experiments VALUES (?,?,?,?)", (run_id, "admin", json.dumps(body), json.dumps(snapshot))
+            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
+            (run_id, "admin", json.dumps(body), json.dumps(snapshot)),
         )
     for shown in (
         client.get(f"/api/v1/experiments/{run_id}", headers=headers).json(),

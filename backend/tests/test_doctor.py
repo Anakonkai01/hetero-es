@@ -3,8 +3,11 @@ import sqlite3
 
 import pytest
 
+
 from backend.doctor import FAIL, PASS, WARN, main, run_checks
 from backend.server import initialize
+
+pytestmark = pytest.mark.sqlite_file(reason="SQLite diagnostics and deliberate on-disk corruption")
 
 
 @pytest.fixture
@@ -118,11 +121,13 @@ def test_storage_directory_is_required_and_free_space_is_judged(lab, tmp_path, m
     import shutil
 
     monkeypatch.setattr(
-        "backend.doctor.shutil.disk_usage", lambda path: shutil._ntuple_diskusage(500 * 10**9, 100 * 10**9, 400 * 10**9)
+        "backend.services.doctor.shutil.disk_usage",
+        lambda path: shutil._ntuple_diskusage(500 * 10**9, 100 * 10**9, 400 * 10**9),
     )
     assert levels(lab)["storage"][0] == PASS
     monkeypatch.setattr(
-        "backend.doctor.shutil.disk_usage", lambda path: shutil._ntuple_diskusage(100 * 10**9, 99 * 10**9, 1 * 10**9)
+        "backend.services.doctor.shutil.disk_usage",
+        lambda path: shutil._ntuple_diskusage(100 * 10**9, 99 * 10**9, 1 * 10**9),
     )
     assert levels(lab)["storage"][0] == WARN and "free" in levels(lab)["storage"][1]
     monkeypatch.undo()

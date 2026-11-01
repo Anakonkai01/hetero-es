@@ -52,3 +52,18 @@ def test_borrowed_connection_is_unusable_after_its_transaction_scope(tmp_path):
         assert connection.execute("SELECT 1").fetchone()[0] == 1
     with pytest.raises(Exception):
         connection.execute("SELECT 1")
+
+
+def test_store_uses_the_core_owner_and_nested_reads_share_uncommitted_state(tmp_path):
+    from backend.db.engine import Database
+
+    store = Store(tmp_path / "core-owner.sqlite", {"admin": "store-fixture-password"}, AgentRuntime())
+    try:
+        assert isinstance(store.database, Database)
+        with store.db() as db:
+            db.execute("UPDATE users SET profile=:p0 WHERE id=:p1", ('{"userId":"admin","fixture":true}', "admin"))
+            assert store.profile("admin") == {"userId": "admin", "fixture": True}
+            with store.db() as nested:
+                assert nested is db
+    finally:
+        store.close()

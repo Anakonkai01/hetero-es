@@ -73,7 +73,13 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   B3 foundation: SQLAlchemy Core transaction/row/binding owner tested on SQLite and real PostgreSQL 17.11;
   full SQLite backend 520, dedicated matrix 24, protocol/engine mutation 6/6 each. Store integration and full PostgreSQL
   backend remain in progress; this is not full B3 acceptance. Evidence `2026-11-01-b3-database-foundation`.
-  B3–B10 and C remain. Before B9, strengthen the old runtime scanner and modernize doctor instrumentation paths.
+  B3 integration: Store now uses the Core owner; portable named repository SQL, explicit ordering, real PG17 schema
+  and SQLite additive migrations. Full SQLite 528 / PostgreSQL 538, zero skips; PG audit 334 real PostgreSQL Stores +39
+  explicit SQLite file-contract Stores. Two product processes competing for a device/GPU grant exactly one assignment.
+  Fresh `scripts/check-backend-postgres.sh` invocation passed and removed its owned container. Original assertions in
+  all 70 B2 test modules remain; recursive runtime scanner and doctor instrumentation paths modernized before B9.
+  Evidence `2026-11-01-b3-portable-backend`: schema/SQL mutation 12/12, integrated engine mutation 6/6; B3 complete.
+  B4–B10 and C remain; PostgreSQL metadata dump/restore belongs to B4, recursive package resources/shim removal to B9.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.

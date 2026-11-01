@@ -23,7 +23,7 @@ def test_newly_configured_gpu_starts_unassigned_and_disabled(setup):
     assert "new-gpu" not in store.assignments("lab")
     with store.db() as db:
         assert "new-gpu" in store.disabled_workers(db)
-        assert db.execute('SELECT workspace_id FROM worker_assignments WHERE worker_id="new-gpu"').fetchone()[0] is None
+        assert db.execute("SELECT workspace_id FROM worker_assignments WHERE worker_id='new-gpu'").fetchone()[0] is None
 
 
 def test_restore_publication_cannot_replace_existing_empty_directory(tmp_path):
