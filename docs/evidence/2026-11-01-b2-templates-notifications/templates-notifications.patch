@@ -1,0 +1,1372 @@
+diff --git a/backend/api/notifications.py b/backend/api/notifications.py
+new file mode 100644
+index 00000000..27e93cc5
+--- /dev/null
++++ b/backend/api/notifications.py
+@@ -0,0 +1,20 @@
++"""Notifications HTTP adapters."""
++
++from fastapi import Depends
++from fastapi import APIRouter
++from ..services.notifications import operations
++
++
++def install_routes(app, store, user):
++    service = operations(store, user)
++    router = APIRouter()
++
++    @app.get("/api/v1/notifications")
++    def list_notifications(limit: int = 30, current=Depends(user)):
++        return service.list_notifications(limit=limit, current=current)
++
++    @app.post("/api/v1/notifications/read")
++    def read_notifications(body: dict, current=Depends(user)):
++        return service.read_notifications(body=body, current=current)
++
++    app.include_router(router)
+diff --git a/backend/api/templates.py b/backend/api/templates.py
+new file mode 100644
+index 00000000..6137fb6c
+--- /dev/null
++++ b/backend/api/templates.py
+@@ -0,0 +1,34 @@
++"""Templates HTTP adapters."""
++
++from fastapi import Depends, HTTPException, Response
++from fastapi import APIRouter
++from ..services.templates import operations, clean_config as _clean_config
++from ..core.errors import ServiceError
++
++
++def install_routes(app, store, scoped):
++    service = operations(store, scoped)
++    router = APIRouter()
++
++    @app.get("/api/v1/experiment-templates")
++    def list_templates(current=Depends(scoped)):
++        return service.list_templates(current=current)
++
++    @app.post("/api/v1/experiment-templates", status_code=201)
++    def create_template(body: dict, current=Depends(scoped)):
++        return service.create_template(body=body, current=current)
++
++    @app.delete("/api/v1/experiment-templates/{template_id}", status_code=204)
++    def delete_template(template_id: str, current=Depends(scoped)):
++        service.delete_template(template_id=template_id, current=current)
++        return Response(status_code=204)
++
++    app.include_router(router)
++
++
++def clean_config(config):
++    """Compatibility HTTP boundary for existing in-process template callers."""
++    try:
++        return _clean_config(config)
++    except ServiceError as error:
++        raise HTTPException(error.status_code, error.detail, headers=error.headers) from None
+diff --git a/backend/db/migrations.py b/backend/db/migrations.py
+new file mode 100644
+index 00000000..4ded9904
+--- /dev/null
++++ b/backend/db/migrations.py
+@@ -0,0 +1,156 @@
++"""Versioned, transactional migration of the original single-lab database."""
++
++import json
++
++SCHEMA_VERSION = 1
++
++
++def migrate(db):
++    version = db.execute("PRAGMA user_version").fetchone()[0]
++    if version > SCHEMA_VERSION:
++        raise RuntimeError("Database belongs to a newer product version")
++    if version == SCHEMA_VERSION:
++        return
++    # Do not rewrite experiment bodies, snapshots, sessions or FIFO sequence IDs.
++    db.execute("BEGIN IMMEDIATE")
++    db.execute(
++        "CREATE TABLE workspaces(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,creator TEXT NOT NULL)"
++    )
++    db.execute(
++        'CREATE TABLE memberships(workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ("ADMIN","PARTICIPANT")),PRIMARY KEY(workspace_id,user_id))'
++    )
++    db.execute(
++        "CREATE TABLE invitations(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,status TEXT NOT NULL,created TEXT NOT NULL)"
++    )
++    db.execute('CREATE UNIQUE INDEX pending_invitation ON invitations(workspace_id,user_id) WHERE status="PENDING"')
++    db.execute("CREATE TABLE worker_assignments(worker_id TEXT PRIMARY KEY,owner TEXT NOT NULL,workspace_id TEXT)")
++    db.execute("CREATE TABLE settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)")
++    db.execute("ALTER TABLE audit ADD COLUMN workspace_id TEXT")
++    db.execute('UPDATE audit SET workspace_id="lab"')
++    profiles = [json.loads(row["profile"]) for row in db.execute("SELECT profile FROM users ORDER BY rowid")]
++    # Legacy bootstrap migration only: subsequent authorization uses persisted
++    # privileges and membership, never a special username.
++    creator = next(
++        (p["userId"] for p in profiles if p["username"] == "admin"), profiles[0]["userId"] if profiles else "bootstrap"
++    )
++    db.execute(
++        "INSERT INTO workspaces VALUES (?,?,?,?)",
++        ("lab", "HeteroES Lab", "Private GPU pool · FIFO · one active experiment", creator),
++    )
++    for p in profiles:
++        p.update(
++            accountStatus="ACTIVE", platformAdmin=p["userId"] == creator, canCreateWorkspace=p["userId"] == creator
++        )
++        db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(p), p["userId"]))
++        db.execute(
++            "INSERT INTO memberships VALUES (?,?,?)",
++            ("lab", p["userId"], "ADMIN" if p["userId"] == creator else "PARTICIPANT"),
++        )
++    db.execute("CREATE UNIQUE INDEX username ON users(json_extract(profile,'$.username'))")
++    db.execute("INSERT INTO settings VALUES (?,?)", ("dispatchHold", "false"))
++    db.execute("PRAGMA user_version=1")
++
++
++def initialize_workspace_extras(db):
++    """Tables added after schema version 1, created when missing: per-workspace settings and join requests."""
++    db.executescript(
++        """
++        CREATE TABLE IF NOT EXISTS workspace_settings(workspace_id TEXT PRIMARY KEY,body TEXT NOT NULL);
++        CREATE TABLE IF NOT EXISTS join_requests(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,
++            status TEXT NOT NULL,created TEXT NOT NULL);
++        CREATE UNIQUE INDEX IF NOT EXISTS pending_join_request ON join_requests(workspace_id,user_id)
++            WHERE status="PENDING";
++        """
++    )
++
++
++def initialize_agent_schema(store):
++    with store.db() as db:
++        db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("controlMode", "agent-v2"))
++        db.executescript(
++            "\n                CREATE TABLE IF NOT EXISTS pairing_codes (digest TEXT PRIMARY KEY,owner TEXT NOT NULL,expires REAL NOT NULL,used INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY,worker_id TEXT UNIQUE NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,token_digest TEXT NOT NULL,status TEXT NOT NULL,compute_url TEXT NOT NULL,self_test TEXT NOT NULL,boot_id TEXT,seen REAL NOT NULL DEFAULT 0,enabled INTEGER NOT NULL DEFAULT 0,desired INTEGER NOT NULL DEFAULT 0,processes TEXT NOT NULL DEFAULT '[]');\n                CREATE TABLE IF NOT EXISTS assignments (id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL,coordinator TEXT NOT NULL,epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS device_reservations (device_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS physical_reservations (resource_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_commands (id TEXT PRIMARY KEY,device_id TEXT NOT NULL,dedupe TEXT NOT NULL UNIQUE,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS monitoring_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,assignment_id TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_telemetry_history(device_id TEXT NOT NULL,boot_id TEXT NOT NULL,sampled_at REAL NOT NULL,received_at REAL NOT NULL,body TEXT NOT NULL,PRIMARY KEY(device_id,boot_id,sampled_at));\n                CREATE TABLE IF NOT EXISTS device_reports (device_id TEXT NOT NULL,assignment_id TEXT NOT NULL,sequence INTEGER NOT NULL,PRIMARY KEY(device_id,assignment_id,sequence));\n                CREATE TABLE IF NOT EXISTS assignment_members (change_id TEXT PRIMARY KEY,run_id TEXT NOT NULL,worker_id TEXT NOT NULL,device_id TEXT NOT NULL,action TEXT NOT NULL CHECK(action IN ('JOIN','LEAVE')),actor TEXT NOT NULL,created REAL NOT NULL);\n            "
++        )
++        if "telemetry" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
++            db.execute("ALTER TABLE devices ADD COLUMN telemetry TEXT")
++        if "bulk_url" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
++            db.execute("ALTER TABLE devices ADD COLUMN bulk_url TEXT")
++        if "keep_on" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
++            # the owner's choice to keep contributing after the machine restarts (otherwise every boot starts OFF)
++            db.execute("ALTER TABLE devices ADD COLUMN keep_on INTEGER NOT NULL DEFAULT 0")
++        schema = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='assignments'").fetchone()[0]
++        if "run_id TEXT UNIQUE" in schema:
++            db.executescript(
++                "\n                    BEGIN IMMEDIATE;\n                    ALTER TABLE assignments RENAME TO assignments_v2;\n                    CREATE TABLE assignments(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,coordinator TEXT NOT NULL,\n                        epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                    INSERT INTO assignments SELECT * FROM assignments_v2;\n                    DROP TABLE assignments_v2;\n                    COMMIT;\n                "
++            )
++        db.execute(
++            "CREATE UNIQUE INDEX IF NOT EXISTS active_assignment_per_run ON assignments(run_id) WHERE released=0"
++        )
++        db.execute("CREATE UNIQUE INDEX IF NOT EXISTS assignment_epoch ON assignments(run_id,epoch)")
++        for row in db.execute(
++            "SELECT r.assignment_id,d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id"
++        ).fetchall():
++            resource = json.loads(row["self_test"]).get("gpuUUID")
++            if resource:
++                old = db.execute(
++                    "SELECT assignment_id FROM physical_reservations WHERE resource_id=?", (resource,)
++                ).fetchone()
++                if old and old[0] != row["assignment_id"]:
++                    raise RuntimeError("Conflicting physical GPU ownership; keep dispatch held")
++                db.execute("INSERT OR IGNORE INTO physical_reservations VALUES (?,?)", (resource, row["assignment_id"]))
++        initialize_model_qualification_schema(db)
++
++
++def initialize_model_qualification_schema(db):
++    db.executescript("""
++        CREATE TABLE IF NOT EXISTS model_engine_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
++            reference_hash TEXT NOT NULL,body TEXT NOT NULL,engine TEXT NOT NULL,
++            PRIMARY KEY(workspace_id,manifest_hash,engine));
++        CREATE TABLE IF NOT EXISTS model_engine_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,
++            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,
++            engine TEXT NOT NULL,PRIMARY KEY(device_id,workspace_id,manifest_hash,engine));
++        CREATE TABLE IF NOT EXISTS model_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
++            reference_hash TEXT NOT NULL,body TEXT NOT NULL,PRIMARY KEY(workspace_id,manifest_hash));
++        CREATE TABLE IF NOT EXISTS model_probe_jobs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,asset_id TEXT NOT NULL,
++            device_id TEXT NOT NULL,body TEXT NOT NULL);
++        CREATE TABLE IF NOT EXISTS model_probe_reservations(job_id TEXT PRIMARY KEY,device_id TEXT UNIQUE NOT NULL,
++            resource_id TEXT UNIQUE NOT NULL);
++        CREATE TABLE IF NOT EXISTS model_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,
++            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,
++            PRIMARY KEY(device_id,workspace_id,manifest_hash));
++    """)
++
++
++def initialize_product_schema(db):
++    db.executescript(
++        "\n                PRAGMA journal_mode=WAL;\n                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);\n                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);\n                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);\n            "
++    )
++
++
++def initialize_study_schema(db):
++    db.executescript(
++        "\n                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);\n            "
++    )
++
++
++def initialize_templates_schema(db):
++    db.execute(
++        "CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)"
++    )
++
++
++def initialize_notifications_schema(db):
++    db.execute(
++        "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)"
++    )
++
++
++def initialize_recovery_schema(db):
++    db.execute(
++        "CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)"
++    )
++
++
++def initialize_recovery_downloads_schema(db):
++    db.executescript(
++        "CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);"
++    )
+diff --git a/backend/db/projections.py b/backend/db/projections.py
+new file mode 100644
+index 00000000..ee60292a
+--- /dev/null
++++ b/backend/db/projections.py
+@@ -0,0 +1,8 @@
++"""Notification projection schema initialization, owned by the database layer."""
++
++from .migrations import initialize_notifications_schema
++
++
++def initialize_notification_projection(db):
++    initialize_notifications_schema(db)
++    db.execute("CREATE INDEX IF NOT EXISTS notifications_user ON notifications(user_id, id)")
+diff --git a/backend/migrations.py b/backend/migrations.py
+index 4ded9904..05f878c8 100644
+--- a/backend/migrations.py
++++ b/backend/migrations.py
+@@ -1,156 +1,6 @@
+-"""Versioned, transactional migration of the original single-lab database."""
++"""Compatibility module retained during database-layer extraction."""
+ 
+-import json
++import sys
++from .db import migrations as _implementation
+ 
+-SCHEMA_VERSION = 1
+-
+-
+-def migrate(db):
+-    version = db.execute("PRAGMA user_version").fetchone()[0]
+-    if version > SCHEMA_VERSION:
+-        raise RuntimeError("Database belongs to a newer product version")
+-    if version == SCHEMA_VERSION:
+-        return
+-    # Do not rewrite experiment bodies, snapshots, sessions or FIFO sequence IDs.
+-    db.execute("BEGIN IMMEDIATE")
+-    db.execute(
+-        "CREATE TABLE workspaces(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,creator TEXT NOT NULL)"
+-    )
+-    db.execute(
+-        'CREATE TABLE memberships(workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ("ADMIN","PARTICIPANT")),PRIMARY KEY(workspace_id,user_id))'
+-    )
+-    db.execute(
+-        "CREATE TABLE invitations(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,status TEXT NOT NULL,created TEXT NOT NULL)"
+-    )
+-    db.execute('CREATE UNIQUE INDEX pending_invitation ON invitations(workspace_id,user_id) WHERE status="PENDING"')
+-    db.execute("CREATE TABLE worker_assignments(worker_id TEXT PRIMARY KEY,owner TEXT NOT NULL,workspace_id TEXT)")
+-    db.execute("CREATE TABLE settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)")
+-    db.execute("ALTER TABLE audit ADD COLUMN workspace_id TEXT")
+-    db.execute('UPDATE audit SET workspace_id="lab"')
+-    profiles = [json.loads(row["profile"]) for row in db.execute("SELECT profile FROM users ORDER BY rowid")]
+-    # Legacy bootstrap migration only: subsequent authorization uses persisted
+-    # privileges and membership, never a special username.
+-    creator = next(
+-        (p["userId"] for p in profiles if p["username"] == "admin"), profiles[0]["userId"] if profiles else "bootstrap"
+-    )
+-    db.execute(
+-        "INSERT INTO workspaces VALUES (?,?,?,?)",
+-        ("lab", "HeteroES Lab", "Private GPU pool · FIFO · one active experiment", creator),
+-    )
+-    for p in profiles:
+-        p.update(
+-            accountStatus="ACTIVE", platformAdmin=p["userId"] == creator, canCreateWorkspace=p["userId"] == creator
+-        )
+-        db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(p), p["userId"]))
+-        db.execute(
+-            "INSERT INTO memberships VALUES (?,?,?)",
+-            ("lab", p["userId"], "ADMIN" if p["userId"] == creator else "PARTICIPANT"),
+-        )
+-    db.execute("CREATE UNIQUE INDEX username ON users(json_extract(profile,'$.username'))")
+-    db.execute("INSERT INTO settings VALUES (?,?)", ("dispatchHold", "false"))
+-    db.execute("PRAGMA user_version=1")
+-
+-
+-def initialize_workspace_extras(db):
+-    """Tables added after schema version 1, created when missing: per-workspace settings and join requests."""
+-    db.executescript(
+-        """
+-        CREATE TABLE IF NOT EXISTS workspace_settings(workspace_id TEXT PRIMARY KEY,body TEXT NOT NULL);
+-        CREATE TABLE IF NOT EXISTS join_requests(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,
+-            status TEXT NOT NULL,created TEXT NOT NULL);
+-        CREATE UNIQUE INDEX IF NOT EXISTS pending_join_request ON join_requests(workspace_id,user_id)
+-            WHERE status="PENDING";
+-        """
+-    )
+-
+-
+-def initialize_agent_schema(store):
+-    with store.db() as db:
+-        db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("controlMode", "agent-v2"))
+-        db.executescript(
+-            "\n                CREATE TABLE IF NOT EXISTS pairing_codes (digest TEXT PRIMARY KEY,owner TEXT NOT NULL,expires REAL NOT NULL,used INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY,worker_id TEXT UNIQUE NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,token_digest TEXT NOT NULL,status TEXT NOT NULL,compute_url TEXT NOT NULL,self_test TEXT NOT NULL,boot_id TEXT,seen REAL NOT NULL DEFAULT 0,enabled INTEGER NOT NULL DEFAULT 0,desired INTEGER NOT NULL DEFAULT 0,processes TEXT NOT NULL DEFAULT '[]');\n                CREATE TABLE IF NOT EXISTS assignments (id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL,coordinator TEXT NOT NULL,epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS device_reservations (device_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS physical_reservations (resource_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_commands (id TEXT PRIMARY KEY,device_id TEXT NOT NULL,dedupe TEXT NOT NULL UNIQUE,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS monitoring_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,assignment_id TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_telemetry_history(device_id TEXT NOT NULL,boot_id TEXT NOT NULL,sampled_at REAL NOT NULL,received_at REAL NOT NULL,body TEXT NOT NULL,PRIMARY KEY(device_id,boot_id,sampled_at));\n                CREATE TABLE IF NOT EXISTS device_reports (device_id TEXT NOT NULL,assignment_id TEXT NOT NULL,sequence INTEGER NOT NULL,PRIMARY KEY(device_id,assignment_id,sequence));\n                CREATE TABLE IF NOT EXISTS assignment_members (change_id TEXT PRIMARY KEY,run_id TEXT NOT NULL,worker_id TEXT NOT NULL,device_id TEXT NOT NULL,action TEXT NOT NULL CHECK(action IN ('JOIN','LEAVE')),actor TEXT NOT NULL,created REAL NOT NULL);\n            "
+-        )
+-        if "telemetry" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
+-            db.execute("ALTER TABLE devices ADD COLUMN telemetry TEXT")
+-        if "bulk_url" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
+-            db.execute("ALTER TABLE devices ADD COLUMN bulk_url TEXT")
+-        if "keep_on" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
+-            # the owner's choice to keep contributing after the machine restarts (otherwise every boot starts OFF)
+-            db.execute("ALTER TABLE devices ADD COLUMN keep_on INTEGER NOT NULL DEFAULT 0")
+-        schema = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='assignments'").fetchone()[0]
+-        if "run_id TEXT UNIQUE" in schema:
+-            db.executescript(
+-                "\n                    BEGIN IMMEDIATE;\n                    ALTER TABLE assignments RENAME TO assignments_v2;\n                    CREATE TABLE assignments(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,coordinator TEXT NOT NULL,\n                        epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                    INSERT INTO assignments SELECT * FROM assignments_v2;\n                    DROP TABLE assignments_v2;\n                    COMMIT;\n                "
+-            )
+-        db.execute(
+-            "CREATE UNIQUE INDEX IF NOT EXISTS active_assignment_per_run ON assignments(run_id) WHERE released=0"
+-        )
+-        db.execute("CREATE UNIQUE INDEX IF NOT EXISTS assignment_epoch ON assignments(run_id,epoch)")
+-        for row in db.execute(
+-            "SELECT r.assignment_id,d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id"
+-        ).fetchall():
+-            resource = json.loads(row["self_test"]).get("gpuUUID")
+-            if resource:
+-                old = db.execute(
+-                    "SELECT assignment_id FROM physical_reservations WHERE resource_id=?", (resource,)
+-                ).fetchone()
+-                if old and old[0] != row["assignment_id"]:
+-                    raise RuntimeError("Conflicting physical GPU ownership; keep dispatch held")
+-                db.execute("INSERT OR IGNORE INTO physical_reservations VALUES (?,?)", (resource, row["assignment_id"]))
+-        initialize_model_qualification_schema(db)
+-
+-
+-def initialize_model_qualification_schema(db):
+-    db.executescript("""
+-        CREATE TABLE IF NOT EXISTS model_engine_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
+-            reference_hash TEXT NOT NULL,body TEXT NOT NULL,engine TEXT NOT NULL,
+-            PRIMARY KEY(workspace_id,manifest_hash,engine));
+-        CREATE TABLE IF NOT EXISTS model_engine_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,
+-            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,
+-            engine TEXT NOT NULL,PRIMARY KEY(device_id,workspace_id,manifest_hash,engine));
+-        CREATE TABLE IF NOT EXISTS model_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
+-            reference_hash TEXT NOT NULL,body TEXT NOT NULL,PRIMARY KEY(workspace_id,manifest_hash));
+-        CREATE TABLE IF NOT EXISTS model_probe_jobs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,asset_id TEXT NOT NULL,
+-            device_id TEXT NOT NULL,body TEXT NOT NULL);
+-        CREATE TABLE IF NOT EXISTS model_probe_reservations(job_id TEXT PRIMARY KEY,device_id TEXT UNIQUE NOT NULL,
+-            resource_id TEXT UNIQUE NOT NULL);
+-        CREATE TABLE IF NOT EXISTS model_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,
+-            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,
+-            PRIMARY KEY(device_id,workspace_id,manifest_hash));
+-    """)
+-
+-
+-def initialize_product_schema(db):
+-    db.executescript(
+-        "\n                PRAGMA journal_mode=WAL;\n                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);\n                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);\n                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);\n            "
+-    )
+-
+-
+-def initialize_study_schema(db):
+-    db.executescript(
+-        "\n                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);\n            "
+-    )
+-
+-
+-def initialize_templates_schema(db):
+-    db.execute(
+-        "CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)"
+-    )
+-
+-
+-def initialize_notifications_schema(db):
+-    db.execute(
+-        "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)"
+-    )
+-
+-
+-def initialize_recovery_schema(db):
+-    db.execute(
+-        "CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)"
+-    )
+-
+-
+-def initialize_recovery_downloads_schema(db):
+-    db.executescript(
+-        "CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);"
+-    )
++sys.modules[__name__] = _implementation
+diff --git a/backend/notifications.py b/backend/notifications.py
+index d52d13c6..e706ca7c 100644
+--- a/backend/notifications.py
++++ b/backend/notifications.py
+@@ -1,185 +1,12 @@
+-"""In-app notifications: a projection of what happened, kept per person with a read state.
+-
+-Nothing here is written by the code that does the work. Each look at the list first catches up with the audit log
+-(accounts, devices) and with experiments that ended, creating a row per fact (a unique key makes it happen once).
+-Rows hold a kind and parameters, never English text, so the interface can translate them.
+-"""
+-
+-from .migrations import initialize_notifications_schema
+-from datetime import datetime, timezone
+-import json
+-
+-from fastapi import Depends, HTTPException
+-
+-MAX_LIMIT = 100
+-MAX_IDS = 200
+-RUN_KINDS = {"COMPLETED": "run.completed", "FAILED": "run.failed", "CANCELLED": "run.cancelled"}
+-ACCOUNT_KINDS = {"ACTIVE": "account.approved", "REJECTED": "account.rejected", "SUSPENDED": "account.suspended"}
+-
+-
+-def _stamp():
+-    return datetime.now(timezone.utc).isoformat()
+-
+-
+-def _epoch(iso):
+-    try:
+-        return datetime.fromisoformat(iso).timestamp()
+-    except (TypeError, ValueError):
+-        return None
+-
+-
+-class Notifications:
+-    def __init__(self, store):
+-        self.store = store
+-        with store.db() as db:
+-            initialize_notifications_schema(db)
+-            db.execute("CREATE INDEX IF NOT EXISTS notifications_user ON notifications(user_id, id)")
+-        self.start_following()
+-
+-    def _add(self, db, user_id, kind, params, target, dedupe):
+-        db.execute(
+-            "INSERT OR IGNORE INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (?,?,?,?,?,?)",
+-            (user_id, kind, json.dumps(params, sort_keys=True), target, _stamp(), dedupe),
+-        )
+-
+-    def _administrators(self, db):
+-        return [
+-            row["id"]
+-            for row in db.execute("SELECT id, profile FROM users")
+-            if (lambda p: p.get("platformAdmin") and p.get("accountStatus") == "ACTIVE")(json.loads(row["profile"]))
+-        ]
+-
+-    def start_following(self):
+-        """Fix the starting point the first time this lab runs with notifications, so history is never dug up; later starts keep it."""
+-        with self.store.db() as db:
+-            if db.execute("SELECT 1 FROM settings WHERE key='notificationCursor'").fetchone() is None:
+-                latest = db.execute("SELECT COALESCE(MAX(sequence),0) FROM audit").fetchone()[0]
+-                db.execute("INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", (json.dumps(latest),))
+-                db.execute(
+-                    "INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)",
+-                    (json.dumps(datetime.now(timezone.utc).timestamp()),),
+-                )
+-
+-    def catch_up(self):
+-        """Create the notifications for everything that happened since the last look."""
+-        store = self.store
+-        with store.db() as db:
+-            cursor = db.execute("SELECT value FROM settings WHERE key='notificationCursor'").fetchone()
+-            horizon = db.execute("SELECT value FROM settings WHERE key='notificationSince'").fetchone()
+-            if cursor is None:
+-                return self.start_following()
+-            last = json.loads(cursor[0])
+-            since = json.loads(horizon[0]) if horizon else 0
+-            admins = self._administrators(db)
+-            newest = last
+-            for row in db.execute(
+-                "SELECT sequence, action, target FROM audit WHERE sequence>? ORDER BY sequence", (last,)
+-            ).fetchall():
+-                newest = row["sequence"]
+-                if row["action"] == "REGISTER":
+-                    profile = store.profile(row["target"]) or {}
+-                    for admin in admins:
+-                        self._add(
+-                            db,
+-                            admin,
+-                            "account.request",
+-                            {"username": profile.get("username", ""), "displayName": profile.get("displayName", "")},
+-                            "/operations",
+-                            f"register:{row['target']}:{admin}",
+-                        )
+-                elif row["action"] == "ACCOUNT_UPDATE":
+-                    profile = store.profile(row["target"]) or {}
+-                    kind = ACCOUNT_KINDS.get(profile.get("accountStatus"))
+-                    if kind:
+-                        self._add(db, row["target"], kind, {}, "/get-started", f"account:{row['sequence']}")
+-                elif row["action"] == "DEVICE_ENROLLED":
+-                    device = (
+-                        db.execute("SELECT name, status FROM devices WHERE id=?", (row["target"],)).fetchone()
+-                        if db.execute("SELECT 1 FROM sqlite_master WHERE name='devices'").fetchone()
+-                        else None
+-                    )
+-                    if device and device["status"] == "PENDING":
+-                        for admin in admins:
+-                            self._add(
+-                                db,
+-                                admin,
+-                                "device.request",
+-                                {"name": device["name"]},
+-                                "/operations",
+-                                f"device:{row['target']}:{admin}",
+-                            )
+-            if newest != last:
+-                db.execute("INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", (json.dumps(newest),))
+-        for body in store.list():
+-            kind = RUN_KINDS.get(body.get("status"))
+-            ended = _epoch(body.get("completedAt"))
+-            if kind and ended is not None and ended >= since and body.get("ownerUserId") and not body.get("archivedAt"):
+-                with store.db() as db:
+-                    self._add(
+-                        db,
+-                        body["ownerUserId"],
+-                        kind,
+-                        {"name": body.get("name", "")},
+-                        f"/experiments/{body['experimentId']}",
+-                        f"run:{body['experimentId']}:{body['status']}",
+-                    )
+-
+-    def listing(self, user_id, limit):
+-        with self.store.db() as db:
+-            rows = db.execute(
+-                "SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT ?", (user_id, limit)
+-            ).fetchall()
+-            unread = db.execute(
+-                "SELECT COUNT(*) FROM notifications WHERE user_id=? AND read_at IS NULL", (user_id,)
+-            ).fetchone()[0]
+-        return {
+-            "items": [
+-                {
+-                    "id": str(row["id"]),
+-                    "kind": row["kind"],
+-                    "params": json.loads(row["params"]),
+-                    "target": row["target"],
+-                    "created": row["created"],
+-                    "read": row["read_at"] is not None,
+-                }
+-                for row in rows
+-            ],
+-            "unread": unread,
+-        }
+-
+-    def mark_read(self, user_id, ids=None):
+-        with self.store.db() as db:
+-            if ids is None:
+-                db.execute(
+-                    "UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL", (_stamp(), user_id)
+-                )
+-            else:
+-                numbers = [int(item) for item in ids if str(item).isdigit()]
+-                db.execute(
+-                    f"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})"
+-                    if numbers
+-                    else "SELECT 1",
+-                    (_stamp(), user_id, *numbers) if numbers else (),
+-                )
+-
+-
+-def install_notification_routes(app, store, user):
+-    notifications = Notifications(store)
+-
+-    @app.get("/api/v1/notifications")
+-    def list_notifications(limit: int = 30, current=Depends(user)):
+-        if not 1 <= limit <= MAX_LIMIT:
+-            raise HTTPException(422, f"limit must be from 1 to {MAX_LIMIT}")
+-        notifications.catch_up()
+-        return notifications.listing(current["userId"], limit)
+-
+-    @app.post("/api/v1/notifications/read")
+-    def read_notifications(body: dict, current=Depends(user)):
+-        ids, everything = body.get("ids"), body.get("all")
+-        if everything is True and ids is None:
+-            notifications.mark_read(current["userId"])
+-        elif isinstance(ids, list) and 1 <= len(ids) <= MAX_IDS and all(isinstance(item, (str, int)) for item in ids):
+-            notifications.mark_read(current["userId"], ids)
+-        else:
+-            raise HTTPException(422, f'Send {{"all": true}} or a list of 1 to {MAX_IDS} ids')
+-        return {"unread": notifications.listing(current["userId"], 1)["unread"]}
++"""Compatibility import retained during the three-layer extraction."""
++
++from .api.notifications import install_routes as install_notification_routes
++from .services.notifications import (
++    MAX_LIMIT as MAX_LIMIT,
++    MAX_IDS as MAX_IDS,
++    RUN_KINDS as RUN_KINDS,
++    ACCOUNT_KINDS as ACCOUNT_KINDS,
++    Notifications as Notifications,
++    _stamp as _stamp,
++    _epoch as _epoch,
++)
+diff --git a/backend/repositories/notifications.py b/backend/repositories/notifications.py
+new file mode 100644
+index 00000000..1e6dbd2f
+--- /dev/null
++++ b/backend/repositories/notifications.py
+@@ -0,0 +1,79 @@
++"""Notifications SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class NotificationsRepository:
++    @staticmethod
++    def _add_insert_notifications(db, parameters=()):
++        return execute(
++            db,
++            "INSERT OR IGNORE INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (?,?,?,?,?,?)",
++            parameters,
++        )
++
++    @staticmethod
++    def _administrators_select_users(db, parameters=()):
++        return execute(db, "SELECT id, profile FROM users", parameters)
++
++    @staticmethod
++    def start_following_insert_settings(db, parameters=()):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", parameters)
++
++    @staticmethod
++    def start_following_insert_settings_2(db, parameters=()):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)", parameters)
++
++    @staticmethod
++    def catch_up_insert_settings(db, parameters=()):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", parameters)
++
++    @staticmethod
++    def mark_read_update_notifications(db, parameters=()):
++        return execute(db, "UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL", parameters)
++
++    @staticmethod
++    def mark_read_update_notifications_2(db, parameters=(), *, numbers):
++        return execute(
++            db,
++            f"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})"
++            if numbers
++            else "SELECT 1",
++            parameters,
++        )
++
++    @staticmethod
++    def catch_up_select_settings(db, parameters=()):
++        return execute(db, "SELECT value FROM settings WHERE key='notificationCursor'", parameters)
++
++    @staticmethod
++    def catch_up_select_settings_2(db, parameters=()):
++        return execute(db, "SELECT value FROM settings WHERE key='notificationSince'", parameters)
++
++    @staticmethod
++    def catch_up_select_audit(db, parameters=()):
++        return execute(db, "SELECT sequence, action, target FROM audit WHERE sequence>? ORDER BY sequence", parameters)
++
++    @staticmethod
++    def listing_select_notifications(db, parameters=()):
++        return execute(db, "SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT ?", parameters)
++
++    @staticmethod
++    def start_following_select_settings(db, parameters=()):
++        return execute(db, "SELECT 1 FROM settings WHERE key='notificationCursor'", parameters)
++
++    @staticmethod
++    def listing_select_notifications_2(db, parameters=()):
++        return execute(db, "SELECT COUNT(*) FROM notifications WHERE user_id=? AND read_at IS NULL", parameters)
++
++    @staticmethod
++    def start_following_select_audit(db, parameters=()):
++        return execute(db, "SELECT COALESCE(MAX(sequence),0) FROM audit", parameters)
++
++    @staticmethod
++    def catch_up_select_sqlite_master(db, parameters=()):
++        return execute(db, "SELECT 1 FROM sqlite_master WHERE name='devices'", parameters)
++
++    @staticmethod
++    def catch_up_select_devices(db, parameters=()):
++        return execute(db, "SELECT name, status FROM devices WHERE id=?", parameters)
+diff --git a/backend/repositories/templates.py b/backend/repositories/templates.py
+new file mode 100644
+index 00000000..57d297f0
+--- /dev/null
++++ b/backend/repositories/templates.py
+@@ -0,0 +1,31 @@
++"""Templates SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class TemplatesRepository:
++    @staticmethod
++    def list_templates_select_experiment_templates(db, parameters=()):
++        return execute(
++            db, "SELECT * FROM experiment_templates WHERE workspace_id=? ORDER BY created DESC, id", parameters
++        )
++
++    @staticmethod
++    def create_template_insert_experiment_templates(db, parameters=()):
++        return execute(
++            db,
++            "INSERT INTO experiment_templates VALUES (:id,:workspace_id,:owner_id,:name,:config,:created)",
++            parameters,
++        )
++
++    @staticmethod
++    def create_template_select_experiment_templates(db, parameters=()):
++        return execute(db, "SELECT name FROM experiment_templates WHERE workspace_id=?", parameters)
++
++    @staticmethod
++    def delete_template_delete_experiment_templates(db, parameters=()):
++        return execute(db, "DELETE FROM experiment_templates WHERE id=?", parameters)
++
++    @staticmethod
++    def delete_template_select_experiment_templates(db, parameters=()):
++        return execute(db, "SELECT * FROM experiment_templates WHERE id=? AND workspace_id=?", parameters)
+diff --git a/backend/services/notifications.py b/backend/services/notifications.py
+new file mode 100644
+index 00000000..696d924f
+--- /dev/null
++++ b/backend/services/notifications.py
+@@ -0,0 +1,168 @@
++"""Notifications business operations; HTTP responses stay in api/."""
++
++from datetime import datetime, timezone
++import json
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.notifications import NotificationsRepository as repository
++from ..db.projections import initialize_notification_projection
++
++MAX_LIMIT = 100
++
++MAX_IDS = 200
++
++RUN_KINDS = {"COMPLETED": "run.completed", "FAILED": "run.failed", "CANCELLED": "run.cancelled"}
++
++ACCOUNT_KINDS = {"ACTIVE": "account.approved", "REJECTED": "account.rejected", "SUSPENDED": "account.suspended"}
++
++
++def _stamp():
++    return datetime.now(timezone.utc).isoformat()
++
++
++def _epoch(iso):
++    try:
++        return datetime.fromisoformat(iso).timestamp()
++    except (TypeError, ValueError):
++        return None
++
++
++class Notifications:
++    def __init__(self, store):
++        self.store = store
++        with store.db() as db:
++            initialize_notification_projection(db)
++        self.start_following()
++
++    def _add(self, db, user_id, kind, params, target, dedupe):
++        repository._add_insert_notifications(
++            db, (user_id, kind, json.dumps(params, sort_keys=True), target, _stamp(), dedupe)
++        )
++
++    def _administrators(self, db):
++        return [
++            row["id"]
++            for row in repository._administrators_select_users(db, ())
++            if (lambda p: p.get("platformAdmin") and p.get("accountStatus") == "ACTIVE")(json.loads(row["profile"]))
++        ]
++
++    def start_following(self):
++        """Fix the starting point the first time this lab runs with notifications, so history is never dug up; later starts keep it."""
++        with self.store.db() as db:
++            if repository.start_following_select_settings(db, ()).fetchone() is None:
++                latest = repository.start_following_select_audit(db, ()).fetchone()[0]
++                repository.start_following_insert_settings(db, (json.dumps(latest),))
++                repository.start_following_insert_settings_2(db, (json.dumps(datetime.now(timezone.utc).timestamp()),))
++
++    def catch_up(self):
++        """Create the notifications for everything that happened since the last look."""
++        store = self.store
++        with store.db() as db:
++            cursor = repository.catch_up_select_settings(db, ()).fetchone()
++            horizon = repository.catch_up_select_settings_2(db, ()).fetchone()
++            if cursor is None:
++                return self.start_following()
++            last = json.loads(cursor[0])
++            since = json.loads(horizon[0]) if horizon else 0
++            admins = self._administrators(db)
++            newest = last
++            for row in repository.catch_up_select_audit(db, (last,)).fetchall():
++                newest = row["sequence"]
++                if row["action"] == "REGISTER":
++                    profile = store.profile(row["target"]) or {}
++                    for admin in admins:
++                        self._add(
++                            db,
++                            admin,
++                            "account.request",
++                            {"username": profile.get("username", ""), "displayName": profile.get("displayName", "")},
++                            "/operations",
++                            f"register:{row['target']}:{admin}",
++                        )
++                elif row["action"] == "ACCOUNT_UPDATE":
++                    profile = store.profile(row["target"]) or {}
++                    kind = ACCOUNT_KINDS.get(profile.get("accountStatus"))
++                    if kind:
++                        self._add(db, row["target"], kind, {}, "/get-started", f"account:{row['sequence']}")
++                elif row["action"] == "DEVICE_ENROLLED":
++                    device = (
++                        repository.catch_up_select_devices(db, (row["target"],)).fetchone()
++                        if repository.catch_up_select_sqlite_master(db, ()).fetchone()
++                        else None
++                    )
++                    if device and device["status"] == "PENDING":
++                        for admin in admins:
++                            self._add(
++                                db,
++                                admin,
++                                "device.request",
++                                {"name": device["name"]},
++                                "/operations",
++                                f"device:{row['target']}:{admin}",
++                            )
++            if newest != last:
++                repository.catch_up_insert_settings(db, (json.dumps(newest),))
++        for body in store.list():
++            kind = RUN_KINDS.get(body.get("status"))
++            ended = _epoch(body.get("completedAt"))
++            if kind and ended is not None and ended >= since and body.get("ownerUserId") and not body.get("archivedAt"):
++                with store.db() as db:
++                    self._add(
++                        db,
++                        body["ownerUserId"],
++                        kind,
++                        {"name": body.get("name", "")},
++                        f"/experiments/{body['experimentId']}",
++                        f"run:{body['experimentId']}:{body['status']}",
++                    )
++
++    def listing(self, user_id, limit):
++        with self.store.db() as db:
++            rows = repository.listing_select_notifications(db, (user_id, limit)).fetchall()
++            unread = repository.listing_select_notifications_2(db, (user_id,)).fetchone()[0]
++        return {
++            "items": [
++                {
++                    "id": str(row["id"]),
++                    "kind": row["kind"],
++                    "params": json.loads(row["params"]),
++                    "target": row["target"],
++                    "created": row["created"],
++                    "read": row["read_at"] is not None,
++                }
++                for row in rows
++            ],
++            "unread": unread,
++        }
++
++    def mark_read(self, user_id, ids=None):
++        with self.store.db() as db:
++            if ids is None:
++                repository.mark_read_update_notifications(db, (_stamp(), user_id))
++            else:
++                numbers = [int(item) for item in ids if str(item).isdigit()]
++                repository.mark_read_update_notifications_2(
++                    db, (_stamp(), user_id, *numbers) if numbers else (), numbers=numbers
++                )
++
++
++def operations(store, user):
++    notifications = Notifications(store)
++
++    def list_notifications(limit: int = 30, *, current):
++        if not 1 <= limit <= MAX_LIMIT:
++            raise ServiceError(422, f"limit must be from 1 to {MAX_LIMIT}")
++        notifications.catch_up()
++        return notifications.listing(current["userId"], limit)
++
++    def read_notifications(body: dict, *, current):
++        ids, everything = body.get("ids"), body.get("all")
++        if everything is True and ids is None:
++            notifications.mark_read(current["userId"])
++        elif isinstance(ids, list) and 1 <= len(ids) <= MAX_IDS and all(isinstance(item, (str, int)) for item in ids):
++            notifications.mark_read(current["userId"], ids)
++        else:
++            raise ServiceError(422, f'Send {{"all": true}} or a list of 1 to {MAX_IDS} ids')
++        return {"unread": notifications.listing(current["userId"], 1)["unread"]}
++
++    return SimpleNamespace(list_notifications=list_notifications, read_notifications=read_notifications)
+diff --git a/backend/services/templates.py b/backend/services/templates.py
+new file mode 100644
+index 00000000..5bb06ac9
+--- /dev/null
++++ b/backend/services/templates.py
+@@ -0,0 +1,188 @@
++"""Templates business operations; HTTP responses stay in api/."""
++
++from ..db.migrations import initialize_templates_schema
++from heteroes.catalog import SCHEDULER_POLICIES, SYNC_MODES, V3_DECODE_ENGINES
++from heteroes.v3.options import validate_weight_space, validate_seed_namespace
++from heteroes.v3.scoring import validate_spec
++from datetime import datetime, timezone
++import json
++import uuid
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.templates import TemplatesRepository as repository
++
++MAX_PER_WORKSPACE = 50
++
++INTEGERS = {
++    "maxGenerations": (1, 1000),
++    "candidatesPerGeneration": (2, 256),
++    "recipeVersion": (1, 3),
++    "validationInterval": (1, 1000),
++    "batchSize": (1, 1024),
++    "batchSeed": (0, 2**31),
++    "maxNewTokens": (1, 2048),
++    "momentumWindow": (2, 8),
++    "evalChunk": (1, 64),
++}
++
++FLOATS = {
++    "auditRate": (0, 1),
++    "alpha": (1e-7, 1.0),
++    "sigma": (1e-7, 1.0),
++    "sigmaMinimum": (1e-7, 1.0),
++    "alphaMinimum": (1e-7, 1.0),
++    "momentumBeta": (1e-7, 0.9999999),
++    "hardCapSeconds": (60, 7 * 86400),
++    "stallSeconds": (30, 7 * 86400),
++}
++
++NULLABLE = {
++    "alphaMinimum",
++    "momentumBeta",
++    "evalChunk",
++    "hardCapSeconds",
++    "stallSeconds",
++}
++
++CHOICES = {
++    "schedulerPolicy": set(SCHEDULER_POLICIES),
++    "syncMode": set(SYNC_MODES),
++    "sigmaSchedule": {"constant", "cosine"},
++    "decodeEngine": set(V3_DECODE_ENGINES),
++    "coefficientRule": {"zscore@1", "centered-rank@1"},
++    "alphaSchedule": {"constant", "cosine", "linear"},
++    "sampler": {"sha256-python-random-sample-v1", "epoch-shuffle@1"},
++}
++
++SHORT_TEXT = {"task"}
++
++
++def clean_config(config):
++    """Validated settings, or ServiceError(422). Unknown keys are refused rather than silently dropped."""
++    if not isinstance(config, dict) or not config:
++        raise ServiceError(422, "A template needs at least one setting")
++    known = (
++        set(INTEGERS)
++        | set(FLOATS)
++        | set(CHOICES)
++        | SHORT_TEXT
++        | {"workerIds", "backupPolicy", "weightSpace", "antithetic", "scorer", "systemPrompt", "candidateSeedNamespace"}
++    )
++    unknown = sorted(set(config) - known)
++    if unknown:
++        raise ServiceError(422, f"Settings that cannot be saved in a template: {', '.join(unknown)}")
++    result = {}
++    for key, value in config.items():
++        if key in NULLABLE and value is None:
++            pass
++        elif key in INTEGERS:
++            low, high = INTEGERS[key]
++            if type(value) is not int or not low <= value <= high:
++                raise ServiceError(422, f"{key} must be a whole number from {low} to {high}")
++        elif key in FLOATS:
++            low, high = FLOATS[key]
++            if type(value) not in (int, float) or not low <= value <= high:
++                raise ServiceError(422, f"{key} must be a number from {low} to {high}")
++        elif key in CHOICES:
++            if not isinstance(value, str) or value not in CHOICES[key]:
++                raise ServiceError(422, f"{key} has an unsupported value")
++        elif key in SHORT_TEXT:
++            if not isinstance(value, str) or not 1 <= len(value) <= 64:
++                raise ServiceError(422, f"{key} must be a short text")
++        elif key == "candidateSeedNamespace":
++            try:
++                validate_seed_namespace(value)
++            except ValueError as error:
++                raise ServiceError(422, str(error)) from None
++        elif key in ("weightSpace", "scorer"):
++            try:
++                if key == "weightSpace":
++                    validate_weight_space(value, initial_adapter=False)
++                else:
++                    validate_spec(value, allow_python=False)
++            except (ValueError, TypeError) as error:
++                raise ServiceError(422, str(error)) from None
++        elif key == "antithetic":
++            if type(value) is not bool:
++                raise ServiceError(422, "Antithetic is true or false")
++        elif key == "systemPrompt":
++            if value is not None and (not isinstance(value, str) or not 1 <= len(value) <= 4000):
++                raise ServiceError(422, "System prompt is null or a text of at most 4000 characters")
++        elif key == "workerIds":
++            if (
++                not isinstance(value, list)
++                or len(value) > 32
++                or not all(isinstance(item, str) and 1 <= len(item) <= 100 for item in value)
++            ):
++                raise ServiceError(422, "workerIds must be a short list of names")
++        elif key == "backupPolicy":
++            if (
++                not isinstance(value, dict)
++                or set(value) != {"interval", "retain"}
++                or any(type(v) is not int or not 1 <= v <= 1000 for v in value.values())
++            ):
++                raise ServiceError(422, "Backup interval and retention must be integers from 1 to 1000")
++        result[key] = value
++    return result
++
++
++def operations(store, scoped):
++    with store.db() as db:
++        initialize_templates_schema(db)
++
++    def present(row):
++        owner = store.profile(row["owner_id"]) or {}
++        return {
++            "templateId": row["id"],
++            "name": row["name"],
++            "config": json.loads(row["config"]),
++            "ownerUserId": row["owner_id"],
++            "ownerName": owner.get("displayName", ""),
++            "created": row["created"],
++        }
++
++    def list_templates(*, current):
++        with store.db() as db:
++            rows = repository.list_templates_select_experiment_templates(db, (current["workspaceId"],)).fetchall()
++        return [present(row) for row in rows]
++
++    def create_template(body: dict, *, current):
++        name = body.get("name") if isinstance(body, dict) else None
++        name = name.strip() if isinstance(name, str) else ""
++        if not 3 <= len(name) <= 100:
++            raise ServiceError(422, "The template name needs 3 to 100 characters")
++        config = clean_config(body.get("config"))
++        with store.db() as db:
++            rows = repository.create_template_select_experiment_templates(db, (current["workspaceId"],)).fetchall()
++            if len(rows) >= MAX_PER_WORKSPACE:
++                raise ServiceError(422, f"A workspace can keep {MAX_PER_WORKSPACE} templates; delete one first")
++            if any(row["name"].casefold() == name.casefold() for row in rows):
++                raise ServiceError(409, "A template with this name already exists")
++            row = {
++                "id": uuid.uuid4().hex,
++                "workspace_id": current["workspaceId"],
++                "owner_id": current["userId"],
++                "name": name,
++                "config": json.dumps(config, sort_keys=True),
++                "created": datetime.now(timezone.utc).isoformat(),
++            }
++            repository.create_template_insert_experiment_templates(db, row)
++            store.audit(db, current["userId"], "TEMPLATE_CREATE", row["id"], current["workspaceId"])
++        return present(row)
++
++    def delete_template(template_id: str, *, current):
++        with store.db() as db:
++            row = repository.delete_template_select_experiment_templates(
++                db, (template_id, current["workspaceId"])
++            ).fetchone()
++            if not row:
++                raise ServiceError(404, "Template not found")
++            if row["owner_id"] != current["userId"] and current["workspaceRole"] != "ADMIN":
++                raise ServiceError(403, "Only the author or a workspace administrator can delete this template")
++            repository.delete_template_delete_experiment_templates(db, (template_id,))
++            store.audit(db, current["userId"], "TEMPLATE_DELETE", template_id, current["workspaceId"])
++        return None
++
++    return SimpleNamespace(
++        present=present, list_templates=list_templates, create_template=create_template, delete_template=delete_template
++    )
+diff --git a/backend/templates.py b/backend/templates.py
+index 95789447..477333a3 100644
+--- a/backend/templates.py
++++ b/backend/templates.py
+@@ -1,193 +1,12 @@
+-"""Saved experiment settings ("templates") of a workspace.
+-
+-A template holds only plain settings (sizes, rates, decoder, GPU names), never model, dataset or device ids, which can go
+-stale; the experiment wizard still validates everything when a run is created from it.
+-"""
+-
+-from .migrations import initialize_templates_schema
+-from heteroes.catalog import SCHEDULER_POLICIES, SYNC_MODES, V3_DECODE_ENGINES
+-from heteroes.v3.options import validate_weight_space, validate_seed_namespace
+-from heteroes.v3.scoring import validate_spec
+-from datetime import datetime, timezone
+-import json
+-import uuid
+-
+-from fastapi import Depends, HTTPException, Response
+-
+-MAX_PER_WORKSPACE = 50
+-INTEGERS = {
+-    "maxGenerations": (1, 1000),
+-    "candidatesPerGeneration": (2, 256),
+-    "recipeVersion": (1, 3),
+-    "validationInterval": (1, 1000),
+-    "batchSize": (1, 1024),
+-    "batchSeed": (0, 2**31),
+-    "maxNewTokens": (1, 2048),
+-    "momentumWindow": (2, 8),
+-    "evalChunk": (1, 64),
+-}
+-FLOATS = {
+-    "auditRate": (0, 1),
+-    "alpha": (1e-7, 1.0),
+-    "sigma": (1e-7, 1.0),
+-    "sigmaMinimum": (1e-7, 1.0),
+-    "alphaMinimum": (1e-7, 1.0),
+-    "momentumBeta": (1e-7, 0.9999999),
+-    "hardCapSeconds": (60, 7 * 86400),
+-    "stallSeconds": (30, 7 * 86400),
+-}
+-NULLABLE = {
+-    "alphaMinimum",
+-    "momentumBeta",
+-    "evalChunk",
+-    "hardCapSeconds",
+-    "stallSeconds",
+-}  # null: no minimum alpha, no momentum, the default chunk
+-CHOICES = {
+-    "schedulerPolicy": set(SCHEDULER_POLICIES),
+-    "syncMode": set(SYNC_MODES),
+-    "sigmaSchedule": {"constant", "cosine"},
+-    "decodeEngine": set(V3_DECODE_ENGINES),
+-    "coefficientRule": {"zscore@1", "centered-rank@1"},
+-    "alphaSchedule": {"constant", "cosine", "linear"},
+-    "sampler": {"sha256-python-random-sample-v1", "epoch-shuffle@1"},
+-}
+-SHORT_TEXT = {"task"}
+-
+-
+-def clean_config(config):
+-    """Validated settings, or HTTPException(422). Unknown keys are refused rather than silently dropped."""
+-    if not isinstance(config, dict) or not config:
+-        raise HTTPException(422, "A template needs at least one setting")
+-    known = (
+-        set(INTEGERS)
+-        | set(FLOATS)
+-        | set(CHOICES)
+-        | SHORT_TEXT
+-        | {"workerIds", "backupPolicy", "weightSpace", "antithetic", "scorer", "systemPrompt", "candidateSeedNamespace"}
+-    )
+-    unknown = sorted(set(config) - known)
+-    if unknown:
+-        raise HTTPException(422, f"Settings that cannot be saved in a template: {', '.join(unknown)}")
+-    result = {}
+-    for key, value in config.items():
+-        if key in NULLABLE and value is None:
+-            pass
+-        elif key in INTEGERS:
+-            low, high = INTEGERS[key]
+-            if type(value) is not int or not low <= value <= high:
+-                raise HTTPException(422, f"{key} must be a whole number from {low} to {high}")
+-        elif key in FLOATS:
+-            low, high = FLOATS[key]
+-            if type(value) not in (int, float) or not low <= value <= high:
+-                raise HTTPException(422, f"{key} must be a number from {low} to {high}")
+-        elif key in CHOICES:
+-            if not isinstance(value, str) or value not in CHOICES[key]:
+-                raise HTTPException(422, f"{key} has an unsupported value")
+-        elif key in SHORT_TEXT:
+-            if not isinstance(value, str) or not 1 <= len(value) <= 64:
+-                raise HTTPException(422, f"{key} must be a short text")
+-        elif key == "candidateSeedNamespace":
+-            try:
+-                validate_seed_namespace(value)
+-            except ValueError as error:
+-                raise HTTPException(422, str(error)) from None
+-        elif key in ("weightSpace", "scorer"):
+-            try:
+-                if key == "weightSpace":
+-                    validate_weight_space(value, initial_adapter=False)
+-                else:
+-                    validate_spec(value, allow_python=False)
+-            except (ValueError, TypeError) as error:
+-                raise HTTPException(422, str(error)) from None
+-        elif key == "antithetic":
+-            if type(value) is not bool:
+-                raise HTTPException(422, "Antithetic is true or false")
+-        elif key == "systemPrompt":
+-            if value is not None and (not isinstance(value, str) or not 1 <= len(value) <= 4000):
+-                raise HTTPException(422, "System prompt is null or a text of at most 4000 characters")
+-        elif key == "workerIds":
+-            if (
+-                not isinstance(value, list)
+-                or len(value) > 32
+-                or not all(isinstance(item, str) and 1 <= len(item) <= 100 for item in value)
+-            ):
+-                raise HTTPException(422, "workerIds must be a short list of names")
+-        elif key == "backupPolicy":
+-            if (
+-                not isinstance(value, dict)
+-                or set(value) != {"interval", "retain"}
+-                or any(type(v) is not int or not 1 <= v <= 1000 for v in value.values())
+-            ):
+-                raise HTTPException(422, "Backup interval and retention must be integers from 1 to 1000")
+-        result[key] = value
+-    return result
+-
+-
+-def install_template_routes(app, store, scoped):
+-    with store.db() as db:
+-        initialize_templates_schema(db)
+-
+-    def present(row):
+-        owner = store.profile(row["owner_id"]) or {}
+-        return {
+-            "templateId": row["id"],
+-            "name": row["name"],
+-            "config": json.loads(row["config"]),
+-            "ownerUserId": row["owner_id"],
+-            "ownerName": owner.get("displayName", ""),
+-            "created": row["created"],
+-        }
+-
+-    @app.get("/api/v1/experiment-templates")
+-    def list_templates(current=Depends(scoped)):
+-        with store.db() as db:
+-            rows = db.execute(
+-                "SELECT * FROM experiment_templates WHERE workspace_id=? ORDER BY created DESC, id",
+-                (current["workspaceId"],),
+-            ).fetchall()
+-        return [present(row) for row in rows]
+-
+-    @app.post("/api/v1/experiment-templates", status_code=201)
+-    def create_template(body: dict, current=Depends(scoped)):
+-        name = body.get("name") if isinstance(body, dict) else None
+-        name = name.strip() if isinstance(name, str) else ""
+-        if not 3 <= len(name) <= 100:
+-            raise HTTPException(422, "The template name needs 3 to 100 characters")
+-        config = clean_config(body.get("config"))
+-        with store.db() as db:
+-            rows = db.execute(
+-                "SELECT name FROM experiment_templates WHERE workspace_id=?", (current["workspaceId"],)
+-            ).fetchall()
+-            if len(rows) >= MAX_PER_WORKSPACE:
+-                raise HTTPException(422, f"A workspace can keep {MAX_PER_WORKSPACE} templates; delete one first")
+-            if any(row["name"].casefold() == name.casefold() for row in rows):
+-                raise HTTPException(409, "A template with this name already exists")
+-            row = {
+-                "id": uuid.uuid4().hex,
+-                "workspace_id": current["workspaceId"],
+-                "owner_id": current["userId"],
+-                "name": name,
+-                "config": json.dumps(config, sort_keys=True),
+-                "created": datetime.now(timezone.utc).isoformat(),
+-            }
+-            db.execute(
+-                "INSERT INTO experiment_templates VALUES (:id,:workspace_id,:owner_id,:name,:config,:created)", row
+-            )
+-            store.audit(db, current["userId"], "TEMPLATE_CREATE", row["id"], current["workspaceId"])
+-        return present(row)
+-
+-    @app.delete("/api/v1/experiment-templates/{template_id}", status_code=204)
+-    def delete_template(template_id: str, current=Depends(scoped)):
+-        with store.db() as db:
+-            row = db.execute(
+-                "SELECT * FROM experiment_templates WHERE id=? AND workspace_id=?",
+-                (template_id, current["workspaceId"]),
+-            ).fetchone()
+-            if not row:
+-                raise HTTPException(404, "Template not found")
+-            if row["owner_id"] != current["userId"] and current["workspaceRole"] != "ADMIN":
+-                raise HTTPException(403, "Only the author or a workspace administrator can delete this template")
+-            db.execute("DELETE FROM experiment_templates WHERE id=?", (template_id,))
+-            store.audit(db, current["userId"], "TEMPLATE_DELETE", template_id, current["workspaceId"])
+-        return Response(status_code=204)
++"""Compatibility import retained during the three-layer extraction."""
++
++from .api.templates import install_routes as install_template_routes
++from .api.templates import clean_config as clean_config
++from .services.templates import (
++    MAX_PER_WORKSPACE as MAX_PER_WORKSPACE,
++    INTEGERS as INTEGERS,
++    FLOATS as FLOATS,
++    NULLABLE as NULLABLE,
++    CHOICES as CHOICES,
++    SHORT_TEXT as SHORT_TEXT,
++)
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index 7222c6fa..c5b055cb 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -54,6 +54,10 @@ def test_account_layer_boundaries():
+         "services/experiment_state.py",
+         "api/history.py",
+         "services/history.py",
++        "api/templates.py",
++        "services/templates.py",
++        "api/notifications.py",
++        "services/notifications.py",
+     ):
+         tree = ast.parse((backend / relative).read_text())
+         for node in ast.walk(tree):
+@@ -94,3 +98,19 @@ def test_explicit_write_transaction_rolls_back_uncommitted_changes():
+         db.execute("INSERT INTO changes VALUES (1)")
+         db.rollback()
+         assert db.execute("SELECT count(*) FROM changes").fetchone()[0] == 0
++
++
++def test_template_service_uses_plain_errors_and_legacy_helper_keeps_http_errors():
++    from fastapi import HTTPException
++
++    from backend.api.templates import clean_config as http_config
++    from backend.services.templates import clean_config as service_config
++
++    valid = {"maxGenerations": 3, "workerIds": ["5070ti"]}
++    assert service_config(valid) == http_config(valid) == valid
++    with pytest.raises(ServiceError) as business:
++        service_config({"modelArtifactId": "not-a-portable-setting"})
++    with pytest.raises(HTTPException) as legacy:
++        http_config({"modelArtifactId": "not-a-portable-setting"})
++    assert business.value.status_code == legacy.value.status_code == 422
++    assert business.value.detail == legacy.value.detail
+diff --git a/backend/tests/test_notification_layers.py b/backend/tests/test_notification_layers.py
+new file mode 100644
+index 00000000..b9938b24
+--- /dev/null
++++ b/backend/tests/test_notification_layers.py
+@@ -0,0 +1,22 @@
++"""A notification's durable identity/read state survives projection catch-up."""
++
++from labkit import draft, login
++from test_notifications import finish, listing
++
++
++def test_finished_run_notification_keeps_identity_and_read_state_on_refresh(setup):
++    client, store, _ = setup
++    admin = login(client, "admin")
++    run = draft(client, admin).json()["experimentId"]
++    finish(store, run)
++    initial = listing(client, admin)
++    [notification] = [item for item in initial["items"] if item["kind"] == "run.completed"]
++    assert notification["read"] is False
++    reply = client.post("/api/v1/notifications/read", json={"ids": [notification["id"]]}, headers=admin)
++    assert reply.status_code == 200
++    for _ in range(2):
++        refreshed = listing(client, admin)
++        [again] = [item for item in refreshed["items"] if item["kind"] == "run.completed"]
++        assert again["id"] == notification["id"]
++        assert again["read"] is True
++        assert refreshed["unread"] == 0

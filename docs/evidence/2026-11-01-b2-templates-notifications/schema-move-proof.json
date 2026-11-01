@@ -1,0 +1,8 @@
+{
+  "source": "backend/migrations.py at499e59ac",
+  "destination": "backend/db/migrations.py",
+  "bytesIdentical": true,
+  "astIdentical": true,
+  "sha256": "25290021d752c5ab2e2300c357fd90315fa7ad4c81c5e7c09399d27179a7ade1",
+  "compatibility": "module identity alias until B9"
+}

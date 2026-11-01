@@ -1,0 +1,51 @@
+{
+  "domain": "templates",
+  "sqlCalls": 5,
+  "businessFunctions": 4,
+  "httpFunctions": 3,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "list_templates_select_experiment_templates",
+      "scope": "list_templates",
+      "statement": "'SELECT * FROM experiment_templates WHERE workspace_id=? ORDER BY created DESC, id'",
+      "dynamic": false,
+      "free": [],
+      "line": 145
+    },
+    {
+      "name": "create_template_insert_experiment_templates",
+      "scope": "create_template",
+      "statement": "'INSERT INTO experiment_templates VALUES (:id,:workspace_id,:owner_id,:name,:config,:created)'",
+      "dynamic": false,
+      "free": [],
+      "line": 174
+    },
+    {
+      "name": "create_template_select_experiment_templates",
+      "scope": "create_template",
+      "statement": "'SELECT name FROM experiment_templates WHERE workspace_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 159
+    },
+    {
+      "name": "delete_template_delete_experiment_templates",
+      "scope": "delete_template",
+      "statement": "'DELETE FROM experiment_templates WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 191
+    },
+    {
+      "name": "delete_template_select_experiment_templates",
+      "scope": "delete_template",
+      "statement": "'SELECT * FROM experiment_templates WHERE id=? AND workspace_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 183
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "domain": "notifications",
+  "sqlCalls": 16,
+  "businessFunctions": 2,
+  "httpFunctions": 2,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "_add_insert_notifications",
+      "scope": "_add",
+      "statement": "'INSERT OR IGNORE INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (?,?,?,?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 39
+    },
+    {
+      "name": "_administrators_select_users",
+      "scope": "_administrators",
+      "statement": "'SELECT id, profile FROM users'",
+      "dynamic": false,
+      "free": [],
+      "line": 47
+    },
+    {
+      "name": "start_following_insert_settings",
+      "scope": "start_following",
+      "statement": "\"INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)\"",
+      "dynamic": false,
+      "free": [],
+      "line": 56
+    },
+    {
+      "name": "start_following_insert_settings_2",
+      "scope": "start_following",
+      "statement": "\"INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)\"",
+      "dynamic": false,
+      "free": [],
+      "line": 57
+    },
+    {
+      "name": "catch_up_insert_settings",
+      "scope": "catch_up",
+      "statement": "\"INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)\"",
+      "dynamic": false,
+      "free": [],
+      "line": 111
+    },
+    {
+      "name": "mark_read_update_notifications",
+      "scope": "mark_read",
+      "statement": "'UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL'",
+      "dynamic": false,
+      "free": [],
+      "line": 152
+    },
+    {
+      "name": "mark_read_update_notifications_2",
+      "scope": "mark_read",
+      "statement": "f\"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})\" if numbers else 'SELECT 1'",
+      "dynamic": true,
+      "free": [
+        "numbers"
+      ],
+      "line": 157
+    },
+    {
+      "name": "catch_up_select_settings",
+      "scope": "catch_up",
+      "statement": "\"SELECT value FROM settings WHERE key='notificationCursor'\"",
+      "dynamic": false,
+      "free": [],
+      "line": 66
+    },
+    {
+      "name": "catch_up_select_settings_2",
+      "scope": "catch_up",
+      "statement": "\"SELECT value FROM settings WHERE key='notificationSince'\"",
+      "dynamic": false,
+      "free": [],
+      "line": 67
+    },
+    {
+      "name": "catch_up_select_audit",
+      "scope": "catch_up",
+      "statement": "'SELECT sequence, action, target FROM audit WHERE sequence>? ORDER BY sequence'",
+      "dynamic": false,
+      "free": [],
+      "line": 74
+    },
+    {
+      "name": "listing_select_notifications",
+      "scope": "listing",
+      "statement": "'SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT ?'",
+      "dynamic": false,
+      "free": [],
+      "line": 128
+    },
+    {
+      "name": "start_following_select_settings",
+      "scope": "start_following",
+      "statement": "\"SELECT 1 FROM settings WHERE key='notificationCursor'\"",
+      "dynamic": false,
+      "free": [],
+      "line": 54
+    },
+    {
+      "name": "listing_select_notifications_2",
+      "scope": "listing",
+      "statement": "'SELECT COUNT(*) FROM notifications WHERE user_id=? AND read_at IS NULL'",
+      "dynamic": false,
+      "free": [],
+      "line": 131
+    },
+    {
+      "name": "start_following_select_audit",
+      "scope": "start_following",
+      "statement": "'SELECT COALESCE(MAX(sequence),0) FROM audit'",
+      "dynamic": false,
+      "free": [],
+      "line": 55
+    },
+    {
+      "name": "catch_up_select_sqlite_master",
+      "scope": "catch_up",
+      "statement": "\"SELECT 1 FROM sqlite_master WHERE name='devices'\"",
+      "dynamic": false,
+      "free": [],
+      "line": 97
+    },
+    {
+      "name": "catch_up_select_devices",
+      "scope": "catch_up",
+      "statement": "'SELECT name, status FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 96
+    }
+  ]
+}

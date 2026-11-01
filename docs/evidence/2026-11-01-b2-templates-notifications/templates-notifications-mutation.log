@@ -1,0 +1,14 @@
+control ok    | 63 passed, 1 warning in 11.21s
+killed       unknown template settings saved | 1 failed, 6 passed, 1 warning in 0.44s
+killed       boolean accepted as template integer | 1 failed, 11 passed, 1 warning in 1.54s
+killed       template author delete guard ignored | 1 failed, 13 passed, 1 warning in 2.12s
+killed       template id crosses workspace scope | 1 failed, 14 passed, 1 warning in 2.40s
+killed       projection replaces notification read state | 1 failed, 1 warning in 0.39s
+killed       restart resets notification cursor | 1 failed, 16 passed, 1 warning in 3.10s
+killed       read all modifies another users notifications | 1 failed, 20 passed, 1 warning in 4.49s
+killed       read ids modifies another users notifications | 1 failed, 20 passed, 1 warning in 4.49s
+killed       account requests announced to nonadmins | 1 failed, 17 passed, 1 warning in 3.36s
+killed       legacy template helper leaks domain exception | 1 failed, 6 passed, 1 warning in 0.47s
+killed       notification list limit not checked | 1 failed, 21 passed, 1 warning in 6.98s
+
+11 of 11 mutants killed.

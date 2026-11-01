@@ -1,0 +1,68 @@
+[
+  {
+    "name": "unknown template settings saved",
+    "file": "backend/services/templates.py",
+    "old": "if unknown:",
+    "new": "if False:"
+  },
+  {
+    "name": "boolean accepted as template integer",
+    "file": "backend/services/templates.py",
+    "old": "if type(value) is not int or not low <= value <= high:",
+    "new": "if not isinstance(value, int) or not low <= value <= high:"
+  },
+  {
+    "name": "template author delete guard ignored",
+    "file": "backend/services/templates.py",
+    "old": "if row[\"owner_id\"] != current[\"userId\"] and current[\"workspaceRole\"] != \"ADMIN\":",
+    "new": "if False:"
+  },
+  {
+    "name": "template id crosses workspace scope",
+    "file": "backend/repositories/templates.py",
+    "old": "def delete_template_select_experiment_templates(db, parameters=()):\n        return execute(db, \"SELECT * FROM experiment_templates WHERE id=? AND workspace_id=?\", parameters)",
+    "new": "def delete_template_select_experiment_templates(db, parameters=()):\n        return execute(db, \"SELECT * FROM experiment_templates WHERE id=? AND ? IS NOT NULL\", parameters)"
+  },
+  {
+    "name": "projection replaces notification read state",
+    "file": "backend/repositories/notifications.py",
+    "old": "INSERT OR IGNORE INTO notifications",
+    "new": "INSERT OR REPLACE INTO notifications"
+  },
+  {
+    "name": "restart resets notification cursor",
+    "file": "backend/services/notifications.py",
+    "old": "if repository.start_following_select_settings(db, ()).fetchone() is None:",
+    "new": "if True:"
+  },
+  {
+    "name": "read all modifies another users notifications",
+    "file": "backend/repositories/notifications.py",
+    "old": "def mark_read_update_notifications(db, parameters=()):\n        return execute(db, \"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL\", parameters)",
+    "new": "def mark_read_update_notifications(db, parameters=()):\n        return execute(db, \"UPDATE notifications SET read_at=? WHERE ? IS NOT NULL AND read_at IS NULL\", parameters)"
+  },
+  {
+    "name": "read ids modifies another users notifications",
+    "file": "backend/repositories/notifications.py",
+    "old": "def mark_read_update_notifications_2(db, parameters=(), *, numbers):\n        return execute(\n            db,\n            f\"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})\"\n            if numbers\n            else \"SELECT 1\",\n            parameters,\n        )",
+    "new": "def mark_read_update_notifications_2(db, parameters=(), *, numbers):\n        return execute(\n            db,\n            f\"UPDATE notifications SET read_at=? WHERE ? IS NOT NULL AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})\"\n            if numbers\n            else \"SELECT 1\",\n            parameters,\n        )"
+  },
+  {
+    "name": "account requests announced to nonadmins",
+    "file": "backend/services/notifications.py",
+    "old": "p.get(\"platformAdmin\")",
+    "new": "True"
+  },
+  {
+    "name": "legacy template helper leaks domain exception",
+    "file": "backend/api/templates.py",
+    "old": "except ServiceError as error:",
+    "new": "except KeyError as error:"
+  },
+  {
+    "name": "notification list limit not checked",
+    "file": "backend/services/notifications.py",
+    "old": "if not 1 <= limit <= MAX_LIMIT:",
+    "new": "if False:"
+  }
+]

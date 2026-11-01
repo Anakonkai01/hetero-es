@@ -1,0 +1,6 @@
+{
+  "initializerStatementsAST": "identical",
+  "relocatedIndex": true,
+  "source": "Notifications.__init__ at499e59ac",
+  "destination": "backend/db/projections.py"
+}
