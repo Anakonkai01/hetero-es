@@ -1,0 +1,24 @@
+{
+  "study_registry": {
+    "sqlCalls": 9,
+    "nestedImports": [],
+    "classes": [
+      "ImportData",
+      "DatasetUpload",
+      "DatasetBuild",
+      "DatasetLimits",
+      "RegisterModel",
+      "Registry"
+    ]
+  },
+  "model_qualification": {
+    "sqlCalls": 22,
+    "nestedImports": [
+      "from heteroes.product.chunk_memory import check"
+    ],
+    "classes": [
+      "ProbeRequest",
+      "ModelQualifications"
+    ]
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "domain": "model_qualification",
+  "sqlCalls": 22,
+  "businessFunctions": 4,
+  "httpFunctions": 4,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "status_select_model_probe_jobs",
+      "scope": "status",
+      "statement": "'SELECT body FROM model_probe_jobs WHERE asset_id=? ORDER BY rowid DESC'",
+      "dynamic": false,
+      "free": [],
+      "line": 343
+    },
+    {
+      "name": "cancel_select_model_probe_jobs",
+      "scope": "cancel",
+      "statement": "'SELECT body FROM model_probe_jobs WHERE id=? AND asset_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 353
+    },
+    {
+      "name": "transfer_select_model_probe_jobs",
+      "scope": "transfer",
+      "statement": "'SELECT j.body FROM model_probe_jobs j JOIN model_probe_reservations r ON r.job_id=j.id WHERE j.id=? AND j.device_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 367
+    },
+    {
+      "name": "save_update_model_probe_jobs",
+      "scope": "save",
+      "statement": "'UPDATE model_probe_jobs SET body=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 51
+    },
+    {
+      "name": "effective_profile_select_value",
+      "scope": "effective_profile",
+      "statement": "f'SELECT q.manifest_hash,{engine_column} FROM {table} q JOIN {references} r ON r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash' + engine_clause + ' WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?'",
+      "dynamic": true,
+      "free": [
+        "engine_clause",
+        "engine_column",
+        "references",
+        "table"
+      ],
+      "line": 76
+    },
+    {
+      "name": "start_insert_model_probe_jobs",
+      "scope": "start",
+      "statement": "'INSERT INTO model_probe_jobs VALUES (?,?,?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 167
+    },
+    {
+      "name": "start_insert_model_probe_reservations",
+      "scope": "start",
+      "statement": "'INSERT INTO model_probe_reservations VALUES (?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 171
+    },
+    {
+      "name": "accept_delete_model_probe_reservations",
+      "scope": "accept",
+      "statement": "'DELETE FROM model_probe_reservations WHERE job_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 299
+    },
+    {
+      "name": "reference_select_model_engine_references",
+      "scope": "reference",
+      "statement": "'SELECT * FROM model_engine_references WHERE workspace_id=? AND manifest_hash=? AND engine=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 58
+    },
+    {
+      "name": "start_select_model_probe_jobs",
+      "scope": "start",
+      "statement": "'SELECT body FROM model_probe_jobs WHERE workspace_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 136
+    },
+    {
+      "name": "accept_select_devices",
+      "scope": "accept",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 212
+    },
+    {
+      "name": "accept_select_worker_assignments",
+      "scope": "accept",
+      "statement": "'SELECT workspace_id FROM worker_assignments WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 213
+    },
+    {
+      "name": "accept_select_model_probe_jobs",
+      "scope": "accept",
+      "statement": "'SELECT body FROM model_probe_jobs WHERE device_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 216
+    },
+    {
+      "name": "accept_update_devices",
+      "scope": "accept",
+      "statement": "\"UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=?\"",
+      "dynamic": false,
+      "free": [],
+      "line": 243
+    },
+    {
+      "name": "reference_select_model_references",
+      "scope": "reference",
+      "statement": "'SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 55
+    },
+    {
+      "name": "start_select_devices",
+      "scope": "start",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 95
+    },
+    {
+      "name": "accept_select_model_probe_jobs_2",
+      "scope": "accept",
+      "statement": "'SELECT body FROM model_probe_jobs WHERE id=? AND device_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 232
+    },
+    {
+      "name": "start_select_worker_assignments",
+      "scope": "start",
+      "statement": "'SELECT workspace_id FROM worker_assignments WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 97
+    },
+    {
+      "name": "start_select_device_reservations",
+      "scope": "start",
+      "statement": "'SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id'",
+      "dynamic": false,
+      "free": [],
+      "line": 127
+    },
+    {
+      "name": "accept_insert_model_references",
+      "scope": "accept",
+      "statement": "'INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)' if not engine_args else 'INSERT OR IGNORE INTO model_engine_references VALUES (?,?,?,?,?)'",
+      "dynamic": true,
+      "free": [
+        "engine_args"
+      ],
+      "line": 276
+    },
+    {
+      "name": "accept_insert_model_qualifications",
+      "scope": "accept",
+      "statement": "'INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)' if not engine_args else 'INSERT OR REPLACE INTO model_engine_qualifications VALUES (?,?,?,?,?,?,?)'",
+      "dynamic": true,
+      "free": [
+        "engine_args"
+      ],
+      "line": 282
+    }
+  ]
+}

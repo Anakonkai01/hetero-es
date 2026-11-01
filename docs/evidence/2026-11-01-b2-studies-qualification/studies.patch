@@ -1,0 +1,1834 @@
+diff --git a/backend/api/model_qualification.py b/backend/api/model_qualification.py
+new file mode 100644
+index 00000000..17442883
+--- /dev/null
++++ b/backend/api/model_qualification.py
+@@ -0,0 +1,29 @@
++"""Model_Qualification HTTP adapters."""
++
++from ..core.study_models import ProbeRequest
++from fastapi import Depends
++from fastapi import APIRouter
++from ..services.model_qualification import operations
++
++
++def install_routes(app, registry, runtime, scoped, device_auth):
++    service = operations(registry, runtime, scoped, device_auth)
++    router = APIRouter()
++
++    @app.post("/api/v1/models/{asset_id}/qualifications", status_code=201)
++    def start(asset_id: str, body: ProbeRequest, current=Depends(scoped)):
++        return service.start(asset_id=asset_id, body=body, current=current)
++
++    @app.get("/api/v1/models/{asset_id}/qualifications")
++    def status(asset_id: str, current=Depends(scoped)):
++        return service.status(asset_id=asset_id, current=current)
++
++    @app.post("/api/v1/models/{asset_id}/qualifications/{job_id}/cancel")
++    def cancel(asset_id: str, job_id: str, current=Depends(scoped)):
++        return service.cancel(asset_id=asset_id, job_id=job_id, current=current)
++
++    @app.post("/api/v1/device/model-transfer")
++    def transfer(body: dict, current=Depends(device_auth)):
++        return service.transfer(body=body, current=current)
++
++    app.include_router(router)
+diff --git a/backend/api/study_registry.py b/backend/api/study_registry.py
+new file mode 100644
+index 00000000..86b2a30e
+--- /dev/null
++++ b/backend/api/study_registry.py
+@@ -0,0 +1,49 @@
++"""Study_Registry HTTP adapters."""
++
++from ..core.study_models import ImportData, DatasetUpload, DatasetBuild, DatasetLimits, RegisterModel
++from fastapi import Depends
++from fastapi import APIRouter
++from ..services.study_registry import operations
++
++
++def install_routes(app, registry, runtime, scoped, device_auth):
++    service = operations(registry, runtime, scoped, device_auth)
++    router = APIRouter()
++
++    @app.post("/api/v1/datasets/import", status_code=201)
++    def import_data(body: ImportData, current=Depends(scoped)):
++        return service.import_data(body=body, current=current)
++
++    @app.get("/api/v1/platform/dataset-limits")
++    def get_dataset_limits(current=Depends(scoped)):
++        return service.get_dataset_limits(current=current)
++
++    @app.put("/api/v1/platform/dataset-limits")
++    def set_dataset_limits(body: DatasetLimits, current=Depends(scoped)):
++        return service.set_dataset_limits(body=body, current=current)
++
++    @app.post("/api/v1/datasets/upload-plan", status_code=201)
++    def dataset_upload_plan(body: DatasetUpload, current=Depends(scoped)):
++        return service.dataset_upload_plan(body=body, current=current)
++
++    @app.post("/api/v1/datasets/uploads/{upload_id}/build", status_code=201)
++    def build_uploaded_dataset(upload_id: str, body: DatasetBuild, current=Depends(scoped)):
++        return service.build_uploaded_dataset(upload_id=upload_id, body=body, current=current)
++
++    @app.post("/api/v1/models/register", status_code=201)
++    def register_model(body: RegisterModel, current=Depends(scoped)):
++        return service.register_model(body=body, current=current)
++
++    @app.post("/api/v1/models/{asset_id}/upload-plan")
++    def upload_plan(asset_id: str, sizes: dict, current=Depends(scoped)):
++        return service.upload_plan(asset_id=asset_id, sizes=sizes, current=current)
++
++    @app.post("/api/v1/models/{asset_id}/publish")
++    def publish(asset_id: str, current=Depends(scoped)):
++        return service.publish(asset_id=asset_id, current=current)
++
++    @app.post("/api/v1/device/study-transfer")
++    def transfer(body: dict, current=Depends(device_auth)):
++        return service.transfer(body=body, current=current)
++
++    app.include_router(router)
+diff --git a/backend/core/study_models.py b/backend/core/study_models.py
+new file mode 100644
+index 00000000..a5558f14
+--- /dev/null
++++ b/backend/core/study_models.py
+@@ -0,0 +1,51 @@
++"""CPU-safe study and qualification request contracts."""
++
++from typing import Literal
++from pydantic import BaseModel, ConfigDict, Field
++from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2
++from heteroes.product.model_qualification import STRICT_DECODER
++from .models import FiniteStrict
++
++
++class ImportData(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    recipeVersion: int = Field(default=2, ge=2, le=3, strict=True)
++    name: str = Field(min_length=1, max_length=100)
++    files: dict
++    mapping: dict | None = None
++    adapter: str = "exact-number-v1"
++    splitSeed: int = Field(default=42, ge=0, lt=2**53, strict=True)
++
++
++class DatasetUpload(BaseModel):
++    """A large Recipe v3 dataset: one file or three named splits, uploaded with signed requests, then built."""
++
++    model_config = ConfigDict(extra="forbid")
++    name: str = Field(min_length=1, max_length=100)
++    files: dict
++
++
++class DatasetBuild(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    mapping: dict | None = None
++    splitSeed: int = Field(default=42, ge=0, lt=2**53, strict=True)
++
++
++class DatasetLimits(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    maxBytes: int = Field(ge=1_000_000, le=50_000_000_000, strict=True)
++    maxRows: int = Field(ge=1_000, le=1_000_000_000, strict=True)
++
++
++class RegisterModel(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    recipeVersion: int = Field(default=2, ge=2, le=3, strict=True)
++    name: str = Field(min_length=1, max_length=100)
++    manifest: dict
++    source: str = "REFERENCE"
++
++
++class ProbeRequest(FiniteStrict):
++    deviceId: str = Field(pattern="^[a-f0-9]{32}$")
++    noiseEngineVersion: Literal[ENGINE_VERSION, ENGINE_V2] | None = None
++    decoder: Literal["hf_generate", STRICT_DECODER] | None = None
+diff --git a/backend/model_qualification.py b/backend/model_qualification.py
+index e1c16e04..d0859038 100644
+--- a/backend/model_qualification.py
++++ b/backend/model_qualification.py
+@@ -1,389 +1,10 @@
+-"""Workspace-owned model references and durable ownership of on-demand GPU probes. CPU imports only."""
+-
+-import json
+-import re
+-import time
+-import uuid
+-
+-from fastapi import Depends, HTTPException
+-from pydantic import Field
+-
+-from heteroes.canonical import canonical_json_hash
+-from heteroes.product.model_qualification import STRICT_DECODER, check_reference, qualification_key, verify_observations
+-from .policies import FiniteStrict, has_device_reservation, noise_qualification
+-from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2, CPU_NOISE_FINGERPRINTS
+-from typing import Literal
+-from heteroes.product.cpu_coordinator import coordinator_only
+-
+-TERMINAL = {"COMPLETED", "FAILED", "CANCELLED"}
+-
+-
+-def restore_mismatch(report):
+-    if report.errorCode == "RESTORE_MISMATCH":
+-        return True
+-    observations = report.observations
+-    if not isinstance(observations, dict):
+-        return False
+-    return any(
+-        isinstance(row, dict)
+-        and isinstance(row.get("parentSha256"), str)
+-        and re.fullmatch("[a-f0-9]{64}", row["parentSha256"])
+-        and isinstance(row.get("restoredSha256"), str)
+-        and re.fullmatch("[a-f0-9]{64}", row["restoredSha256"])
+-        and row["parentSha256"] != row["restoredSha256"]
+-        for sign in ("1", "-1")
+-        for row in (observations.get(sign) if isinstance(observations.get(sign), list) else [])
+-    )
+-
+-
+-class ProbeRequest(FiniteStrict):
+-    deviceId: str = Field(pattern="^[a-f0-9]{32}$")
+-    noiseEngineVersion: Literal[ENGINE_VERSION, ENGINE_V2] | None = None
+-    decoder: Literal["hf_generate", STRICT_DECODER] | None = None  # M4: strict_b22_v1 has its own reference
+-
+-
+-class ModelQualifications:
+-    def __init__(self, runtime):
+-        self.runtime = runtime
+-
+-    @property
+-    def store(self):
+-        return self.runtime.store
+-
+-    def save(self, db, job):
+-        db.execute("UPDATE model_probe_jobs SET body=? WHERE id=?", (json.dumps(job, allow_nan=False), job["jobId"]))
+-
+-    def reference(self, db, workspace, manifest_hash, engine=ENGINE_VERSION):
+-        if engine == ENGINE_VERSION:
+-            return db.execute(
+-                "SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?", (workspace, manifest_hash)
+-            ).fetchone()
+-        return db.execute(
+-            "SELECT * FROM model_engine_references WHERE workspace_id=? AND manifest_hash=? AND engine=?",
+-            (workspace, manifest_hash, engine),
+-        ).fetchone()
+-
+-    def effective_profile(self, db, device, profile, workspace):
+-        # Old immutable rows prove v1 only. New references have a separate engine key; neither rewrites the other.
+-        by_engine = {k: list(v) for k, v in (profile.get("qualifiedModelsByNoiseEngine") or {}).items()}
+-        baseline = by_engine.setdefault(profile.get("noiseVersion", ENGINE_VERSION), [])
+-        for digest in profile.get("qualifiedModelHashes", []):
+-            if digest not in baseline:
+-                baseline.append(digest)
+-        for table, engine_clause in (
+-            ("model_qualifications", ""),
+-            ("model_engine_qualifications", " AND r.engine=q.engine"),
+-        ):
+-            references = "model_references" if table == "model_qualifications" else "model_engine_references"
+-            engine_column = "'" + ENGINE_VERSION + "'" if not engine_clause else "q.engine"
+-            for row in db.execute(
+-                f"SELECT q.manifest_hash,{engine_column} FROM {table} q JOIN {references} r ON "
+-                "r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash"
+-                + engine_clause
+-                + " WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?",
+-                (device, workspace, canonical_json_hash(profile)),
+-            ):
+-                hashes = by_engine.setdefault(row[1], [])
+-                if row[0] not in hashes:
+-                    hashes.append(row[0])
+-        return {
+-            **profile,
+-            "qualifiedModelHashes": sorted({h for values in by_engine.values() for h in values}),
+-            "qualifiedModelsByNoiseEngine": by_engine,
+-        }
+-
+-    def start(self, asset, device_id, current, engine=None, decoder=None):
+-        with self.store.db() as db:
+-            db.execute("BEGIN IMMEDIATE")
+-            device = db.execute("SELECT * FROM devices WHERE id=?", (device_id,)).fetchone()
+-            allocation = (
+-                db.execute(
+-                    "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", (device["worker_id"],)
+-                ).fetchone()
+-                if device
+-                else None
+-            )
+-            if not device or not allocation or allocation[0] != current["workspaceId"]:
+-                raise HTTPException(404, "Device is not assigned to this workspace")
+-            profile = json.loads(device["self_test"])
+-            if (
+-                asset.get("recipeVersion") != 3
+-                or asset["status"] not in ("REGISTERED", "READY")
+-                or device["status"] != "APPROVED"
+-                or self.store.profile(device["owner"])["accountStatus"] != "ACTIVE"
+-                or not profile.get("passed")
+-                or profile.get("recipeVersions") != [3]
+-                or coordinator_only(profile)
+-            ):
+-                raise HTTPException(409, "A ready v3 model and an approved v3 device are required")
+-            if time.time() - device["seen"] >= 30 or not device["enabled"] or not device["desired"]:
+-                raise HTTPException(409, "Reconnect the device and turn contribution ON")
+-            engine = engine or profile.get("noiseVersion", ENGINE_VERSION)
+-            if engine not in CPU_NOISE_FINGERPRINTS or noise_qualification(profile, engine):
+-                raise HTTPException(409, "Update and self-test selected device for the run's noise engine")
+-            resource = profile.get("gpuUUID")
+-            if not resource or has_device_reservation(db, device_id, resource):
+-                raise HTTPException(409, "Wait for confirmed physical GPU release")
+-            # A legacy reservation without physical identity may be an alias of this device.
+-            if any(
+-                not json.loads(r[0]).get("gpuUUID") and not coordinator_only(json.loads(r[0]))
+-                for r in db.execute("SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id")
+-            ):
+-                raise HTTPException(409, "Wait for legacy GPU ownership release")
+-            self.runtime.require_command(db, device_id, "QUALIFY_MODEL")
+-            self.runtime.require_command(db, device_id, "CANCEL_MODEL_QUALIFICATION")
+-            # references and qualifications are keyed by engine, and by decoder for the strict identity only
+-            key = qualification_key(engine, decoder)
+-            reference = self.reference(db, current["workspaceId"], asset["manifestHash"], key)
+-            if not reference:
+-                for row in db.execute(
+-                    "SELECT body FROM model_probe_jobs WHERE workspace_id=?", (current["workspaceId"],)
+-                ):
+-                    other = json.loads(row[0])
+-                    if (
+-                        other["manifestHash"] == asset["manifestHash"]
+-                        and other["status"] not in TERMINAL
+-                        and qualification_key(other.get("noiseEngineVersion", ENGINE_VERSION), other.get("decoder"))
+-                        == key
+-                    ):
+-                        raise HTTPException(409, "Wait for the first device to establish the model reference")
+-            job = {
+-                "jobId": uuid.uuid4().hex,
+-                "deviceId": device_id,
+-                "assetId": asset["id"],
+-                "workspaceId": current["workspaceId"],
+-                "ownerUserId": current["userId"],
+-                "manifestHash": asset["manifestHash"],
+-                "noiseEngineVersion": engine,
+-                **({"decoder": STRICT_DECODER} if key != engine else {}),
+-                "manifest": asset["manifest"],
+-                "source": asset["source"],
+-                "profileHash": canonical_json_hash(profile),
+-                "resourceId": resource,
+-                "mode": "COMPARE_REFERENCE" if reference else "BUILD_REFERENCE",
+-                "reference": json.loads(reference["body"]) if reference else None,
+-                "status": "PREPARING",
+-                "cancelRequested": False,
+-                "errorCode": None,
+-                "createdAt": time.time(),
+-            }
+-            db.execute(
+-                "INSERT INTO model_probe_jobs VALUES (?,?,?,?,?)",
+-                (job["jobId"], job["workspaceId"], asset["id"], device_id, json.dumps(job)),
+-            )
+-            db.execute("INSERT INTO model_probe_reservations VALUES (?,?,?)", (job["jobId"], device_id, resource))
+-            self.runtime.enqueue(
+-                db,
+-                device_id,
+-                "QUALIFY_MODEL",
+-                {
+-                    k: job[k]
+-                    for k in ("jobId", "mode", "manifest", "source", "reference", "noiseEngineVersion", "decoder")
+-                    if k in job
+-                },
+-                "model-probe:" + job["jobId"],
+-            )
+-            self.store.audit(db, current["userId"], "MODEL_QUALIFICATION_REQUESTED", job["jobId"], job["workspaceId"])
+-        return self.public(job)
+-
+-    @staticmethod
+-    def public(job):
+-        return {
+-            k: job[k]
+-            for k in ("jobId", "deviceId", "assetId", "ownerUserId", "mode", "status", "errorCode", "createdAt")
+-        } | {
+-            "chunkMemory": job.get("chunkMemory"),
+-            "noiseEngineVersion": job.get("noiseEngineVersion", ENGINE_VERSION),
+-            "decoder": job.get("decoder", "hf_generate"),
+-        }
+-
+-    def cancel(self, db, job):
+-        if job["status"] in TERMINAL:
+-            return
+-        job.update(cancelRequested=True, status="CANCELLING")
+-        self.save(db, job)
+-        self.runtime.enqueue(
+-            db,
+-            job["deviceId"],
+-            "CANCEL_MODEL_QUALIFICATION",
+-            {"jobId": job["jobId"]},
+-            "cancel-model-probe:" + job["jobId"],
+-        )
+-
+-    def accept(self, db, device, reports):
+-        # Approval, workspace and boot opt-in can change while a probe is running. Cancellation never releases ownership.
+-        current = db.execute("SELECT * FROM devices WHERE id=?", (device["id"],)).fetchone()
+-        allocation = db.execute(
+-            "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", (current["worker_id"],)
+-        ).fetchone()
+-        for row in db.execute("SELECT body FROM model_probe_jobs WHERE device_id=?", (device["id"],)).fetchall():
+-            job = json.loads(row[0])
+-            if (
+-                current["status"] != "APPROVED"
+-                or not current["desired"]
+-                or not current["enabled"]
+-                or not allocation
+-                or allocation[0] != job["workspaceId"]
+-                or self.store.profile(current["owner"])["accountStatus"] != "ACTIVE"
+-            ):
+-                self.cancel(db, job)
+-        accepted = []
+-        for report in reports:
+-            encoded = report.model_dump()
+-            if len(json.dumps(encoded, allow_nan=False).encode()) > 250_000:
+-                raise HTTPException(413, "Model qualification report is too large")
+-            row = db.execute(
+-                "SELECT body FROM model_probe_jobs WHERE id=? AND device_id=?", (report.jobId, device["id"])
+-            ).fetchone()
+-            if not row:
+-                continue
+-            job = json.loads(row[0])
+-            accepted.append(report.jobId)
+-            if job["status"] in TERMINAL:
+-                continue
+-            restore_failed = restore_mismatch(report)
+-            if restore_failed:
+-                db.execute("UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=?", (device["id"],))
+-                self.store.cancel_selected(db, current["worker_id"])
+-                self.store.audit(db, "system", "DEVICE_RESTORE_MISMATCH", device["id"], job["workspaceId"])
+-            if report.processAlive is not False:
+-                job["status"] = (
+-                    "CANCELLING"
+-                    if job["cancelRequested"]
+-                    else ("DRAINING" if report.status in TERMINAL else report.status)
+-                )
+-                self.save(db, job)
+-                continue
+-            if restore_failed:
+-                job.update(status="FAILED", errorCode="RESTORE_MISMATCH")
+-            elif job["cancelRequested"] or report.status == "CANCELLED":
+-                job.update(status="CANCELLED", errorCode=None)
+-            elif report.status != "COMPLETED":
+-                job.update(status="FAILED", errorCode=report.errorCode or "MODEL_PROBE_FAILED")
+-            else:
+-                try:
+-                    if canonical_json_hash(json.loads(current["self_test"])) != job["profileHash"]:
+-                        raise ValueError("Native profile changed")
+-                    reference = report.reference if job["mode"] == "BUILD_REFERENCE" else job["reference"]
+-                    check_reference(reference, job["manifest"])
+-                    engine = qualification_key(job.get("noiseEngineVersion", ENGINE_VERSION), job.get("decoder"))
+-                    recipe = reference["cell"]["recipe"]
+-                    if qualification_key(recipe["noise"]["engine"], recipe["evaluation"]["decoder"]) != engine:
+-                        raise ValueError("Model reference noise engine or decoder differs")
+-                    evidence = verify_observations(reference, report.observations)
+-                    reference_hash = canonical_json_hash(reference)
+-                    old = self.reference(db, job["workspaceId"], job["manifestHash"], engine)
+-                    if old and old["reference_hash"] != reference_hash:
+-                        raise ValueError("Frozen reference changed")
+-                    engine_args = () if engine == ENGINE_VERSION else (engine,)
+-                    db.execute(
+-                        "INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)"
+-                        if not engine_args
+-                        else "INSERT OR IGNORE INTO model_engine_references VALUES (?,?,?,?,?)",
+-                        (job["workspaceId"], job["manifestHash"], reference_hash, json.dumps(reference), *engine_args),
+-                    )
+-                    db.execute(
+-                        "INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)"
+-                        if not engine_args
+-                        else "INSERT OR REPLACE INTO model_engine_qualifications VALUES (?,?,?,?,?,?,?)",
+-                        (
+-                            device["id"],
+-                            job["workspaceId"],
+-                            job["manifestHash"],
+-                            job["profileHash"],
+-                            reference_hash,
+-                            json.dumps(evidence),
+-                            *engine_args,
+-                        ),
+-                    )
+-                    job.update(status="COMPLETED", errorCode=None, chunkMemory=checked_memory(report.chunkMemory))
+-                except (ValueError, TypeError, KeyError):
+-                    job.update(status="FAILED", errorCode="MODEL_QUALIFICATION_MISMATCH")
+-            db.execute("DELETE FROM model_probe_reservations WHERE job_id=?", (job["jobId"],))
+-            self.save(db, job)
+-            self.store.audit(db, "system", "MODEL_QUALIFICATION_" + job["status"], job["jobId"], job["workspaceId"])
+-        return accepted
+-
+-
+-def checked_memory(value):
+-    """A device's chunk measurement as the lab keeps it; anything else is dropped (the qualification stands)."""
+-    from heteroes.product.chunk_memory import check
+-
+-    try:
+-        return None if value is None else check(value)
+-    except ValueError:
+-        return None
+-
+-
+-def install_routes(app, registry, runtime, scoped, device_auth):
+-    service = runtime.qualifications
+-
+-    @app.post("/api/v1/models/{asset_id}/qualifications", status_code=201)
+-    def start(asset_id: str, body: ProbeRequest, current=Depends(scoped)):
+-        return service.start(
+-            registry.get(asset_id, current["workspaceId"], "model"),
+-            body.deviceId,
+-            current,
+-            body.noiseEngineVersion,
+-            body.decoder,
+-        )
+-
+-    @app.get("/api/v1/models/{asset_id}/qualifications")
+-    def status(asset_id: str, current=Depends(scoped)):
+-        asset = registry.get(asset_id, current["workspaceId"], "model")
+-        with registry.store.db() as db:
+-            reference = service.reference(db, current["workspaceId"], asset["manifestHash"])
+-            return {
+-                "referenceHash": reference["reference_hash"] if reference else None,
+-                "referenceHashesByNoiseEngine": {
+-                    key: row["reference_hash"]
+-                    for engine in CPU_NOISE_FINGERPRINTS
+-                    for key in (engine, qualification_key(engine, STRICT_DECODER))
+-                    if (row := service.reference(db, current["workspaceId"], asset["manifestHash"], key))
+-                },
+-                "jobs": [
+-                    service.public(json.loads(r[0]))
+-                    for r in db.execute(
+-                        "SELECT body FROM model_probe_jobs WHERE asset_id=? ORDER BY rowid DESC", (asset_id,)
+-                    )
+-                ],
+-            }
+-
+-    @app.post("/api/v1/models/{asset_id}/qualifications/{job_id}/cancel")
+-    def cancel(asset_id: str, job_id: str, current=Depends(scoped)):
+-        registry.get(asset_id, current["workspaceId"], "model")
+-        with registry.store.db() as db:
+-            row = db.execute(
+-                "SELECT body FROM model_probe_jobs WHERE id=? AND asset_id=?", (job_id, asset_id)
+-            ).fetchone()
+-            if not row:
+-                raise HTTPException(404, "Model qualification not found")
+-            job = json.loads(row[0])
+-            if current["workspaceRole"] != "ADMIN" and current["userId"] != job["ownerUserId"]:
+-                raise HTTPException(403, "Only the requester or workspace admin may cancel this probe")
+-            service.cancel(db, job)
+-            return service.public(job)
+-
+-    @app.post("/api/v1/device/model-transfer")
+-    def transfer(body: dict, current=Depends(device_auth)):
+-        with registry.store.db() as db:
+-            row = db.execute(
+-                "SELECT j.body FROM model_probe_jobs j JOIN model_probe_reservations r ON r.job_id=j.id "
+-                "WHERE j.id=? AND j.device_id=?",
+-                (body.get("jobId"), current["id"]),
+-            ).fetchone()
+-            if not row:
+-                raise HTTPException(403, "Model probe is stale or not owned by this device")
+-            job = json.loads(row[0])
+-            if (
+-                job["cancelRequested"]
+-                or job["source"] != "UPLOAD"
+-                or current["status"] != "APPROVED"
+-                or not current["desired"]
+-                or body.get("sha256") not in job["manifest"]["files"].values()
+-            ):
+-                raise HTTPException(403, "File is outside the active model probe")
+-            if runtime.storage_backend is None:
+-                raise HTTPException(409, "Configure local artifact storage first")
+-            sha = body["sha256"]
+-            return {"url": runtime.storage_backend.download_url("objects/" + sha), "sha256": sha}
++"""Compatibility exports during backend layer extraction."""
++
++from .api.model_qualification import install_routes as install_routes
++from .services.model_qualification import (
++    ModelQualifications as ModelQualifications,
++    restore_mismatch as restore_mismatch,
++    checked_memory as checked_memory,
++    TERMINAL as TERMINAL,
++)
++from .core.study_models import ProbeRequest as ProbeRequest
+diff --git a/backend/repositories/model_qualification.py b/backend/repositories/model_qualification.py
+new file mode 100644
+index 00000000..01d3a2a1
+--- /dev/null
++++ b/backend/repositories/model_qualification.py
+@@ -0,0 +1,117 @@
++"""Model_Qualification SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class ModelQualificationRepository:
++    @staticmethod
++    def status_select_model_probe_jobs(db, parameters=()):
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE asset_id=? ORDER BY rowid DESC", parameters)
++
++    @staticmethod
++    def cancel_select_model_probe_jobs(db, parameters=()):
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=? AND asset_id=?", parameters)
++
++    @staticmethod
++    def transfer_select_model_probe_jobs(db, parameters=()):
++        return execute(
++            db,
++            "SELECT j.body FROM model_probe_jobs j JOIN model_probe_reservations r ON r.job_id=j.id WHERE j.id=? AND j.device_id=?",
++            parameters,
++        )
++
++    @staticmethod
++    def save_update_model_probe_jobs(db, parameters=()):
++        return execute(db, "UPDATE model_probe_jobs SET body=? WHERE id=?", parameters)
++
++    @staticmethod
++    def effective_profile_select_value(db, parameters=(), *, engine_clause, engine_column, references, table):
++        return execute(
++            db,
++            f"SELECT q.manifest_hash,{engine_column} FROM {table} q JOIN {references} r ON r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash"
++            + engine_clause
++            + " WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?",
++            parameters,
++        )
++
++    @staticmethod
++    def start_insert_model_probe_jobs(db, parameters=()):
++        return execute(db, "INSERT INTO model_probe_jobs VALUES (?,?,?,?,?)", parameters)
++
++    @staticmethod
++    def start_insert_model_probe_reservations(db, parameters=()):
++        return execute(db, "INSERT INTO model_probe_reservations VALUES (?,?,?)", parameters)
++
++    @staticmethod
++    def accept_delete_model_probe_reservations(db, parameters=()):
++        return execute(db, "DELETE FROM model_probe_reservations WHERE job_id=?", parameters)
++
++    @staticmethod
++    def reference_select_model_engine_references(db, parameters=()):
++        return execute(
++            db,
++            "SELECT * FROM model_engine_references WHERE workspace_id=? AND manifest_hash=? AND engine=?",
++            parameters,
++        )
++
++    @staticmethod
++    def start_select_model_probe_jobs(db, parameters=()):
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE workspace_id=?", parameters)
++
++    @staticmethod
++    def accept_select_devices(db, parameters=()):
++        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++
++    @staticmethod
++    def accept_select_worker_assignments(db, parameters=()):
++        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", parameters)
++
++    @staticmethod
++    def accept_select_model_probe_jobs(db, parameters=()):
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE device_id=?", parameters)
++
++    @staticmethod
++    def accept_update_devices(db, parameters=()):
++        return execute(db, "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=?", parameters)
++
++    @staticmethod
++    def reference_select_model_references(db, parameters=()):
++        return execute(db, "SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?", parameters)
++
++    @staticmethod
++    def start_select_devices(db, parameters=()):
++        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++
++    @staticmethod
++    def accept_select_model_probe_jobs_2(db, parameters=()):
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=? AND device_id=?", parameters)
++
++    @staticmethod
++    def start_select_worker_assignments(db, parameters=()):
++        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", parameters)
++
++    @staticmethod
++    def start_select_device_reservations(db, parameters=()):
++        return execute(
++            db, "SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id", parameters
++        )
++
++    @staticmethod
++    def accept_insert_model_references(db, parameters=(), *, engine_args):
++        return execute(
++            db,
++            "INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)"
++            if not engine_args
++            else "INSERT OR IGNORE INTO model_engine_references VALUES (?,?,?,?,?)",
++            parameters,
++        )
++
++    @staticmethod
++    def accept_insert_model_qualifications(db, parameters=(), *, engine_args):
++        return execute(
++            db,
++            "INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)"
++            if not engine_args
++            else "INSERT OR REPLACE INTO model_engine_qualifications VALUES (?,?,?,?,?,?,?)",
++            parameters,
++        )
+diff --git a/backend/repositories/study_registry.py b/backend/repositories/study_registry.py
+new file mode 100644
+index 00000000..65350d97
+--- /dev/null
++++ b/backend/repositories/study_registry.py
+@@ -0,0 +1,41 @@
++"""Study_Registry SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class StudyRegistryRepository:
++    @staticmethod
++    def set_dataset_limits_insert_settings(db, parameters=()):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('datasetLimits', ?)", parameters)
++
++    @staticmethod
++    def upload_plan_insert_study_uploads(db, parameters=()):
++        return execute(db, "INSERT INTO study_uploads VALUES (?,?,?,?,?,?)", parameters)
++
++    @staticmethod
++    def publish_update_study_assets(db, parameters=()):
++        return execute(db, "UPDATE study_assets SET body=? WHERE id=?", parameters)
++
++    @staticmethod
++    def publish_select_study_uploads(db, parameters=()):
++        return execute(db, "SELECT * FROM study_uploads WHERE asset_id=? AND name=? ORDER BY rowid DESC", parameters)
++
++    @staticmethod
++    def transfer_select_assignments(db, parameters=()):
++        return execute(db, "SELECT * FROM assignments WHERE id=? AND epoch=? AND released=0", parameters)
++
++    @staticmethod
++    def dataset_limits_select_settings(db, parameters=()):
++        return execute(db, "SELECT value FROM settings WHERE key='datasetLimits'", parameters)
++
++    @staticmethod
++    def save_insert_study_assets(db, parameters=()):
++        return execute(db, "INSERT INTO study_assets VALUES (?,?,?,?,?)", parameters)
++
++    @staticmethod
++    def list_select_study_assets(db, parameters=()):
++        return execute(db, "SELECT body FROM study_assets WHERE workspace_id=? AND kind=? ORDER BY rowid", parameters)
++
++    @staticmethod
++    def get_select_study_assets(db, parameters=()):
++        return execute(db, "SELECT body FROM study_assets WHERE id=? AND workspace_id=? AND kind=?", parameters)
+diff --git a/backend/services/model_qualification.py b/backend/services/model_qualification.py
+new file mode 100644
+index 00000000..0d19c146
+--- /dev/null
++++ b/backend/services/model_qualification.py
+@@ -0,0 +1,355 @@
++"""Model_Qualification business operations; HTTP responses stay in api/."""
++
++from ..core.study_models import ProbeRequest
++import json
++import re
++import time
++import uuid
++from heteroes.canonical import canonical_json_hash
++from heteroes.product.model_qualification import STRICT_DECODER, check_reference, qualification_key, verify_observations
++from ..policies import has_device_reservation, noise_qualification
++from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
++from heteroes.product.cpu_coordinator import coordinator_only
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.model_qualification import ModelQualificationRepository as repository
++from ..db.transactions import begin_write
++
++TERMINAL = {"COMPLETED", "FAILED", "CANCELLED"}
++
++
++def restore_mismatch(report):
++    if report.errorCode == "RESTORE_MISMATCH":
++        return True
++    observations = report.observations
++    if not isinstance(observations, dict):
++        return False
++    return any(
++        isinstance(row, dict)
++        and isinstance(row.get("parentSha256"), str)
++        and re.fullmatch("[a-f0-9]{64}", row["parentSha256"])
++        and isinstance(row.get("restoredSha256"), str)
++        and re.fullmatch("[a-f0-9]{64}", row["restoredSha256"])
++        and row["parentSha256"] != row["restoredSha256"]
++        for sign in ("1", "-1")
++        for row in (observations.get(sign) if isinstance(observations.get(sign), list) else [])
++    )
++
++
++class ModelQualifications:
++    def __init__(self, runtime):
++        self.runtime = runtime
++
++    @property
++    def store(self):
++        return self.runtime.store
++
++    def save(self, db, job):
++        repository.save_update_model_probe_jobs(db, (json.dumps(job, allow_nan=False), job["jobId"]))
++
++    def reference(self, db, workspace, manifest_hash, engine=ENGINE_VERSION):
++        if engine == ENGINE_VERSION:
++            return repository.reference_select_model_references(db, (workspace, manifest_hash)).fetchone()
++        return repository.reference_select_model_engine_references(db, (workspace, manifest_hash, engine)).fetchone()
++
++    def effective_profile(self, db, device, profile, workspace):
++        # Old immutable rows prove v1 only. New references have a separate engine key; neither rewrites the other.
++        by_engine = {k: list(v) for k, v in (profile.get("qualifiedModelsByNoiseEngine") or {}).items()}
++        baseline = by_engine.setdefault(profile.get("noiseVersion", ENGINE_VERSION), [])
++        for digest in profile.get("qualifiedModelHashes", []):
++            if digest not in baseline:
++                baseline.append(digest)
++        for table, engine_clause in (
++            ("model_qualifications", ""),
++            ("model_engine_qualifications", " AND r.engine=q.engine"),
++        ):
++            references = "model_references" if table == "model_qualifications" else "model_engine_references"
++            engine_column = "'" + ENGINE_VERSION + "'" if not engine_clause else "q.engine"
++            for row in repository.effective_profile_select_value(
++                db,
++                (device, workspace, canonical_json_hash(profile)),
++                engine_clause=engine_clause,
++                engine_column=engine_column,
++                references=references,
++                table=table,
++            ):
++                hashes = by_engine.setdefault(row[1], [])
++                if row[0] not in hashes:
++                    hashes.append(row[0])
++        return {
++            **profile,
++            "qualifiedModelHashes": sorted({h for values in by_engine.values() for h in values}),
++            "qualifiedModelsByNoiseEngine": by_engine,
++        }
++
++    def start(self, asset, device_id, current, engine=None, decoder=None):
++        with self.store.db() as db:
++            begin_write(db)
++            device = repository.start_select_devices(db, (device_id,)).fetchone()
++            allocation = (
++                repository.start_select_worker_assignments(db, (device["worker_id"],)).fetchone() if device else None
++            )
++            if not device or not allocation or allocation[0] != current["workspaceId"]:
++                raise ServiceError(404, "Device is not assigned to this workspace")
++            profile = json.loads(device["self_test"])
++            if (
++                asset.get("recipeVersion") != 3
++                or asset["status"] not in ("REGISTERED", "READY")
++                or device["status"] != "APPROVED"
++                or self.store.profile(device["owner"])["accountStatus"] != "ACTIVE"
++                or not profile.get("passed")
++                or profile.get("recipeVersions") != [3]
++                or coordinator_only(profile)
++            ):
++                raise ServiceError(409, "A ready v3 model and an approved v3 device are required")
++            if time.time() - device["seen"] >= 30 or not device["enabled"] or not device["desired"]:
++                raise ServiceError(409, "Reconnect the device and turn contribution ON")
++            engine = engine or profile.get("noiseVersion", ENGINE_VERSION)
++            if engine not in CPU_NOISE_FINGERPRINTS or noise_qualification(profile, engine):
++                raise ServiceError(409, "Update and self-test selected device for the run's noise engine")
++            resource = profile.get("gpuUUID")
++            if not resource or has_device_reservation(db, device_id, resource):
++                raise ServiceError(409, "Wait for confirmed physical GPU release")
++            # A legacy reservation without physical identity may be an alias of this device.
++            if any(
++                not json.loads(r[0]).get("gpuUUID") and not coordinator_only(json.loads(r[0]))
++                for r in repository.start_select_device_reservations(db, ())
++            ):
++                raise ServiceError(409, "Wait for legacy GPU ownership release")
++            self.runtime.require_command(db, device_id, "QUALIFY_MODEL")
++            self.runtime.require_command(db, device_id, "CANCEL_MODEL_QUALIFICATION")
++            # references and qualifications are keyed by engine, and by decoder for the strict identity only
++            key = qualification_key(engine, decoder)
++            reference = self.reference(db, current["workspaceId"], asset["manifestHash"], key)
++            if not reference:
++                for row in repository.start_select_model_probe_jobs(db, (current["workspaceId"],)):
++                    other = json.loads(row[0])
++                    if (
++                        other["manifestHash"] == asset["manifestHash"]
++                        and other["status"] not in TERMINAL
++                        and qualification_key(other.get("noiseEngineVersion", ENGINE_VERSION), other.get("decoder"))
++                        == key
++                    ):
++                        raise ServiceError(409, "Wait for the first device to establish the model reference")
++            job = {
++                "jobId": uuid.uuid4().hex,
++                "deviceId": device_id,
++                "assetId": asset["id"],
++                "workspaceId": current["workspaceId"],
++                "ownerUserId": current["userId"],
++                "manifestHash": asset["manifestHash"],
++                "noiseEngineVersion": engine,
++                **({"decoder": STRICT_DECODER} if key != engine else {}),
++                "manifest": asset["manifest"],
++                "source": asset["source"],
++                "profileHash": canonical_json_hash(profile),
++                "resourceId": resource,
++                "mode": "COMPARE_REFERENCE" if reference else "BUILD_REFERENCE",
++                "reference": json.loads(reference["body"]) if reference else None,
++                "status": "PREPARING",
++                "cancelRequested": False,
++                "errorCode": None,
++                "createdAt": time.time(),
++            }
++            repository.start_insert_model_probe_jobs(
++                db, (job["jobId"], job["workspaceId"], asset["id"], device_id, json.dumps(job))
++            )
++            repository.start_insert_model_probe_reservations(db, (job["jobId"], device_id, resource))
++            self.runtime.enqueue(
++                db,
++                device_id,
++                "QUALIFY_MODEL",
++                {
++                    k: job[k]
++                    for k in ("jobId", "mode", "manifest", "source", "reference", "noiseEngineVersion", "decoder")
++                    if k in job
++                },
++                "model-probe:" + job["jobId"],
++            )
++            self.store.audit(db, current["userId"], "MODEL_QUALIFICATION_REQUESTED", job["jobId"], job["workspaceId"])
++        return self.public(job)
++
++    @staticmethod
++    def public(job):
++        return {
++            k: job[k]
++            for k in ("jobId", "deviceId", "assetId", "ownerUserId", "mode", "status", "errorCode", "createdAt")
++        } | {
++            "chunkMemory": job.get("chunkMemory"),
++            "noiseEngineVersion": job.get("noiseEngineVersion", ENGINE_VERSION),
++            "decoder": job.get("decoder", "hf_generate"),
++        }
++
++    def cancel(self, db, job):
++        if job["status"] in TERMINAL:
++            return
++        job.update(cancelRequested=True, status="CANCELLING")
++        self.save(db, job)
++        self.runtime.enqueue(
++            db,
++            job["deviceId"],
++            "CANCEL_MODEL_QUALIFICATION",
++            {"jobId": job["jobId"]},
++            "cancel-model-probe:" + job["jobId"],
++        )
++
++    def accept(self, db, device, reports):
++        # Approval, workspace and boot opt-in can change while a probe is running. Cancellation never releases ownership.
++        current = repository.accept_select_devices(db, (device["id"],)).fetchone()
++        allocation = repository.accept_select_worker_assignments(db, (current["worker_id"],)).fetchone()
++        for row in repository.accept_select_model_probe_jobs(db, (device["id"],)).fetchall():
++            job = json.loads(row[0])
++            if (
++                current["status"] != "APPROVED"
++                or not current["desired"]
++                or not current["enabled"]
++                or not allocation
++                or allocation[0] != job["workspaceId"]
++                or self.store.profile(current["owner"])["accountStatus"] != "ACTIVE"
++            ):
++                self.cancel(db, job)
++        accepted = []
++        for report in reports:
++            encoded = report.model_dump()
++            if len(json.dumps(encoded, allow_nan=False).encode()) > 250_000:
++                raise ServiceError(413, "Model qualification report is too large")
++            row = repository.accept_select_model_probe_jobs_2(db, (report.jobId, device["id"])).fetchone()
++            if not row:
++                continue
++            job = json.loads(row[0])
++            accepted.append(report.jobId)
++            if job["status"] in TERMINAL:
++                continue
++            restore_failed = restore_mismatch(report)
++            if restore_failed:
++                repository.accept_update_devices(db, (device["id"],))
++                self.store.cancel_selected(db, current["worker_id"])
++                self.store.audit(db, "system", "DEVICE_RESTORE_MISMATCH", device["id"], job["workspaceId"])
++            if report.processAlive is not False:
++                job["status"] = (
++                    "CANCELLING"
++                    if job["cancelRequested"]
++                    else ("DRAINING" if report.status in TERMINAL else report.status)
++                )
++                self.save(db, job)
++                continue
++            if restore_failed:
++                job.update(status="FAILED", errorCode="RESTORE_MISMATCH")
++            elif job["cancelRequested"] or report.status == "CANCELLED":
++                job.update(status="CANCELLED", errorCode=None)
++            elif report.status != "COMPLETED":
++                job.update(status="FAILED", errorCode=report.errorCode or "MODEL_PROBE_FAILED")
++            else:
++                try:
++                    if canonical_json_hash(json.loads(current["self_test"])) != job["profileHash"]:
++                        raise ValueError("Native profile changed")
++                    reference = report.reference if job["mode"] == "BUILD_REFERENCE" else job["reference"]
++                    check_reference(reference, job["manifest"])
++                    engine = qualification_key(job.get("noiseEngineVersion", ENGINE_VERSION), job.get("decoder"))
++                    recipe = reference["cell"]["recipe"]
++                    if qualification_key(recipe["noise"]["engine"], recipe["evaluation"]["decoder"]) != engine:
++                        raise ValueError("Model reference noise engine or decoder differs")
++                    evidence = verify_observations(reference, report.observations)
++                    reference_hash = canonical_json_hash(reference)
++                    old = self.reference(db, job["workspaceId"], job["manifestHash"], engine)
++                    if old and old["reference_hash"] != reference_hash:
++                        raise ValueError("Frozen reference changed")
++                    engine_args = () if engine == ENGINE_VERSION else (engine,)
++                    repository.accept_insert_model_references(
++                        db,
++                        (job["workspaceId"], job["manifestHash"], reference_hash, json.dumps(reference), *engine_args),
++                        engine_args=engine_args,
++                    )
++                    repository.accept_insert_model_qualifications(
++                        db,
++                        (
++                            device["id"],
++                            job["workspaceId"],
++                            job["manifestHash"],
++                            job["profileHash"],
++                            reference_hash,
++                            json.dumps(evidence),
++                            *engine_args,
++                        ),
++                        engine_args=engine_args,
++                    )
++                    job.update(status="COMPLETED", errorCode=None, chunkMemory=checked_memory(report.chunkMemory))
++                except (ValueError, TypeError, KeyError):
++                    job.update(status="FAILED", errorCode="MODEL_QUALIFICATION_MISMATCH")
++            repository.accept_delete_model_probe_reservations(db, (job["jobId"],))
++            self.save(db, job)
++            self.store.audit(db, "system", "MODEL_QUALIFICATION_" + job["status"], job["jobId"], job["workspaceId"])
++        return accepted
++
++
++def checked_memory(value):
++    """A device's chunk measurement as the lab keeps it; anything else is dropped (the qualification stands)."""
++    from heteroes.product.chunk_memory import check
++
++    try:
++        return None if value is None else check(value)
++    except ValueError:
++        return None
++
++
++def operations(registry, runtime, scoped, device_auth):
++    service = runtime.qualifications
++
++    def start(asset_id: str, body: ProbeRequest, *, current):
++        return service.start(
++            registry.get(asset_id, current["workspaceId"], "model"),
++            body.deviceId,
++            current,
++            body.noiseEngineVersion,
++            body.decoder,
++        )
++
++    def status(asset_id: str, *, current):
++        asset = registry.get(asset_id, current["workspaceId"], "model")
++        with registry.store.db() as db:
++            reference = service.reference(db, current["workspaceId"], asset["manifestHash"])
++            return {
++                "referenceHash": reference["reference_hash"] if reference else None,
++                "referenceHashesByNoiseEngine": {
++                    key: row["reference_hash"]
++                    for engine in CPU_NOISE_FINGERPRINTS
++                    for key in (engine, qualification_key(engine, STRICT_DECODER))
++                    if (row := service.reference(db, current["workspaceId"], asset["manifestHash"], key))
++                },
++                "jobs": [
++                    service.public(json.loads(r[0])) for r in repository.status_select_model_probe_jobs(db, (asset_id,))
++                ],
++            }
++
++    def cancel(asset_id: str, job_id: str, *, current):
++        registry.get(asset_id, current["workspaceId"], "model")
++        with registry.store.db() as db:
++            row = repository.cancel_select_model_probe_jobs(db, (job_id, asset_id)).fetchone()
++            if not row:
++                raise ServiceError(404, "Model qualification not found")
++            job = json.loads(row[0])
++            if current["workspaceRole"] != "ADMIN" and current["userId"] != job["ownerUserId"]:
++                raise ServiceError(403, "Only the requester or workspace admin may cancel this probe")
++            service.cancel(db, job)
++            return service.public(job)
++
++    def transfer(body: dict, *, current):
++        with registry.store.db() as db:
++            row = repository.transfer_select_model_probe_jobs(db, (body.get("jobId"), current["id"])).fetchone()
++            if not row:
++                raise ServiceError(403, "Model probe is stale or not owned by this device")
++            job = json.loads(row[0])
++            if (
++                job["cancelRequested"]
++                or job["source"] != "UPLOAD"
++                or current["status"] != "APPROVED"
++                or not current["desired"]
++                or body.get("sha256") not in job["manifest"]["files"].values()
++            ):
++                raise ServiceError(403, "File is outside the active model probe")
++            if runtime.storage_backend is None:
++                raise ServiceError(409, "Configure local artifact storage first")
++            sha = body["sha256"]
++            return {"url": runtime.storage_backend.download_url("objects/" + sha), "sha256": sha}
++
++    return SimpleNamespace(start=start, status=status, cancel=cancel, transfer=transfer)
+diff --git a/backend/services/study_registry.py b/backend/services/study_registry.py
+new file mode 100644
+index 00000000..97368209
+--- /dev/null
++++ b/backend/services/study_registry.py
+@@ -0,0 +1,320 @@
++"""Study_Registry business operations; HTTP responses stay in api/."""
++
++from ..core.study_models import ImportData, DatasetUpload, DatasetBuild, DatasetLimits, RegisterModel
++from ..db.migrations import initialize_study_schema
++import hashlib
++import json
++from pathlib import Path
++import uuid
++from heteroes.study.data import dataset, canonical
++from heteroes.study.models import validate as validate_model
++from heteroes.v3 import data as v3data
++from ..policies import platform_profile
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.study_registry import StudyRegistryRepository as repository
++
++
++def dataset_limits(store):
++    """The platform's limits for one dataset file (owner default 2026-10-20: 1 GB and 10 million rows)."""
++    with store.db() as db:
++        row = repository.dataset_limits_select_settings(db, ()).fetchone()
++    return (
++        json.loads(row[0]) if row else {"maxBytes": v3data.DEFAULT_MAX_BYTES, "maxRows": v3data.DEFAULT_MAX_FILE_ROWS}
++    )
++
++
++class Registry:
++    def __init__(self, store):
++        self.store = store
++        with store.db() as db:
++            initialize_study_schema(db)
++
++    def list(self, workspace, kind):
++        with self.store.db() as db:
++            return [json.loads(r[0]) for r in repository.list_select_study_assets(db, (workspace, kind))]
++
++    def get(self, asset_id, workspace, kind):
++        with self.store.db() as db:
++            row = repository.get_select_study_assets(db, (asset_id, workspace, kind)).fetchone()
++        if not row:
++            raise ServiceError(404, "Workspace asset not found")
++        return json.loads(row[0])
++
++    def save(self, body, workspace, owner, kind):
++        with self.store.db() as db:
++            repository.save_insert_study_assets(db, (body["id"], workspace, owner, kind, json.dumps(body)))
++            self.store.audit(db, owner, "REGISTER_" + kind.upper(), body["id"], workspace)
++        return body
++
++
++def operations(registry, runtime, scoped, device_auth):
++    def backend():
++        if runtime.storage_backend is None:
++            raise ServiceError(409, "Configure local artifact storage first")
++        return runtime.storage_backend
++
++    def import_data(body: ImportData, *, current):
++        try:
++            value = (
++                v3data.dataset(body.files, seed=body.splitSeed, mapping=body.mapping)
++                if body.recipeVersion == 3
++                else dataset(body.files, seed=body.splitSeed, mapping=body.mapping, adapter=body.adapter)
++            )
++        except (ValueError, KeyError, TypeError, UnicodeError):
++            raise ServiceError(422, "Invalid dataset format, mapping, exact answers or splits") from None
++        payload = canonical(value)
++        if len(payload) > 10_000_000:
++            raise ServiceError(422, "Dataset document exceeds 10 MB")
++        digest = hashlib.sha256(payload).hexdigest()
++        store_backend = backend()
++        if hasattr(store_backend, "inventory") and store_backend.inventory() + len(payload) > getattr(
++            store_backend, "quota_bytes", 200_000_000_000
++        ):
++            raise ServiceError(507, "Artifact quota exceeded")
++        store_backend.put("objects/" + digest, payload)
++        result = {
++            "id": uuid.uuid4().hex,
++            "datasetId": None,
++            "name": body.name,
++            "workspaceId": current["workspaceId"],
++            "ownerUserId": current["userId"],
++            "status": "READY",
++            "objectSha256": digest,
++            "identity": {k: value[k] for k in ("contentHash", "splitHashes")},
++            "counts": {k: len(v) for k, v in value["splits"].items()},
++            "splitSeed": value["splitSeed"],
++            "splitMode": value["splitMode"],
++            "adapter": value.get("adapter"),
++            "recipeVersion": body.recipeVersion,
++            "columns": sorted(set.intersection(*(set(row) for rows in value["splits"].values() for row in rows))),
++        }
++        result["datasetId"] = result["id"]
++        return registry.save(result, current["workspaceId"], current["userId"], "dataset")
++
++    def get_dataset_limits(*, current):
++        return dataset_limits(registry.store)
++
++    def set_dataset_limits(body: DatasetLimits, *, current):
++        platform_profile(current)
++        with registry.store.db() as db:
++            repository.set_dataset_limits_insert_settings(db, (json.dumps(body.model_dump()),))
++            registry.store.audit(db, current["userId"], "DATASET_LIMITS_CHANGED", json.dumps(body.model_dump()))
++        return body.model_dump()
++
++    def dataset_upload_plan(body: DatasetUpload, *, current):
++        limits = dataset_limits(registry.store)
++        names = set(body.files)
++        if names not in ({"all"}, set(v3data.SPLITS)) or any(
++            not isinstance(f, dict)
++            or set(f) != {"format", "sizeBytes"}
++            or f["format"] not in ("jsonl", "csv", "json")
++            or type(f["sizeBytes"]) is not int
++            or not 1 <= f["sizeBytes"] <= limits["maxBytes"]
++            for f in body.files.values()
++        ):
++            raise ServiceError(
++                422, f"Give one file or three splits (.jsonl, .csv or .json) of at most {limits['maxBytes']} bytes"
++            )
++        b = backend()
++        if hasattr(b, "inventory") and b.inventory() + 3 * sum(f["sizeBytes"] for f in body.files.values()) > getattr(
++            b, "quota_bytes", 200_000_000_000
++        ):
++            raise ServiceError(507, "Artifact quota exceeded")
++        upload_id = uuid.uuid4().hex
++        files, plans = {}, {}
++        for name, f in sorted(body.files.items()):
++            key = "uploads/" + hashlib.sha256(f"{upload_id}:{name}".encode()).hexdigest() + "/" + upload_id
++            files[name] = {**f, "key": key}
++            plans[name] = b.upload_plan(key, f["sizeBytes"], public_base=runtime.public_web_url())
++        record = {"id": upload_id, "name": body.name, "ownerUserId": current["userId"], "files": files}
++        registry.save(record, current["workspaceId"], current["userId"], "dataset-upload")
++        return {"uploadId": upload_id, "files": plans}
++
++    def build_uploaded_dataset(upload_id: str, body: DatasetBuild, *, current):
++        import shutil
++        import tempfile
++
++        upload = registry.get(upload_id, current["workspaceId"], "dataset-upload")
++        if upload["ownerUserId"] != current["userId"]:
++            raise ServiceError(403, "Only the uploader may build this dataset")
++        mapping = body.mapping or {"prompt": "prompt"}
++        if set(mapping) != {"prompt"} or not isinstance(mapping["prompt"], str) or not mapping["prompt"]:
++            raise ServiceError(422, "Map the prompt field; the scorer selects its other columns")
++        limits, b = dataset_limits(registry.store), backend()
++        work = Path(tempfile.mkdtemp(prefix=".dataset-build-", dir=b.root))
++        try:
++            sources = {}
++            for name, f in upload["files"].items():
++                source = work / f"source-{name}.{f['format']}"
++                try:
++                    with source.open("wb") as stream:
++                        for chunk in b.get(f["key"]):
++                            stream.write(chunk)
++                except FileNotFoundError:
++                    raise ServiceError(409, "Upload every file before building the dataset") from None
++                if source.stat().st_size != f["sizeBytes"]:
++                    raise ServiceError(409, "An uploaded file is incomplete")
++                sources[name] = (source, f["format"])
++            try:
++                document = v3data.build_file_dataset(
++                    sources,
++                    work / "out",
++                    split_seed=body.splitSeed,
++                    prompt_field=mapping["prompt"],
++                    max_bytes=limits["maxBytes"],
++                    max_rows=limits["maxRows"],
++                )
++                columns = v3data.common_columns(v3data.open_dataset(work / "out" / "dataset.json"))
++            except (ValueError, KeyError, TypeError, UnicodeError) as error:
++                raise ServiceError(422, f"Invalid dataset: {error}") from None
++            for sha in v3data.split_files(document):
++                b.put_file("objects/" + sha, work / "out" / f"{sha}.jsonl", sha)
++            payload = canonical(document)
++            digest = hashlib.sha256(payload).hexdigest()
++            b.put("objects/" + digest, payload)
++        finally:
++            shutil.rmtree(work, ignore_errors=True)
++        for f in upload["files"].values():
++            b.delete(f["key"])
++        result = {
++            "id": uuid.uuid4().hex,
++            "datasetId": None,
++            "name": upload["name"],
++            "workspaceId": current["workspaceId"],
++            "ownerUserId": current["userId"],
++            "status": "READY",
++            "objectSha256": digest,
++            "identity": {k: document[k] for k in ("contentHash", "splitHashes")},
++            "counts": document["splitCounts"],
++            "splitSeed": document["splitSeed"],
++            "splitMode": document["splitMode"],
++            "adapter": None,
++            "recipeVersion": 3,
++            "formatVersion": v3data.FILE_FORMAT_VERSION,
++            "splitObjects": sorted(v3data.split_files(document)),
++            "sizeBytes": sum(document["splitBytes"].values()),
++            "columns": columns,
++        }
++        result["datasetId"] = result["id"]
++        return registry.save(result, current["workspaceId"], current["userId"], "dataset")
++
++    def register_model(body: RegisterModel, *, current):
++        try:
++            validate_model(body.manifest, allow_any=body.recipeVersion == 3)
++        except (ValueError, TypeError, KeyError):
++            raise ServiceError(422, "Use a supported text model with pinned safetensors files") from None
++        if body.source not in ("REFERENCE", "UPLOAD"):
++            raise ServiceError(422, "Use REFERENCE or UPLOAD")
++        model_id = uuid.uuid4().hex
++        result = {
++            "id": model_id,
++            "modelArtifactId": model_id,
++            "name": body.name,
++            "workspaceId": current["workspaceId"],
++            "ownerUserId": current["userId"],
++            "reference": body.manifest["modelId"],
++            "recipeVersion": body.recipeVersion,
++            "revision": body.manifest["revision"],
++            "manifest": body.manifest,
++            "source": body.source,
++            "status": "REGISTERED" if body.source == "REFERENCE" else "AWAITING_FILES",
++            "manifestHash": hashlib.sha256(canonical(body.manifest)).hexdigest(),
++        }
++        return registry.save(result, current["workspaceId"], current["userId"], "model")
++
++    def upload_plan(asset_id: str, sizes: dict, *, current):
++        asset = registry.get(asset_id, current["workspaceId"], "model")
++        if asset["ownerUserId"] != current["userId"] or asset["source"] != "UPLOAD":
++            raise ServiceError(403, "Only the uploader may publish this model")
++        expected = asset["manifest"]["files"]
++        if set(sizes) != set(expected) or any(
++            type(n) is not int or not 1 <= n <= 5_000_000_000 for n in sizes.values()
++        ):
++            raise ServiceError(422, "Provide the exact pinned file sizes")
++        b = backend()
++        if hasattr(b, "inventory") and b.inventory() + sum(sizes.values()) > getattr(b, "quota_bytes", 200_000_000_000):
++            raise ServiceError(507, "Artifact quota exceeded")
++        result = {}
++        with registry.store.db() as db:
++            for name, size in sizes.items():
++                identity = uuid.uuid4().hex
++                key = "uploads/" + expected[name] + "/" + identity
++                repository.upload_plan_insert_study_uploads(db, (identity, asset_id, name, expected[name], key, size))
++                result[name] = {"uploadId": identity, **b.upload_plan(key, size)}
++        return result
++
++    def publish(asset_id: str, *, current):
++        asset = registry.get(asset_id, current["workspaceId"], "model")
++        if asset["ownerUserId"] != current["userId"] or asset["source"] != "UPLOAD":
++            raise ServiceError(403, "Only the uploader may publish this model")
++        b = backend()
++        with registry.store.db() as db:
++            for name, sha in asset["manifest"]["files"].items():
++                try:
++                    hasher = hashlib.sha256()
++                    for chunk in b.get("objects/" + sha):
++                        hasher.update(chunk)
++                    if hasher.hexdigest() == sha:
++                        continue
++                except FileNotFoundError:
++                    pass
++                uploaded = False
++                for row in repository.publish_select_study_uploads(db, (asset_id, name)):
++                    try:
++                        etag, chunks = b.read_version(row["upload_key"])
++                        hasher = hashlib.sha256()
++                        length = 0
++                        for chunk in chunks:
++                            hasher.update(chunk)
++                            length += len(chunk)
++                        if hasher.hexdigest() != sha or length != row["size"]:
++                            continue
++                        b.publish_upload(row["upload_key"], "objects/" + sha, etag)
++                        uploaded = True
++                        break
++                    except (FileNotFoundError, ValueError):
++                        continue
++                if not uploaded:
++                    raise ServiceError(409, "A pinned file is missing, incomplete or has the wrong checksum")
++            asset["status"] = "READY"
++            repository.publish_update_study_assets(db, (json.dumps(asset), asset_id))
++        return asset
++
++    def transfer(body: dict, *, current):
++        # Fresh grants are issued only to an active member of this frozen epoch.
++        with registry.store.db() as db:
++            row = repository.transfer_select_assignments(db, (body.get("assignmentId"), body.get("epoch"))).fetchone()
++            if not row:
++                raise ServiceError(403, "Assignment is stale or released")
++            ar = json.loads(row["body"])
++            if current["id"] not in ar["deviceIds"]:
++                raise ServiceError(403, "Device is not selected")
++            config = ar["config"]
++            datasets = {config.get("datasetObjectSha256"), *config.get("datasetSplitObjects", [])}
++            allowed = set(datasets)
++            if config.get("modelSource") == "UPLOAD":
++                allowed.update(config["modelManifest"]["files"].values())
++            sha = body.get("sha256")
++            if sha not in allowed or not isinstance(sha, str):
++                raise ServiceError(403, "Object is outside the frozen assignment")
++        grant = {"url": backend().download_url("objects/" + sha), "sha256": sha}
++        public = runtime.public_web_url()
++        if public and sha in datasets:
++            # for a device that cannot reach the private route (no Tailscale): small dataset files only
++            if url := backend().public_study_url(public, "objects/" + sha):
++                grant["publicUrl"] = url
++        return grant
++
++    return SimpleNamespace(
++        backend=backend,
++        import_data=import_data,
++        get_dataset_limits=get_dataset_limits,
++        set_dataset_limits=set_dataset_limits,
++        dataset_upload_plan=dataset_upload_plan,
++        build_uploaded_dataset=build_uploaded_dataset,
++        register_model=register_model,
++        upload_plan=upload_plan,
++        publish=publish,
++        transfer=transfer,
++    )
+diff --git a/backend/study_registry.py b/backend/study_registry.py
+index 16d9331c..83bfeb30 100644
+--- a/backend/study_registry.py
++++ b/backend/study_registry.py
+@@ -1,369 +1,12 @@
+-"""Workspace-scoped pinned models, immutable data and private transfer grants."""
+-
+-from .migrations import initialize_study_schema
+-import hashlib
+-import json
+-from pathlib import Path
+-import uuid
+-from fastapi import Depends, HTTPException
+-from pydantic import BaseModel, ConfigDict, Field
+-from heteroes.study.data import dataset, canonical
+-from heteroes.study.models import validate as validate_model
+-from heteroes.v3 import data as v3data
+-from .policies import platform_profile
+-
+-
+-class ImportData(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    recipeVersion: int = Field(default=2, ge=2, le=3, strict=True)
+-    name: str = Field(min_length=1, max_length=100)
+-    files: dict
+-    mapping: dict | None = None
+-    adapter: str = "exact-number-v1"
+-    splitSeed: int = Field(default=42, ge=0, lt=2**53, strict=True)
+-
+-
+-class DatasetUpload(BaseModel):
+-    """A large Recipe v3 dataset: one file or three named splits, uploaded with signed requests, then built."""
+-
+-    model_config = ConfigDict(extra="forbid")
+-    name: str = Field(min_length=1, max_length=100)
+-    files: dict
+-
+-
+-class DatasetBuild(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    mapping: dict | None = None
+-    splitSeed: int = Field(default=42, ge=0, lt=2**53, strict=True)
+-
+-
+-class DatasetLimits(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    maxBytes: int = Field(ge=1_000_000, le=50_000_000_000, strict=True)
+-    maxRows: int = Field(ge=1_000, le=1_000_000_000, strict=True)
+-
+-
+-def dataset_limits(store):
+-    """The platform's limits for one dataset file (owner default 2026-10-20: 1 GB and 10 million rows)."""
+-    with store.db() as db:
+-        row = db.execute("SELECT value FROM settings WHERE key='datasetLimits'").fetchone()
+-    return (
+-        json.loads(row[0]) if row else {"maxBytes": v3data.DEFAULT_MAX_BYTES, "maxRows": v3data.DEFAULT_MAX_FILE_ROWS}
+-    )
+-
+-
+-class RegisterModel(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    recipeVersion: int = Field(default=2, ge=2, le=3, strict=True)
+-    name: str = Field(min_length=1, max_length=100)
+-    manifest: dict
+-    source: str = "REFERENCE"
+-
+-
+-class Registry:
+-    def __init__(self, store):
+-        self.store = store
+-        with store.db() as db:
+-            initialize_study_schema(db)
+-
+-    def list(self, workspace, kind):
+-        with self.store.db() as db:
+-            return [
+-                json.loads(r[0])
+-                for r in db.execute(
+-                    "SELECT body FROM study_assets WHERE workspace_id=? AND kind=? ORDER BY rowid", (workspace, kind)
+-                )
+-            ]
+-
+-    def get(self, asset_id, workspace, kind):
+-        with self.store.db() as db:
+-            row = db.execute(
+-                "SELECT body FROM study_assets WHERE id=? AND workspace_id=? AND kind=?", (asset_id, workspace, kind)
+-            ).fetchone()
+-        if not row:
+-            raise HTTPException(404, "Workspace asset not found")
+-        return json.loads(row[0])
+-
+-    def save(self, body, workspace, owner, kind):
+-        with self.store.db() as db:
+-            db.execute(
+-                "INSERT INTO study_assets VALUES (?,?,?,?,?)", (body["id"], workspace, owner, kind, json.dumps(body))
+-            )
+-            self.store.audit(db, owner, "REGISTER_" + kind.upper(), body["id"], workspace)
+-        return body
+-
+-
+-def install_routes(app, registry, runtime, scoped, device_auth):
+-    def backend():
+-        if runtime.storage_backend is None:
+-            raise HTTPException(409, "Configure local artifact storage first")
+-        return runtime.storage_backend
+-
+-    @app.post("/api/v1/datasets/import", status_code=201)
+-    def import_data(body: ImportData, current=Depends(scoped)):
+-        try:
+-            value = (
+-                v3data.dataset(body.files, seed=body.splitSeed, mapping=body.mapping)
+-                if body.recipeVersion == 3
+-                else dataset(body.files, seed=body.splitSeed, mapping=body.mapping, adapter=body.adapter)
+-            )
+-        except (ValueError, KeyError, TypeError, UnicodeError):
+-            raise HTTPException(422, "Invalid dataset format, mapping, exact answers or splits") from None
+-        payload = canonical(value)
+-        if len(payload) > 10_000_000:
+-            raise HTTPException(422, "Dataset document exceeds 10 MB")
+-        digest = hashlib.sha256(payload).hexdigest()
+-        store_backend = backend()
+-        if hasattr(store_backend, "inventory") and store_backend.inventory() + len(payload) > getattr(
+-            store_backend, "quota_bytes", 200_000_000_000
+-        ):
+-            raise HTTPException(507, "Artifact quota exceeded")
+-        store_backend.put("objects/" + digest, payload)
+-        result = {
+-            "id": uuid.uuid4().hex,
+-            "datasetId": None,
+-            "name": body.name,
+-            "workspaceId": current["workspaceId"],
+-            "ownerUserId": current["userId"],
+-            "status": "READY",
+-            "objectSha256": digest,
+-            "identity": {k: value[k] for k in ("contentHash", "splitHashes")},
+-            "counts": {k: len(v) for k, v in value["splits"].items()},
+-            "splitSeed": value["splitSeed"],
+-            "splitMode": value["splitMode"],
+-            "adapter": value.get("adapter"),
+-            "recipeVersion": body.recipeVersion,
+-            "columns": sorted(set.intersection(*(set(row) for rows in value["splits"].values() for row in rows))),
+-        }
+-        result["datasetId"] = result["id"]
+-        return registry.save(result, current["workspaceId"], current["userId"], "dataset")
+-
+-    @app.get("/api/v1/platform/dataset-limits")
+-    def get_dataset_limits(current=Depends(scoped)):
+-        return dataset_limits(registry.store)
+-
+-    @app.put("/api/v1/platform/dataset-limits")
+-    def set_dataset_limits(body: DatasetLimits, current=Depends(scoped)):
+-        platform_profile(current)
+-        with registry.store.db() as db:
+-            db.execute("INSERT OR REPLACE INTO settings VALUES ('datasetLimits', ?)", (json.dumps(body.model_dump()),))
+-            registry.store.audit(db, current["userId"], "DATASET_LIMITS_CHANGED", json.dumps(body.model_dump()))
+-        return body.model_dump()
+-
+-    @app.post("/api/v1/datasets/upload-plan", status_code=201)
+-    def dataset_upload_plan(body: DatasetUpload, current=Depends(scoped)):
+-        limits = dataset_limits(registry.store)
+-        names = set(body.files)
+-        if names not in ({"all"}, set(v3data.SPLITS)) or any(
+-            not isinstance(f, dict)
+-            or set(f) != {"format", "sizeBytes"}
+-            or f["format"] not in ("jsonl", "csv", "json")
+-            or type(f["sizeBytes"]) is not int
+-            or not 1 <= f["sizeBytes"] <= limits["maxBytes"]
+-            for f in body.files.values()
+-        ):
+-            raise HTTPException(
+-                422, f"Give one file or three splits (.jsonl, .csv or .json) of at most {limits['maxBytes']} bytes"
+-            )
+-        b = backend()
+-        if hasattr(b, "inventory") and b.inventory() + 3 * sum(f["sizeBytes"] for f in body.files.values()) > getattr(
+-            b, "quota_bytes", 200_000_000_000
+-        ):
+-            raise HTTPException(507, "Artifact quota exceeded")
+-        upload_id = uuid.uuid4().hex
+-        files, plans = {}, {}
+-        for name, f in sorted(body.files.items()):
+-            key = "uploads/" + hashlib.sha256(f"{upload_id}:{name}".encode()).hexdigest() + "/" + upload_id
+-            files[name] = {**f, "key": key}
+-            plans[name] = b.upload_plan(key, f["sizeBytes"], public_base=runtime.public_web_url())
+-        record = {"id": upload_id, "name": body.name, "ownerUserId": current["userId"], "files": files}
+-        registry.save(record, current["workspaceId"], current["userId"], "dataset-upload")
+-        return {"uploadId": upload_id, "files": plans}
+-
+-    @app.post("/api/v1/datasets/uploads/{upload_id}/build", status_code=201)
+-    def build_uploaded_dataset(upload_id: str, body: DatasetBuild, current=Depends(scoped)):
+-        import shutil
+-        import tempfile
+-
+-        upload = registry.get(upload_id, current["workspaceId"], "dataset-upload")
+-        if upload["ownerUserId"] != current["userId"]:
+-            raise HTTPException(403, "Only the uploader may build this dataset")
+-        mapping = body.mapping or {"prompt": "prompt"}
+-        if set(mapping) != {"prompt"} or not isinstance(mapping["prompt"], str) or not mapping["prompt"]:
+-            raise HTTPException(422, "Map the prompt field; the scorer selects its other columns")
+-        limits, b = dataset_limits(registry.store), backend()
+-        work = Path(tempfile.mkdtemp(prefix=".dataset-build-", dir=b.root))
+-        try:
+-            sources = {}
+-            for name, f in upload["files"].items():
+-                source = work / f"source-{name}.{f['format']}"
+-                try:
+-                    with source.open("wb") as stream:
+-                        for chunk in b.get(f["key"]):
+-                            stream.write(chunk)
+-                except FileNotFoundError:
+-                    raise HTTPException(409, "Upload every file before building the dataset") from None
+-                if source.stat().st_size != f["sizeBytes"]:
+-                    raise HTTPException(409, "An uploaded file is incomplete")
+-                sources[name] = (source, f["format"])
+-            try:
+-                document = v3data.build_file_dataset(
+-                    sources,
+-                    work / "out",
+-                    split_seed=body.splitSeed,
+-                    prompt_field=mapping["prompt"],
+-                    max_bytes=limits["maxBytes"],
+-                    max_rows=limits["maxRows"],
+-                )
+-                columns = v3data.common_columns(v3data.open_dataset(work / "out" / "dataset.json"))
+-            except (ValueError, KeyError, TypeError, UnicodeError) as error:
+-                raise HTTPException(422, f"Invalid dataset: {error}") from None
+-            for sha in v3data.split_files(document):
+-                b.put_file("objects/" + sha, work / "out" / f"{sha}.jsonl", sha)
+-            payload = canonical(document)
+-            digest = hashlib.sha256(payload).hexdigest()
+-            b.put("objects/" + digest, payload)
+-        finally:
+-            shutil.rmtree(work, ignore_errors=True)
+-        for f in upload["files"].values():
+-            b.delete(f["key"])
+-        result = {
+-            "id": uuid.uuid4().hex,
+-            "datasetId": None,
+-            "name": upload["name"],
+-            "workspaceId": current["workspaceId"],
+-            "ownerUserId": current["userId"],
+-            "status": "READY",
+-            "objectSha256": digest,
+-            "identity": {k: document[k] for k in ("contentHash", "splitHashes")},
+-            "counts": document["splitCounts"],
+-            "splitSeed": document["splitSeed"],
+-            "splitMode": document["splitMode"],
+-            "adapter": None,
+-            "recipeVersion": 3,
+-            "formatVersion": v3data.FILE_FORMAT_VERSION,
+-            "splitObjects": sorted(v3data.split_files(document)),
+-            "sizeBytes": sum(document["splitBytes"].values()),
+-            "columns": columns,
+-        }
+-        result["datasetId"] = result["id"]
+-        return registry.save(result, current["workspaceId"], current["userId"], "dataset")
+-
+-    @app.post("/api/v1/models/register", status_code=201)
+-    def register_model(body: RegisterModel, current=Depends(scoped)):
+-        try:
+-            validate_model(body.manifest, allow_any=body.recipeVersion == 3)
+-        except (ValueError, TypeError, KeyError):
+-            raise HTTPException(422, "Use a supported text model with pinned safetensors files") from None
+-        if body.source not in ("REFERENCE", "UPLOAD"):
+-            raise HTTPException(422, "Use REFERENCE or UPLOAD")
+-        model_id = uuid.uuid4().hex
+-        result = {
+-            "id": model_id,
+-            "modelArtifactId": model_id,
+-            "name": body.name,
+-            "workspaceId": current["workspaceId"],
+-            "ownerUserId": current["userId"],
+-            "reference": body.manifest["modelId"],
+-            "recipeVersion": body.recipeVersion,
+-            "revision": body.manifest["revision"],
+-            "manifest": body.manifest,
+-            "source": body.source,
+-            "status": "REGISTERED" if body.source == "REFERENCE" else "AWAITING_FILES",
+-            "manifestHash": hashlib.sha256(canonical(body.manifest)).hexdigest(),
+-        }
+-        return registry.save(result, current["workspaceId"], current["userId"], "model")
+-
+-    @app.post("/api/v1/models/{asset_id}/upload-plan")
+-    def upload_plan(asset_id: str, sizes: dict, current=Depends(scoped)):
+-        asset = registry.get(asset_id, current["workspaceId"], "model")
+-        if asset["ownerUserId"] != current["userId"] or asset["source"] != "UPLOAD":
+-            raise HTTPException(403, "Only the uploader may publish this model")
+-        expected = asset["manifest"]["files"]
+-        if set(sizes) != set(expected) or any(
+-            type(n) is not int or not 1 <= n <= 5_000_000_000 for n in sizes.values()
+-        ):
+-            raise HTTPException(422, "Provide the exact pinned file sizes")
+-        b = backend()
+-        if hasattr(b, "inventory") and b.inventory() + sum(sizes.values()) > getattr(b, "quota_bytes", 200_000_000_000):
+-            raise HTTPException(507, "Artifact quota exceeded")
+-        result = {}
+-        with registry.store.db() as db:
+-            for name, size in sizes.items():
+-                identity = uuid.uuid4().hex
+-                key = "uploads/" + expected[name] + "/" + identity
+-                db.execute(
+-                    "INSERT INTO study_uploads VALUES (?,?,?,?,?,?)",
+-                    (identity, asset_id, name, expected[name], key, size),
+-                )
+-                result[name] = {"uploadId": identity, **b.upload_plan(key, size)}
+-        return result
+-
+-    @app.post("/api/v1/models/{asset_id}/publish")
+-    def publish(asset_id: str, current=Depends(scoped)):
+-        asset = registry.get(asset_id, current["workspaceId"], "model")
+-        if asset["ownerUserId"] != current["userId"] or asset["source"] != "UPLOAD":
+-            raise HTTPException(403, "Only the uploader may publish this model")
+-        b = backend()
+-        with registry.store.db() as db:
+-            for name, sha in asset["manifest"]["files"].items():
+-                try:
+-                    hasher = hashlib.sha256()
+-                    for chunk in b.get("objects/" + sha):
+-                        hasher.update(chunk)
+-                    if hasher.hexdigest() == sha:
+-                        continue
+-                except FileNotFoundError:
+-                    pass
+-                uploaded = False
+-                for row in db.execute(
+-                    "SELECT * FROM study_uploads WHERE asset_id=? AND name=? ORDER BY rowid DESC", (asset_id, name)
+-                ):
+-                    try:
+-                        etag, chunks = b.read_version(row["upload_key"])
+-                        hasher = hashlib.sha256()
+-                        length = 0
+-                        for chunk in chunks:
+-                            hasher.update(chunk)
+-                            length += len(chunk)
+-                        if hasher.hexdigest() != sha or length != row["size"]:
+-                            continue
+-                        b.publish_upload(row["upload_key"], "objects/" + sha, etag)
+-                        uploaded = True
+-                        break
+-                    except (FileNotFoundError, ValueError):
+-                        continue
+-                if not uploaded:
+-                    raise HTTPException(409, "A pinned file is missing, incomplete or has the wrong checksum")
+-            asset["status"] = "READY"
+-            db.execute("UPDATE study_assets SET body=? WHERE id=?", (json.dumps(asset), asset_id))
+-        return asset
+-
+-    @app.post("/api/v1/device/study-transfer")
+-    def transfer(body: dict, current=Depends(device_auth)):
+-        # Fresh grants are issued only to an active member of this frozen epoch.
+-        with registry.store.db() as db:
+-            row = db.execute(
+-                "SELECT * FROM assignments WHERE id=? AND epoch=? AND released=0",
+-                (body.get("assignmentId"), body.get("epoch")),
+-            ).fetchone()
+-            if not row:
+-                raise HTTPException(403, "Assignment is stale or released")
+-            ar = json.loads(row["body"])
+-            if current["id"] not in ar["deviceIds"]:
+-                raise HTTPException(403, "Device is not selected")
+-            config = ar["config"]
+-            datasets = {config.get("datasetObjectSha256"), *config.get("datasetSplitObjects", [])}
+-            allowed = set(datasets)
+-            if config.get("modelSource") == "UPLOAD":
+-                allowed.update(config["modelManifest"]["files"].values())
+-            sha = body.get("sha256")
+-            if sha not in allowed or not isinstance(sha, str):
+-                raise HTTPException(403, "Object is outside the frozen assignment")
+-        grant = {"url": backend().download_url("objects/" + sha), "sha256": sha}
+-        public = runtime.public_web_url()
+-        if public and sha in datasets:
+-            # for a device that cannot reach the private route (no Tailscale): small dataset files only
+-            if url := backend().public_study_url(public, "objects/" + sha):
+-                grant["publicUrl"] = url
+-        return grant
++"""Compatibility exports during backend layer extraction."""
++
++from .api.study_registry import install_routes as install_routes
++from .services.study_registry import Registry as Registry, dataset_limits as dataset_limits
++from .services.study_registry import dataset as dataset
++from .core.study_models import (
++    ImportData as ImportData,
++    DatasetUpload as DatasetUpload,
++    DatasetBuild as DatasetBuild,
++    DatasetLimits as DatasetLimits,
++    RegisterModel as RegisterModel,
++)
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index e4645ede..99091ec6 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -67,6 +67,11 @@ def test_account_layer_boundaries():
+         "services/devices.py",
+         "services/device_state.py",
+         "services/scheduling.py",
++        "core/study_models.py",
++        "api/study_registry.py",
++        "services/study_registry.py",
++        "api/model_qualification.py",
++        "services/model_qualification.py",
+     ):
+         tree = ast.parse((backend / relative).read_text())
+         for node in ast.walk(tree):
+diff --git a/backend/tests/test_study_layers.py b/backend/tests/test_study_layers.py
+new file mode 100644
+index 00000000..ecd76413
+--- /dev/null
++++ b/backend/tests/test_study_layers.py
+@@ -0,0 +1,18 @@
++"""Study registry errors and scope stay independent of the HTTP layer."""
++
++import pytest
++
++from backend.core.errors import ServiceError
++from backend.study_registry import Registry
++
++
++def test_registry_lookup_preserves_workspace_scope_and_uses_plain_errors(lab):
++    _, store, _, _ = lab
++    registry = Registry(store)
++    asset = {"id": "study-layer-fixture", "name": "Private study fixture"}
++    registry.save(asset, "lab", "admin", "dataset")
++    assert registry.get(asset["id"], "lab", "dataset") == asset
++    for workspace, kind in (("another-workspace", "dataset"), ("lab", "model")):
++        with pytest.raises(ServiceError) as missing:
++            registry.get(asset["id"], workspace, kind)
++        assert missing.value.status_code == 404

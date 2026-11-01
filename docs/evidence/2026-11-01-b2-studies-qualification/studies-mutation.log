@@ -1,0 +1,18 @@
+control ok    | 83 passed, 1 warning in 10.53s
+killed       probe route drops the decoder | 6 failed, 77 passed, 1 warning in 10.67s
+killed       probe request accepts any decoder | 1 failed, 82 passed, 1 warning in 10.65s
+killed       reference lookup ignores the decoder | 6 failed, 77 passed, 1 warning in 10.62s
+killed       pending probe of the other decoder blocks | 1 failed, 82 passed, 1 warning in 10.67s
+killed       job forgets the strict decoder | 6 failed, 77 passed, 1 warning in 10.69s
+killed       command to the device drops the decoder | 1 failed, 82 passed, 1 warning in 10.33s
+killed       report is checked against the engine only | 5 failed, 78 passed, 1 warning in 10.30s
+killed       report recipe decoder is not compared | 5 failed, 78 passed, 1 warning in 10.24s
+killed       status omits the strict references | 1 failed, 82 passed, 1 warning in 10.28s
+killed       registry lookup ignores workspace | 1 failed, 82 passed, 1 warning in 10.27s
+killed       study transfer ignores frozen object membership | 2 failed, 81 passed, 1 warning in 10.33s
+killed       study transfer accepts another epoch | 2 failed, 81 passed, 1 warning in 10.28s
+killed       nonadmin may change dataset limits | 1 failed, 82 passed, 1 warning in 10.27s
+killed       restore mismatch leaves device approved | 2 failed, 81 passed, 1 warning in 10.26s
+killed       unknown or live probe releases GPU ownership | 2 failed, 81 passed, 1 warning in 10.27s
+
+15 of 15 mutants killed.

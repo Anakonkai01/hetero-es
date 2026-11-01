@@ -1,0 +1,35 @@
+{
+  "base": "96d662e7",
+  "classes": [
+    {
+      "class": "ImportData",
+      "module": "study_registry",
+      "AST": "identical"
+    },
+    {
+      "class": "DatasetUpload",
+      "module": "study_registry",
+      "AST": "identical"
+    },
+    {
+      "class": "DatasetBuild",
+      "module": "study_registry",
+      "AST": "identical"
+    },
+    {
+      "class": "DatasetLimits",
+      "module": "study_registry",
+      "AST": "identical"
+    },
+    {
+      "class": "RegisterModel",
+      "module": "study_registry",
+      "AST": "identical"
+    },
+    {
+      "class": "ProbeRequest",
+      "module": "model_qualification",
+      "AST": "identical"
+    }
+  ]
+}

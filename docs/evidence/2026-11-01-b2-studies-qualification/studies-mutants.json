@@ -1,0 +1,92 @@
+[
+  {
+    "name": "probe route drops the decoder",
+    "file": "backend/services/model_qualification.py",
+    "old": "            body.noiseEngineVersion,\n            body.decoder,\n",
+    "new": "            body.noiseEngineVersion,\n"
+  },
+  {
+    "name": "probe request accepts any decoder",
+    "file": "backend/core/study_models.py",
+    "old": "decoder: Literal[\"hf_generate\", STRICT_DECODER] | None = None",
+    "new": "decoder: str | None = None"
+  },
+  {
+    "name": "reference lookup ignores the decoder",
+    "file": "backend/services/model_qualification.py",
+    "old": "            key = qualification_key(engine, decoder)\n",
+    "new": "            key = qualification_key(engine)\n"
+  },
+  {
+    "name": "pending probe of the other decoder blocks",
+    "file": "backend/services/model_qualification.py",
+    "old": "qualification_key(other.get(\"noiseEngineVersion\", ENGINE_VERSION), other.get(\"decoder\"))",
+    "new": "qualification_key(other.get(\"noiseEngineVersion\", ENGINE_VERSION))"
+  },
+  {
+    "name": "job forgets the strict decoder",
+    "file": "backend/services/model_qualification.py",
+    "old": "                **({\"decoder\": STRICT_DECODER} if key != engine else {}),\n",
+    "new": ""
+  },
+  {
+    "name": "command to the device drops the decoder",
+    "file": "backend/services/model_qualification.py",
+    "old": "\"reference\", \"noiseEngineVersion\", \"decoder\")",
+    "new": "\"reference\", \"noiseEngineVersion\")"
+  },
+  {
+    "name": "report is checked against the engine only",
+    "file": "backend/services/model_qualification.py",
+    "old": "engine = qualification_key(job.get(\"noiseEngineVersion\", ENGINE_VERSION), job.get(\"decoder\"))",
+    "new": "engine = qualification_key(job.get(\"noiseEngineVersion\", ENGINE_VERSION))"
+  },
+  {
+    "name": "report recipe decoder is not compared",
+    "file": "backend/services/model_qualification.py",
+    "old": "qualification_key(recipe[\"noise\"][\"engine\"], recipe[\"evaluation\"][\"decoder\"]) != engine",
+    "new": "qualification_key(recipe[\"noise\"][\"engine\"]) != engine"
+  },
+  {
+    "name": "status omits the strict references",
+    "file": "backend/services/model_qualification.py",
+    "old": "for key in (engine, qualification_key(engine, STRICT_DECODER))",
+    "new": "for key in (engine,)"
+  },
+  {
+    "name": "registry lookup ignores workspace",
+    "file": "backend/repositories/study_registry.py",
+    "old": "WHERE id=? AND workspace_id=? AND kind=?",
+    "new": "WHERE id=? AND (workspace_id=? OR 1=1) AND kind=?"
+  },
+  {
+    "name": "study transfer ignores frozen object membership",
+    "file": "backend/services/study_registry.py",
+    "old": "if sha not in allowed or not isinstance(sha, str):",
+    "new": "if False:"
+  },
+  {
+    "name": "study transfer accepts another epoch",
+    "file": "backend/repositories/study_registry.py",
+    "old": "WHERE id=? AND epoch=? AND released=0",
+    "new": "WHERE id=? AND (epoch=? OR 1=1) AND released=0"
+  },
+  {
+    "name": "nonadmin may change dataset limits",
+    "file": "backend/services/study_registry.py",
+    "old": "platform_profile(current)",
+    "new": "pass"
+  },
+  {
+    "name": "restore mismatch leaves device approved",
+    "file": "backend/services/model_qualification.py",
+    "old": "restore_failed = restore_mismatch(report)",
+    "new": "restore_failed = False"
+  },
+  {
+    "name": "unknown or live probe releases GPU ownership",
+    "file": "backend/services/model_qualification.py",
+    "old": "if report.processAlive is not False:",
+    "new": "if False:"
+  }
+]

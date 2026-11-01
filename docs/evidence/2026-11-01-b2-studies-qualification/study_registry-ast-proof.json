@@ -1,0 +1,83 @@
+{
+  "domain": "study_registry",
+  "sqlCalls": 9,
+  "businessFunctions": 10,
+  "httpFunctions": 9,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "set_dataset_limits_insert_settings",
+      "scope": "set_dataset_limits",
+      "statement": "\"INSERT OR REPLACE INTO settings VALUES ('datasetLimits', ?)\"",
+      "dynamic": false,
+      "free": [],
+      "line": 122
+    },
+    {
+      "name": "upload_plan_insert_study_uploads",
+      "scope": "upload_plan",
+      "statement": "'INSERT INTO study_uploads VALUES (?,?,?,?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 268
+    },
+    {
+      "name": "publish_update_study_assets",
+      "scope": "publish",
+      "statement": "'UPDATE study_assets SET body=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 312
+    },
+    {
+      "name": "publish_select_study_uploads",
+      "scope": "publish",
+      "statement": "'SELECT * FROM study_uploads WHERE asset_id=? AND name=? ORDER BY rowid DESC'",
+      "dynamic": false,
+      "free": [],
+      "line": 292
+    },
+    {
+      "name": "transfer_select_assignments",
+      "scope": "transfer",
+      "statement": "'SELECT * FROM assignments WHERE id=? AND epoch=? AND released=0'",
+      "dynamic": false,
+      "free": [],
+      "line": 319
+    },
+    {
+      "name": "dataset_limits_select_settings",
+      "scope": "dataset_limits",
+      "statement": "\"SELECT value FROM settings WHERE key='datasetLimits'\"",
+      "dynamic": false,
+      "free": [],
+      "line": 28
+    },
+    {
+      "name": "save_insert_study_assets",
+      "scope": "save",
+      "statement": "'INSERT INTO study_assets VALUES (?,?,?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 62
+    },
+    {
+      "name": "list_select_study_assets",
+      "scope": "list",
+      "statement": "'SELECT body FROM study_assets WHERE workspace_id=? AND kind=? ORDER BY rowid'",
+      "dynamic": false,
+      "free": [],
+      "line": 46
+    },
+    {
+      "name": "get_select_study_assets",
+      "scope": "get",
+      "statement": "'SELECT body FROM study_assets WHERE id=? AND workspace_id=? AND kind=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 53
+    }
+  ]
+}
