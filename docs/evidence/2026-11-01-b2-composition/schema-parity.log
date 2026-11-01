@@ -1,0 +1,8 @@
+{
+  "baselineSha256": "518ebe4e661f7c9752862f8256e63265f0f5f2b62fa544b94f8b281098d8cd56",
+  "tables": 37,
+  "columns": 177,
+  "catalogColumnsIndexes": "byte-equivalent JSON values",
+  "result": "PASS",
+  "scope": "new isolated SQLite database; no live lab inspected"
+}

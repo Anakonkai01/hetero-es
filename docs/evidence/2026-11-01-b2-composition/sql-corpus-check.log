@@ -1,0 +1,9 @@
+{
+  "base": "6ee47147",
+  "oldCalls": 358,
+  "newDefinitions": 350,
+  "oldUnique": 278,
+  "newUnique": 278,
+  "scope": "AST-equal SQL expressions; excludes generic repository forwarding; does not prove PostgreSQL portability or parameter/transaction behavior"
+}
+removed expressions: 0 added: 0 multiplicity changes: 2

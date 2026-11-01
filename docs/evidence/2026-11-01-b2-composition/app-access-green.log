@@ -1,0 +1,186 @@
+.........FFF.FEEEEEEEFFFF..............F....F.E.EE                       [100%]
+==================================== ERRORS ====================================
+____ ERROR at setup of test_the_timeline_endpoint_describes_a_recorded_run _____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ ERROR at setup of test_a_member_of_another_workspace_cannot_see_the_timeline_or_the_stream _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+____ ERROR at setup of test_a_finished_run_streams_once_and_ends_over_http _____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ ERROR at setup of test_a_running_run_pushes_changes_and_heartbeats_but_never_repeats_itself _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+___ ERROR at setup of test_a_run_that_finishes_while_watched_ends_the_stream ___
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ ERROR at setup of test_too_many_viewers_are_refused_and_the_slot_is_freed_when_one_leaves _
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_____ ERROR at setup of test_a_stream_that_runs_too_long_is_ended_politely _____
+backend/tests/conftest.py:25: in setup
+    app = create_app(tmp_path / "product.sqlite", USERS, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ ERROR at setup of test_shared_authorization_uses_plain_errors_and_rechecks_durable_access _
+backend/tests/conftest.py:15: in lab
+    app = create_app(tmp_path / "lab.sqlite", {"admin": USERS["admin"]}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ ERROR at setup of test_explicit_resume_clears_the_hold_and_old_maintenance_flags _
+backend/tests/conftest.py:15: in lab
+    app = create_app(tmp_path / "lab.sqlite", {"admin": USERS["admin"]}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ ERROR at setup of test_resume_keeps_hold_when_imported_queued_workers_are_not_configured _
+backend/tests/conftest.py:15: in lab
+    app = create_app(tmp_path / "lab.sqlite", {"admin": USERS["admin"]}, runtime, dispatch=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+=================================== FAILURES ===================================
+_______ test_product_route_contract_matches_archived_pre_split_inventory _______
+backend/tests/test_route_contract.py:19: in test_product_route_contract_matches_archived_pre_split_inventory
+    app = create_app(
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+__ test_second_factory_for_same_database_is_rejected_and_shutdown_releases_it __
+backend/tests/test_writer_lock.py:36: in test_second_factory_for_same_database_is_rejected_and_shutdown_releases_it
+    with TestClient(app_from_environment()) as client:
+                    ^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:146: in app_from_environment
+    return _app_from_config(root, credentials, config, writer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:157: in _app_from_config
+    from ..api.devices import AgentRuntime
+E   ImportError: cannot import name 'AgentRuntime' from 'backend.api.devices' (/home/pc5070ti/projects/heteroes/backend/api/devices.py)
+_______________ test_factory_failure_releases_lock_before_retry ________________
+backend/tests/test_writer_lock.py:57: in test_factory_failure_releases_lock_before_retry
+    app_from_environment()
+backend/apps/factory.py:146: in app_from_environment
+    return _app_from_config(root, credentials, config, writer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:157: in _app_from_config
+    from ..api.devices import AgentRuntime
+E   ImportError: cannot import name 'AgentRuntime' from 'backend.api.devices' (/home/pc5070ti/projects/heteroes/backend/api/devices.py)
+__________ test_shutdown_keeps_lock_until_dispatcher_thread_finishes ___________
+backend/tests/test_writer_lock.py:86: in test_shutdown_keeps_lock_until_dispatcher_thread_finishes
+    app = app_from_environment()
+          ^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:146: in app_from_environment
+    return _app_from_config(root, credentials, config, writer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:157: in _app_from_config
+    from ..api.devices import AgentRuntime
+E   ImportError: cannot import name 'AgentRuntime' from 'backend.api.devices' (/home/pc5070ti/projects/heteroes/backend/api/devices.py)
+____________ test_same_origin_web_keeps_api_auth_and_unknown_paths _____________
+backend/tests/test_web.py:13: in test_same_origin_web_keeps_api_auth_and_unknown_paths
+    app = create_app(
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+___ test_installer_links_stay_private_behind_a_public_web_address_by_default ___
+backend/tests/test_web.py:70: in test_installer_links_stay_private_behind_a_public_web_address_by_default
+    with TestClient(installer_app(tmp_path, monkeypatch)) as client:
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_web.py:59: in installer_app
+    return create_app(
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ test_installer_links_use_the_public_origin_when_public_downloads_are_enabled _
+backend/tests/test_web.py:80: in test_installer_links_use_the_public_origin_when_public_downloads_are_enabled
+    with TestClient(installer_app(tmp_path, monkeypatch, publicDownloads=True)) as client:
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_web.py:59: in installer_app
+    return create_app(
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+_ test_installers_published_as_symlinks_into_another_disk_are_served_with_ranges _
+backend/tests/test_web.py:99: in test_installers_published_as_symlinks_into_another_disk_are_served_with_ranges
+    app = create_app(
+backend/apps/factory.py:112: in create_app
+    from ..services.study_registry import install_routes as study_routes
+E   ImportError: cannot import name 'install_routes' from 'backend.services.study_registry' (/home/pc5070ti/projects/heteroes/backend/services/study_registry.py)
+________ test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash _________
+backend/tests/test_server.py:29: in test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash
+    app = app_from_environment()
+          ^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:146: in app_from_environment
+    return _app_from_config(root, credentials, config, writer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:157: in _app_from_config
+    from ..api.devices import AgentRuntime
+E   ImportError: cannot import name 'AgentRuntime' from 'backend.api.devices' (/home/pc5070ti/projects/heteroes/backend/api/devices.py)
+________ test_agent_factory_keeps_r10_health_and_installs_device_routes ________
+backend/tests/test_agent_factory.py:55: in test_agent_factory_keeps_r10_health_and_installs_device_routes
+    app = app_from_environment()
+          ^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:146: in app_from_environment
+    return _app_from_config(root, credentials, config, writer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/factory.py:157: in _app_from_config
+    from ..api.devices import AgentRuntime
+E   ImportError: cannot import name 'AgentRuntime' from 'backend.api.devices' (/home/pc5070ti/projects/heteroes/backend/api/devices.py)
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_route_contract.py::test_product_route_contract_matches_archived_pre_split_inventory
+FAILED backend/tests/test_writer_lock.py::test_second_factory_for_same_database_is_rejected_and_shutdown_releases_it
+FAILED backend/tests/test_writer_lock.py::test_factory_failure_releases_lock_before_retry
+FAILED backend/tests/test_writer_lock.py::test_shutdown_keeps_lock_until_dispatcher_thread_finishes
+FAILED backend/tests/test_web.py::test_same_origin_web_keeps_api_auth_and_unknown_paths
+FAILED backend/tests/test_web.py::test_installer_links_stay_private_behind_a_public_web_address_by_default
+FAILED backend/tests/test_web.py::test_installer_links_use_the_public_origin_when_public_downloads_are_enabled
+FAILED backend/tests/test_web.py::test_installers_published_as_symlinks_into_another_disk_are_served_with_ranges
+FAILED backend/tests/test_server.py::test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash
+FAILED backend/tests/test_agent_factory.py::test_agent_factory_keeps_r10_health_and_installs_device_routes
+ERROR backend/tests/test_run_stream.py::test_the_timeline_endpoint_describes_a_recorded_run
+ERROR backend/tests/test_run_stream.py::test_a_member_of_another_workspace_cannot_see_the_timeline_or_the_stream
+ERROR backend/tests/test_run_stream.py::test_a_finished_run_streams_once_and_ends_over_http
+ERROR backend/tests/test_run_stream.py::test_a_running_run_pushes_changes_and_heartbeats_but_never_repeats_itself
+ERROR backend/tests/test_run_stream.py::test_a_run_that_finishes_while_watched_ends_the_stream
+ERROR backend/tests/test_run_stream.py::test_too_many_viewers_are_refused_and_the_slot_is_freed_when_one_leaves
+ERROR backend/tests/test_run_stream.py::test_a_stream_that_runs_too_long_is_ended_politely
+ERROR backend/tests/test_operations_layers.py::test_shared_authorization_uses_plain_errors_and_rechecks_durable_access
+ERROR backend/tests/test_operations_layers.py::test_explicit_resume_clears_the_hold_and_old_maintenance_flags
+ERROR backend/tests/test_operations_layers.py::test_resume_keeps_hold_when_imported_queued_workers_are_not_configured
+10 failed, 30 passed, 1 warning, 10 errors in 2.41s

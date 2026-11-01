@@ -1,0 +1,76 @@
+{
+  "base": "9817afb5",
+  "proof": [
+    {
+      "domain": "deployment",
+      "businessFunctionAST": "same except SQL/connection/driver-error forwarding",
+      "cliFunctionAST": null,
+      "sqlCalls": 1
+    },
+    {
+      "domain": "doctor",
+      "businessFunctionAST": "same except SQL/connection/driver-error forwarding",
+      "cliFunctionAST": "identical",
+      "sqlCalls": 6
+    },
+    {
+      "domain": "server",
+      "businessFunctionAST": "same except SQL/connection/driver-error forwarding",
+      "cliFunctionAST": "identical",
+      "sqlCalls": 1
+    }
+  ],
+  "queries": [
+    {
+      "domain": "deployment",
+      "name": "deployment_idle_1",
+      "statement": "f'SELECT count(*) FROM {table}'",
+      "free": [
+        "table"
+      ]
+    },
+    {
+      "domain": "doctor",
+      "name": "doctor_run_checks_2",
+      "statement": "\"SELECT 1 FROM sqlite_master WHERE name='devices'\"",
+      "free": []
+    },
+    {
+      "domain": "doctor",
+      "name": "doctor_run_checks_3",
+      "statement": "'PRAGMA user_version'",
+      "free": []
+    },
+    {
+      "domain": "doctor",
+      "name": "doctor_run_checks_4",
+      "statement": "\"SELECT 1 FROM sqlite_master WHERE name='physical_reservations'\"",
+      "free": []
+    },
+    {
+      "domain": "doctor",
+      "name": "doctor_run_checks_5",
+      "statement": "'SELECT status, seen FROM devices'",
+      "free": []
+    },
+    {
+      "domain": "doctor",
+      "name": "doctor_run_checks_6",
+      "statement": "'PRAGMA integrity_check'",
+      "free": []
+    },
+    {
+      "domain": "doctor",
+      "name": "doctor_run_checks_7",
+      "statement": "'SELECT count(*) FROM physical_reservations'",
+      "free": []
+    },
+    {
+      "domain": "server",
+      "name": "server_initialize_8",
+      "statement": "'INSERT OR REPLACE INTO settings VALUES (?,?)'",
+      "free": []
+    }
+  ],
+  "sqliteConnectionSemantics": "same sqlite3.connect arguments and original caller context-manager lifetime"
+}

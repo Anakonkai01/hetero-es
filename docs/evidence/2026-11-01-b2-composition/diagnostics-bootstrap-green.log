@@ -1,0 +1,222 @@
+.......F.FFFFFFFFFFF..................                                   [100%]
+=================================== FAILURES ===================================
+___ test_fresh_lab_has_no_failure_but_reports_the_held_queue_and_plain_http ____
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:36: in test_fresh_lab_has_no_failure_but_reports_the_held_queue_and_plain_http
+    result = levels(lab)
+             ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+______________________ test_only_agent_mode_is_supported _______________________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:52: in test_only_agent_mode_is_supported
+    assert levels(lab)["mode"][0] == FAIL
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_______________ test_private_address_must_be_numeric_and_private _______________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:57: in test_private_address_must_be_numeric_and_private
+    assert levels(lab)["address"][0] == FAIL
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_____________ test_https_private_address_has_no_transport_warning ______________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:68: in test_https_private_address_has_no_transport_warning
+    assert levels(lab)["transport"][0] == PASS
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_______ test_public_addresses_are_checked_and_temporary_ones_are_flagged _______
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:72: in test_public_addresses_are_checked_and_temporary_ones_are_flagged
+    assert "public" not in levels(lab)
+                           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_________________ test_public_installer_downloads_are_reported _________________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:83: in test_public_installer_downloads_are_reported
+    assert "private" in levels(lab)["installers"][1]
+                        ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_____________________ test_damaged_or_newer_database_fails _____________________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:91: in test_damaged_or_newer_database_fails
+    assert levels(lab)["database"][0] == FAIL and "newer" in levels(lab)["database"][1]
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+__ test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check __
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:114: in test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check
+    assert levels(lab)["database"][0] == FAIL
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_________ test_storage_directory_is_required_and_free_space_is_judged __________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:123: in test_storage_directory_is_required_and_free_space_is_judged
+    assert levels(lab)["storage"][0] == PASS
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_________ test_a_lab_without_online_devices_is_a_warning_not_a_failure _________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:134: in test_a_lab_without_online_devices_is_a_warning_not_a_failure
+    assert levels(lab)["devices"][0] == WARN
+           ^^^^^^^^^^^
+backend/tests/test_doctor.py:27: in levels
+    return {name: (level, message) for level, name, message in run_checks(root)}
+                                                               ^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_______________ test_command_line_exits_nonzero_only_on_failure ________________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:138: in test_command_line_exits_nonzero_only_on_failure
+    assert main(["--private", str(lab)]) == 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/apps/doctor.py:11: in main
+    results = run_checks(parser.parse_args(argv).private)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+_____________________ test_doctor_never_changes_a_lab_file _____________________
+backend/services/doctor.py:100: in run_checks
+    with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
+         ^^^^^^^^^^^^^^^^
+E   NameError: name 'connect_readonly' is not defined
+
+During handling of the above exception, another exception occurred:
+backend/tests/test_doctor.py:152: in test_doctor_never_changes_a_lab_file
+    run_checks(lab)
+backend/services/doctor.py:127: in run_checks
+    except (DatabaseError, OSError, ValueError, TypeError):
+            ^^^^^^^^^^^^^
+E   NameError: name 'DatabaseError' is not defined
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_doctor.py::test_fresh_lab_has_no_failure_but_reports_the_held_queue_and_plain_http
+FAILED backend/tests/test_doctor.py::test_only_agent_mode_is_supported - Name...
+FAILED backend/tests/test_doctor.py::test_private_address_must_be_numeric_and_private
+FAILED backend/tests/test_doctor.py::test_https_private_address_has_no_transport_warning
+FAILED backend/tests/test_doctor.py::test_public_addresses_are_checked_and_temporary_ones_are_flagged
+FAILED backend/tests/test_doctor.py::test_public_installer_downloads_are_reported
+FAILED backend/tests/test_doctor.py::test_damaged_or_newer_database_fails - N...
+FAILED backend/tests/test_doctor.py::test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check
+FAILED backend/tests/test_doctor.py::test_storage_directory_is_required_and_free_space_is_judged
+FAILED backend/tests/test_doctor.py::test_a_lab_without_online_devices_is_a_warning_not_a_failure
+FAILED backend/tests/test_doctor.py::test_command_line_exits_nonzero_only_on_failure
+FAILED backend/tests/test_doctor.py::test_doctor_never_changes_a_lab_file - N...
+12 failed, 26 passed, 1 warning in 5.23s

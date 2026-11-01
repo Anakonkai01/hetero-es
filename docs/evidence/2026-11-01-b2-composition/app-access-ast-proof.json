@@ -1,0 +1,78 @@
+{
+  "base": "9817afb5",
+  "proof": [
+    {
+      "accessMethod": "scope",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "accessMethod": "visible",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "accessMethod": "authorized",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "accessMethod": "capabilities",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "accessMethod": "active",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "accessMethod": "platform",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "accessMethod": "workspace_admin",
+      "bodyAST": "same except self store/runtime/scope forwarding and plain error class",
+      "dependencyDefaults": "removed from service signature"
+    },
+    {
+      "module": "timeline",
+      "target": "services/timeline",
+      "body": "source spans unchanged except relative import destinations",
+      "bytesIdentical": true
+    },
+    {
+      "module": "writer_lock",
+      "target": "core/writer_lock",
+      "body": "source spans unchanged except relative import destinations",
+      "bytesIdentical": true
+    },
+    {
+      "module": "monitor",
+      "target": "apps/monitor",
+      "body": "source spans unchanged except relative import destinations",
+      "bytesIdentical": true
+    },
+    {
+      "module": "live",
+      "target": "api/live",
+      "body": "source spans unchanged except relative import destinations",
+      "bytesIdentical": false
+    },
+    {
+      "module": "routes_web",
+      "target": "api/web",
+      "body": "source spans unchanged except relative import destinations",
+      "bytesIdentical": false
+    },
+    {
+      "StoreClassAST": "identical",
+      "preMoveSha256": "7d7d68e25ef0a6b987ae30dceafc3d5e33f1193b774488122a0fd4263f8eec75"
+    }
+  ],
+  "factory": "relative imports rewired; access closure bodies preserved in service, request dependency keeps original Header/Depends signature; lifecycle/bootstrap bodies otherwise unchanged",
+  "httpEndpointSignatures": "untouched; only installer callback wiring has optional business callbacks",
+  "businessImportRetarget": "same implementation classes/functions via direct service/core owners; template errors stay plain",
+  "cliServingTarget": "backend.apps.factory:app_from_environment"
+}

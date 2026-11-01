@@ -1,0 +1,29 @@
+F...F...                                                                 [100%]
+=================================== FAILURES ===================================
+_________________ test_store_facade_contains_no_sql_execution __________________
+backend/tests/test_store_layers.py:15: in test_store_facade_contains_no_sql_execution
+    assert node.func.attr not in {"execute", "executescript", "executemany"}
+E   AssertionError: assert 'execute' not in {'execute', 'executemany', 'executescript'}
+E    +  where 'execute' = <ast.Attribute object at 0x78c957b3f650>.attr
+E    +    where <ast.Attribute object at 0x78c957b3f650> = <ast.Call object at 0x78c957b3f690>.func
+________________________ test_account_layer_boundaries _________________________
+backend/tests/test_account_layers.py:95: in test_account_layer_boundaries
+    tree = ast.parse((backend / relative).read_text())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/backend/services/audit.py'
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_store_layers.py::test_store_facade_contains_no_sql_execution
+FAILED backend/tests/test_account_layers.py::test_account_layer_boundaries - ...
+2 failed, 6 passed, 1 warning in 0.16s

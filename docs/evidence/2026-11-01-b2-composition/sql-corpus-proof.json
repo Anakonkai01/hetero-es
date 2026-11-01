@@ -1,0 +1,22 @@
+{
+  "base": "6ee47147",
+  "oldCalls": 358,
+  "newDefinitions": 350,
+  "oldUnique": 278,
+  "newUnique": 278,
+  "removed": [],
+  "added": [],
+  "multiplicityChanges": [
+    {
+      "expression": "'BEGIN IMMEDIATE'",
+      "before": 9,
+      "after": 2
+    },
+    {
+      "expression": "'DELETE FROM sessions WHERE user_id=? AND digest<>?'",
+      "before": 2,
+      "after": 1
+    }
+  ],
+  "scope": "AST-equal SQL expressions; excludes generic repository forwarding; does not prove PostgreSQL portability or parameter/transaction behavior"
+}

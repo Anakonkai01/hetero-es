@@ -1,0 +1,3010 @@
+diff --git a/backend/api/experiments.py b/backend/api/experiments.py
+index 855d75d0..2d24a176 100644
+--- a/backend/api/experiments.py
++++ b/backend/api/experiments.py
+@@ -7,8 +7,8 @@ from fastapi import APIRouter
+ from ..services.experiments import operations
+ 
+ 
+-def install_routes(app, store, runtime, scoped, visible, authorized, validate):
+-    service = operations(store, runtime, scoped, visible, authorized, validate)
++def install_routes(app, store, runtime, scoped, visible, authorized, validate, *, service_scoped=None):
++    service = operations(store, runtime, service_scoped or scoped, visible, authorized, validate)
+     router = APIRouter()
+ 
+     @router.get("/api/v1/experiments")
+diff --git a/backend/api/lab.py b/backend/api/lab.py
+new file mode 100644
+index 00000000..bdf6898b
+--- /dev/null
++++ b/backend/api/lab.py
+@@ -0,0 +1,23 @@
++"""Account, workspace and platform HTTP composition."""
++
++from fastapi import Depends
++from .accounts import install_routes as install_accounts_routes
++from .workspaces import install_routes as install_workspaces_routes
++from .operations import install_routes as install_operations_routes
++from ..services.access import AccessService
++
++
++def install_lab_routes(app, store, user, scoped, runtime):
++    access = AccessService(store, runtime)
++
++    def active(current=Depends(user)):
++        return access.active(current)
++
++    def platform(current=Depends(active)):
++        return access.platform(current)
++
++    install_accounts_routes(app, store, user)
++    install_workspaces_routes(
++        app, store, scoped, active, access.workspace_admin, service_scoped=access.scope, service_active=access.active
++    )
++    install_operations_routes(app, store, runtime, platform, check_platform=access.platform)
+diff --git a/backend/api/live.py b/backend/api/live.py
+new file mode 100644
+index 00000000..ad4218ff
+--- /dev/null
++++ b/backend/api/live.py
+@@ -0,0 +1,64 @@
++"""Server-sent events for one run: the compact timeline is pushed when it changes, with heartbeats in between."""
++
++import asyncio
++import json
++import threading
++
++from starlette.concurrency import run_in_threadpool
++
++from ..core.constants import TERMINAL
++from ..services.timeline import build_timeline
++
++
++class LiveStreams:
++    """Limits how many viewers may hold a stream open and carries the pacing settings."""
++
++    def __init__(self, limit=25, poll=0.7, heartbeat=15.0, max_seconds=3600.0):
++        self.limit, self.poll, self.heartbeat, self.max_seconds = limit, poll, heartbeat, max_seconds
++        self.active = 0
++        self._lock = threading.Lock()
++
++    def acquire(self):
++        with self._lock:
++            if self.active >= self.limit:
++                return False
++            self.active += 1
++            return True
++
++    def release(self):
++        with self._lock:
++            self.active = max(0, self.active - 1)
++
++    async def frames(self, store, run_id):
++        """Yield SSE text. The caller must have acquired a slot; it is released when the stream ends for any reason."""
++        loop = asyncio.get_running_loop()
++        started, last_sent, quiet, fingerprint = loop.time(), loop.time(), 0.0, None
++        try:
++            while True:
++                body, snapshot, names = await run_in_threadpool(
++                    lambda: (store.get(run_id), store.snapshot(run_id), store.device_identities())
++                )
++                # The clock is left out of the comparison: only real changes are worth sending.
++                current = json.dumps(
++                    build_timeline(body, snapshot, now_ms=0, names=names),
++                    sort_keys=True,
++                    separators=(",", ":"),
++                    allow_nan=False,
++                )
++                if current != fingerprint:
++                    fingerprint = current
++                    payload = json.dumps(
++                        build_timeline(body, snapshot, names=names), separators=(",", ":"), allow_nan=False
++                    )
++                    yield f"event: timeline\ndata: {payload}\n\n"
++                    last_sent = loop.time()
++                if not body or body.get("status") in TERMINAL or loop.time() - started > self.max_seconds:
++                    yield "event: end\ndata: {}\n\n"
++                    return
++                await asyncio.sleep(self.poll)
++                quiet = loop.time() - last_sent
++                if quiet >= self.heartbeat:
++                    yield ": heartbeat\n\n"
++                    last_sent = loop.time()
++        finally:
++            self.release()
+diff --git a/backend/api/operations.py b/backend/api/operations.py
+index 037dbe5e..64a3c254 100644
+--- a/backend/api/operations.py
++++ b/backend/api/operations.py
+@@ -6,8 +6,8 @@ from fastapi import APIRouter
+ from ..services.operations import operations as business_operations
+ 
+ 
+-def install_routes(app, store, runtime, platform):
+-    service = business_operations(store, runtime, platform)
++def install_routes(app, store, runtime, platform, *, check_platform=None):
++    service = business_operations(store, runtime, check_platform or platform)
+     router = APIRouter()
+ 
+     @router.get("/api/v1/platform/users")
+diff --git a/backend/api/security.py b/backend/api/security.py
+index 43f53a6a..5cedecc7 100644
+--- a/backend/api/security.py
++++ b/backend/api/security.py
+@@ -1,6 +1,6 @@
+ """HTTP authentication dependencies."""
+ 
+-from fastapi import Header, HTTPException
++from fastapi import Depends, Header, HTTPException
+ 
+ 
+ def local_user(accounts):
+@@ -10,3 +10,10 @@ def local_user(accounts):
+         return accounts.current(authorization[7:])
+ 
+     return user
++
++
++def workspace_scope(access, user):
++    def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
++        return access.scope(current, x_workspace_id)
++
++    return scoped
+diff --git a/backend/api/web.py b/backend/api/web.py
+new file mode 100644
+index 00000000..97cbb762
+--- /dev/null
++++ b/backend/api/web.py
+@@ -0,0 +1,54 @@
++from ..core.config import load_config
++import json
++import os
++from pathlib import Path
++
++from fastapi import HTTPException
++from fastapi.responses import FileResponse
++from fastapi.staticfiles import StaticFiles
++
++
++def install_routes(app, web_directory, downloads_directory):
++    if web_directory is not None:
++        web = Path(web_directory).resolve(strict=True)
++        if not (web / "index.html").is_file():
++            raise ValueError("Built web application is missing")
++        app.mount("/assets", StaticFiles(directory=web / "assets"), name="web-assets")
++        if downloads_directory is not None:
++
++            @app.get("/downloads/manifest.json", include_in_schema=False)
++            def installer_manifest():
++                manifest = json.loads((Path(downloads_directory) / "manifest.json").read_text())
++                private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
++                if private_root:
++                    config = load_config(private_root)
++                    # publicDownloads: the operator serves installers on the public origin too.
++                    if config.get("publicWebUrl") and not config.get("publicDownloads"):
++                        bulk = config.get("bulkApiUrl", config.get("apiUrl"))
++                        manifest["privateTransferRequired"] = True
++                        for group in ("installers", "serverInstallers"):
++                            for item in manifest.get(group, []):
++                                item["url"] = bulk + "/downloads/" + Path(item["name"]).name
++                        for item in manifest.get("linuxWorker", {}).values():
++                            item["url"] = bulk + "/downloads/" + Path(item["name"]).name
++                return manifest
++
++            # The publisher links installers from another disk; Starlette refuses such symlinks by default.
++            # Path traversal is still rejected: the check then compares the link's own location.
++            app.mount(
++                "/downloads", StaticFiles(directory=downloads_directory, follow_symlink=True), name="worker-downloads"
++            )
++        else:
++
++            @app.get("/downloads/manifest.json", include_in_schema=False)
++            def no_installers():
++                return {"version": "0.1.0", "privateTrial": True, "installers": []}
++
++        @app.get("/{route:path}", include_in_schema=False)
++        def web_page(route: str):
++            if route == "api" or route.startswith(("api/", "assets/", "downloads/")):
++                raise HTTPException(404, "Unknown endpoint")
++            candidate = web / route
++            if candidate.is_file() and candidate.resolve().is_relative_to(web):
++                return FileResponse(candidate)
++            return FileResponse(web / "index.html", headers={"Cache-Control": "no-cache"})
+diff --git a/backend/api/workspaces.py b/backend/api/workspaces.py
+index 2168f60c..d70b169c 100644
+--- a/backend/api/workspaces.py
++++ b/backend/api/workspaces.py
+@@ -5,8 +5,8 @@ from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDe
+ from ..services.workspaces import operations
+ 
+ 
+-def install_routes(app, store, scoped, active, workspace_admin):
+-    service = operations(store, scoped, active, workspace_admin)
++def install_routes(app, store, scoped, active, workspace_admin, *, service_scoped=None, service_active=None):
++    service = operations(store, service_scoped or scoped, service_active or active, workspace_admin)
+     router = APIRouter()
+ 
+     @router.post("/api/v1/workspaces", status_code=201)
+diff --git a/backend/app.py b/backend/app.py
+index 25638b87..86d18536 100644
+--- a/backend/app.py
++++ b/backend/app.py
+@@ -1,206 +1,6 @@
+-from .routes_auth import install_routes as install_auth_routes
+-from .routes_inventory import install_routes as install_inventory_routes
+-from .routes_experiments import install_routes as install_experiments_routes
+-from .routes_history import install_routes as install_history_routes
+-from .routes_web import install_routes as install_web_routes
+-from functools import partial
+-from .validation import validate_configuration
+-from .policies import active_profile
+-from .config import load_config
+-from contextlib import asynccontextmanager
+-import json
+-import os
+-from pathlib import Path
+-import threading
++"""Compatibility factory namespace retained during application extraction."""
+ 
+-from fastapi import Depends, FastAPI, Header, HTTPException
+-from fastapi.responses import JSONResponse
+-from starlette.concurrency import run_in_threadpool
++import sys
++from .apps import factory as _implementation
+ 
+-from .store import Store
+-from .lab import install_lab_routes
+-from .live import LiveStreams
+-from .templates import install_template_routes
+-from .notifications import install_notification_routes
+-from .throttle import Throttle
+-from .api.security import local_user
+-from .core.errors import ServiceError
+-
+-
+-def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
+-    store = Store(path, passwords, runtime)
+-    from .study_registry import Registry
+-
+-    registry = Registry(store)
+-    stop = threading.Event()
+-
+-    @asynccontextmanager
+-    async def lifespan(_):
+-        thread = threading.Thread(target=store.dispatch, args=(stop,), daemon=True)
+-        dispatcher_started = False
+-        metadata_thread = None
+-        try:
+-            if dispatch:
+-                thread.start()
+-                dispatcher_started = True
+-            if getattr(runtime, "storage_backend", None) is not None:
+-                from .metadata_backup import backup_loop
+-
+-                metadata_thread = threading.Thread(
+-                    target=backup_loop, args=(store, app.state.storage, stop), daemon=True
+-                )
+-                metadata_thread.start()
+-            yield
+-        finally:
+-            stop.set()
+-            # A second writer cannot take over while an old background writer
+-            # still owns work. Join off-loop and release only after both stop.
+-            if metadata_thread and metadata_thread.ident is not None:
+-                await run_in_threadpool(metadata_thread.join)
+-            if dispatcher_started:
+-                await run_in_threadpool(thread.join)
+-            if writer_lock is not None:
+-                writer_lock.close()
+-
+-    # The interactive documentation lists every route: keep it for development, not for a served lab.
+-    private_docs = {} if web_directory is None else {"docs_url": None, "redoc_url": None, "openapi_url": None}
+-    app = FastAPI(title="HeteroES product API", lifespan=lifespan, **private_docs)
+-    app.state.login_failures = Throttle(5, 600)  # per caller address and username
+-    app.state.login_failures_by_address = Throttle(30, 600)  # per caller address, any username
+-    app.state.registrations = Throttle(10, 3600)
+-    app.state.store = store
+-    app.state.live = LiveStreams()
+-
+-    @app.exception_handler(ServiceError)
+-    @app.exception_handler(HTTPException)
+-    async def handle_http(_request, error):
+-        return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
+-
+-    user = local_user(store.accounts)
+-
+-    def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
+-        profile = active_profile(store, current, "Your account must be active to access lab resources")
+-        membership = next((w for w in store.workspaces(current["userId"]) if w["workspaceId"] == x_workspace_id), None)
+-        if not membership:
+-            raise HTTPException(403, "Select a workspace you belong to")
+-        return {**profile, "workspaceId": x_workspace_id, "workspaceRole": membership["role"]}
+-
+-    session = store.accounts.session
+-
+-    def visible(current):
+-        return [
+-            body
+-            for body in store.list()
+-            if not body.get("archivedAt")
+-            and body["workspaceId"] == current["workspaceId"]
+-            and (current["workspaceRole"] == "ADMIN" or body["ownerUserId"] == current["userId"])
+-        ]
+-
+-    def authorized(run_id, current):
+-        body = store.get(run_id)
+-        current = scoped(current, current["workspaceId"])
+-        if (
+-            not body
+-            or body.get("archivedAt")
+-            or body["workspaceId"] != current["workspaceId"]
+-            or (current["workspaceRole"] != "ADMIN" and body["ownerUserId"] != current["userId"])
+-        ):
+-            raise HTTPException(404, "Experiment not found")
+-        return body
+-
+-    def capabilities():
+-        try:
+-            value = runtime.capabilities()
+-            store.ensure_workers(value["workerIds"])
+-            return value
+-        except Exception:
+-            raise HTTPException(503, "Runtime control service unavailable") from None
+-
+-    validate = partial(
+-        validate_configuration,
+-        store=store,
+-        runtime=runtime,
+-        registry=registry,
+-        scoped=scoped,
+-        capabilities=capabilities,
+-    )
+-
+-    install_auth_routes(app, store, user, session)
+-    install_inventory_routes(app, store, runtime, scoped, visible, capabilities, registry)
+-    install_experiments_routes(app, store, runtime, scoped, visible, authorized, validate)
+-    install_history_routes(app, store, runtime, scoped, visible, authorized)
+-
+-    install_lab_routes(app, store, user, scoped, runtime)
+-    install_template_routes(app, store, scoped)
+-    install_notification_routes(app, store, user)
+-    from .devices import install_device_routes
+-
+-    device_auth = install_device_routes(app, store, user, runtime)
+-    from .study_registry import install_routes as study_routes
+-
+-    study_routes(app, registry, runtime, scoped, device_auth)
+-    from .model_qualification import install_routes as qualification_routes
+-
+-    qualification_routes(app, registry, runtime, scoped, device_auth)
+-    if runtime.storage_backend is not None:
+-        from .recovery_storage import RecoveryStorage, install_storage_routes
+-
+-        storage = RecoveryStorage(
+-            store, runtime.storage_backend, quota_bytes=getattr(runtime.storage_backend, "quota_bytes", 8_000_000_000)
+-        )
+-        app.state.storage = storage
+-        runtime.storage = storage
+-        install_storage_routes(app, store, storage, device_auth, user, scoped, authorized)
+-        if hasattr(runtime.storage_backend, "install_routes"):
+-            runtime.storage_backend.install_routes(app)
+-
+-    install_web_routes(app, web_directory, downloads_directory)
+-    return app
+-
+-
+-def app_from_environment():
+-    private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-    if not private_root:
+-        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
+-    root = Path(private_root)
+-    credentials = json.loads((root / "credentials.json").read_text())
+-    config = load_config(root)
+-    from .writer_lock import acquire_writer
+-
+-    writer = acquire_writer(Path(config["productStateDirectory"]) / "product.sqlite")
+-    try:
+-        return _app_from_config(root, credentials, config, writer)
+-    except BaseException:
+-        writer.close()
+-        raise
+-
+-
+-def _app_from_config(root, credentials, config, writer):
+-    if config.get("deploymentMode") != "agent":
+-        raise ValueError("Only agent deployment mode is supported")
+-    if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
+-        raise ValueError("Only local recovery storage is supported")
+-    from .devices import AgentRuntime
+-
+-    storage_backend = None
+-    if config.get("storageMode") == "local":
+-        from .local_storage import LocalBackend
+-
+-        storage_backend = LocalBackend(
+-            config["storageDirectory"],
+-            root / "storage-signing.key",
+-            config.get("bulkApiUrl", config["apiUrl"]),
+-            config.get("storageVolumeUUID"),
+-            config.get("metadataStorageDirectory"),
+-        )
+-        storage_backend.quota_bytes = config.get("storageQuotaBytes", 200_000_000_000)
+-    runtime = AgentRuntime(storage_backend)
+-    runtime.server_instance_id = config.get("serverInstanceId")
+-    return create_app(
+-        Path(config["productStateDirectory"]) / "product.sqlite",
+-        credentials["users"],
+-        runtime,
+-        web_directory=os.environ.get("HETEROES_WEB_DIRECTORY"),
+-        downloads_directory=os.environ.get("HETEROES_DOWNLOADS_DIRECTORY"),
+-        writer_lock=writer,
+-    )
++sys.modules[__name__] = _implementation
+diff --git a/backend/apps/__init__.py b/backend/apps/__init__.py
+new file mode 100644
+index 00000000..a2e9314e
+--- /dev/null
++++ b/backend/apps/__init__.py
+@@ -0,0 +1 @@
++"""Application composition and command entrypoints."""
+diff --git a/backend/apps/doctor.py b/backend/apps/doctor.py
+new file mode 100644
+index 00000000..31149530
+--- /dev/null
++++ b/backend/apps/doctor.py
+@@ -0,0 +1,20 @@
++"Read-only preflight for a Local Lab Server. It changes no lab file (SQLite may create its\n-shm coordination file when it opens the WAL database); exit status 1 if any check FAILs.\n\n    python -m backend.doctor --private ~/.config/heteroes-m2\n"
++
++import argparse
++from pathlib import Path
++from ..services.doctor import run_checks, FAIL
++
++
++def main(argv=None):
++    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    parser.add_argument("--private", type=Path, required=True, help="private lab directory (contains config.json)")
++    results = run_checks(parser.parse_args(argv).private)
++    for level, name, message in results:
++        print(f"{level:4}  {name:14} {message}")
++    failed = sum(level == FAIL for level, _, _ in results)
++    print("\n" + (f"{failed} check(s) FAILED." if failed else "No failures."))
++    return 1 if failed else 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+new file mode 100644
+index 00000000..b199e73f
+--- /dev/null
++++ b/backend/apps/factory.py
+@@ -0,0 +1,180 @@
++from ..api.auth import install_routes as install_auth_routes
++from ..api.inventory import install_routes as install_inventory_routes
++from ..api.experiments import install_routes as install_experiments_routes
++from ..api.history import install_routes as install_history_routes
++from ..api.web import install_routes as install_web_routes
++from functools import partial
++from ..services.validation import validate_configuration
++from ..core.config import load_config
++from contextlib import asynccontextmanager
++import json
++import os
++from pathlib import Path
++import threading
++
++from fastapi import FastAPI, HTTPException
++from fastapi.responses import JSONResponse
++from starlette.concurrency import run_in_threadpool
++
++from ..services.store import Store
++from ..api.lab import install_lab_routes
++from ..api.live import LiveStreams
++from ..api.templates import install_routes as install_template_routes
++from ..api.notifications import install_routes as install_notification_routes
++from ..throttle import Throttle
++from ..api.security import local_user, workspace_scope
++from ..services.access import AccessService
++from ..core.errors import ServiceError
++
++
++def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
++    store = Store(path, passwords, runtime)
++    from ..services.study_registry import Registry
++
++    registry = Registry(store)
++    stop = threading.Event()
++
++    @asynccontextmanager
++    async def lifespan(_):
++        thread = threading.Thread(target=store.dispatch, args=(stop,), daemon=True)
++        dispatcher_started = False
++        metadata_thread = None
++        try:
++            if dispatch:
++                thread.start()
++                dispatcher_started = True
++            if getattr(runtime, "storage_backend", None) is not None:
++                from ..services.metadata_backup import backup_loop
++
++                metadata_thread = threading.Thread(
++                    target=backup_loop, args=(store, app.state.storage, stop), daemon=True
++                )
++                metadata_thread.start()
++            yield
++        finally:
++            stop.set()
++            # A second writer cannot take over while an old background writer
++            # still owns work. Join off-loop and release only after both stop.
++            if metadata_thread and metadata_thread.ident is not None:
++                await run_in_threadpool(metadata_thread.join)
++            if dispatcher_started:
++                await run_in_threadpool(thread.join)
++            if writer_lock is not None:
++                writer_lock.close()
++
++    # The interactive documentation lists every route: keep it for development, not for a served lab.
++    private_docs = {} if web_directory is None else {"docs_url": None, "redoc_url": None, "openapi_url": None}
++    app = FastAPI(title="HeteroES product API", lifespan=lifespan, **private_docs)
++    app.state.login_failures = Throttle(5, 600)  # per caller address and username
++    app.state.login_failures_by_address = Throttle(30, 600)  # per caller address, any username
++    app.state.registrations = Throttle(10, 3600)
++    app.state.store = store
++    app.state.live = LiveStreams()
++
++    @app.exception_handler(ServiceError)
++    @app.exception_handler(HTTPException)
++    async def handle_http(_request, error):
++        return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
++
++    user = local_user(store.accounts)
++    access = AccessService(store, runtime)
++
++    scoped = workspace_scope(access, user)
++
++    session = store.accounts.session
++
++    visible = access.visible
++
++    authorized = access.authorized
++
++    capabilities = access.capabilities
++
++    validate = partial(
++        validate_configuration,
++        store=store,
++        runtime=runtime,
++        registry=registry,
++        scoped=access.scope,
++        capabilities=capabilities,
++    )
++
++    install_auth_routes(app, store, user, session)
++    install_inventory_routes(app, store, runtime, scoped, visible, capabilities, registry)
++    install_experiments_routes(app, store, runtime, scoped, visible, authorized, validate, service_scoped=access.scope)
++    install_history_routes(app, store, runtime, scoped, visible, authorized)
++
++    install_lab_routes(app, store, user, scoped, runtime)
++    install_template_routes(app, store, scoped)
++    install_notification_routes(app, store, user)
++    from ..api.devices import install_routes as install_device_routes
++
++    device_auth = install_device_routes(app, store, user, runtime)
++    from ..api.study_registry import install_routes as study_routes
++
++    study_routes(app, registry, runtime, scoped, device_auth)
++    from ..api.model_qualification import install_routes as qualification_routes
++
++    qualification_routes(app, registry, runtime, scoped, device_auth)
++    if runtime.storage_backend is not None:
++        from ..services.recovery_storage import RecoveryStorage
++        from ..api.recovery_storage import install_routes as install_storage_routes
++
++        storage = RecoveryStorage(
++            store, runtime.storage_backend, quota_bytes=getattr(runtime.storage_backend, "quota_bytes", 8_000_000_000)
++        )
++        app.state.storage = storage
++        runtime.storage = storage
++        install_storage_routes(app, store, storage, device_auth, user, scoped, authorized)
++        if hasattr(runtime.storage_backend, "install_routes"):
++            runtime.storage_backend.install_routes(app)
++
++    install_web_routes(app, web_directory, downloads_directory)
++    return app
++
++
++def app_from_environment():
++    private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
++    if not private_root:
++        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
++    root = Path(private_root)
++    credentials = json.loads((root / "credentials.json").read_text())
++    config = load_config(root)
++    from ..core.writer_lock import acquire_writer
++
++    writer = acquire_writer(Path(config["productStateDirectory"]) / "product.sqlite")
++    try:
++        return _app_from_config(root, credentials, config, writer)
++    except BaseException:
++        writer.close()
++        raise
++
++
++def _app_from_config(root, credentials, config, writer):
++    if config.get("deploymentMode") != "agent":
++        raise ValueError("Only agent deployment mode is supported")
++    if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
++        raise ValueError("Only local recovery storage is supported")
++    from ..services.devices import AgentRuntime
++
++    storage_backend = None
++    if config.get("storageMode") == "local":
++        from ..storage.local_backend import LocalBackend
++
++        storage_backend = LocalBackend(
++            config["storageDirectory"],
++            root / "storage-signing.key",
++            config.get("bulkApiUrl", config["apiUrl"]),
++            config.get("storageVolumeUUID"),
++            config.get("metadataStorageDirectory"),
++        )
++        storage_backend.quota_bytes = config.get("storageQuotaBytes", 200_000_000_000)
++    runtime = AgentRuntime(storage_backend)
++    runtime.server_instance_id = config.get("serverInstanceId")
++    return create_app(
++        Path(config["productStateDirectory"]) / "product.sqlite",
++        credentials["users"],
++        runtime,
++        web_directory=os.environ.get("HETEROES_WEB_DIRECTORY"),
++        downloads_directory=os.environ.get("HETEROES_DOWNLOADS_DIRECTORY"),
++        writer_lock=writer,
++    )
+diff --git a/backend/apps/monitor.py b/backend/apps/monitor.py
+new file mode 100644
+index 00000000..5dee3f26
+--- /dev/null
++++ b/backend/apps/monitor.py
+@@ -0,0 +1,43 @@
++"""Private Server monitor: JSON lines, no CUDA; stdin EOF owns its lifetime."""
++
++import argparse
++import json
++from pathlib import Path
++import signal
++import sys
++import threading
++from heteroes.product.telemetry import TelemetrySampler
++
++
++def main():
++    p = argparse.ArgumentParser()
++    p.add_argument("--state", type=Path, required=True)
++    p.add_argument("--storage", type=Path)
++    p.add_argument("--energy-state", type=Path)
++    args = p.parse_args()
++    args.state.mkdir(parents=True, exist_ok=True, mode=0o700)
++    stop = threading.Event()
++
++    def lifetime():
++        sys.stdin.buffer.read()
++        stop.set()
++
++    threading.Thread(target=lifetime, daemon=True).start()
++    signal.signal(signal.SIGTERM, lambda *_: stop.set())
++    signal.signal(signal.SIGINT, lambda *_: stop.set())
++    sampler = TelemetrySampler(
++        args.state, args.storage, energy_directory=args.energy_state or Path.home() / ".local/share/heteroes-power"
++    )
++    while not stop.is_set():
++        try:
++            observation = sampler.sample()
++            print(
++                json.dumps({"observation": observation, "history": list(sampler.history)}, allow_nan=False), flush=True
++            )
++        except (OSError, ValueError):
++            pass
++        stop.wait(3)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/backend/apps/server.py b/backend/apps/server.py
+new file mode 100644
+index 00000000..4c55ddd2
+--- /dev/null
++++ b/backend/apps/server.py
+@@ -0,0 +1,65 @@
++"CPU-only packaged Lab Server entry point. Bootstrap secrets arrive on stdin."
++
++import argparse
++from pathlib import Path
++import sys
++import json
++import os
++import signal
++import threading
++from ..core.config import load_config
++from ..services.bootstrap import initialize
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--private", type=Path, required=True)
++    parser.add_argument("--initialize", action="store_true")
++    parser.add_argument("--web", type=Path)
++    parser.add_argument("--downloads", type=Path)
++    parser.add_argument("--headless", action="store_true", help="Run without a desktop parent pipe")
++    args = parser.parse_args()
++    os.environ["CUDA_VISIBLE_DEVICES"] = ""
++    if args.initialize:
++        try:
++            result = initialize(args.private, json.loads(sys.stdin.buffer.read(16385)))
++        except Exception:
++            # Pydantic errors can include input secrets; do not print them.
++            print(json.dumps({"error": "SERVER_INITIALIZATION_FAILED"}))
++            return 1
++        print(json.dumps(result))
++        return 0
++    if args.web is None:
++        parser.error("--web is required for serving")
++    config = load_config(args.private)
++    os.environ["HETEROES_PRIVATE_CONFIG"] = str(args.private)
++    os.environ["HETEROES_WEB_DIRECTORY"] = str(args.web)
++    if args.downloads:
++        os.environ["HETEROES_DOWNLOADS_DIRECTORY"] = str(args.downloads)
++    os.environ["HETEROES_UI_URL"] = config.get("publicWebUrl") or config["apiUrl"]
++
++    def parent_pipe():
++        # The desktop owns this process. Closing its pipe on exit/crash stops
++        # only this API; outbound workers retain durable outage evidence.
++        sys.stdin.buffer.read(1)
++        os.kill(os.getpid(), signal.SIGTERM)
++
++    import uvicorn
++
++    if not args.headless:
++        threading.Thread(target=parent_pipe, daemon=True).start()
++    from urllib.parse import urlsplit
++
++    address = urlsplit(config["apiUrl"])
++    uvicorn.run(
++        "backend.apps.factory:app_from_environment",
++        factory=True,
++        host=config.get("serverHost", address.hostname),
++        port=config.get("serverPort", address.port or 80),
++        access_log=False,
++    )
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/backend/core/server_models.py b/backend/core/server_models.py
+new file mode 100644
+index 00000000..e73ba78d
+--- /dev/null
++++ b/backend/core/server_models.py
+@@ -0,0 +1,13 @@
++"""Bootstrap input contract; secrets are never rendered as validation diagnostics."""
++
++from pydantic import BaseModel, ConfigDict, Field
++
++
++class Bootstrap(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++    username: str = Field(min_length=2, max_length=100, pattern=r"^[a-zA-Z0-9_.-]+$")
++    password: str = Field(min_length=12, max_length=200)
++    host: str
++    port: int = Field(ge=1024, le=65535, strict=True)
++    storageDirectory: str
++    storageVolumeUUID: str | None = None
+diff --git a/backend/core/writer_lock.py b/backend/core/writer_lock.py
+new file mode 100644
+index 00000000..f9193650
+--- /dev/null
++++ b/backend/core/writer_lock.py
+@@ -0,0 +1,30 @@
++"""Kernel lifetime lock for one production management writer per database."""
++
++import os
++from pathlib import Path
++import sys
++
++
++def acquire_writer(database):
++    database = Path(database).resolve()
++    database.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
++    stream = open(database.with_name(database.name + ".writer.lock"), "a+b")
++    try:
++        if sys.platform == "win32":
++            import msvcrt
++
++            stream.seek(0, 2)
++            if stream.tell() == 0:
++                stream.write(b"0")
++                stream.flush()
++            stream.seek(0)
++            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
++        else:
++            import fcntl
++
++            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
++        os.chmod(stream.name, 0o600)
++        return stream
++    except (OSError, BlockingIOError):
++        stream.close()
++        raise RuntimeError("A Lab Server already owns this database") from None
+diff --git a/backend/db/database.py b/backend/db/database.py
+new file mode 100644
+index 00000000..7ac221ef
+--- /dev/null
++++ b/backend/db/database.py
+@@ -0,0 +1,41 @@
++"""SQLite connection and bootstrap ownership; runtime ledgers stay independent."""
++
++from contextlib import contextmanager
++import json
++import sqlite3
++from .migrations import initialize_product_schema, initialize_workspace_extras, migrate
++
++
++class SQLiteDatabase:
++    def __init__(self, path, lock):
++        self.path, self.lock = str(path), lock
++
++    def initialize(self, passwords, hasher):
++        with self.connection() as db:
++            initialize_product_schema(db)
++            for name, password in passwords.items():
++                profile = {"userId": name, "username": name, "displayName": name.title(), "canCreateWorkspace": False}
++                # Bootstrap secrets seed an empty installation only. A renamed
++                # or removed account must not be recreated on every restart.
++                if db.execute("PRAGMA user_version").fetchone()[0] == 0:
++                    db.execute(
++                        "INSERT OR IGNORE INTO users VALUES (?,?,?)",
++                        (name, hasher.hash(password), json.dumps(profile)),
++                    )
++            db.commit()
++            migrate(db)
++            initialize_workspace_extras(db)
++
++    @contextmanager
++    def connection(self):
++        with self.lock:
++            connection = sqlite3.connect(self.path, timeout=20)
++            connection.row_factory = sqlite3.Row
++            try:
++                yield connection
++                connection.commit()
++            except BaseException:
++                connection.rollback()
++                raise
++            finally:
++                connection.close()
+diff --git a/backend/db/sqlite_diagnostics.py b/backend/db/sqlite_diagnostics.py
+new file mode 100644
+index 00000000..d8221d12
+--- /dev/null
++++ b/backend/db/sqlite_diagnostics.py
+@@ -0,0 +1,41 @@
++"""SQLite operational diagnostics and driver boundary."""
++
++import sqlite3
++from ..repositories.base import execute
++
++DatabaseError = sqlite3.Error
++DatabaseCorruption = sqlite3.DatabaseError
++
++
++def connect_readonly(*args, **kwargs):
++    return sqlite3.connect(*args, **kwargs)
++
++
++class SQLiteDiagnostics:
++    @staticmethod
++    def deployment_idle_1(db, parameters=(), *, table):
++        return execute(db, f"SELECT count(*) FROM {table}", parameters)
++
++    @staticmethod
++    def doctor_run_checks_2(db, parameters=()):
++        return execute(db, "SELECT 1 FROM sqlite_master WHERE name='devices'", parameters)
++
++    @staticmethod
++    def doctor_run_checks_3(db, parameters=()):
++        return execute(db, "PRAGMA user_version", parameters)
++
++    @staticmethod
++    def doctor_run_checks_4(db, parameters=()):
++        return execute(db, "SELECT 1 FROM sqlite_master WHERE name='physical_reservations'", parameters)
++
++    @staticmethod
++    def doctor_run_checks_5(db, parameters=()):
++        return execute(db, "SELECT status, seen FROM devices", parameters)
++
++    @staticmethod
++    def doctor_run_checks_6(db, parameters=()):
++        return execute(db, "PRAGMA integrity_check", parameters)
++
++    @staticmethod
++    def doctor_run_checks_7(db, parameters=()):
++        return execute(db, "SELECT count(*) FROM physical_reservations", parameters)
+diff --git a/backend/deployment.py b/backend/deployment.py
+index 7caef60a..5cfb4034 100644
+--- a/backend/deployment.py
++++ b/backend/deployment.py
+@@ -1,96 +1,6 @@
+-"""CPU deployment validation and public entrypoint configuration. No GPU imports."""
++"""Compatibility deployment namespace during extraction."""
+ 
+-from .policies import dispatch_held
+-import json
+-import os
+-from pathlib import Path
+-import sqlite3
+-from .addresses import endpoint
++import sys
++from .services import deployment as _implementation
+ 
+-
+-def save_private(path, value):
+-    path = Path(path)
+-    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+-    temporary = path.with_name(path.name + ".tmp")
+-    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+-    with os.fdopen(fd, "w") as out:
+-        json.dump(value, out, indent=2)
+-        out.flush()
+-        os.fsync(out.fileno())
+-    os.replace(temporary, path)
+-
+-
+-def idle(config):
+-    path = Path(config["productStateDirectory"]) / "product.sqlite"
+-    with sqlite3.connect(path.as_uri() + "?mode=ro", uri=True) as db:
+-        if dispatch_held(db) is not True:
+-            raise RuntimeError("Hold dispatch before deployment maintenance")
+-        for table in ("device_reservations", "physical_reservations"):
+-            if db.execute(f"SELECT count(*) FROM {table}").fetchone()[0]:
+-                raise RuntimeError("Confirm all assignments drained before deployment maintenance")
+-
+-
+-def caddyfile(config):
+-    api = endpoint(config["apiUrl"], private=True)
+-    compute = endpoint(config["privateComputeUrl"], private=True)
+-    ports = [config.get("webEntryPort", 8080), config.get("computeEntryPort", 8081)]
+-    if any(type(p) is not int or not 1024 <= p <= 65535 for p in ports) or len(set(ports)) != 2:
+-        raise ValueError("Select distinct unprivileged entry ports")
+-    public_downloads = config.get("publicDownloads", False)
+-    if type(public_downloads) is not bool:
+-        raise ValueError("publicDownloads must be true or false")
+-    # Installers are the only bulk path an operator may open to the public entry;
+-    # model weights, storage capabilities and backups always need a private route.
+-    bulk = (
+-        ("/downloads/* " if not public_downloads else "")
+-        + "/api/v1/datasets/import /api/v1/local-storage/* /api/v1/cloud-downloads/* /api/v1/artifacts/*/download-ticket /api/v1/platform/backups/*/download /api/v1/platform/backups/*/download-ticket"
+-    )
+-    # Caddy's admin endpoint is disabled. Separate loopback listeners prevent
+-    # a forged Host header from selecting the private bulk entrypoint.
+-    return """{
+-    admin off
+-    auto_https off
+-}
+-http://:%d {
+-    bind 127.0.0.1
+-    # one larger body: a signed dataset upload from a researcher without the private route (the lab checks the
+-    # size it signed, at most 64 MiB); every other request stays small
+-    @small not path /api/v1/public-upload/*
+-    request_body @small {
+-        max_size 3MB
+-    }
+-    @upload path /api/v1/public-upload/*
+-    request_body @upload {
+-        max_size 64MiB
+-    }
+-    header X-Content-Type-Options nosniff
+-    header Referrer-Policy no-referrer
+-    @manifest path /downloads/manifest.json
+-    handle @manifest {
+-        reverse_proxy %s
+-    }
+-    @bulk path %s
+-    handle @bulk {
+-        respond "Private LAN/Tailscale transfer required" 403
+-    }
+-    handle {
+-        # Server-sent events (the live run view) must reach the browser as they are produced.
+-        reverse_proxy %s {
+-            flush_interval -1
+-        }
+-    }
+-}
+-http://:%d {
+-    bind 127.0.0.1
+-    request_body {
+-        max_size 1MB
+-    }
+-    @control path /v1/health /v1/job /v1/leases /v1/heartbeats /v1/results /v1/failures /v1/updates/*
+-    handle @control {
+-        reverse_proxy %s
+-    }
+-    handle {
+-        respond "Private LAN/Tailscale transfer required" 403
+-    }
+-}
+-""" % (ports[0], api, bulk, api, ports[1], compute)
++sys.modules[__name__] = _implementation
+diff --git a/backend/doctor.py b/backend/doctor.py
+index ca3c1445..4d830e4e 100644
+--- a/backend/doctor.py
++++ b/backend/doctor.py
+@@ -1,168 +1,11 @@
+-"""Read-only preflight for a Local Lab Server. It changes no lab file (SQLite may create its
+--shm coordination file when it opens the WAL database); exit status 1 if any check FAILs.
++"""Compatibility doctor namespace and CLI during extraction."""
+ 
+-    python -m backend.doctor --private ~/.config/heteroes-m2
+-"""
+-
+-from .policies import dispatch_held
+-from .config import load_config
+-import argparse
+-from pathlib import Path
+-import shutil
+-import sqlite3
+ import sys
+-import time
+-
+-from .addresses import endpoint, is_private
+-from .migrations import SCHEMA_VERSION
+-
+-PASS, WARN, FAIL = "PASS", "WARN", "FAIL"
+-LOW_FREE_BYTES = 10 * 10**9
+-
+-
+-def run_checks(private):
+-    """Return [(level, name, message)]. The directory is only ever read."""
+-    private = Path(private)
+-    out = []
+-
+-    def add(level, name, message):
+-        out.append((level, name, message))
+-
+-    try:
+-        config = load_config(private)
+-    except (OSError, ValueError):
+-        add(FAIL, "configuration", f"{private}/config.json is missing or is not valid JSON")
+-        return out
+-    add(PASS, "configuration", "config.json is readable")
+-
+-    if config.get("deploymentMode") == "agent":
+-        add(PASS, "mode", "agent mode (the only supported control mode)")
+-    else:
+-        add(FAIL, "mode", 'deploymentMode is not "agent"; the older control mode is not supported')
+-
+-    api = config.get("apiUrl", "")
+-    try:
+-        endpoint(api, private=True)
+-    except ValueError:
+-        add(
+-            FAIL,
+-            "address",
+-            f'apiUrl "{api}" must be a numeric private, loopback or Tailscale address; names and public addresses are not accepted',
+-        )
+-    else:
+-        host = api.split("//", 1)[-1].split(":")[0]
+-        if host.startswith("127."):
+-            add(WARN, "address", "apiUrl is a loopback address: only this computer can reach the lab")
+-        else:
+-            add(
+-                PASS,
+-                "address",
+-                f"apiUrl {api} is a private address; keep it fixed (DHCP reservation) or the lab breaks when it changes",
+-            )
+-        if api.startswith("https://"):
+-            add(PASS, "transport", "traffic to the Lab Server is encrypted")
+-        else:
+-            add(
+-                WARN,
+-                "transport",
+-                "plain HTTP: session and device tokens are not encrypted. Fine on a trusted LAN; use an encrypted overlay (WireGuard, Tailscale) on a shared network",
+-            )
+-
+-    public = [config.get(k) for k in ("publicWebUrl", "publicComputeUrl") if config.get(k)]
+-    if public:
+-        bad = []
+-        for url in public:
+-            try:
+-                endpoint(url)
+-                if is_private(url):
+-                    bad.append(url)
+-            except ValueError:
+-                bad.append(url)
+-        if bad:
+-            add(FAIL, "public", "public address must be an HTTPS host name: " + ", ".join(bad))
+-        elif any("trycloudflare.com" in url for url in public):
+-            add(
+-                WARN,
+-                "public",
+-                "the public address is a temporary Quick Tunnel: it changes whenever the tunnel restarts",
+-            )
+-        else:
+-            add(PASS, "public", "public addresses are HTTPS host names")
+-        add(
+-            PASS,
+-            "installers",
+-            "installers are served on the public address"
+-            if config.get("publicDownloads")
+-            else "installers are private: they download only over the LAN or Tailscale address",
+-        )
+-
+-    database = private / "state" / "product.sqlite"
+-    held, online = None, None
+-    try:
+-        with sqlite3.connect(database.as_uri() + "?mode=ro", uri=True) as db:
+-            if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+-                raise sqlite3.DatabaseError("integrity check failed")
+-            version = db.execute("PRAGMA user_version").fetchone()[0]
+-            if version > SCHEMA_VERSION:
+-                add(
+-                    FAIL,
+-                    "database",
+-                    f"database schema {version} is newer than this program knows ({SCHEMA_VERSION}); use the newer release",
+-                )
+-            else:
+-                add(PASS, "database", f"product.sqlite is intact (schema {version})")
+-            held = dispatch_held(db)
+-            reservations = (
+-                db.execute("SELECT count(*) FROM physical_reservations").fetchone()[0]
+-                if db.execute("SELECT 1 FROM sqlite_master WHERE name='physical_reservations'").fetchone()
+-                else 0
+-            )
+-            if db.execute("SELECT 1 FROM sqlite_master WHERE name='devices'").fetchone():
+-                rows = db.execute("SELECT status, seen FROM devices").fetchall()
+-                online = sum(1 for status, seen in rows if status == "APPROVED" and time.time() - seen < 30)
+-                add(
+-                    PASS if online else WARN,
+-                    "devices",
+-                    f"{len(rows)} device(s) enrolled, {online} approved and online"
+-                    + ("" if online else ": no GPU is available right now"),
+-                )
+-    except (sqlite3.Error, OSError, ValueError, TypeError):
+-        add(FAIL, "database", f"{database} is missing, damaged or unreadable")
+-    else:
+-        add(
+-            WARN if held else PASS,
+-            "dispatch",
+-            "the queue is held: new experiments will not start until an administrator resumes it in Operations"
+-            if held
+-            else "the queue is open",
+-        )
+-        if reservations:
+-            add(WARN, "reservations", f"{reservations} physical GPU reservation(s) are active")
+-
+-    storage = config.get("storageDirectory")
+-    if not storage:
+-        add(WARN, "storage", "no storageDirectory configured: recovery points cannot be kept")
+-    elif not Path(storage).is_dir():
+-        add(FAIL, "storage", f"storage directory {storage} does not exist (is the disk mounted?)")
+-    else:
+-        free = shutil.disk_usage(storage).free
+-        if free < LOW_FREE_BYTES:
+-            add(WARN, "storage", f"only {free / 1e9:.1f} GB free in {storage}; a model checkpoint is about 1 GB")
+-        else:
+-            add(PASS, "storage", f"{free / 1e9:.0f} GB free in {storage}")
+-    return out
+-
+-
+-def main(argv=None):
+-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+-    parser.add_argument("--private", type=Path, required=True, help="private lab directory (contains config.json)")
+-    results = run_checks(parser.parse_args(argv).private)
+-    for level, name, message in results:
+-        print(f"{level:4}  {name:14} {message}")
+-    failed = sum(level == FAIL for level, _, _ in results)
+-    print("\n" + (f"{failed} check(s) FAILED." if failed else "No failures."))
+-    return 1 if failed else 0
+-
++from .services import doctor as _implementation
++from .apps.doctor import main
+ 
++_implementation.main = main
+ if __name__ == "__main__":
+-    sys.exit(main())
++    raise SystemExit(main())
++else:
++    sys.modules[__name__] = _implementation
+diff --git a/backend/lab.py b/backend/lab.py
+index 0f05eebc..42921e14 100644
+--- a/backend/lab.py
++++ b/backend/lab.py
+@@ -1,26 +1,3 @@
+-"""Identity and membership operations, independent of runtime numerical state."""
++"""Compatibility lab HTTP composition export."""
+ 
+-from .routes_accounts import install_routes as install_accounts_routes
+-from .routes_workspaces import install_routes as install_workspaces_routes
+-from .routes_operations import install_routes as install_operations_routes
+-from .policies import active_profile, platform_profile
+-
+-from fastapi import Depends, HTTPException
+-
+-
+-def install_lab_routes(app, store, user, scoped, runtime):
+-    def active(current=Depends(user)):
+-        return active_profile(store, current, "Your account is awaiting approval or is restricted")
+-
+-    def platform(current=Depends(active)):
+-        return platform_profile(current, "Platform administrator permission required")
+-
+-    def workspace_admin(workspace_id, current):
+-        fresh = scoped(current, workspace_id)
+-        if fresh["workspaceRole"] != "ADMIN":
+-            raise HTTPException(403, "Workspace administrator permission required")
+-        return fresh
+-
+-    install_accounts_routes(app, store, user)
+-    install_workspaces_routes(app, store, scoped, active, workspace_admin)
+-    install_operations_routes(app, store, runtime, platform)
++from .api.lab import install_lab_routes as install_lab_routes
+diff --git a/backend/live.py b/backend/live.py
+index 2c5a9c92..18ee10d9 100644
+--- a/backend/live.py
++++ b/backend/live.py
+@@ -1,64 +1,6 @@
+-"""Server-sent events for one run: the compact timeline is pushed when it changes, with heartbeats in between."""
++"""Compatibility namespace retained during application composition extraction."""
+ 
+-import asyncio
+-import json
+-import threading
++import sys
++from .api import live as _implementation
+ 
+-from starlette.concurrency import run_in_threadpool
+-
+-from .store import TERMINAL
+-from .timeline import build_timeline
+-
+-
+-class LiveStreams:
+-    """Limits how many viewers may hold a stream open and carries the pacing settings."""
+-
+-    def __init__(self, limit=25, poll=0.7, heartbeat=15.0, max_seconds=3600.0):
+-        self.limit, self.poll, self.heartbeat, self.max_seconds = limit, poll, heartbeat, max_seconds
+-        self.active = 0
+-        self._lock = threading.Lock()
+-
+-    def acquire(self):
+-        with self._lock:
+-            if self.active >= self.limit:
+-                return False
+-            self.active += 1
+-            return True
+-
+-    def release(self):
+-        with self._lock:
+-            self.active = max(0, self.active - 1)
+-
+-    async def frames(self, store, run_id):
+-        """Yield SSE text. The caller must have acquired a slot; it is released when the stream ends for any reason."""
+-        loop = asyncio.get_running_loop()
+-        started, last_sent, quiet, fingerprint = loop.time(), loop.time(), 0.0, None
+-        try:
+-            while True:
+-                body, snapshot, names = await run_in_threadpool(
+-                    lambda: (store.get(run_id), store.snapshot(run_id), store.device_identities())
+-                )
+-                # The clock is left out of the comparison: only real changes are worth sending.
+-                current = json.dumps(
+-                    build_timeline(body, snapshot, now_ms=0, names=names),
+-                    sort_keys=True,
+-                    separators=(",", ":"),
+-                    allow_nan=False,
+-                )
+-                if current != fingerprint:
+-                    fingerprint = current
+-                    payload = json.dumps(
+-                        build_timeline(body, snapshot, names=names), separators=(",", ":"), allow_nan=False
+-                    )
+-                    yield f"event: timeline\ndata: {payload}\n\n"
+-                    last_sent = loop.time()
+-                if not body or body.get("status") in TERMINAL or loop.time() - started > self.max_seconds:
+-                    yield "event: end\ndata: {}\n\n"
+-                    return
+-                await asyncio.sleep(self.poll)
+-                quiet = loop.time() - last_sent
+-                if quiet >= self.heartbeat:
+-                    yield ": heartbeat\n\n"
+-                    last_sent = loop.time()
+-        finally:
+-            self.release()
++sys.modules[__name__] = _implementation
+diff --git a/backend/monitor.py b/backend/monitor.py
+index 5dee3f26..d0393fd9 100644
+--- a/backend/monitor.py
++++ b/backend/monitor.py
+@@ -1,43 +1,9 @@
+-"""Private Server monitor: JSON lines, no CUDA; stdin EOF owns its lifetime."""
++"""Compatibility namespace retained during application composition extraction."""
+ 
+-import argparse
+-import json
+-from pathlib import Path
+-import signal
+ import sys
+-import threading
+-from heteroes.product.telemetry import TelemetrySampler
+-
+-
+-def main():
+-    p = argparse.ArgumentParser()
+-    p.add_argument("--state", type=Path, required=True)
+-    p.add_argument("--storage", type=Path)
+-    p.add_argument("--energy-state", type=Path)
+-    args = p.parse_args()
+-    args.state.mkdir(parents=True, exist_ok=True, mode=0o700)
+-    stop = threading.Event()
+-
+-    def lifetime():
+-        sys.stdin.buffer.read()
+-        stop.set()
+-
+-    threading.Thread(target=lifetime, daemon=True).start()
+-    signal.signal(signal.SIGTERM, lambda *_: stop.set())
+-    signal.signal(signal.SIGINT, lambda *_: stop.set())
+-    sampler = TelemetrySampler(
+-        args.state, args.storage, energy_directory=args.energy_state or Path.home() / ".local/share/heteroes-power"
+-    )
+-    while not stop.is_set():
+-        try:
+-            observation = sampler.sample()
+-            print(
+-                json.dumps({"observation": observation, "history": list(sampler.history)}, allow_nan=False), flush=True
+-            )
+-        except (OSError, ValueError):
+-            pass
+-        stop.wait(3)
+-
++from .apps import monitor as _implementation
+ 
+ if __name__ == "__main__":
+-    main()
++    raise SystemExit(_implementation.main())
++else:
++    sys.modules[__name__] = _implementation
+diff --git a/backend/repositories/audit.py b/backend/repositories/audit.py
+new file mode 100644
+index 00000000..f40bc581
+--- /dev/null
++++ b/backend/repositories/audit.py
+@@ -0,0 +1,9 @@
++"""Product audit persistence."""
++
++from .base import execute
++
++
++class AuditRepository:
++    @staticmethod
++    def record(db, parameters):
++        return execute(db, "INSERT INTO audit(actor,action,target,created,workspace_id) VALUES (?,?,?,?,?)", parameters)
+diff --git a/backend/repositories/bootstrap.py b/backend/repositories/bootstrap.py
+new file mode 100644
+index 00000000..7b84986d
+--- /dev/null
++++ b/backend/repositories/bootstrap.py
+@@ -0,0 +1,9 @@
++"""Bootstrap admission persistence."""
++
++from .base import execute
++
++
++class BootstrapRepository:
++    @staticmethod
++    def server_initialize_8(db, parameters=()):
++        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
+diff --git a/backend/routes_web.py b/backend/routes_web.py
+index 2f5999a6..bcd99e44 100644
+--- a/backend/routes_web.py
++++ b/backend/routes_web.py
+@@ -1,54 +1,6 @@
+-from .config import load_config
+-import json
+-import os
+-from pathlib import Path
++"""Compatibility namespace retained during application composition extraction."""
+ 
+-from fastapi import HTTPException
+-from fastapi.responses import FileResponse
+-from fastapi.staticfiles import StaticFiles
++import sys
++from .api import web as _implementation
+ 
+-
+-def install_routes(app, web_directory, downloads_directory):
+-    if web_directory is not None:
+-        web = Path(web_directory).resolve(strict=True)
+-        if not (web / "index.html").is_file():
+-            raise ValueError("Built web application is missing")
+-        app.mount("/assets", StaticFiles(directory=web / "assets"), name="web-assets")
+-        if downloads_directory is not None:
+-
+-            @app.get("/downloads/manifest.json", include_in_schema=False)
+-            def installer_manifest():
+-                manifest = json.loads((Path(downloads_directory) / "manifest.json").read_text())
+-                private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-                if private_root:
+-                    config = load_config(private_root)
+-                    # publicDownloads: the operator serves installers on the public origin too.
+-                    if config.get("publicWebUrl") and not config.get("publicDownloads"):
+-                        bulk = config.get("bulkApiUrl", config.get("apiUrl"))
+-                        manifest["privateTransferRequired"] = True
+-                        for group in ("installers", "serverInstallers"):
+-                            for item in manifest.get(group, []):
+-                                item["url"] = bulk + "/downloads/" + Path(item["name"]).name
+-                        for item in manifest.get("linuxWorker", {}).values():
+-                            item["url"] = bulk + "/downloads/" + Path(item["name"]).name
+-                return manifest
+-
+-            # The publisher links installers from another disk; Starlette refuses such symlinks by default.
+-            # Path traversal is still rejected: the check then compares the link's own location.
+-            app.mount(
+-                "/downloads", StaticFiles(directory=downloads_directory, follow_symlink=True), name="worker-downloads"
+-            )
+-        else:
+-
+-            @app.get("/downloads/manifest.json", include_in_schema=False)
+-            def no_installers():
+-                return {"version": "0.1.0", "privateTrial": True, "installers": []}
+-
+-        @app.get("/{route:path}", include_in_schema=False)
+-        def web_page(route: str):
+-            if route == "api" or route.startswith(("api/", "assets/", "downloads/")):
+-                raise HTTPException(404, "Unknown endpoint")
+-            candidate = web / route
+-            if candidate.is_file() and candidate.resolve().is_relative_to(web):
+-                return FileResponse(candidate)
+-            return FileResponse(web / "index.html", headers={"Cache-Control": "no-cache"})
++sys.modules[__name__] = _implementation
+diff --git a/backend/server.py b/backend/server.py
+index 36975969..282ca358 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -1,127 +1,8 @@
+-"""CPU-only packaged Lab Server entry point. Bootstrap secrets arrive on stdin."""
+-
+-from .config import load_config
+-import argparse
+-import ipaddress
+-import json
+-import os
+-from pathlib import Path
+-import shutil
+-import secrets
+-import signal
+-import sys
+-import threading
+-
+-from pydantic import BaseModel, ConfigDict, Field
+-
+-from .devices import AgentRuntime, Enrollment
+-from .local_storage import LocalBackend
+-from .store import Store
+-
+-
+-class Bootstrap(BaseModel):
+-    model_config = ConfigDict(extra="forbid")
+-    username: str = Field(min_length=2, max_length=100, pattern=r"^[a-zA-Z0-9_.-]+$")
+-    password: str = Field(min_length=12, max_length=200)
+-    host: str
+-    port: int = Field(ge=1024, le=65535, strict=True)
+-    storageDirectory: str
+-    storageVolumeUUID: str | None = None
+-
+-
+-def initialize(root, values):
+-    data = Bootstrap.model_validate(values)
+-    address = ipaddress.ip_address(data.host)
+-    if address.version != 4 or address.is_unspecified or address.is_multicast:
+-        raise ValueError("Select a local IPv4 address")
+-    url = Enrollment.private_compute(f"http://{address}:{data.port}")
+-    storage = Path(data.storageDirectory)
+-    if not storage.is_absolute():
+-        raise ValueError("Storage directory must be absolute")
+-    root = Path(root)
+-    # A failed or interrupted previous installation is never silently overwritten.
+-    root.mkdir(mode=0o700, parents=False, exist_ok=False)
+-    try:
+-        backend = LocalBackend(
+-            storage, root / "storage-signing.key", url, data.storageVolumeUUID, root / "metadata-objects"
+-        )
+-        store = Store(root / "state/product.sqlite", {data.username: data.password}, AgentRuntime(backend))
+-        with store.db() as db:
+-            db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("dispatchHold", "true"))
+-        config = {
+-            "deploymentMode": "agent",
+-            "storageMode": "local",
+-            "serverInstanceId": secrets.token_hex(16),
+-            "productStateDirectory": str(root / "state"),
+-            "apiUrl": url,
+-            "serverHost": str(address),
+-            "serverPort": data.port,
+-            "storageDirectory": str(storage),
+-            "storageVolumeUUID": data.storageVolumeUUID,
+-            "metadataStorageDirectory": str(root / "metadata-objects"),
+-            "storageQuotaBytes": 200_000_000_000,
+-        }
+-        # The DB contains only an Argon2 password hash. There is no reusable
+-        # administrator password in a credentials file, process argument or log.
+-        for name, value in [("config.json", config), ("credentials.json", {"users": {}})]:
+-            with (root / name).open("x") as stream:
+-                os.chmod(root / name, 0o600)
+-                json.dump(value, stream)
+-        return {"initialized": True, "apiUrl": url, "dispatchHeld": True}
+-    except BaseException:
+-        shutil.rmtree(root)
+-        raise
+-
+-
+-def main():
+-    parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument("--private", type=Path, required=True)
+-    parser.add_argument("--initialize", action="store_true")
+-    parser.add_argument("--web", type=Path)
+-    parser.add_argument("--downloads", type=Path)
+-    parser.add_argument("--headless", action="store_true", help="Run without a desktop parent pipe")
+-    args = parser.parse_args()
+-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+-    if args.initialize:
+-        try:
+-            result = initialize(args.private, json.loads(sys.stdin.buffer.read(16385)))
+-        except Exception:
+-            # Pydantic errors can include input secrets; do not print them.
+-            print(json.dumps({"error": "SERVER_INITIALIZATION_FAILED"}))
+-            return 1
+-        print(json.dumps(result))
+-        return 0
+-    if args.web is None:
+-        parser.error("--web is required for serving")
+-    config = load_config(args.private)
+-    os.environ["HETEROES_PRIVATE_CONFIG"] = str(args.private)
+-    os.environ["HETEROES_WEB_DIRECTORY"] = str(args.web)
+-    if args.downloads:
+-        os.environ["HETEROES_DOWNLOADS_DIRECTORY"] = str(args.downloads)
+-    os.environ["HETEROES_UI_URL"] = config.get("publicWebUrl") or config["apiUrl"]
+-
+-    def parent_pipe():
+-        # The desktop owns this process. Closing its pipe on exit/crash stops
+-        # only this API; outbound workers retain durable outage evidence.
+-        sys.stdin.buffer.read(1)
+-        os.kill(os.getpid(), signal.SIGTERM)
+-
+-    import uvicorn
+-
+-    if not args.headless:
+-        threading.Thread(target=parent_pipe, daemon=True).start()
+-    from urllib.parse import urlsplit
+-
+-    address = urlsplit(config["apiUrl"])
+-    uvicorn.run(
+-        "backend.app:app_from_environment",
+-        factory=True,
+-        host=config.get("serverHost", address.hostname),
+-        port=config.get("serverPort", address.port or 80),
+-        access_log=False,
+-    )
+-    return 0
++"""Compatibility packaged server exports and command entrypoint."""
+ 
++from .core.server_models import Bootstrap as Bootstrap
++from .services.bootstrap import initialize as initialize
++from .apps.server import main as main
+ 
+ if __name__ == "__main__":
+     raise SystemExit(main())
+diff --git a/backend/services/access.py b/backend/services/access.py
+new file mode 100644
+index 00000000..1756dbde
+--- /dev/null
++++ b/backend/services/access.py
+@@ -0,0 +1,59 @@
++"""Fresh account/workspace authorization and application state views."""
++
++from .policies import active_profile, platform_profile
++from ..core.errors import ServiceError
++
++
++class AccessService:
++    def __init__(self, store, runtime):
++        self.store, self.runtime = store, runtime
++
++    def scope(self, current, workspace_id: str):
++        profile = active_profile(self.store, current, "Your account must be active to access lab resources")
++        membership = next(
++            (w for w in self.store.workspaces(current["userId"]) if w["workspaceId"] == workspace_id), None
++        )
++        if not membership:
++            raise ServiceError(403, "Select a workspace you belong to")
++        return {**profile, "workspaceId": workspace_id, "workspaceRole": membership["role"]}
++
++    def visible(self, current):
++        return [
++            body
++            for body in self.store.list()
++            if not body.get("archivedAt")
++            and body["workspaceId"] == current["workspaceId"]
++            and (current["workspaceRole"] == "ADMIN" or body["ownerUserId"] == current["userId"])
++        ]
++
++    def authorized(self, run_id, current):
++        body = self.store.get(run_id)
++        current = self.scope(current, current["workspaceId"])
++        if (
++            not body
++            or body.get("archivedAt")
++            or body["workspaceId"] != current["workspaceId"]
++            or (current["workspaceRole"] != "ADMIN" and body["ownerUserId"] != current["userId"])
++        ):
++            raise ServiceError(404, "Experiment not found")
++        return body
++
++    def capabilities(self):
++        try:
++            value = self.runtime.capabilities()
++            self.store.ensure_workers(value["workerIds"])
++            return value
++        except Exception:
++            raise ServiceError(503, "Runtime control service unavailable") from None
++
++    def active(self, current):
++        return active_profile(self.store, current, "Your account is awaiting approval or is restricted")
++
++    def platform(self, current):
++        return platform_profile(current, "Platform administrator permission required")
++
++    def workspace_admin(self, workspace_id, current):
++        fresh = self.scope(current, workspace_id)
++        if fresh["workspaceRole"] != "ADMIN":
++            raise ServiceError(403, "Workspace administrator permission required")
++        return fresh
+diff --git a/backend/services/audit.py b/backend/services/audit.py
+new file mode 100644
+index 00000000..0487a7d6
+--- /dev/null
++++ b/backend/services/audit.py
+@@ -0,0 +1,9 @@
++"""Audit policy; timestamps remain the original product clock."""
++
++from ..core.clock import now
++from ..repositories.audit import AuditRepository as repository
++
++
++class AuditService:
++    def audit(self, db, actor, action, target, workspace_id=None):
++        repository.record(db, (actor, action, target, now(), workspace_id))
+diff --git a/backend/services/bootstrap.py b/backend/services/bootstrap.py
+new file mode 100644
+index 00000000..324e3cc8
+--- /dev/null
++++ b/backend/services/bootstrap.py
+@@ -0,0 +1,61 @@
++"""CPU-only packaged Lab Server entry point. Bootstrap secrets arrive on stdin."""
++
++from ..repositories.bootstrap import BootstrapRepository as repository
++from ..core.server_models import Bootstrap
++
++import ipaddress
++import json
++import os
++from pathlib import Path
++import shutil
++import secrets
++
++
++from .devices import AgentRuntime
++from ..core.device_models import Enrollment
++from ..storage.local_backend import LocalBackend
++from .store import Store
++
++
++def initialize(root, values):
++    data = Bootstrap.model_validate(values)
++    address = ipaddress.ip_address(data.host)
++    if address.version != 4 or address.is_unspecified or address.is_multicast:
++        raise ValueError("Select a local IPv4 address")
++    url = Enrollment.private_compute(f"http://{address}:{data.port}")
++    storage = Path(data.storageDirectory)
++    if not storage.is_absolute():
++        raise ValueError("Storage directory must be absolute")
++    root = Path(root)
++    # A failed or interrupted previous installation is never silently overwritten.
++    root.mkdir(mode=0o700, parents=False, exist_ok=False)
++    try:
++        backend = LocalBackend(
++            storage, root / "storage-signing.key", url, data.storageVolumeUUID, root / "metadata-objects"
++        )
++        store = Store(root / "state/product.sqlite", {data.username: data.password}, AgentRuntime(backend))
++        with store.db() as db:
++            repository.server_initialize_8(db, ("dispatchHold", "true"))
++        config = {
++            "deploymentMode": "agent",
++            "storageMode": "local",
++            "serverInstanceId": secrets.token_hex(16),
++            "productStateDirectory": str(root / "state"),
++            "apiUrl": url,
++            "serverHost": str(address),
++            "serverPort": data.port,
++            "storageDirectory": str(storage),
++            "storageVolumeUUID": data.storageVolumeUUID,
++            "metadataStorageDirectory": str(root / "metadata-objects"),
++            "storageQuotaBytes": 200_000_000_000,
++        }
++        # The DB contains only an Argon2 password hash. There is no reusable
++        # administrator password in a credentials file, process argument or log.
++        for name, value in [("config.json", config), ("credentials.json", {"users": {}})]:
++            with (root / name).open("x") as stream:
++                os.chmod(root / name, 0o600)
++                json.dump(value, stream)
++        return {"initialized": True, "apiUrl": url, "dispatchHeld": True}
++    except BaseException:
++        shutil.rmtree(root)
++        raise
+diff --git a/backend/services/deployment.py b/backend/services/deployment.py
+new file mode 100644
+index 00000000..7f82ebdc
+--- /dev/null
++++ b/backend/services/deployment.py
+@@ -0,0 +1,97 @@
++"""CPU deployment validation and public entrypoint configuration. No GPU imports."""
++
++from ..db.sqlite_diagnostics import SQLiteDiagnostics as repository, connect_readonly
++
++from .policies import dispatch_held
++import json
++import os
++from pathlib import Path
++from ..core.addresses import endpoint
++
++
++def save_private(path, value):
++    path = Path(path)
++    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
++    temporary = path.with_name(path.name + ".tmp")
++    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
++    with os.fdopen(fd, "w") as out:
++        json.dump(value, out, indent=2)
++        out.flush()
++        os.fsync(out.fileno())
++    os.replace(temporary, path)
++
++
++def idle(config):
++    path = Path(config["productStateDirectory"]) / "product.sqlite"
++    with connect_readonly(path.as_uri() + "?mode=ro", uri=True) as db:
++        if dispatch_held(db) is not True:
++            raise RuntimeError("Hold dispatch before deployment maintenance")
++        for table in ("device_reservations", "physical_reservations"):
++            if repository.deployment_idle_1(db, (), table=table).fetchone()[0]:
++                raise RuntimeError("Confirm all assignments drained before deployment maintenance")
++
++
++def caddyfile(config):
++    api = endpoint(config["apiUrl"], private=True)
++    compute = endpoint(config["privateComputeUrl"], private=True)
++    ports = [config.get("webEntryPort", 8080), config.get("computeEntryPort", 8081)]
++    if any(type(p) is not int or not 1024 <= p <= 65535 for p in ports) or len(set(ports)) != 2:
++        raise ValueError("Select distinct unprivileged entry ports")
++    public_downloads = config.get("publicDownloads", False)
++    if type(public_downloads) is not bool:
++        raise ValueError("publicDownloads must be true or false")
++    # Installers are the only bulk path an operator may open to the public entry;
++    # model weights, storage capabilities and backups always need a private route.
++    bulk = (
++        ("/downloads/* " if not public_downloads else "")
++        + "/api/v1/datasets/import /api/v1/local-storage/* /api/v1/cloud-downloads/* /api/v1/artifacts/*/download-ticket /api/v1/platform/backups/*/download /api/v1/platform/backups/*/download-ticket"
++    )
++    # Caddy's admin endpoint is disabled. Separate loopback listeners prevent
++    # a forged Host header from selecting the private bulk entrypoint.
++    return """{
++    admin off
++    auto_https off
++}
++http://:%d {
++    bind 127.0.0.1
++    # one larger body: a signed dataset upload from a researcher without the private route (the lab checks the
++    # size it signed, at most 64 MiB); every other request stays small
++    @small not path /api/v1/public-upload/*
++    request_body @small {
++        max_size 3MB
++    }
++    @upload path /api/v1/public-upload/*
++    request_body @upload {
++        max_size 64MiB
++    }
++    header X-Content-Type-Options nosniff
++    header Referrer-Policy no-referrer
++    @manifest path /downloads/manifest.json
++    handle @manifest {
++        reverse_proxy %s
++    }
++    @bulk path %s
++    handle @bulk {
++        respond "Private LAN/Tailscale transfer required" 403
++    }
++    handle {
++        # Server-sent events (the live run view) must reach the browser as they are produced.
++        reverse_proxy %s {
++            flush_interval -1
++        }
++    }
++}
++http://:%d {
++    bind 127.0.0.1
++    request_body {
++        max_size 1MB
++    }
++    @control path /v1/health /v1/job /v1/leases /v1/heartbeats /v1/results /v1/failures /v1/updates/*
++    handle @control {
++        reverse_proxy %s
++    }
++    handle {
++        respond "Private LAN/Tailscale transfer required" 403
++    }
++}
++""" % (ports[0], api, bulk, api, ports[1], compute)
+diff --git a/backend/services/devices.py b/backend/services/devices.py
+index 32028355..ca73fb66 100644
+--- a/backend/services/devices.py
++++ b/backend/services/devices.py
+@@ -28,7 +28,7 @@ from ..core.device_models import (
+ from ..agent_scheduling import AgentScheduling
+ from ..agent_commands import AgentCommands
+ from ..agent_polling import AgentPolling
+-from ..model_qualification import ModelQualifications
++from .model_qualification import ModelQualifications
+ from ..db.migrations import initialize_agent_schema
+ from .policies import has_device_reservation, processes_drained
+ from .policies import set_disabled_workers, active_profile, platform_profile
+diff --git a/backend/services/doctor.py b/backend/services/doctor.py
+new file mode 100644
+index 00000000..84a4ab0d
+--- /dev/null
++++ b/backend/services/doctor.py
+@@ -0,0 +1,152 @@
++"""Read-only preflight for a Local Lab Server. It changes no lab file (SQLite may create its
++-shm coordination file when it opens the WAL database); exit status 1 if any check FAILs.
++
++    python -m backend.doctor --private ~/.config/heteroes-m2
++"""
++
++from ..db.sqlite_diagnostics import SQLiteDiagnostics as repository, connect_readonly, DatabaseError, DatabaseCorruption
++
++from .policies import dispatch_held
++from ..core.config import load_config
++from pathlib import Path
++import shutil
++import time
++
++from ..core.addresses import endpoint, is_private
++from ..db.migrations import SCHEMA_VERSION
++
++PASS, WARN, FAIL = "PASS", "WARN", "FAIL"
++LOW_FREE_BYTES = 10 * 10**9
++
++
++def run_checks(private):
++    """Return [(level, name, message)]. The directory is only ever read."""
++    private = Path(private)
++    out = []
++
++    def add(level, name, message):
++        out.append((level, name, message))
++
++    try:
++        config = load_config(private)
++    except (OSError, ValueError):
++        add(FAIL, "configuration", f"{private}/config.json is missing or is not valid JSON")
++        return out
++    add(PASS, "configuration", "config.json is readable")
++
++    if config.get("deploymentMode") == "agent":
++        add(PASS, "mode", "agent mode (the only supported control mode)")
++    else:
++        add(FAIL, "mode", 'deploymentMode is not "agent"; the older control mode is not supported')
++
++    api = config.get("apiUrl", "")
++    try:
++        endpoint(api, private=True)
++    except ValueError:
++        add(
++            FAIL,
++            "address",
++            f'apiUrl "{api}" must be a numeric private, loopback or Tailscale address; names and public addresses are not accepted',
++        )
++    else:
++        host = api.split("//", 1)[-1].split(":")[0]
++        if host.startswith("127."):
++            add(WARN, "address", "apiUrl is a loopback address: only this computer can reach the lab")
++        else:
++            add(
++                PASS,
++                "address",
++                f"apiUrl {api} is a private address; keep it fixed (DHCP reservation) or the lab breaks when it changes",
++            )
++        if api.startswith("https://"):
++            add(PASS, "transport", "traffic to the Lab Server is encrypted")
++        else:
++            add(
++                WARN,
++                "transport",
++                "plain HTTP: session and device tokens are not encrypted. Fine on a trusted LAN; use an encrypted overlay (WireGuard, Tailscale) on a shared network",
++            )
++
++    public = [config.get(k) for k in ("publicWebUrl", "publicComputeUrl") if config.get(k)]
++    if public:
++        bad = []
++        for url in public:
++            try:
++                endpoint(url)
++                if is_private(url):
++                    bad.append(url)
++            except ValueError:
++                bad.append(url)
++        if bad:
++            add(FAIL, "public", "public address must be an HTTPS host name: " + ", ".join(bad))
++        elif any("trycloudflare.com" in url for url in public):
++            add(
++                WARN,
++                "public",
++                "the public address is a temporary Quick Tunnel: it changes whenever the tunnel restarts",
++            )
++        else:
++            add(PASS, "public", "public addresses are HTTPS host names")
++        add(
++            PASS,
++            "installers",
++            "installers are served on the public address"
++            if config.get("publicDownloads")
++            else "installers are private: they download only over the LAN or Tailscale address",
++        )
++
++    database = private / "state" / "product.sqlite"
++    held, online = None, None
++    try:
++        with connect_readonly(database.as_uri() + "?mode=ro", uri=True) as db:
++            if repository.doctor_run_checks_6(db, ()).fetchone()[0] != "ok":
++                raise DatabaseCorruption("integrity check failed")
++            version = repository.doctor_run_checks_3(db, ()).fetchone()[0]
++            if version > SCHEMA_VERSION:
++                add(
++                    FAIL,
++                    "database",
++                    f"database schema {version} is newer than this program knows ({SCHEMA_VERSION}); use the newer release",
++                )
++            else:
++                add(PASS, "database", f"product.sqlite is intact (schema {version})")
++            held = dispatch_held(db)
++            reservations = (
++                repository.doctor_run_checks_7(db, ()).fetchone()[0]
++                if repository.doctor_run_checks_4(db, ()).fetchone()
++                else 0
++            )
++            if repository.doctor_run_checks_2(db, ()).fetchone():
++                rows = repository.doctor_run_checks_5(db, ()).fetchall()
++                online = sum(1 for status, seen in rows if status == "APPROVED" and time.time() - seen < 30)
++                add(
++                    PASS if online else WARN,
++                    "devices",
++                    f"{len(rows)} device(s) enrolled, {online} approved and online"
++                    + ("" if online else ": no GPU is available right now"),
++                )
++    except (DatabaseError, OSError, ValueError, TypeError):
++        add(FAIL, "database", f"{database} is missing, damaged or unreadable")
++    else:
++        add(
++            WARN if held else PASS,
++            "dispatch",
++            "the queue is held: new experiments will not start until an administrator resumes it in Operations"
++            if held
++            else "the queue is open",
++        )
++        if reservations:
++            add(WARN, "reservations", f"{reservations} physical GPU reservation(s) are active")
++
++    storage = config.get("storageDirectory")
++    if not storage:
++        add(WARN, "storage", "no storageDirectory configured: recovery points cannot be kept")
++    elif not Path(storage).is_dir():
++        add(FAIL, "storage", f"storage directory {storage} does not exist (is the disk mounted?)")
++    else:
++        free = shutil.disk_usage(storage).free
++        if free < LOW_FREE_BYTES:
++            add(WARN, "storage", f"only {free / 1e9:.1f} GB free in {storage}; a model checkpoint is about 1 GB")
++        else:
++            add(PASS, "storage", f"{free / 1e9:.0f} GB free in {storage}")
++    return out
+diff --git a/backend/services/experiments.py b/backend/services/experiments.py
+index 1f9cdf33..ec60ec5f 100644
+--- a/backend/services/experiments.py
++++ b/backend/services/experiments.py
+@@ -6,9 +6,10 @@ from .policies import dispatch_held
+ import hashlib
+ import json
+ import secrets
+-from ..store import TERMINAL, now
++from ..core.constants import TERMINAL
++from ..core.clock import now
+ from ..constants import REVISION
+-from ..timeline import build_timeline
++from .timeline import build_timeline
+ from types import SimpleNamespace
+ from ..core.errors import ServiceError
+ from ..repositories.experiments import ExperimentsRepository as repository
+diff --git a/backend/services/store.py b/backend/services/store.py
+new file mode 100644
+index 00000000..e9cf5fc6
+--- /dev/null
++++ b/backend/services/store.py
+@@ -0,0 +1,107 @@
++"""Product state facade. Runtime ledgers remain owned by device agents."""
++
++from contextlib import contextmanager
++import os
++from pathlib import Path
++import threading
++
++from argon2 import PasswordHasher
++
++from .accounts import AccountService
++from .device_state import DeviceStateService
++from .scheduling import SchedulingService
++from .experiment_state import ExperimentStateService
++from .workspaces import WorkspaceStateService
++from ..core.clock import now as now
++from ..db.database import SQLiteDatabase
++from .audit import AuditService
++from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
++
++
++class Store:
++    def __init__(self, path, passwords, runtime):
++        self.path, self.runtime = str(path), runtime
++        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
++        self.lock = threading.RLock()
++        self.operation_lock = threading.RLock()
++        self.hasher = PasswordHasher()
++        self.accounts = AccountService(self)
++        self.audit_service = AuditService()
++        self.device_state = DeviceStateService(self)
++        self.scheduling = SchedulingService(self)
++        self.experiments = ExperimentStateService(self)
++        self.workspace_state = WorkspaceStateService(self)
++        self.last_error = None
++        self.database = SQLiteDatabase(self.path, self.lock)
++        self.database.initialize(passwords, self.hasher)
++        os.chmod(path, 0o600)
++        runtime.attach_store(self)
++        try:
++            self.ensure_workers(runtime.capabilities()["workerIds"])
++        except Exception:
++            self.last_error = "WorkerConfigurationUnavailable"
++
++    @contextmanager
++    def db(self):
++        with self.database.connection() as connection:
++            yield connection
++
++    def audit(self, db, actor, action, target, workspace_id=None):
++        return self.audit_service.audit(db=db, actor=actor, action=action, target=target, workspace_id=workspace_id)
++
++    def ensure_workers(self, ids):
++        return self.device_state.ensure_workers(ids=ids)
++
++    def profile(self, user_id):
++        return self.accounts.profile(user_id)
++
++    def workspaces(self, user_id):
++        return self.workspace_state.workspaces(user_id=user_id)
++
++    def assignments(self, workspace_id, include_disabled=False):
++        return self.device_state.assignments(workspace_id=workspace_id, include_disabled=include_disabled)
++
++    def disabled_workers(self, db):
++        return self.device_state.disabled_workers(db=db)
++
++    def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
++        return self.experiments.cancel_selected(db=db, worker_id=worker_id, include_queued=include_queued, keep=keep)
++
++    def cancel_owned(self, db, owner, workspace_id=None):
++        return self.experiments.cancel_owned(db=db, owner=owner, workspace_id=workspace_id)
++
++    def eligibility(self, db, body, workers=None):
++        return self.experiments.eligibility(db=db, body=body, workers=workers)
++
++    def get(self, run_id):
++        return self.experiments.get(run_id=run_id)
++
++    def list(self):
++        return self.experiments.list()
++
++    def save(self, db, body):
++        return self.experiments.save(db=db, body=body)
++
++    def create(self, owner, config, workspace_id="lab"):
++        return self.experiments.create(owner=owner, config=config, workspace_id=workspace_id)
++
++    def device_names(self):
++        return self.device_state.device_names()
++
++    def device_identities(self):
++        return self.device_state.device_identities()
++
++    def snapshot(self, run_id):
++        return self.experiments.snapshot(run_id=run_id)
++
++    def dispatch_once(self):
++        return self.scheduling.dispatch_once()
++
++    def _dispatch_once(self):
++        return self.scheduling._dispatch_once()
++
++    def _dispatch_run(self, active):
++        return self.scheduling._dispatch_run(active=active)
++
++    def dispatch(self, stop):
++        return self.scheduling.dispatch(stop=stop)  # errors never become fabricated success/rewards
+diff --git a/backend/services/timeline.py b/backend/services/timeline.py
+new file mode 100644
+index 00000000..b9ff3129
+--- /dev/null
++++ b/backend/services/timeline.py
+@@ -0,0 +1,230 @@
++"""A compact, time-ordered view of one run for the Live, Timeline and Replay screens.
++
++Pure: it reads the stored snapshot and returns plain data, so a finished run and a running one are described the
++same way. Times are epoch milliseconds; generations are numbered from 0 as in the ledger.
++"""
++
++from datetime import datetime
++import math
++import time
++
++# Moments worth showing on a timeline. Routine chatter (a worker asking for work) is deliberately not a mark.
++MARKS = frozenset(
++    {
++        "replay",
++        "worker_unavailable",
++        "worker_start_unknown",
++        "worker_start",
++        "model_loaded",
++        "executor_ready",
++        "transport_error",
++        "coordinator_recovery",
++        "recovered",
++        "generation_resumed",
++        "recovery_point_error",
++        "managed_error",
++        "audit_mismatch",
++        "audit_worker_quarantined",
++        "audit_incomplete",
++        "membership_changed",
++        "membership_refused",
++        "worker_joined",
++        "worker_left",
++        "worker_restarted",
++        "worker_unreachable",
++        "worker_reachable",
++        "worker_lost",
++        "worker_blocked",
++        "worker_retry_requested",
++    }
++)
++SECONDS = (
++    ("wait", "wait_seconds"),
++    ("update", "update_seconds"),
++    ("publish", "publish_seconds"),
++    ("record", "record_seconds"),
++    ("total", "total_seconds"),
++)
++
++
++def _number(value):
++    return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
++
++
++def _ms_from_iso(value):
++    try:
++        return int(datetime.fromisoformat(value).timestamp() * 1000)
++    except (TypeError, ValueError):
++        return None
++
++
++def _ms_from_epoch(value):
++    number = _number(value)
++    return None if number is None else int(number * 1000)
++
++
++def _generation_index(generation_id):
++    try:
++        return int(str(generation_id).rsplit(".g", 1)[1])
++    except (IndexError, ValueError):
++        return None
++
++
++def build_timeline(body, snapshot, now_ms=None, names=None):
++    names = names or {}
++    snapshot = snapshot or {}
++    state = snapshot.get("state") or {}
++    recorded = (body or {}).get("workerIdentities", {})
++
++    def identity(worker_id):
++        value = recorded.get(worker_id) or names.get(worker_id)
++        if isinstance(value, str):
++            return {"name": value, "identitySource": "current"}
++        if isinstance(value, dict):
++            return {
++                "name": value.get("name"),
++                "gpuName": value.get("gpuName"),
++                "gpuUUID": value.get("gpuUUID"),
++                "gpuIndex": value.get("gpuIndex"),
++                "identitySource": value.get("source", "current"),
++            }
++        return {"name": None, "identitySource": "unknown"}
++
++    events = sorted(
++        (e for e in snapshot.get("events") or [] if isinstance(e, dict) and _number(e.get("t")) is not None),
++        key=lambda e: e["t"],
++    )
++    candidates = {c.get("candidateId"): c for c in snapshot.get("candidates") or []}
++
++    jobs = []
++    for item in snapshot.get("attempts") or []:
++        start = _ms_from_iso(item.get("startedAt"))
++        if start is None:
++            continue
++        candidate = candidates.get(item.get("candidateId"), {})
++        won = (
++            candidate.get("status") == "COMMITTED"
++            and candidate.get("attemptId") == item.get("attemptId")
++            and item.get("status") == "SUCCEEDED"
++        )
++        jobs.append(
++            {
++                "candidateId": item.get("candidateId"),
++                "attemptId": item.get("attemptId"),
++                "generation": _generation_index(item.get("generationId")),
++                "workerId": item.get("workerId"),
++                "seed": candidate.get("seed"),
++                "startMs": start,
++                "endMs": _ms_from_iso(item.get("completedAt")),
++                "status": item.get("status"),
++                "reward": _number(candidate.get("reward")) if won else None,
++            }
++        )
++    jobs.sort(key=lambda j: (j["startMs"], j["candidateId"] or ""))
++
++    by_generation = {}
++    for event in events:
++        index = event.get("generation")
++        if isinstance(index, int) and event.get("event") in (
++            "generation_open",
++            "generation_complete",
++            "generation_done",
++        ):
++            by_generation.setdefault(index, {})[event["event"]] = event
++    generations = []
++    for item in snapshot.get("generations") or []:
++        index = _generation_index(item.get("generationId"))
++        if index is None:
++            continue
++        seen = by_generation.get(index, {})
++        done = seen.get("generation_done", {})
++        finished = item.get("status") == "COMPLETED"
++        seconds = {name: _number(done.get(key)) for name, key in SECONDS if _number(done.get(key)) is not None}
++        generations.append(
++            {
++                "index": index,
++                "id": item.get("generationId"),
++                "status": item.get("status"),
++                "openMs": _ms_from_epoch(seen.get("generation_open", {}).get("t"))
++                or _ms_from_iso(item.get("startedAt")),
++                "evaluatedMs": _ms_from_epoch(seen.get("generation_complete", {}).get("t")),
++                "doneMs": _ms_from_epoch(done.get("t"))
++                or (_ms_from_iso(item.get("completedAt")) if finished else None),
++                "candidateCount": item.get("candidateCount"),
++                "committedCount": item.get("committedCandidateCount"),
++                "rewardMean": _number(item.get("rewardMean", done.get("mean_reward"))),
++                "rewardBest": _number(item.get("rewardBest", done.get("max_reward"))),
++                "seconds": seconds,
++            }
++        )
++    generations.sort(key=lambda g: g["index"])
++
++    workers, known = [], set()
++    for worker_id, info in (state.get("workerStates") or {}).items():
++        known.add(worker_id)
++        info = info or {}
++        # not answering now (finding 11): its last known alive/ready says nothing about the present
++        away = None if info.get("confirmed", True) else _ms_from_epoch(info.get("unreachableSince"))
++        workers.append(
++            {
++                "id": worker_id,
++                **identity(worker_id),
++                "started": not info.get("notStarted", False),
++                "alive": info.get("alive"),
++                "unreachableSinceMs": away,
++                "stopReason": info.get("stopReason"),
++                "blockedAtMs": _ms_from_epoch(info.get("blockedAt")),
++            }
++        )
++    for job in jobs:
++        if job["workerId"] and job["workerId"] not in known:
++            known.add(job["workerId"])
++            workers.append({"id": job["workerId"], **identity(job["workerId"]), "started": True, "alive": None})
++    for worker_id in (body or {}).get("workerIds", []):
++        if worker_id not in known:
++            known.add(worker_id)
++            workers.append({"id": worker_id, **identity(worker_id), "started": False, "alive": None})
++
++    marks = []
++    for event in events:
++        if event.get("event") in MARKS:
++            mark = {
++                "atMs": int(event["t"] * 1000),
++                "type": event["event"],
++                "workerId": event.get("worker_id"),
++                "generation": event.get("generation"),
++            }
++            if isinstance(event.get("error"), str):
++                mark["detail"] = event["error"][:200]
++            elif isinstance(event.get("reason"), str):
++                mark["detail"] = event["reason"][:200]
++            marks.append(mark)
++
++    body = body or {}
++    started = _ms_from_epoch(state.get("startedAt")) or _ms_from_iso(body.get("startedAt"))
++    completed = _ms_from_epoch(state.get("completedAt")) or _ms_from_iso(body.get("completedAt"))
++    detailed = sorted({job["generation"] for job in jobs if job["generation"] is not None})
++    expected = sum(item.get("candidateCount") or 0 for item in generations)
++    return {
++        "experiment": {
++            "id": body.get("experimentId"),
++            "name": body.get("name"),
++            "status": state.get("status") or body.get("status"),
++            "createdMs": _ms_from_iso(body.get("createdAt")),
++            "startedMs": started,
++            "completedMs": completed,
++            "maxGenerations": body.get("maxGenerations"),
++            "candidatesPerGeneration": body.get("candidatesPerGeneration"),
++        },
++        "workers": workers,
++        "generations": generations,
++        "jobs": jobs,
++        "marks": marks,
++        "history": {
++            "partial": len(candidates) < expected,
++            "detailedStartMs": min((job["startMs"] for job in jobs), default=None),
++            "firstDetailedGeneration": detailed[0] if detailed else None,
++            "lastDetailedGeneration": detailed[-1] if detailed else None,
++        },
++        "nowMs": int(time.time() * 1000) if now_ms is None else now_ms,
++    }
+diff --git a/backend/store.py b/backend/store.py
+index de47223f..ca464997 100644
+--- a/backend/store.py
++++ b/backend/store.py
+@@ -1,132 +1,3 @@
+-"""SQLite product state. Runtime ledgers remain owned by device agents."""
++"""Compatibility exports for the product state facade."""
+ 
+-from .migrations import initialize_product_schema
+-from contextlib import contextmanager
+-import json
+-import os
+-from pathlib import Path
+-import sqlite3
+-import threading
+-
+-from argon2 import PasswordHasher
+-from .migrations import initialize_workspace_extras, migrate
+-
+-from .services.accounts import AccountService
+-from .services.device_state import DeviceStateService
+-from .services.scheduling import SchedulingService
+-from .services.experiment_state import ExperimentStateService
+-from .services.workspaces import WorkspaceStateService
+-from .core.clock import now
+-from .core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
+-
+-
+-class Store:
+-    def __init__(self, path, passwords, runtime):
+-        self.path, self.runtime = str(path), runtime
+-        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+-        self.lock = threading.RLock()
+-        self.operation_lock = threading.RLock()
+-        self.hasher = PasswordHasher()
+-        self.accounts = AccountService(self)
+-        self.device_state = DeviceStateService(self)
+-        self.scheduling = SchedulingService(self)
+-        self.experiments = ExperimentStateService(self)
+-        self.workspace_state = WorkspaceStateService(self)
+-        self.last_error = None
+-        with self.db() as db:
+-            initialize_product_schema(db)
+-            for name, password in passwords.items():
+-                profile = {"userId": name, "username": name, "displayName": name.title(), "canCreateWorkspace": False}
+-                # Bootstrap secrets seed an empty installation only. A renamed
+-                # or removed account must not be recreated on every restart.
+-                if db.execute("PRAGMA user_version").fetchone()[0] == 0:
+-                    db.execute(
+-                        "INSERT OR IGNORE INTO users VALUES (?,?,?)",
+-                        (name, self.hasher.hash(password), json.dumps(profile)),
+-                    )
+-            db.commit()
+-            migrate(db)
+-            initialize_workspace_extras(db)
+-        os.chmod(path, 0o600)
+-        runtime.attach_store(self)
+-        try:
+-            self.ensure_workers(runtime.capabilities()["workerIds"])
+-        except Exception:
+-            self.last_error = "WorkerConfigurationUnavailable"
+-
+-    @contextmanager
+-    def db(self):
+-        with self.lock:
+-            connection = sqlite3.connect(self.path, timeout=20)
+-            connection.row_factory = sqlite3.Row
+-            try:
+-                yield connection
+-                connection.commit()
+-            except BaseException:
+-                connection.rollback()
+-                raise
+-            finally:
+-                connection.close()
+-
+-    def audit(self, db, actor, action, target, workspace_id=None):
+-        db.execute(
+-            "INSERT INTO audit(actor,action,target,created,workspace_id) VALUES (?,?,?,?,?)",
+-            (actor, action, target, now(), workspace_id),
+-        )
+-
+-    def ensure_workers(self, ids):
+-        return self.device_state.ensure_workers(ids=ids)
+-
+-    def profile(self, user_id):
+-        return self.accounts.profile(user_id)
+-
+-    def workspaces(self, user_id):
+-        return self.workspace_state.workspaces(user_id=user_id)
+-
+-    def assignments(self, workspace_id, include_disabled=False):
+-        return self.device_state.assignments(workspace_id=workspace_id, include_disabled=include_disabled)
+-
+-    def disabled_workers(self, db):
+-        return self.device_state.disabled_workers(db=db)
+-
+-    def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
+-        return self.experiments.cancel_selected(db=db, worker_id=worker_id, include_queued=include_queued, keep=keep)
+-
+-    def cancel_owned(self, db, owner, workspace_id=None):
+-        return self.experiments.cancel_owned(db=db, owner=owner, workspace_id=workspace_id)
+-
+-    def eligibility(self, db, body, workers=None):
+-        return self.experiments.eligibility(db=db, body=body, workers=workers)
+-
+-    def get(self, run_id):
+-        return self.experiments.get(run_id=run_id)
+-
+-    def list(self):
+-        return self.experiments.list()
+-
+-    def save(self, db, body):
+-        return self.experiments.save(db=db, body=body)
+-
+-    def create(self, owner, config, workspace_id="lab"):
+-        return self.experiments.create(owner=owner, config=config, workspace_id=workspace_id)
+-
+-    def device_names(self):
+-        return self.device_state.device_names()
+-
+-    def device_identities(self):
+-        return self.device_state.device_identities()
+-
+-    def snapshot(self, run_id):
+-        return self.experiments.snapshot(run_id=run_id)
+-
+-    def dispatch_once(self):
+-        return self.scheduling.dispatch_once()
+-
+-    def _dispatch_once(self):
+-        return self.scheduling._dispatch_once()
+-
+-    def _dispatch_run(self, active):
+-        return self.scheduling._dispatch_run(active=active)
+-
+-    def dispatch(self, stop):
+-        return self.scheduling.dispatch(stop=stop)  # errors never become fabricated success/rewards
++from .services.store import Store as Store, now as now, ACTIVE as ACTIVE, TERMINAL as TERMINAL
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index 3c423ce5..e9d26cc4 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -42,54 +42,10 @@ def test_service_errors_are_plain_errors_and_keep_public_message_headers():
+ 
+ def test_account_layer_boundaries():
+     backend = Path(__file__).resolve().parents[1]
+-    for relative in (
+-        "api/auth.py",
+-        "api/accounts.py",
+-        "api/security.py",
+-        "services/accounts.py",
+-        "api/workspaces.py",
+-        "services/workspaces.py",
+-        "api/experiments.py",
+-        "services/experiments.py",
+-        "services/experiment_state.py",
+-        "api/history.py",
+-        "services/history.py",
+-        "api/templates.py",
+-        "services/templates.py",
+-        "api/notifications.py",
+-        "services/notifications.py",
+-        "services/agent_commands.py",
+-        "services/agent_polling.py",
+-        "services/agent_scheduling.py",
+-        "core/models.py",
+-        "core/device_models.py",
+-        "api/devices.py",
+-        "services/devices.py",
+-        "services/device_state.py",
+-        "services/scheduling.py",
+-        "core/study_models.py",
+-        "api/study_registry.py",
+-        "services/study_registry.py",
+-        "api/model_qualification.py",
+-        "services/model_qualification.py",
+-        "core/storage_models.py",
+-        "core/filesystem.py",
+-        "services/recovery_storage.py",
+-        "services/metadata_backup.py",
+-        "storage/local_backend.py",
+-        "api/recovery_storage.py",
+-        "api/local_storage.py",
+-        "api/operations.py",
+-        "services/operations.py",
+-        "api/inventory.py",
+-        "services/inventory.py",
+-        "services/policies.py",
+-        "services/validation.py",
+-        "core/request_models.py",
+-        "core/config.py",
+-        "core/throttle.py",
+-        "core/addresses.py",
+-        "core/monitor_models.py",
++    for relative in sorted(
++        path.relative_to(backend).as_posix()
++        for group in ("api", "services", "core", "storage")
++        for path in (backend / group).rglob("*.py")
+     ):
+         tree = ast.parse((backend / relative).read_text())
+         for node in ast.walk(tree):
+diff --git a/backend/tests/test_layer_imports.py b/backend/tests/test_layer_imports.py
+new file mode 100644
+index 00000000..c7804530
+--- /dev/null
++++ b/backend/tests/test_layer_imports.py
+@@ -0,0 +1,30 @@
++"""Business imports stay usable without loading the HTTP framework or GPU runtime."""
++
++from pathlib import Path
++import subprocess
++import sys
++import textwrap
++
++
++def test_service_modules_import_without_fastapi_starlette_or_torch():
++    root = Path(__file__).resolve().parents[2]
++    code = textwrap.dedent("""
++        import importlib
++        import importlib.abc
++        from pathlib import Path
++        import sys
++
++        class NoTransportOrGPU(importlib.abc.MetaPathFinder):
++            def find_spec(self, fullname, path=None, target=None):
++                if fullname.split('.')[0] in {'fastapi', 'starlette', 'torch'}:
++                    raise AssertionError('Business import reached forbidden dependency: ' + fullname)
++                return None
++
++        sys.meta_path.insert(0, NoTransportOrGPU())
++        for path in sorted(Path('backend/services').glob('*.py')):
++            if path.stem != '__init__':
++                importlib.import_module('backend.services.' + path.stem)
++        assert not {'fastapi', 'starlette', 'torch'} & set(sys.modules)
++    """)
++    result = subprocess.run([sys.executable, "-c", code], cwd=root, capture_output=True, text=True)
++    assert result.returncode == 0, result.stderr
+diff --git a/backend/tests/test_operations_layers.py b/backend/tests/test_operations_layers.py
+index d03145d3..c2a01d48 100644
+--- a/backend/tests/test_operations_layers.py
++++ b/backend/tests/test_operations_layers.py
+@@ -85,3 +85,40 @@ def test_resume_keeps_hold_when_imported_queued_workers_are_not_configured(lab):
+     with store.db() as db:
+         assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0] == "true"
+         assert db.execute("SELECT count(*) FROM audit WHERE action='MAINTENANCE_END'").fetchone()[0] == 0
++
++
++def test_workspace_scope_rechecks_stored_status_when_the_supplied_profile_is_stale(lab):
++    import json
++    from backend.services.access import AccessService
++
++    _, store, runtime, _ = lab
++    access = AccessService(store, runtime)
++    stale = store.profile("admin")
++    changed = {**stale, "accountStatus": "SUSPENDED"}
++    with store.db() as db:
++        db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(changed), "admin"))
++    with pytest.raises(ServiceError) as denied:
++        access.scope(stale, "lab")
++    assert denied.value.status_code == 403
++    changed.update(accountStatus="ACTIVE", displayName="Updated fixture name")
++    with store.db() as db:
++        db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(changed), "admin"))
++    assert access.scope(stale, "lab")["displayName"] == "Updated fixture name"
++
++
++def test_participant_list_hides_other_owners_runs_in_the_same_workspace(setup):
++    from labkit import draft, login
++
++    client, _, _ = setup
++    participant = login(client, "participant")
++    admin = login(client, "admin")
++    own = draft(client, participant, name="Participant visibility fixture")
++    other = draft(client, admin, name="Administrator visibility fixture")
++    assert own.status_code == other.status_code == 200
++    own_id, other_id = own.json()["experimentId"], other.json()["experimentId"]
++    visible = client.get("/api/v1/experiments", headers=participant)
++    assert visible.status_code == 200
++    assert {run["experimentId"] for run in visible.json()} == {own_id}
++    administrator_view = client.get("/api/v1/experiments", headers=admin)
++    assert administrator_view.status_code == 200
++    assert {run["experimentId"] for run in administrator_view.json()} == {own_id, other_id}
+diff --git a/backend/tests/test_store_layers.py b/backend/tests/test_store_layers.py
+new file mode 100644
+index 00000000..05a1d138
+--- /dev/null
++++ b/backend/tests/test_store_layers.py
+@@ -0,0 +1,54 @@
++"""The Store facade keeps transaction semantics while its DB owner handles persistence."""
++
++import ast
++from pathlib import Path
++import pytest
++
++from backend.devices import AgentRuntime
++from backend.store import Store
++
++
++def test_sql_execution_is_owned_by_database_and_repositories():
++    backend = Path(__file__).resolve().parents[1]
++    for path in backend.rglob("*.py"):
++        relative = path.relative_to(backend)
++        if relative.parts[0] in {"tests", "db", "repositories"}:
++            continue
++        for node in ast.walk(ast.parse(path.read_text())):
++            if isinstance(node, ast.Call):
++                operation = (
++                    node.func.attr
++                    if isinstance(node.func, ast.Attribute)
++                    else node.func.id
++                    if isinstance(node.func, ast.Name)
++                    else None
++                )
++                assert operation not in {"execute", "executescript", "executemany", "backup"}, (
++                    str(relative),
++                    operation,
++                )
++
++
++def test_store_context_commits_and_rolls_back_with_the_same_audit_boundary(tmp_path):
++    store = Store(tmp_path / "transactions.sqlite", {"admin": "store-fixture-password"}, AgentRuntime())
++    with pytest.raises(RuntimeError, match="rollback fixture"):
++        with store.db() as db:
++            db.execute("INSERT INTO settings VALUES (?,?)", ("rollback-fixture", "true"))
++            store.audit(db, "admin", "ROLLBACK_FIXTURE", "entry")
++            raise RuntimeError("rollback fixture")
++    with store.db() as db:
++        assert db.execute("SELECT count(*) FROM settings WHERE key=?", ("rollback-fixture",)).fetchone()[0] == 0
++        assert db.execute("SELECT count(*) FROM audit WHERE action=?", ("ROLLBACK_FIXTURE",)).fetchone()[0] == 0
++        db.execute("INSERT INTO settings VALUES (?,?)", ("commit-fixture", "true"))
++        store.audit(db, "admin", "COMMIT_FIXTURE", "entry")
++    with store.db() as db:
++        assert db.execute("SELECT value FROM settings WHERE key=?", ("commit-fixture",)).fetchone()[0] == "true"
++        assert db.execute("SELECT count(*) FROM audit WHERE action=?", ("COMMIT_FIXTURE",)).fetchone()[0] == 1
++
++
++def test_borrowed_connection_is_unusable_after_its_transaction_scope(tmp_path):
++    store = Store(tmp_path / "lifetime.sqlite", {"admin": "store-fixture-password"}, AgentRuntime())
++    with store.db() as connection:
++        assert connection.execute("SELECT 1").fetchone()[0] == 1
++    with pytest.raises(Exception):
++        connection.execute("SELECT 1")
+diff --git a/backend/timeline.py b/backend/timeline.py
+index b9ff3129..9e4a6e44 100644
+--- a/backend/timeline.py
++++ b/backend/timeline.py
+@@ -1,230 +1,6 @@
+-"""A compact, time-ordered view of one run for the Live, Timeline and Replay screens.
++"""Compatibility namespace retained during application composition extraction."""
+ 
+-Pure: it reads the stored snapshot and returns plain data, so a finished run and a running one are described the
+-same way. Times are epoch milliseconds; generations are numbered from 0 as in the ledger.
+-"""
++import sys
++from .services import timeline as _implementation
+ 
+-from datetime import datetime
+-import math
+-import time
+-
+-# Moments worth showing on a timeline. Routine chatter (a worker asking for work) is deliberately not a mark.
+-MARKS = frozenset(
+-    {
+-        "replay",
+-        "worker_unavailable",
+-        "worker_start_unknown",
+-        "worker_start",
+-        "model_loaded",
+-        "executor_ready",
+-        "transport_error",
+-        "coordinator_recovery",
+-        "recovered",
+-        "generation_resumed",
+-        "recovery_point_error",
+-        "managed_error",
+-        "audit_mismatch",
+-        "audit_worker_quarantined",
+-        "audit_incomplete",
+-        "membership_changed",
+-        "membership_refused",
+-        "worker_joined",
+-        "worker_left",
+-        "worker_restarted",
+-        "worker_unreachable",
+-        "worker_reachable",
+-        "worker_lost",
+-        "worker_blocked",
+-        "worker_retry_requested",
+-    }
+-)
+-SECONDS = (
+-    ("wait", "wait_seconds"),
+-    ("update", "update_seconds"),
+-    ("publish", "publish_seconds"),
+-    ("record", "record_seconds"),
+-    ("total", "total_seconds"),
+-)
+-
+-
+-def _number(value):
+-    return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
+-
+-
+-def _ms_from_iso(value):
+-    try:
+-        return int(datetime.fromisoformat(value).timestamp() * 1000)
+-    except (TypeError, ValueError):
+-        return None
+-
+-
+-def _ms_from_epoch(value):
+-    number = _number(value)
+-    return None if number is None else int(number * 1000)
+-
+-
+-def _generation_index(generation_id):
+-    try:
+-        return int(str(generation_id).rsplit(".g", 1)[1])
+-    except (IndexError, ValueError):
+-        return None
+-
+-
+-def build_timeline(body, snapshot, now_ms=None, names=None):
+-    names = names or {}
+-    snapshot = snapshot or {}
+-    state = snapshot.get("state") or {}
+-    recorded = (body or {}).get("workerIdentities", {})
+-
+-    def identity(worker_id):
+-        value = recorded.get(worker_id) or names.get(worker_id)
+-        if isinstance(value, str):
+-            return {"name": value, "identitySource": "current"}
+-        if isinstance(value, dict):
+-            return {
+-                "name": value.get("name"),
+-                "gpuName": value.get("gpuName"),
+-                "gpuUUID": value.get("gpuUUID"),
+-                "gpuIndex": value.get("gpuIndex"),
+-                "identitySource": value.get("source", "current"),
+-            }
+-        return {"name": None, "identitySource": "unknown"}
+-
+-    events = sorted(
+-        (e for e in snapshot.get("events") or [] if isinstance(e, dict) and _number(e.get("t")) is not None),
+-        key=lambda e: e["t"],
+-    )
+-    candidates = {c.get("candidateId"): c for c in snapshot.get("candidates") or []}
+-
+-    jobs = []
+-    for item in snapshot.get("attempts") or []:
+-        start = _ms_from_iso(item.get("startedAt"))
+-        if start is None:
+-            continue
+-        candidate = candidates.get(item.get("candidateId"), {})
+-        won = (
+-            candidate.get("status") == "COMMITTED"
+-            and candidate.get("attemptId") == item.get("attemptId")
+-            and item.get("status") == "SUCCEEDED"
+-        )
+-        jobs.append(
+-            {
+-                "candidateId": item.get("candidateId"),
+-                "attemptId": item.get("attemptId"),
+-                "generation": _generation_index(item.get("generationId")),
+-                "workerId": item.get("workerId"),
+-                "seed": candidate.get("seed"),
+-                "startMs": start,
+-                "endMs": _ms_from_iso(item.get("completedAt")),
+-                "status": item.get("status"),
+-                "reward": _number(candidate.get("reward")) if won else None,
+-            }
+-        )
+-    jobs.sort(key=lambda j: (j["startMs"], j["candidateId"] or ""))
+-
+-    by_generation = {}
+-    for event in events:
+-        index = event.get("generation")
+-        if isinstance(index, int) and event.get("event") in (
+-            "generation_open",
+-            "generation_complete",
+-            "generation_done",
+-        ):
+-            by_generation.setdefault(index, {})[event["event"]] = event
+-    generations = []
+-    for item in snapshot.get("generations") or []:
+-        index = _generation_index(item.get("generationId"))
+-        if index is None:
+-            continue
+-        seen = by_generation.get(index, {})
+-        done = seen.get("generation_done", {})
+-        finished = item.get("status") == "COMPLETED"
+-        seconds = {name: _number(done.get(key)) for name, key in SECONDS if _number(done.get(key)) is not None}
+-        generations.append(
+-            {
+-                "index": index,
+-                "id": item.get("generationId"),
+-                "status": item.get("status"),
+-                "openMs": _ms_from_epoch(seen.get("generation_open", {}).get("t"))
+-                or _ms_from_iso(item.get("startedAt")),
+-                "evaluatedMs": _ms_from_epoch(seen.get("generation_complete", {}).get("t")),
+-                "doneMs": _ms_from_epoch(done.get("t"))
+-                or (_ms_from_iso(item.get("completedAt")) if finished else None),
+-                "candidateCount": item.get("candidateCount"),
+-                "committedCount": item.get("committedCandidateCount"),
+-                "rewardMean": _number(item.get("rewardMean", done.get("mean_reward"))),
+-                "rewardBest": _number(item.get("rewardBest", done.get("max_reward"))),
+-                "seconds": seconds,
+-            }
+-        )
+-    generations.sort(key=lambda g: g["index"])
+-
+-    workers, known = [], set()
+-    for worker_id, info in (state.get("workerStates") or {}).items():
+-        known.add(worker_id)
+-        info = info or {}
+-        # not answering now (finding 11): its last known alive/ready says nothing about the present
+-        away = None if info.get("confirmed", True) else _ms_from_epoch(info.get("unreachableSince"))
+-        workers.append(
+-            {
+-                "id": worker_id,
+-                **identity(worker_id),
+-                "started": not info.get("notStarted", False),
+-                "alive": info.get("alive"),
+-                "unreachableSinceMs": away,
+-                "stopReason": info.get("stopReason"),
+-                "blockedAtMs": _ms_from_epoch(info.get("blockedAt")),
+-            }
+-        )
+-    for job in jobs:
+-        if job["workerId"] and job["workerId"] not in known:
+-            known.add(job["workerId"])
+-            workers.append({"id": job["workerId"], **identity(job["workerId"]), "started": True, "alive": None})
+-    for worker_id in (body or {}).get("workerIds", []):
+-        if worker_id not in known:
+-            known.add(worker_id)
+-            workers.append({"id": worker_id, **identity(worker_id), "started": False, "alive": None})
+-
+-    marks = []
+-    for event in events:
+-        if event.get("event") in MARKS:
+-            mark = {
+-                "atMs": int(event["t"] * 1000),
+-                "type": event["event"],
+-                "workerId": event.get("worker_id"),
+-                "generation": event.get("generation"),
+-            }
+-            if isinstance(event.get("error"), str):
+-                mark["detail"] = event["error"][:200]
+-            elif isinstance(event.get("reason"), str):
+-                mark["detail"] = event["reason"][:200]
+-            marks.append(mark)
+-
+-    body = body or {}
+-    started = _ms_from_epoch(state.get("startedAt")) or _ms_from_iso(body.get("startedAt"))
+-    completed = _ms_from_epoch(state.get("completedAt")) or _ms_from_iso(body.get("completedAt"))
+-    detailed = sorted({job["generation"] for job in jobs if job["generation"] is not None})
+-    expected = sum(item.get("candidateCount") or 0 for item in generations)
+-    return {
+-        "experiment": {
+-            "id": body.get("experimentId"),
+-            "name": body.get("name"),
+-            "status": state.get("status") or body.get("status"),
+-            "createdMs": _ms_from_iso(body.get("createdAt")),
+-            "startedMs": started,
+-            "completedMs": completed,
+-            "maxGenerations": body.get("maxGenerations"),
+-            "candidatesPerGeneration": body.get("candidatesPerGeneration"),
+-        },
+-        "workers": workers,
+-        "generations": generations,
+-        "jobs": jobs,
+-        "marks": marks,
+-        "history": {
+-            "partial": len(candidates) < expected,
+-            "detailedStartMs": min((job["startMs"] for job in jobs), default=None),
+-            "firstDetailedGeneration": detailed[0] if detailed else None,
+-            "lastDetailedGeneration": detailed[-1] if detailed else None,
+-        },
+-        "nowMs": int(time.time() * 1000) if now_ms is None else now_ms,
+-    }
++sys.modules[__name__] = _implementation
+diff --git a/backend/writer_lock.py b/backend/writer_lock.py
+index f9193650..4a88e4e6 100644
+--- a/backend/writer_lock.py
++++ b/backend/writer_lock.py
+@@ -1,30 +1,6 @@
+-"""Kernel lifetime lock for one production management writer per database."""
++"""Compatibility namespace retained during application composition extraction."""
+ 
+-import os
+-from pathlib import Path
+ import sys
++from .core import writer_lock as _implementation
+ 
+-
+-def acquire_writer(database):
+-    database = Path(database).resolve()
+-    database.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+-    stream = open(database.with_name(database.name + ".writer.lock"), "a+b")
+-    try:
+-        if sys.platform == "win32":
+-            import msvcrt
+-
+-            stream.seek(0, 2)
+-            if stream.tell() == 0:
+-                stream.write(b"0")
+-                stream.flush()
+-            stream.seek(0)
+-            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+-        else:
+-            import fcntl
+-
+-            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+-        os.chmod(stream.name, 0o600)
+-        return stream
+-    except (OSError, BlockingIOError):
+-        stream.close()
+-        raise RuntimeError("A Lab Server already owns this database") from None
++sys.modules[__name__] = _implementation

@@ -1,0 +1,74 @@
+[
+  {
+    "name": "transaction success does not commit",
+    "file": "backend/db/database.py",
+    "old": "connection.commit()",
+    "new": "pass"
+  },
+  {
+    "name": "transaction failure commits instead of rollback",
+    "file": "backend/db/database.py",
+    "old": "connection.rollback()",
+    "new": "connection.commit()"
+  },
+  {
+    "name": "transaction connection escapes its scope",
+    "file": "backend/db/database.py",
+    "old": "connection.close()",
+    "new": "pass"
+  },
+  {
+    "name": "bootstrap leaves fresh admission open",
+    "file": "backend/services/bootstrap.py",
+    "old": "(\"dispatchHold\", \"true\")",
+    "new": "(\"dispatchHold\", \"false\")"
+  },
+  {
+    "name": "doctor accepts a newer unknown schema",
+    "file": "backend/services/doctor.py",
+    "old": "if version > SCHEMA_VERSION:",
+    "new": "if False:"
+  },
+  {
+    "name": "deployment ignores admission hold",
+    "file": "backend/services/deployment.py",
+    "old": "if dispatch_held(db) is not True:",
+    "new": "if False:"
+  },
+  {
+    "name": "scope trusts stale profile status",
+    "file": "backend/services/access.py",
+    "old": "profile = active_profile(self.store, current, \"Your account must be active to access lab resources\")",
+    "new": "profile = current"
+  },
+  {
+    "name": "visible runs include another owners work",
+    "file": "backend/services/access.py",
+    "old": "and (current[\"workspaceRole\"] == \"ADMIN\" or body[\"ownerUserId\"] == current[\"userId\"])",
+    "new": "and True"
+  },
+  {
+    "name": "authorized run ignores participant ownership",
+    "file": "backend/services/access.py",
+    "old": "or (current[\"workspaceRole\"] != \"ADMIN\" and body[\"ownerUserId\"] != current[\"userId\"])",
+    "new": "or False"
+  },
+  {
+    "name": "shutdown leaks management writer ownership",
+    "file": "backend/apps/factory.py",
+    "old": "writer_lock.close()",
+    "new": "pass"
+  },
+  {
+    "name": "shutdown releases writer before dispatcher ends",
+    "file": "backend/apps/factory.py",
+    "old": "await run_in_threadpool(thread.join)",
+    "new": "pass"
+  },
+  {
+    "name": "business module imports HTTP compatibility adapter",
+    "file": "backend/services/devices.py",
+    "old": "from .model_qualification import ModelQualifications",
+    "new": "from ..model_qualification import ModelQualifications"
+  }
+]

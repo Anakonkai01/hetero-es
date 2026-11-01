@@ -1,0 +1,15 @@
+control ok    | 56 passed, 1 warning in 12.27s
+killed       transaction success does not commit | 7 failed, 29 passed, 1 warning, 20 errors in 9.16s
+killed       transaction failure commits instead of rollback | 1 failed, 55 passed, 1 warning in 12.21s
+killed       transaction connection escapes its scope | 1 failed, 55 passed, 1 warning in 12.19s
+killed       bootstrap leaves fresh admission open | 2 failed, 54 passed, 1 warning in 12.20s
+killed       doctor accepts a newer unknown schema | 1 failed, 55 passed, 1 warning in 12.20s
+killed       deployment ignores admission hold | 1 failed, 55 passed, 1 warning in 12.18s
+killed       scope trusts stale profile status | 1 failed, 55 passed, 1 warning in 12.19s
+SURVIVED     visible runs include another owners work | 56 passed, 1 warning in 12.19s
+killed       authorized run ignores participant ownership | 2 failed, 54 passed, 1 warning in 12.19s
+killed       shutdown leaks management writer ownership | 2 failed, 54 passed, 1 warning in 12.03s
+killed       shutdown releases writer before dispatcher ends | 1 failed, 55 passed, 1 warning in 9.93s
+killed       business module imports HTTP compatibility adapter | 1 failed, 55 passed, 1 warning in 12.14s
+
+11 of 12 mutants killed.

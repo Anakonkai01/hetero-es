@@ -1,0 +1,1767 @@
+{
+  "calls": [
+    {
+      "file": "backend/db/backups.py",
+      "line": 8,
+      "operation": "backup"
+    },
+    {
+      "file": "backend/db/database.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/database.py",
+      "line": 20,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 15,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 16,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 19,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 22,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 26,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 27,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 28,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 36,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 49,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 50,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 51,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 56,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 104,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 124,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 130,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 136,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 142,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 148,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 154,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 44,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 45,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 69,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 70,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 85,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 88,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 30,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 74,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 76,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 79,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 82,
+      "operation": "executescript"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 89,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 99,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 73,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 75,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 77,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 80,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/migrations.py",
+      "line": 94,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/projections.py",
+      "line": 8,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/sqlite_diagnostics.py",
+      "line": 41,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/db/transactions.py",
+      "line": 5,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 30,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 34,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 45,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 53,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 57,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 39,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 19,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 23,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/accounts.py",
+      "line": 49,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_commands.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_commands.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_commands.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_commands.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_commands.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_commands.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 41,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 45,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 49,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 53,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 61,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 65,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 69,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 77,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 81,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 89,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 93,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 101,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 105,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 111,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 115,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 123,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 127,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 131,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 135,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 141,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 145,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_polling.py",
+      "line": 149,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 15,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 19,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 27,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 31,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 35,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 39,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 43,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 47,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 51,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 55,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 59,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 63,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 67,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 75,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 79,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 83,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 87,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 91,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 95,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 99,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 103,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 107,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 111,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 115,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 119,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 125,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 129,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 133,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 137,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 141,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/agent_scheduling.py",
+      "line": 145,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/audit.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/base.py",
+      "line": 10,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/bootstrap.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/device_state.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 41,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 45,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 49,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 53,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 57,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 61,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 65,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 69,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 77,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 81,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 85,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 89,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 93,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 101,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 105,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 109,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 113,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 117,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 121,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 125,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 129,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 133,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 137,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 141,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 145,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 153,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 157,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 161,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 165,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 169,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 173,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 177,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 181,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 189,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 193,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 197,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 205,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 209,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 213,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 219,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 223,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 231,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/devices.py",
+      "line": 235,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 27,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 35,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 39,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 43,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 47,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 51,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 55,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 59,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 63,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 67,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 75,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 79,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 83,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 87,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 91,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 95,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 99,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/experiments.py",
+      "line": 103,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/history.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/history.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/history.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/inventory.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/inventory.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/metadata.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 39,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 43,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 47,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 51,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 59,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 63,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 67,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 71,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 75,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 79,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 83,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 87,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 91,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 95,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 101,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/model_qualification.py",
+      "line": 111,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 47,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 51,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 55,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 59,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 63,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 67,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 71,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 75,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/notifications.py",
+      "line": 79,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 39,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 43,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 47,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/operations.py",
+      "line": 51,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/policies.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/policies.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/policies.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/policies.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/policies.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 41,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 45,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 49,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 53,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 57,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 61,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 65,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 69,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 73,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 79,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 83,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 87,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 91,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 95,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 99,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 107,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 111,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 117,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 121,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 129,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 133,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 137,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/recovery_storage.py",
+      "line": 143,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/scheduling.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/scheduling.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/scheduling.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/scheduling.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/scheduling.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/scheduling.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 33,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/study_registry.py",
+      "line": 41,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/templates.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/templates.py",
+      "line": 15,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/templates.py",
+      "line": 23,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/templates.py",
+      "line": 27,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/templates.py",
+      "line": 31,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 9,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 13,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 17,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 21,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 25,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 29,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 37,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 41,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 45,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 49,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 53,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 57,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 61,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 65,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 69,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 77,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 81,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 85,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 89,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 97,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 101,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 105,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 109,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 113,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 117,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 125,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 129,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 133,
+      "operation": "execute"
+    },
+    {
+      "file": "backend/repositories/workspaces.py",
+      "line": 141,
+      "operation": "execute"
+    }
+  ],
+  "count": 352,
+  "violations": [],
+  "scope": "all production backend Python; named repository execute wrappers included"
+}

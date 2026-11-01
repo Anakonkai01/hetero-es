@@ -1,0 +1,9 @@
+{
+  "base": "9817afb5",
+  "connectionMethodAST": "identical except method name db -> connection",
+  "bootstrapBlockAST": "identical except DB owner/hasher forwarding; comments preserved",
+  "audit": "same signature, timestamp and SQL arguments, split into service/repository",
+  "publicStoreContext": "same signature/decorator; forwards commit/rollback/close to DB owner",
+  "lock": "original RLock object passed to DB owner",
+  "sqlCallsRelocated": 3
+}
