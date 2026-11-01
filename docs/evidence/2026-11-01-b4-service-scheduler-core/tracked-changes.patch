@@ -1,0 +1,420 @@
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+index 35307bbd..2541e4f6 100644
+--- a/backend/apps/factory.py
++++ b/backend/apps/factory.py
+@@ -25,25 +25,43 @@ from ..throttle import Throttle
+ from ..api.security import local_user, workspace_scope
+ from ..services.access import AccessService
+ from ..core.errors import ServiceError
+-
+-
+-def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
+-    store = Store(path, passwords, runtime)
++from .routing import SERVICES, ServiceRegistration
++from ..api.operational import install_routes as install_operational_routes
++from ..services.scheduler_controller import SchedulerController
++
++
++def create_app(
++    path,
++    passwords,
++    runtime,
++    dispatch=True,
++    web_directory=None,
++    downloads_directory=None,
++    writer_lock=None,
++    *,
++    service="all",
++    database_url=None,
++    database_connect_args=None,
++):
++    if service not in SERVICES:
++        raise ValueError("Unknown backend service")
++    store = Store(path, passwords, runtime, database_url=database_url, database_connect_args=database_connect_args)
+     from ..services.study_registry import Registry
+ 
+     registry = Registry(store)
+     stop = threading.Event()
++    scheduler = SchedulerController(store)
+ 
+     @asynccontextmanager
+     async def lifespan(_):
+-        thread = threading.Thread(target=store.dispatch, args=(stop,), daemon=True)
++        thread = threading.Thread(target=scheduler.run, args=(stop,), daemon=True)
+         dispatcher_started = False
+         metadata_thread = None
+         try:
+-            if dispatch:
++            if dispatch and service in {"all", "scheduler"}:
+                 thread.start()
+                 dispatcher_started = True
+-            if getattr(runtime, "storage_backend", None) is not None:
++            if service in {"all", "storage"} and getattr(runtime, "storage_backend", None) is not None:
+                 from ..services.metadata_backup import backup_loop
+ 
+                 metadata_thread = threading.Thread(
+@@ -64,12 +82,16 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
+                 writer_lock.close()
+ 
+     # The interactive documentation lists every route: keep it for development, not for a served lab.
+-    private_docs = {} if web_directory is None else {"docs_url": None, "redoc_url": None, "openapi_url": None}
++    private_docs = (
++        {} if web_directory is None and service == "all" else {"docs_url": None, "redoc_url": None, "openapi_url": None}
++    )
+     app = FastAPI(title="HeteroES product API", lifespan=lifespan, **private_docs)
+     app.state.login_failures = Throttle(5, 600)  # per caller address and username
+     app.state.login_failures_by_address = Throttle(30, 600)  # per caller address, any username
+     app.state.registrations = Throttle(10, 3600)
+     app.state.store = store
++    app.state.service = service
++    app.state.scheduler = scheduler
+     app.state.live = LiveStreams()
+ 
+     @app.exception_handler(ServiceError)
+@@ -99,23 +121,28 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
+         capabilities=capabilities,
+     )
+ 
+-    install_auth_routes(app, store, user, session)
+-    install_inventory_routes(app, store, runtime, scoped, visible, capabilities, registry)
+-    install_experiments_routes(app, store, runtime, scoped, visible, authorized, validate, service_scoped=access.scope)
+-    install_history_routes(app, store, runtime, scoped, visible, authorized)
++    install_operational_routes(app, store, service)
++    registration = ServiceRegistration(app, service)
+ 
+-    install_lab_routes(app, store, user, scoped, runtime)
+-    install_template_routes(app, store, scoped)
+-    install_notification_routes(app, store, user)
++    install_auth_routes(registration, store, user, session)
++    install_inventory_routes(registration, store, runtime, scoped, visible, capabilities, registry)
++    install_experiments_routes(
++        registration, store, runtime, scoped, visible, authorized, validate, service_scoped=access.scope
++    )
++    install_history_routes(registration, store, runtime, scoped, visible, authorized)
++
++    install_lab_routes(registration, store, user, scoped, runtime)
++    install_template_routes(registration, store, scoped)
++    install_notification_routes(registration, store, user)
+     from ..api.devices import install_routes as install_device_routes
+ 
+-    device_auth = install_device_routes(app, store, user, runtime)
++    device_auth = install_device_routes(registration, store, user, runtime)
+     from ..api.study_registry import install_routes as study_routes
+ 
+-    study_routes(app, registry, runtime, scoped, device_auth)
++    study_routes(registration, registry, runtime, scoped, device_auth)
+     from ..api.model_qualification import install_routes as qualification_routes
+ 
+-    qualification_routes(app, registry, runtime, scoped, device_auth)
++    qualification_routes(registration, registry, runtime, scoped, device_auth)
+     if runtime.storage_backend is not None:
+         from ..services.recovery_storage import RecoveryStorage
+         from ..api.recovery_storage import install_routes as install_storage_routes
+@@ -125,32 +152,56 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
+         )
+         app.state.storage = storage
+         runtime.storage = storage
+-        install_storage_routes(app, store, storage, device_auth, user, scoped, authorized)
++        install_storage_routes(registration, store, storage, device_auth, user, scoped, authorized)
+         if hasattr(runtime.storage_backend, "install_routes"):
+-            runtime.storage_backend.install_routes(app)
++            runtime.storage_backend.install_routes(registration)
+ 
+-    install_web_routes(app, web_directory, downloads_directory)
++    install_web_routes(registration, web_directory, downloads_directory)
+     return app
+ 
+ 
+-def app_from_environment():
++def app_from_environment(*, service=None):
++    service = service or os.environ.get("HETEROES_SERVICE", "all")
++    if service not in SERVICES:
++        raise ValueError("Unknown backend service")
+     private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+     if not private_root:
+         raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
+     root = Path(private_root)
+     credentials = json.loads((root / "credentials.json").read_text())
+     config = load_config(root)
+-    from ..core.writer_lock import acquire_writer
++    database_url = os.environ.get("HETEROES_DATABASE_URL") or config.get("databaseUrl")
++    postgres = False
++    path = Path(config["productStateDirectory"]) / "product.sqlite"
++    if database_url:
++        from sqlalchemy.engine import make_url
++        from sqlalchemy.exc import ArgumentError
+ 
+-    writer = acquire_writer(Path(config["productStateDirectory"]) / "product.sqlite")
++        try:
++            url = make_url(database_url)
++        except ArgumentError:
++            raise ValueError("Invalid database URL") from None
++        postgres = url.get_backend_name() in {"postgres", "postgresql"}
++        if not postgres:
++            if url.get_backend_name() != "sqlite" or not url.database or url.database == ":memory:":
++                raise ValueError("Use a persistent SQLite file or PostgreSQL database")
++            path = Path(url.database).resolve()
++    if service != "all" and not postgres:
++        raise ValueError("Split production services require PostgreSQL")
++    writer = None
++    if not postgres:
++        from ..core.writer_lock import acquire_writer
++
++        writer = acquire_writer(path)
+     try:
+-        return _app_from_config(root, credentials, config, writer)
++        return _app_from_config(root, credentials, config, writer, service=service, database_url=database_url)
+     except BaseException:
+-        writer.close()
++        if writer is not None:
++            writer.close()
+         raise
+ 
+ 
+-def _app_from_config(root, credentials, config, writer):
++def _app_from_config(root, credentials, config, writer, *, service="all", database_url=None):
+     if config.get("deploymentMode") != "agent":
+         raise ValueError("Only agent deployment mode is supported")
+     if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
+@@ -178,4 +229,6 @@ def _app_from_config(root, credentials, config, writer):
+         web_directory=os.environ.get("HETEROES_WEB_DIRECTORY"),
+         downloads_directory=os.environ.get("HETEROES_DOWNLOADS_DIRECTORY"),
+         writer_lock=writer,
++        service=service,
++        database_url=database_url,
+     )
+diff --git a/backend/db/engine.py b/backend/db/engine.py
+index 0168b741..fa6c3ea0 100644
+--- a/backend/db/engine.py
++++ b/backend/db/engine.py
+@@ -103,10 +103,12 @@ class Database:
+                 )
+ 
+     @contextmanager
+-    def transaction(self, *, write=None):
++    def transaction(self, *, write=None, physical=None):
+         with self.lock:
+             existing = getattr(self._local, "connection", None)
+             if existing is not None:
++                if physical is not None and physical is not existing._connection:
++                    raise RuntimeError("Cannot replace the active transaction connection")
+                 if write is True and not existing.write:
+                     raise RuntimeError("Cannot upgrade an active read transaction")
+                 try:
+@@ -116,7 +118,15 @@ class Database:
+                     raise
+                 return
+             writable = True if write is None else write
+-            with self.engine.connect() as physical:
++            if physical is None:
++                physical = getattr(self._local, "session", None)
++            if physical is None:
++                owner = self.engine.connect()
++            else:
++                if physical.engine is not self.engine or physical.closed or physical.invalidated:
++                    raise RuntimeError("Dedicated transaction connection is unavailable")
++                owner = nullcontext(physical)
++            with owner as physical:
+                 connection_info = physical.info
+                 connection_info["heteroes_write"] = writable
+                 transaction = physical.begin()
+@@ -145,6 +155,27 @@ class Database:
+     def close(self):
+         self.engine.dispose()
+ 
++    @contextmanager
++    def use_session(self, physical):
++        """Bind subsequent root transactions to a caller-owned session without merging their commit boundaries."""
++        with self.lock:
++            if getattr(self._local, "connection", None) is not None:
++                raise RuntimeError("Cannot bind a physical session inside an active transaction")
++            previous = getattr(self._local, "session", None)
++            if previous is not None and previous is not physical:
++                raise RuntimeError("Cannot replace the active database session")
++            if physical.engine is not self.engine or physical.closed or physical.invalidated:
++                raise RuntimeError("Dedicated database session is unavailable")
++            self._local.session = physical
++            try:
++                yield
++            finally:
++                self._local.session = previous
++
++    def ping(self):
++        with self.transaction(write=False) as connection:
++            return connection.execute("SELECT 1").fetchone()[0] == 1
++
+     def initialize(self, passwords, hasher):
+         from .schema import initialize_database
+ 
+diff --git a/backend/services/store.py b/backend/services/store.py
+index d8137321..60a92880 100644
+--- a/backend/services/store.py
++++ b/backend/services/store.py
+@@ -15,6 +15,7 @@ from .workspaces import WorkspaceStateService
+ from ..core.clock import now as now
+ from ..db.engine import Database
+ from .audit import AuditService
++from .cluster_state import ClusterStateService
+ from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
+ 
+ 
+@@ -30,13 +31,18 @@ class Store:
+         self.scheduling = SchedulingService(self)
+         self.experiments = ExperimentStateService(self)
+         self.workspace_state = WorkspaceStateService(self)
+-        self.last_error = None
+         self.database = Database(database_url or path, lock=self.lock, connect_args=database_connect_args)
+         self.database.initialize(passwords, self.hasher)
+         if self.database.dialect == "sqlite":
+             self.path = self.database.url.database
+             os.chmod(self.path, 0o600)
+-        runtime.attach_store(self)
++        self.cluster_state = ClusterStateService(self)
++        try:
++            runtime.server_instance_id = self.cluster_state.identity(getattr(runtime, "server_instance_id", None))
++            runtime.attach_store(self)
++        except BaseException:
++            self.database.close()
++            raise
+         try:
+             self.ensure_workers(runtime.capabilities()["workerIds"])
+         except Exception:
+@@ -50,6 +56,14 @@ class Store:
+     def close(self):
+         self.database.close()
+ 
++    @property
++    def last_error(self):
++        return self.cluster_state.last_error
++
++    @last_error.setter
++    def last_error(self, value):
++        self.cluster_state.last_error = value
++
+     def audit(self, db, actor, action, target, workspace_id=None):
+         return self.audit_service.audit(db=db, actor=actor, action=action, target=target, workspace_id=workspace_id)
+ 
+diff --git a/backend/tests/test_route_contract.py b/backend/tests/test_route_contract.py
+index f2c433e8..4b1ef52f 100644
+--- a/backend/tests/test_route_contract.py
++++ b/backend/tests/test_route_contract.py
+@@ -38,7 +38,8 @@ def test_product_route_contract_matches_archived_pre_split_inventory(tmp_path, m
+             if hasattr(route, "original_router"):
+                 walk(route.original_router)
+             elif hasattr(route, "methods"):
+-                pairs.extend((method, route.path) for method in route.methods)
++                if route.path not in {"/healthz", "/readyz", "/metrics"}:
++                    pairs.extend((method, route.path) for method in route.methods)
+             elif type(route).__name__ == "Mount":
+                 mounts.add(route.path)
+             else:
+diff --git a/backend/tests/test_writer_lock.py b/backend/tests/test_writer_lock.py
+index cd85f6d2..3740fd5a 100644
+--- a/backend/tests/test_writer_lock.py
++++ b/backend/tests/test_writer_lock.py
+@@ -7,11 +7,14 @@ import subprocess
+ import sys
+ import threading
+ import pytest
++
+ from fastapi.testclient import TestClient
+ from backend.app import app_from_environment
+ from backend.server import initialize
+ from backend.writer_lock import acquire_writer
+ 
++pytestmark = pytest.mark.sqlite_file(reason="local SQLite kernel writer ownership and shutdown ordering")
++
+ 
+ def deployment(tmp_path, monkeypatch):
+     root = tmp_path / "lab"
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index 39c20493..70d5c914 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -80,6 +80,11 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   all 70 B2 test modules remain; recursive runtime scanner and doctor instrumentation paths modernized before B9.
+   Evidence `2026-11-01-b3-portable-backend`: schema/SQL mutation 12/12, integrated engine mutation 6/6; B3 complete.
+   B4–B10 and C remain; PostgreSQL metadata dump/restore belongs to B4, recursive package resources/shim removal to B9.
++  B4 core: route partition/export and five role entrypoints implemented; product union remains 111 (API67/devices21/
++  storage23) plus two mounts and three shared operational routes. PostgreSQL cluster identity/diagnostics persist.
++  Dedicated scheduler session leadership and active/standby controller preserve job commit boundaries and fence lost
++  connections; graceful and process-death takeover pass real PG tests. Core SQLite541 / PostgreSQL559, zero skips; mutation16/16. Evidence
++  `2026-11-01-b4-service-scheduler-core`. B4 still needs PostgreSQL metadata dump/restore; B5–B10 and all C remain.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+diff --git a/docs/design/lab-server-architecture.md b/docs/design/lab-server-architecture.md
+index 9432e39d..04038892 100644
+--- a/docs/design/lab-server-architecture.md
++++ b/docs/design/lab-server-architecture.md
+@@ -126,7 +126,35 @@ loopback port, writes its target audit/receipt and removes that container. Evide
+ B3 legitimately modernizes test SQL, marks SQLite file contracts, uses the dedicated snapshot API, strengthens the
+ runtime closure scanner to recursive production traversal and updates doctor instrumentation paths. Every baseline
+ assertion from the 70 B2 test modules is retained (SQL literal quoting normalized in the proof). This is separate from
+-B9's later import-only shim-removal proof. Services still run together; B4–B10 and MiniCloud C remain unfinished.
++B9's later import-only shim-removal proof. At the end of B3 the services still ran together; B4 progress is described below. B4–B10 and MiniCloud C remain unfinished.
++
++## B4 service and scheduler core (2026-11-01)
++
++The shared factory now accepts all/api/devices/storage/scheduler. An explicit registration facade partitions the actual
++handlers before registration, while retaining dependency factories needed by other services. The route exporter
++`python -m backend.apps.routes --json` constructs only throwaway local state. Four matching feature profiles cover web
++and local object storage on/off; their disjoint product union matches all. The full profile retains API 67, devices 21,
++storage 23 and two API-owned mounts. Health/readiness/metrics are three separately shared operational routes, registered
++before the SPA. API/devices start no scheduler or metadata-backup loop; storage owns the backup loop.
++
++Each role has `python -m backend.apps.<role>` with configurable host/port. Production split factories require PostgreSQL
++and do not take the local SQLite writer descriptor; all+SQLite retains the existing descriptor/shutdown contract.
++HETEROES_SERVICE and HETEROES_DATABASE_URL have initial support; the complete environment-only config belongs to B9.
++PostgreSQL replicas persist/validate cluster identity and scheduler error types in settings. SQLite keeps configured
++identity and process-local diagnostics. No error messages or bearer credentials enter the shared public health state.
++
++A dedicated detached PostgreSQL session holds the scheduler advisory lock (a distinct key from lab writes). Heartbeats
++never reacquire it and leave no idle transaction. Graceful exit explicitly unlocks and literally closes the session;
++process death releases it automatically. Active/standby controllers dispatch only while owning it. Every business
++transaction uses that physical session, preventing a lost leader from reconnecting on a new business session. Independent
++operation commit/rollback boundaries remain intact: a failed job cannot erase completed or unrelated jobs (B-008).
++Real PostgreSQL tests cover graceful takeover, process death, lost-session rollback, replica diagnostics/identity and
++independent-job progress. Local all keeps the previous dispatch loop. Core acceptance: SQLite 541 / PostgreSQL 559, zero skips, mutation 16/16.
++Evidence: `2026-11-01-b4-service-scheduler-core`.
++
++This is not full B4 completion: PostgreSQL pg_dump-to-backup-storage and an isolated restore drill remain. Metrics here
++establish route/liveness ownership; B7 adds the full instrumentation. OIDC, S3/MinIO, cloud config/packaging and B10/C
++acceptance remain later work; nothing was deployed to the live lab.
+ 
+ ## Planned service boundaries
+ 
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index 124f2491..10d36654 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -3,17 +3,18 @@
+ Source: owner's colleague's notes in `~/projects/app_finding.md`, imported 2026-10-31.
+ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original concerns are preserved below.
+ 
+-| ID    | Area                                    | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                   | Status                                                                                                                                                          |
+-| ----- | --------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+-| B-001 | `backend/`                              | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.    | Open                                                                                                                                                            |
+-| B-002 | `backend/routes_*.py`                   | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                              | Open                                                                                                                                                            |
+-| B-003 | `backend/store.py`                      | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                       | Open                                                                                                                                                            |
+-| B-004 | Experiment submission maintenance hold  | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.           | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                           |
+-| B-005 | Independent device lifecycle guards     | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.     | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                   |
+-| B-006 | Experiment-list owner privacy           | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.              | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                      |
+-| B-007 | Empty dynamic SQL filters on PostgreSQL | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects. | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`. |
+-| B-Q1  | Lab Server responsibilities             | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).      | Answered in A5 (architecture document)                                                                                                                          |
+-| B-Q2  | Data and backups                        | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                 | Answered in A5                                                                                                                                                  |
++| ID    | Area                                     | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                                                     | Status                                                                                                                                                                                     |
++| ----- | ---------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
++| B-001 | `backend/`                               | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.                                      | Open                                                                                                                                                                                       |
++| B-002 | `backend/routes_*.py`                    | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                                                                | Open                                                                                                                                                                                       |
++| B-003 | `backend/store.py`                       | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                                                         | Open                                                                                                                                                                                       |
++| B-004 | Experiment submission maintenance hold   | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.                                             | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                                                      |
++| B-005 | Independent device lifecycle guards      | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.                                       | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                                              |
++| B-006 | Experiment-list owner privacy            | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.                                                | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                                                 |
++| B-007 | Empty dynamic SQL filters on PostgreSQL  | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects.                                   | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`.                            |
++| B-008 | Scheduler fencing transaction boundaries | C    | P2       | Wrapping a whole scheduler tick in one transaction makes a handled job failure roll back already completed jobs and unrelated progress.                                                                                 | Bind independent business transactions to the dedicated leader session; fence connection loss while preserving each operation commit/rollback boundary. | Fixed: independent-job regression and nine session/controller cases pass on PostgreSQL; core mutation16/16, full SQLite541/PostgreSQL559; evidence `2026-11-01-b4-service-scheduler-core`. |
++| B-Q1  | Lab Server responsibilities              | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                        | Answered in A5 (architecture document)                                                                                                                                                     |
++| B-Q2  | Data and backups                         | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                   | Answered in A5                                                                                                                                                                             |
+ 
+ The colleague's parenthetical text denotes examples, English explanations or personal comments. These notes do not claim
+ that the existing modular monolith is a correctness defect; the approved multi-service work is tracked as architecture.

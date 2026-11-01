@@ -1,0 +1,584 @@
+{
+  "version": 1,
+  "product": [
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts/{artifact_id}/download",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/{artifact_id}/download-ticket",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attempts/{attempt_id}",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/password",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/revoke-other-sessions",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/candidates/{candidate_id}",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/capabilities",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/cloud-downloads/{ticket_digest}",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/datasets",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/datasets/import",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/datasets/upload-plan",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/datasets/uploads/{upload_id}/build",
+      "owner": "storage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/device",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/contribution",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/enroll",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/model-transfer",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/device/name",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/poll",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/device/qualification",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/recovery-points",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/recovery-points/complete-object",
+      "owner": "storage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/device/recovery-points/{point_id}",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/device/recovery-points/{point_id}",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/recovery-points/{point_id}/verify",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/study-transfer",
+      "owner": "devices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/device/summary",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/device/worker-command",
+      "owner": "devices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/devices",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/devices/pairing-codes",
+      "owner": "devices"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/devices/{device_id}",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/devices/{device_id}",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/devices/{device_id}/configuration",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/devices/{device_id}/contribution",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/devices/{device_id}/contribution",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/devices/{device_id}/endpoints",
+      "owner": "devices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/events",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiment-templates",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiment-templates",
+      "owner": "api"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/experiment-templates/{template_id}",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments",
+      "owner": "api"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/experiments/{run_id}",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments/{run_id}",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/experiments/{run_id}",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/experiments/{run_id}/backup-policy",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/cancel",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments/{run_id}/generations",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments/{run_id}/generations/{generation_id}",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/pause",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/recovery-import",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/recovery-import/complete-object",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/recovery-import/{point_id}/verify",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments/{run_id}/recovery-points",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/resume",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments/{run_id}/stream",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/submit",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/experiments/{run_id}/timeline",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/experiments/{run_id}/workers",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/generations/{generation_id}/candidates",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/health",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listed-workspaces",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/local-storage/{token}",
+      "owner": "storage"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/local-storage/{token}",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/models",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/models/register",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/models/{asset_id}/publish",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/models/{asset_id}/qualifications",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/models/{asset_id}/qualifications",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/models/{asset_id}/qualifications/{job_id}/cancel",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/models/{asset_id}/upload-plan",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/my-invitations",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/my-invitations/{invitation_id}/accept",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notifications/read",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/platform/audit",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/platform/dataset-limits",
+      "owner": "api"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/platform/dataset-limits",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/platform/devices",
+      "owner": "devices"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/platform/devices/{device_id}",
+      "owner": "devices"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/platform/devices/{device_id}",
+      "owner": "devices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/platform/maintenance/resume",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/platform/operations",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/platform/users",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/platform/users/{user_id}",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/platform/users/{user_id}/revoke-sessions",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/profile",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public-study/{token}",
+      "owner": "storage"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/public-upload/{token}",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/queue",
+      "owner": "api"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/recovery-points/{point_id}",
+      "owner": "storage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recovery-points/{point_id}/download-plan",
+      "owner": "storage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resources",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workers",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workers/{worker_id}",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/workspaces",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/{workspace_id}/default-coordinator",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspace_id}/invitations",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspace_id}/join-requests",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspace_id}/join-requests",
+      "owner": "api"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspace_id}/join-requests/{request_id}",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/{workspace_id}/listing",
+      "owner": "api"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+      "owner": "api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/downloads/manifest.json",
+      "owner": "api"
+    },
+    {
+      "method": "GET",
+      "path": "/{route:path}",
+      "owner": "api"
+    }
+  ],
+  "operational": [
+    {
+      "method": "GET",
+      "path": "/healthz"
+    },
+    {
+      "method": "GET",
+      "path": "/metrics"
+    },
+    {
+      "method": "GET",
+      "path": "/readyz"
+    }
+  ],
+  "mounts": [
+    {
+      "path": "/assets",
+      "owner": "api"
+    },
+    {
+      "path": "/downloads",
+      "owner": "api"
+    }
+  ]
+}

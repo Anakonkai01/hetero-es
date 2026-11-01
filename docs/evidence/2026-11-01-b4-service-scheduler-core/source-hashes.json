@@ -1,0 +1,29 @@
+{
+  "baseline": "1e81c585",
+  "files": {
+    "backend/api/operational.py": "39d7318b594dd64bf022cae6b118fd843a277f387d0c8cacfbbeda8b9fecdd1b",
+    "backend/apps/all.py": "8b538db9bc0513d03f8cec3b9b2bf512970e33096fc0eb931eb3d1ecfff1bcb1",
+    "backend/apps/api.py": "5dd84bd62e2d6d7ac23dec1e2566a7bcdc6025569880461bcb8b9b6a144894dd",
+    "backend/apps/devices.py": "d9b6f2a43e8f9eab8430d7b82b45e2a8013667c3e86b190903280a3d15083949",
+    "backend/apps/factory.py": "5edbb71b8db6e6f4a11d29dc1b7768c13cbeda5bc26d68fa3838b4cd7a9a7a74",
+    "backend/apps/routes.py": "9a437a374d469f495206f9f8580ac98c30c3606860427748f0900720ee554455",
+    "backend/apps/routing.py": "c1d83bc8aa9853323629d9d5d461b94f793e830e44770335483db39651f7a1c3",
+    "backend/apps/run_service.py": "7ca324f0524f1f2144dce94e240d2321b6bd0e396a405c5e83c5ec38899ae652",
+    "backend/apps/scheduler.py": "b49ba2ed33b6e9b5244144c5f1478a68ff1142c74e33a390b8b03302f9574551",
+    "backend/apps/storage.py": "cfd12b53e6e6706779dfdbd027bdf8badc8287054bce5c616ca1234f9c1721c2",
+    "backend/db/engine.py": "f340bd1d2be19afa563914ff942c1388229ea6019d86ced37e288073f739c040",
+    "backend/db/leadership.py": "ddfbb6bcdee9f95d996150cb10b7a6b340885294a626640859e09200ca63af05",
+    "backend/repositories/cluster_state.py": "d99138ea96ad11428e852590da0fb901d07f262b033055db045b4b76cfc11643",
+    "backend/services/cluster_state.py": "fc3eb8eb57c3f9df03d3094dd9f675de55460175b3fdadd65889e81f237412ce",
+    "backend/services/scheduler_controller.py": "94faf5abb2355f30b1d0d5136a11c9679b6ddef09ab3197ad7d6db20f063616d",
+    "backend/services/store.py": "2a9e5146dd47cff306c2c79a83d9a74a0610fd2b76c3db774d98e24edb50e6bd",
+    "backend/tests/fixtures/archive/docs/evidence/2026-11-01-backend-inventory/route-ownership-proposal.json": "b8e38ed98a634dcb812b340a85621f8411626fb1290440929ebe9bc92e17b3db",
+    "backend/tests/test_cluster_state.py": "d2658b811772a84105c5dfab8ed34fb61834bc6b2fd72d771bb531092f7482b2",
+    "backend/tests/test_route_contract.py": "b8f459ad7e75e05fb2e02c01a7d30405dae4cf4aa4679a7884ac3881345e1d5a",
+    "backend/tests/test_scheduler_controller.py": "e99d0e1c5beeed2a5c5c8d82f581d6ad7d6c4f9476cce1edaf5427f8d5f18911",
+    "backend/tests/test_scheduler_leader.py": "2046e193209276b2dde5de543fd9de5fa9d377cbfee5df110f071434af79e856",
+    "backend/tests/test_service_entrypoints.py": "13b3e14867e4304093e9f1d2181bd312b9b53acee34c89615097450ad04cf7d1",
+    "backend/tests/test_service_routes.py": "3cc882de59271834b6f37cb1ed2736c5133b490cd6343823d4b2b2e891f51e45",
+    "backend/tests/test_writer_lock.py": "d48776af96a2e1eb78009f0c6a5b0adba9f6aee28d46cda0a6eb16ff82786352"
+  }
+}

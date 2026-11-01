@@ -1,0 +1,19 @@
+control ok    | 18 passed, 1 warning in 4.98s
+killed       all service processes register every product route | 5 failed, 13 passed, 1 warning in 4.99s
+killed       storage routes are assigned to the API | 2 failed, 16 passed, 1 warning in 4.34s
+killed       device routes are assigned to the API | 3 failed, 15 passed, 1 warning in 4.22s
+killed       included routers bypass service ownership | 4 failed, 14 passed, 1 warning in 4.50s
+killed       API processes start a scheduler loop | 1 failed, 17 passed, 1 warning in 4.14s
+killed       API processes start metadata backup loops | 1 failed, 17 passed, 1 warning in 4.34s
+killed       scheduler sessions return to a connection pool | 1 failed, 17 passed, 1 warning in 4.26s
+killed       heartbeats reacquire a recursive session lock | 1 failed, 17 passed, 1 warning in 4.24s
+killed       graceful shutdown omits explicit unlock | 1 failed, 17 passed, 1 warning in 4.24s
+killed       scheduler and write locks collide | 3 failed, 15 passed, 1 warning in 8.44s
+killed       bound business operations use a fresh pooled session | 2 failed, 16 passed, 1 warning in 4.62s
+killed       one failed job rolls back the whole scheduler tick | 1 failed, 17 passed, 1 warning in 5.27s
+killed       cloud scheduler diagnostics become local memory | 2 failed, 16 passed, 1 warning in 4.18s
+killed       conflicting configured cluster identities are accepted | 1 failed, 17 passed, 1 warning in 4.26s
+killed       scheduler failure is immediately erased | 1 failed, 17 passed, 1 warning in 4.07s
+killed       standby session reports leadership without acquiring | 1 failed, 17 passed, 1 warning in 4.19s
+
+16 of 16 mutants killed.

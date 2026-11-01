@@ -1,0 +1,19 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_fenced_ticks_keep_independent_job_transactions_and_other_jobs_progress __
+backend/tests/test_scheduler_controller.py:104: in test_fenced_ticks_keep_independent_job_transactions_and_other_jobs_progress
+    assert db.execute('SELECT value FROM settings WHERE key=:p0', ('committed-before-failure',)).fetchone()[0] == 'true'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: 'NoneType' object is not subscriptable
+------------------------------ Captured log call -------------------------------
+WARNING  backend.services.scheduler_controller:scheduler_controller.py:41 Scheduler tick failed: RuntimeError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 3, SQLite 0; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_scheduler_controller.py::test_fenced_ticks_keep_independent_job_transactions_and_other_jobs_progress
+1 failed, 2 passed, 1 warning in 0.60s

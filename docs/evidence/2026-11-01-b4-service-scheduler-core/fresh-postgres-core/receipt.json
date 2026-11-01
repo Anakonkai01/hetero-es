@@ -1,0 +1,18 @@
+{
+  "image": "postgres:17-alpine",
+  "container": "heteroes-minicloud-pgtest-20261101t065233z-aa3d45",
+  "binding": "127.0.0.1",
+  "startedAt": "20261101T065233Z-aa3d45",
+  "scope": "all backend/tests",
+  "cleanedUp": true,
+  "port": 32770,
+  "serverVersionNumber": 170011,
+  "imageDigest": "postgres@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b",
+  "pytestExitCode": 0,
+  "pytestSummary": "559 passed, 1 warning in 147.62s (0:02:27)",
+  "productStores": {
+    "sqlite": 48,
+    "postgresql": 363
+  },
+  "explicitSQLiteContracts": 38
+}
