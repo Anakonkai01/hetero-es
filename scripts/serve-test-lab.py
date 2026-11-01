@@ -88,7 +88,8 @@ def load_run(store, recorded):
                     item[key] = item[key].replace(recorded["body"]["experimentId"], run_id)
     with store.db() as db:
         db.execute(
-            "INSERT INTO experiments VALUES (?,?,?,?)", (run_id, admin[0], json.dumps(body), json.dumps(snapshot))
+            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
+            (run_id, admin[0], json.dumps(body), json.dumps(snapshot)),
         )
     return run_id
 
@@ -132,7 +133,10 @@ def load_stuck_run(store, recorded):
             "UPDATE experiments SET body=?, snapshot=? WHERE id=?", (json.dumps(body), json.dumps(empty), run_id)
         )
         assignment = uuid.uuid4().hex
-        db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,0)", (assignment, run_id, "test-device", 1, "{}", "{}"))
+        db.execute(
+            "INSERT INTO assignments(id,run_id,coordinator,epoch,body,snapshot,released) VALUES (?,?,?,?,?,?,0)",
+            (assignment, run_id, "test-device", 1, "{}", "{}"),
+        )
         event = {
             "event": "agent_command_deferred",
             "commandId": "coordinate",

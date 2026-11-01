@@ -21,7 +21,10 @@ from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
 
 class Store:
     def __init__(self, path, passwords, runtime, *, database_url=None, database_connect_args=None):
+        if "://" in str(path):
+            raise ValueError("Store requires a local state path; pass database_url separately")
         self.path, self.runtime = str(path), runtime
+        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lock = threading.RLock()
         self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()

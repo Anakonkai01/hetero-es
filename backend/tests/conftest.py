@@ -3,7 +3,11 @@
 from fastapi.testclient import TestClient
 import pytest
 
-from dbkit import database as database, product_database_target as product_database_target
+from dbkit import (
+    database as database,
+    product_database_target as product_database_target,
+    fresh_postgres_database as fresh_postgres_database,
+)
 
 from backend.app import create_app
 from backend.devices import AgentRuntime

@@ -99,3 +99,28 @@ def product_database_target(request, monkeypatch):
                         db.execute("DROP SCHEMA " + schema + " CASCADE")
             finally:
                 administrator.close()
+
+
+@pytest.fixture
+def fresh_postgres_database():
+    """Create/drop only this test's fresh databases in the explicit owned PostgreSQL test server."""
+    from sqlalchemy import text
+    from sqlalchemy.engine import make_url
+
+    target = make_url(os.environ["HETEROES_TEST_DATABASE_URL"])
+    created = []
+    with Database(target) as administration:
+
+        def create():
+            name = "backup_restore_test_" + uuid.uuid4().hex
+            with administration.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as db:
+                db.execute(text("CREATE DATABASE " + name))
+            created.append(name)
+            return target.set(database=name, query={})
+
+        try:
+            yield create
+        finally:
+            for name in created:
+                with administration.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as db:
+                    db.execute(text("DROP DATABASE " + name + " WITH (FORCE)"))

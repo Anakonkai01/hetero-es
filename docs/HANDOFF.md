@@ -79,12 +79,21 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   Fresh `scripts/check-backend-postgres.sh` invocation passed and removed its owned container. Original assertions in
   all 70 B2 test modules remain; recursive runtime scanner and doctor instrumentation paths modernized before B9.
   Evidence `2026-11-01-b3-portable-backend`: schema/SQL mutation 12/12, integrated engine mutation 6/6; B3 complete.
-  B4–B10 and C remain; PostgreSQL metadata dump/restore belongs to B4, recursive package resources/shim removal to B9.
+  Recursive package resources/shim removal belong to B9; B5–B10 and C remain.
   B4 core: route partition/export and five role entrypoints implemented; product union remains 111 (API67/devices21/
   storage23) plus two mounts and three shared operational routes. PostgreSQL cluster identity/diagnostics persist.
   Dedicated scheduler session leadership and active/standby controller preserve job commit boundaries and fence lost
   connections; graceful and process-death takeover pass real PG tests. Core SQLite541 / PostgreSQL559, zero skips; mutation16/16. Evidence
-  `2026-11-01-b4-service-scheduler-core`. B4 still needs PostgreSQL metadata dump/restore; B5–B10 and all C remain.
+  `2026-11-01-b4-service-scheduler-core`.
+  B4 complete: PostgreSQL17 custom dumps upload to real MinIO, pass read-back checks and restore into a fresh database
+  atomically with sessions revoked, reservations preserved and dispatch held. Backup mutation16/16; fixture mutation4/4.
+  Full SQLite548 / PostgreSQL572, zero skips; PostgreSQL audit371 PG +48 explicit SQLite Stores. All24 check-all steps
+  and Linux build-apps --check pass. The first check-all falsely reported success after fixture startup failures; it is
+  rejected. Explicit seed columns and mandatory startup-failure accounting fix B-010; the replacement runs every browser
+  contract and retains all seven startup logs. Evidence `2026-11-01-b4-backup-restore` records failures and final results.
+  The MinIO image was built from pinned official source because the old upstream image was unavailable. Its test SDK
+  adapter proves actual backup I/O; production S3 integration remains B6. Linux app checks do not prove installed private
+  Python dependencies (B9/B10), Windows/GPU acceptance or deployment. B5–B10 and all C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.

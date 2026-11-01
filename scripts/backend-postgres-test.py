@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import shlex
 import subprocess
 import sys
 import time
@@ -31,6 +32,41 @@ def docker(*arguments, environment=None):
         # No environment or private connection value is included in an error message.
         raise RuntimeError("Owned PostgreSQL Docker operation failed: " + arguments[0])
     return result.stdout.strip()
+
+
+def postgres_tools(container, output):
+    """Extract this owned Alpine container's matching Linux client tools without changing host packages/environments."""
+    root = output / "pg-client17"
+    root.mkdir(mode=0o700)
+    libraries, aliases = set(), {}
+    for program in ("pg_dump", "pg_restore", "psql"):
+        linked = docker("exec", container, "ldd", "/usr/local/bin/" + program)
+        libraries.update(re.findall(r"(/[^\s()]+)", linked))
+        for alias, path in re.findall(r"(\S+) => (/[^\s()]+)", linked):
+            aliases[alias] = Path(path).name
+    for library in sorted(libraries):
+        docker("cp", "--follow-link", container + ":" + library, str(root / Path(library).name))
+    for alias, target in aliases.items():
+        if not (root / alias).exists():
+            (root / alias).symlink_to(target)
+    loader = next(root / Path(path).name for path in libraries if Path(path).name.startswith("ld-musl-"))
+    environment, versions = {}, {}
+    for program, variable in (
+        ("pg_dump", "HETEROES_PG_DUMP"),
+        ("pg_restore", "HETEROES_PG_RESTORE"),
+        ("psql", "HETEROES_PSQL"),
+    ):
+        binary, wrapper = root / (program + ".bin"), root / program
+        docker("cp", container + ":/usr/local/bin/" + program, str(binary))
+        wrapper.write_text(
+            "#!/bin/sh\nexec "
+            + " ".join(map(shlex.quote, (str(loader), "--library-path", str(root), str(binary))))
+            + ' "$@"\n'
+        )
+        wrapper.chmod(0o700)
+        environment[variable] = str(wrapper)
+        versions[program] = subprocess.check_output([str(wrapper), "--version"], text=True).strip()
+    return environment, versions
 
 
 def main():
@@ -120,6 +156,8 @@ def main():
             "HETEROES_TEST_DATABASE_URL": url.render_as_string(hide_password=False),
             "HETEROES_TEST_DATABASE_AUDIT_FILE": str(output / "database-targets.json"),
         }
+        tools_environment, receipt["pgClients"] = postgres_tools(name, output)
+        test_environment.update(tools_environment)
         with (output / "pytest.log").open("w") as log:
             completed = subprocess.run(
                 [sys.executable, "-m", "pytest", "-q", "--tb=short", "backend/tests"],

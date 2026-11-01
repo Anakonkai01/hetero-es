@@ -41,10 +41,15 @@ step worker-build npm run build --workspace @heteroes/worker
 
 lab() {   # lab <port> [extra serve-test-lab args...]
   local port=$1; shift
-  "$PYTHON" scripts/serve-test-lab.py --web "$WORK/web" --port "$port" "$@" > "$WORK/lab-$port.log" 2>&1 &
+  "$PYTHON" scripts/serve-test-lab.py --web "$WORK/web" --port "$port" "$@" > "$OUT/lab-$port.log" 2>&1 &
   LAB=$!
-  for _ in $(seq 1 25); do sleep 1; curl -s -m 2 "http://127.0.0.1:$port/api/v1/health" > /dev/null && return 0; done
-  echo "fixture lab on $port did not start" >&2; return 1
+  for _ in $(seq 1 25); do
+    sleep 1
+    kill -0 "$LAB" 2>/dev/null || break
+    curl -s -m 2 "http://127.0.0.1:$port/api/v1/health" > /dev/null && return 0
+  done
+  failed+=("fixture-lab-$port")
+  echo "fixture lab on $port did not start (see $OUT/lab-$port.log)" >&2; return 1
 }
 stop_lab() { kill "$LAB" 2>/dev/null; wait "$LAB" 2>/dev/null; LAB=; }
 SEEDS=(--seed-run backend/tests/fixtures/run-d09d6ea8.json --seed-run backend/tests/fixtures/run-95b34770.json)
