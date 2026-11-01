@@ -29,6 +29,7 @@ class Store:
         self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()
         self.accounts = AccountService(self)
+        self.authentication = self.accounts
         self.audit_service = AuditService()
         self.device_state = DeviceStateService(self)
         self.scheduling = SchedulingService(self)

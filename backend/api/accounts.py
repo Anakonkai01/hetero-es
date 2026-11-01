@@ -4,11 +4,27 @@ from fastapi import APIRouter, Depends, Header, Request, Response
 
 from ..request_models import Registration, ProfileEdit, PasswordEdit
 from ..throttle import client_address
+from ..core.errors import ServiceError
 
 
 def install_routes(app, store, user):
     router = APIRouter()
     accounts = store.accounts
+
+    if app.state.auth_mode == "oidc":
+
+        @router.post("/api/v1/auth/register")
+        @router.post("/api/v1/auth/password")
+        @router.post("/api/v1/auth/revoke-other-sessions")
+        def external_accounts():
+            raise ServiceError(404, "Use HeteroES ID to manage sign-in and account security")
+
+        @router.patch("/api/v1/profile")
+        def edit_external_profile(body: ProfileEdit, current=Depends(user)):
+            return accounts.edit_profile(current["userId"], body.model_dump(exclude_none=True))
+
+        app.include_router(router)
+        return
 
     @router.post("/api/v1/auth/register", status_code=201)
     def register(body: Registration, request: Request):

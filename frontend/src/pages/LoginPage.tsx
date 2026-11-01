@@ -1,6 +1,8 @@
 import { PreferencesControl, ProductMark, useProduct } from '@heteroes/product-ui';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router';
+import { getRuntimeConfig } from '../app/runtimeConfig';
+import { signInWithIdentity } from '../app/identity';
 import { useSession } from '../app/session';
 import { LoadingState } from '../components/common/LoadingState';
 export function LoginPage() {
@@ -20,6 +22,16 @@ export function LoginPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : t('Could not sign in.'));
     } finally {
+      setSending(false);
+    }
+  }
+  async function identitySignIn() {
+    setSending(true);
+    setError('');
+    try {
+      await signInWithIdentity();
+    } catch {
+      setError(t('Could not sign in.'));
       setSending(false);
     }
   }
@@ -62,55 +74,64 @@ export function LoginPage() {
           <span className="eyebrow">HETEROES LAB</span>
           <h1>{t('Welcome back.')}</h1>
           <p className="auth-description">{t('Sign in to your lab to continue your research.')}</p>
-          <form onSubmit={submit} className="demo-form">
-            <label className="fg">
-              {t('Username')}
-              <input
-                className="inp"
-                autoFocus
-                autoComplete="username"
-                placeholder={t('Your username')}
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </label>
-            <div className="fg">
-              <label htmlFor="login-password">{t('Password')}</label>
-              <span className="password-field">
-                <input
-                  id="login-password"
-                  className="inp"
-                  type={show ? 'text' : 'password'}
-                  autoComplete={'current-password'}
-                  placeholder={t('Your password')}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  aria-label={t(show ? 'Hide password' : 'Show password')}
-                  onClick={() => setShow(!show)}
-                >
-                  {t(show ? 'Hide' : 'Show')}
-                </button>
-              </span>
+          {getRuntimeConfig().authMode === 'oidc' ? (
+            <div className="demo-form">
+              {error && <p role="alert">{error}</p>}
+              <button className="btn pri auth-submit" disabled={sending} onClick={() => void identitySignIn()}>
+                {t('Sign in with HeteroES ID')}
+              </button>
             </div>
-            {error && (
-              <div className="note err" role="alert">
-                {error}
+          ) : (
+            <form onSubmit={submit} className="demo-form">
+              <label className="fg">
+                {t('Username')}
+                <input
+                  className="inp"
+                  autoFocus
+                  autoComplete="username"
+                  placeholder={t('Your username')}
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </label>
+              <div className="fg">
+                <label htmlFor="login-password">{t('Password')}</label>
+                <span className="password-field">
+                  <input
+                    id="login-password"
+                    className="inp"
+                    type={show ? 'text' : 'password'}
+                    autoComplete={'current-password'}
+                    placeholder={t('Your password')}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    aria-label={t(show ? 'Hide password' : 'Show password')}
+                    onClick={() => setShow(!show)}
+                  >
+                    {t(show ? 'Hide' : 'Show')}
+                  </button>
+                </span>
               </div>
-            )}
-            <button type="submit" className="btn pri auth-submit" disabled={sending}>
-              {t(sending ? 'Signing in…' : 'Sign in')} <span aria-hidden="true">→</span>
-            </button>
-            {
-              <p className="auth-register">
-                {t('New to this lab?')} <Link to="/register">{t('Create an account')}</Link>
-              </p>
-            }
-          </form>
+              {error && (
+                <div className="note err" role="alert">
+                  {error}
+                </div>
+              )}
+              <button type="submit" className="btn pri auth-submit" disabled={sending}>
+                {t(sending ? 'Signing in…' : 'Sign in')} <span aria-hidden="true">→</span>
+              </button>
+              {
+                <p className="auth-register">
+                  {t('New to this lab?')} <Link to="/register">{t('Create an account')}</Link>
+                </p>
+              }
+            </form>
+          )}
           <div className="auth-help">
             {t('Your administrator approves access to shared resources.')}
             <br />

@@ -6,7 +6,7 @@ import secrets
 import time
 import uuid
 
-from argon2.exceptions import VerificationError
+from argon2.exceptions import InvalidHashError, VerificationError
 
 from ..core.errors import ServiceError
 from ..passwords import password_problem
@@ -18,6 +18,8 @@ def _digest(token):
 
 
 class AccountService:
+    mode = "local"
+
     def __init__(self, store):
         self.store = store
         self.repository = AccountsRepository()
@@ -45,7 +47,7 @@ class AccountService:
             row = self.repository.by_username(db, username)
             try:
                 self.store.hasher.verify(row["hash"] if row else self.store.hasher.hash("unknown-user"), password)
-            except VerificationError:
+            except (InvalidHashError, VerificationError):
                 raise ServiceError(401, "Invalid username or password") from None
             if not row:
                 raise ServiceError(401, "Invalid username or password")
@@ -73,6 +75,13 @@ class AccountService:
     def sign_out(self, token):
         with self.store.db() as db:
             self.repository.delete_session(db, _digest(token))
+
+    def download_session(self, token, user_id):
+        return _digest(token), time.time() + 60
+
+    @staticmethod
+    def external_download_session(digest):
+        return False
 
     def register(self, username, password, display_name, address, registrations):
         wait = registrations.retry_after(address)

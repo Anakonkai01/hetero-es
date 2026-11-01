@@ -48,6 +48,8 @@ def operations(store, runtime, platform):
             platform(current)
             if not store.profile(user_id):
                 raise ServiceError(404, "Account not found")
+            if store.authentication.mode == "oidc" and user_id.startswith("kc:"):
+                raise ServiceError(404, "Manage identity sessions in HeteroES ID")
             if user_id == current["userId"]:
                 raise ServiceError(409, "Use your account security page to sign out other sessions")
             repository.revoke_sessions_delete_sessions(db, (user_id,))

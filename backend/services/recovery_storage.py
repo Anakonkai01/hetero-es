@@ -380,11 +380,11 @@ def operations(store, storage, device_auth, user, scoped, authorized):
             raise ServiceError(404, "Cloud checkpoint not ready")
         secret = secrets.token_urlsafe(32)
         td = hashlib.sha256(secret.encode()).hexdigest()
-        session_digest = hashlib.sha256(token.encode()).hexdigest()
+        session_digest, ticket_expiry = store.authentication.download_session(token, current["userId"])
         path = "/api/v1/cloud-downloads/" + td
         with store.db() as db:
             repository.ticket_insert_cloud_downloads(
-                db, (td, current["userId"], session_digest, run_id, sha, time.time() + 60)
+                db, (td, current["userId"], session_digest, run_id, sha, ticket_expiry)
             )
         return {"downloadUrl": path, "secret": secret}
 
@@ -395,9 +395,12 @@ def operations(store, storage, device_auth, user, scoped, authorized):
             row = repository.consume_select_cloud_downloads(db, (ticket_digest, time.time())).fetchone()
             if not row:
                 raise ServiceError(401, "Download ticket expired")
-            if not repository.consume_select_sessions(
-                db, (row["session_digest"], row["user_id"], time.time())
-            ).fetchone():
+            if (
+                not store.authentication.external_download_session(row["session_digest"])
+                and not repository.consume_select_sessions(
+                    db, (row["session_digest"], row["user_id"], time.time())
+                ).fetchone()
+            ):
                 raise ServiceError(401, "Session revoked")
             body = store.get(row["run_id"])
             profile = store.profile(row["user_id"])

@@ -1,13 +1,8 @@
 import { SseParser, type SseMessage } from '../lib/sse';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-const TOKEN_KEY = 'heteroes.access-token';
-let accessToken = sessionStorage.getItem(TOKEN_KEY) ?? '';
+import { getAccessToken } from './token';
+export { setAccessToken } from './token';
 let workspaceId = '';
-export function setAccessToken(token: string) {
-  accessToken = token;
-  if (token) sessionStorage.setItem(TOKEN_KEY, token);
-  else sessionStorage.removeItem(TOKEN_KEY);
-}
 export function setActiveWorkspace(id: string) {
   workspaceId = id;
 }
@@ -24,7 +19,7 @@ export function isNotFoundError(error: unknown): boolean {
 }
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
-  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+  if (getAccessToken()) headers.set('Authorization', `Bearer ${getAccessToken()}`);
   if (workspaceId) headers.set('X-Workspace-Id', workspaceId);
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
   if (!response.ok) {
@@ -86,7 +81,7 @@ export async function downloadArtifact(id: string, name: string) {
 }
 async function downloadFile(path: string, name: string) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { Authorization: `Bearer ${accessToken}`, 'X-Workspace-Id': workspaceId },
+    headers: { Authorization: `Bearer ${getAccessToken()}`, 'X-Workspace-Id': workspaceId },
   });
   if (!response.ok) throw new ApiError(response.status, 'Download failed');
   const url = URL.createObjectURL(await response.blob());
@@ -106,7 +101,7 @@ export async function readStream(
   signal: AbortSignal,
 ): Promise<void> {
   const headers = new Headers({ Accept: 'text/event-stream' });
-  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+  if (getAccessToken()) headers.set('Authorization', `Bearer ${getAccessToken()}`);
   if (workspaceId) headers.set('X-Workspace-Id', workspaceId);
   const response = await fetch(`${API_BASE_URL}${path}`, { headers, signal });
   if (!response.ok || !response.body) throw new ApiError(response.status, `Stream unavailable: ${response.status}`);

@@ -42,10 +42,27 @@ def create_app(
     service="all",
     database_url=None,
     database_connect_args=None,
+    auth_mode="local",
+    oidc_issuer=None,
+    oidc_jwks_url=None,
 ):
     if service not in SERVICES:
         raise ValueError("Unknown backend service")
-    store = Store(path, passwords, runtime, database_url=database_url, database_connect_args=database_connect_args)
+    if auth_mode not in {"local", "oidc"}:
+        raise ValueError("Unknown authentication mode")
+    verifier = None
+    if auth_mode == "oidc":
+        from ..services.oidc import OIDCAccounts, OIDCVerifier
+
+        verifier = OIDCVerifier(oidc_issuer, oidc_jwks_url)
+    store = Store(
+        path,
+        passwords if auth_mode == "local" else {},
+        runtime,
+        database_url=database_url,
+        database_connect_args=database_connect_args,
+    )
+    store.authentication = OIDCAccounts(store, verifier) if verifier else store.accounts
     from ..services.study_registry import Registry
 
     registry = Registry(store)
@@ -91,6 +108,7 @@ def create_app(
     app.state.registrations = Throttle(10, 3600)
     app.state.store = store
     app.state.service = service
+    app.state.auth_mode = auth_mode
     app.state.scheduler = scheduler
     app.state.live = LiveStreams()
 
@@ -99,7 +117,7 @@ def create_app(
     async def handle_http(_request, error):
         return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
 
-    user = local_user(store.accounts)
+    user = local_user(store.authentication)
     access = AccessService(store, runtime)
 
     scoped = workspace_scope(access, user)
@@ -231,4 +249,7 @@ def _app_from_config(root, credentials, config, writer, *, service="all", databa
         writer_lock=writer,
         service=service,
         database_url=database_url,
+        auth_mode=os.environ.get("HETEROES_AUTH_MODE", config.get("authMode", "local")),
+        oidc_issuer=os.environ.get("HETEROES_OIDC_ISSUER", config.get("oidcIssuer")),
+        oidc_jwks_url=os.environ.get("HETEROES_OIDC_JWKS_URL", config.get("oidcJwksUrl")),
     )

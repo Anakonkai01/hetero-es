@@ -1366,6 +1366,8 @@ export const translations: Record<string, string> = {
   'Or use the web form (built-in workloads and simple settings)':
     'Hoặc dùng form trên web (bài có sẵn và cài đặt đơn giản)',
   'Distributed experiment workflow': 'Quy trình thí nghiệm phân tán',
+  'Sign in with HeteroES ID': 'Đăng nhập bằng HeteroES ID',
+  'Manage sign-in and password in HeteroES ID.': 'Quản lý đăng nhập và mật khẩu trong HeteroES ID.',
   'Could not sign in.': 'Không đăng nhập được.',
   'Pinned revision': 'Phiên bản đã ghim',
   'EVOLUTION STRATEGIES · DISTRIBUTED COMPUTE': 'EVOLUTION STRATEGIES · TÍNH TOÁN PHÂN TÁN',

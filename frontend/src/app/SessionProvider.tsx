@@ -1,8 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getSession, login, logout } from '../api/access';
 import { ApiError, setAccessToken, setActiveWorkspace } from '../api/client';
 import { SessionContext } from './session';
+import { getRuntimeConfig } from './runtimeConfig';
+import { signOutWithIdentity } from './identity';
 const WORKSPACE_KEY = 'heteroes.demo-workspace';
 export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -36,6 +38,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   });
   const session = query.error instanceof ApiError && query.error.status === 401 ? undefined : query.data;
   const workspace = session?.workspaces.find((item) => item.workspaceId === workspaceId) ?? session?.workspaces[0];
+  useEffect(() => {
+    const changed = () => {
+      void queryClient.cancelQueries().then(() => {
+        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'session' });
+        void queryClient.invalidateQueries({ queryKey: ['session'] });
+      });
+    };
+    window.addEventListener('heteroes-identity-changed', changed);
+    return () => window.removeEventListener('heteroes-identity-changed', changed);
+  }, [queryClient]);
   async function selectWorkspace(id: string) {
     if (!session?.workspaces.some((item) => item.workspaceId === id)) return;
     await queryClient.cancelQueries({ predicate: (query) => query.queryKey[0] !== 'session' });
@@ -60,7 +72,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }
   async function signOut() {
     // Preserve the session if the server cannot confirm revocation.
-    await logout();
+    const external = getRuntimeConfig().authMode === 'oidc';
+    if (external) await logout().catch(() => undefined);
+    else await logout();
     await queryClient.cancelQueries();
     setAccessToken('');
     setActiveWorkspace('');
@@ -68,6 +82,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setWorkspaceId('');
     queryClient.clear();
     queryClient.setQueryData(['session'], null);
+    if (external) await signOutWithIdentity();
   }
   async function refreshSession() {
     await query.refetch();

@@ -36,6 +36,17 @@ class AccountsRepository:
         db.execute("DELETE FROM sessions WHERE digest=:p0", (digest,))
 
     @staticmethod
+    def delete_download_tickets(db, digest):
+        db.execute("DELETE FROM cloud_downloads WHERE session_digest=:p0", (digest,))
+
+    @staticmethod
+    def bootstrap_membership(db, user_id):
+        db.execute(
+            "INSERT INTO memberships(workspace_id,user_id,role) VALUES ('lab',:p0,'ADMIN') ON CONFLICT DO NOTHING",
+            (user_id,),
+        )
+
+    @staticmethod
     def add_user(db, user_id, password_hash, profile):
         try:
             db.execute("INSERT INTO users(id,hash,profile)  VALUES (:p0,:p1,:p2)", (user_id, password_hash, profile))

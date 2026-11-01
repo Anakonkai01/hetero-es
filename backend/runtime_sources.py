@@ -6,6 +6,7 @@ SHARED_MODULES = (
     "__init__.py",
     "catalog.py",
     "canonical.py",
+    "http_safety.py",
     "noise/__init__.py",
     "noise/contracts.py",
     "recovery_manifest.py",

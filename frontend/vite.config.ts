@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.HETEROES_WEB_BASE ?? '/',
   plugins: [react()],
   // Static assets only. `public/downloads` holds links to installers for the lab manager and must never be copied into a build.
   publicDir: 'static',

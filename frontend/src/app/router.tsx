@@ -5,6 +5,7 @@ import { AppLayout } from '../components/layout/AppLayout';
 import { RequireSession } from '../components/layout/RequireSession';
 import { HomePage } from '../pages/HomePage';
 import { useSession } from './session';
+import { getRuntimeConfig } from './runtimeConfig';
 const ProfilePage = lazy(() => import('../pages/ProfilePage').then((module) => ({ default: module.ProfilePage })));
 const MyWorkersPage = lazy(() =>
   import('../pages/MyWorkersPage').then((module) => ({ default: module.MyWorkersPage })),
@@ -59,7 +60,12 @@ export function AppRouter() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/explain" element={<ExplainPage />} />
-        {<Route path="/register" element={<RegisterPage />} />}
+        {
+          <Route
+            path="/register"
+            element={getRuntimeConfig().authMode === 'oidc' ? <Navigate to="/login" replace /> : <RegisterPage />}
+          />
+        }
         <Route element={<RequireSession />}>
           <Route element={<AppLayout />}>
             <Route path="/get-started" element={<GetStartedPage />} />
