@@ -1,0 +1,91 @@
+
+==================================== ERRORS ====================================
+____________ ERROR collecting backend/tests/test_device_removal.py _____________
+backend/tests/test_device_removal.py:9: in <module>
+    from test_lab import register, activate
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+.venv-backend/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+    exec(co, module.__dict__)
+backend/tests/test_lab.py:136: in <module>
+    @pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
+     ^^^^^^
+E   NameError: name 'pytest' is not defined
+__________________ ERROR collecting backend/tests/test_lab.py __________________
+backend/tests/test_lab.py:136: in <module>
+    @pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
+     ^^^^^^
+E   NameError: name 'pytest' is not defined
+__________ ERROR collecting backend/tests/test_notification_layers.py __________
+backend/tests/test_notification_layers.py:4: in <module>
+    from test_notifications import finish, listing
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+.venv-backend/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+    exec(co, module.__dict__)
+backend/tests/test_notifications.py:6: in <module>
+    from test_lab import register, activate
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+.venv-backend/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+    exec(co, module.__dict__)
+backend/tests/test_lab.py:136: in <module>
+    @pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
+     ^^^^^^
+E   NameError: name 'pytest' is not defined
+_____________ ERROR collecting backend/tests/test_notifications.py _____________
+backend/tests/test_notifications.py:6: in <module>
+    from test_lab import register, activate
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+.venv-backend/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+    exec(co, module.__dict__)
+backend/tests/test_lab.py:136: in <module>
+    @pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
+     ^^^^^^
+E   NameError: name 'pytest' is not defined
+_______________ ERROR collecting backend/tests/test_templates.py _______________
+backend/tests/test_templates.py:6: in <module>
+    from test_lab import register, activate
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+.venv-backend/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+    exec(co, module.__dict__)
+backend/tests/test_lab.py:136: in <module>
+    @pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
+     ^^^^^^
+E   NameError: name 'pytest' is not defined
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR backend/tests/test_device_removal.py - NameError: name 'pytest' is not ...
+ERROR backend/tests/test_lab.py - NameError: name 'pytest' is not defined
+ERROR backend/tests/test_notification_layers.py - NameError: name 'pytest' is...
+ERROR backend/tests/test_notifications.py - NameError: name 'pytest' is not d...
+ERROR backend/tests/test_templates.py - NameError: name 'pytest' is not defined
+!!!!!!!!!!!!!!!!!!! Interrupted: 5 errors during collection !!!!!!!!!!!!!!!!!!!!
+1 warning, 5 errors in 0.24s

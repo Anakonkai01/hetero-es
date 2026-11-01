@@ -1,0 +1,152 @@
+[
+  {
+    "file": "schema-red.log",
+    "originalSha256": "42ef14eb779d0dbb7f1c98442b3893d5a2aeb7440b78c000b9e4038f782af08a",
+    "archivedSha256": "42ef14eb779d0dbb7f1c98442b3893d5a2aeb7440b78c000b9e4038f782af08a",
+    "redacted": false
+  },
+  {
+    "file": "schema-sqlite.log",
+    "originalSha256": "a1e02316aa3b80c309d8966e5a9d568830fb64c9b04faaeb1195dc5dcc0debd4",
+    "archivedSha256": "a1e02316aa3b80c309d8966e5a9d568830fb64c9b04faaeb1195dc5dcc0debd4",
+    "redacted": false
+  },
+  {
+    "file": "schema-postgres.log",
+    "originalSha256": "b885afdd219ccf3ef54dd250e0768dc8c4f9834a6d3c13898ad71b847d67a9bb",
+    "archivedSha256": "b885afdd219ccf3ef54dd250e0768dc8c4f9834a6d3c13898ad71b847d67a9bb",
+    "redacted": false
+  },
+  {
+    "file": "repository-sql-red.log",
+    "originalSha256": "6967db6b5df5244ae799f6bbc55a6c5edc4b286ededda9bd4283fe6e59507d43",
+    "archivedSha256": "6967db6b5df5244ae799f6bbc55a6c5edc4b286ededda9bd4283fe6e59507d43",
+    "redacted": false
+  },
+  {
+    "file": "repository-sql-matrix.log",
+    "originalSha256": "88e317cb7f4fe6d3bd4e99209934b795c96d8e002db7024f10620b50808d1c15",
+    "archivedSha256": "88e317cb7f4fe6d3bd4e99209934b795c96d8e002db7024f10620b50808d1c15",
+    "redacted": false
+  },
+  {
+    "file": "store-integration-red.log",
+    "originalSha256": "e128acf1cb472b437a9b4c4ebb862263848c7996e8afe9b58cd9b59e1f75e854",
+    "archivedSha256": "e128acf1cb472b437a9b4c4ebb862263848c7996e8afe9b58cd9b59e1f75e854",
+    "redacted": false
+  },
+  {
+    "file": "store-integration-first.log",
+    "originalSha256": "7e1b85b7030f51c4317b2cacad8d304b0579bf05fbba7ed26d489599018346cd",
+    "archivedSha256": "7e1b85b7030f51c4317b2cacad8d304b0579bf05fbba7ed26d489599018346cd",
+    "redacted": false
+  },
+  {
+    "file": "backend-integrated-first.log",
+    "originalSha256": "0e1c67b0a5347d3e51591528d2e9996ee19b84bacc721953d2edb84002eb8a3c",
+    "archivedSha256": "0e1c67b0a5347d3e51591528d2e9996ee19b84bacc721953d2edb84002eb8a3c",
+    "redacted": false
+  },
+  {
+    "file": "backend-sqlite-second.log",
+    "originalSha256": "c9f752dbcea706983ca7608d48243d544f807b60ce3889d488c16521b931c190",
+    "archivedSha256": "c9f752dbcea706983ca7608d48243d544f807b60ce3889d488c16521b931c190",
+    "redacted": false
+  },
+  {
+    "file": "backend-sqlite-third.log",
+    "originalSha256": "f2f7ca5a89cd35021044e03e3ab4e8e614c9c16f847ca940527650b9e22368f2",
+    "archivedSha256": "f2f7ca5a89cd35021044e03e3ab4e8e614c9c16f847ca940527650b9e22368f2",
+    "redacted": false
+  },
+  {
+    "file": "backend-postgres-first.log",
+    "originalSha256": "80bf7378a3e6b836919b46be5b1d8ddbbe461aaa33144d67933cf7e0343abff7",
+    "archivedSha256": "80bf7378a3e6b836919b46be5b1d8ddbbe461aaa33144d67933cf7e0343abff7",
+    "redacted": false
+  },
+  {
+    "file": "backend-postgres-second.log",
+    "originalSha256": "0938bc8249b0d9437dbf66a0011c88c9b5deed74a9f4c18190c548cc512662bc",
+    "archivedSha256": "0938bc8249b0d9437dbf66a0011c88c9b5deed74a9f4c18190c548cc512662bc",
+    "redacted": false
+  },
+  {
+    "file": "postgres-fixes-focused.log",
+    "originalSha256": "289efecacfdd1b9a97f4bb4aca15e018529a0afd8816846fbb262dbb97153bbd",
+    "archivedSha256": "289efecacfdd1b9a97f4bb4aca15e018529a0afd8816846fbb262dbb97153bbd",
+    "redacted": false
+  },
+  {
+    "file": "product-process-race-postgres.log",
+    "originalSha256": "cbc8c79221b59eee20f10d7e42ce1094764eeea44413536eeed980f95a1fa25f",
+    "archivedSha256": "cbc8c79221b59eee20f10d7e42ce1094764eeea44413536eeed980f95a1fa25f",
+    "redacted": false
+  },
+  {
+    "file": "backend-sqlite-final.log",
+    "originalSha256": "5d87743757cb939dc2868af140f6d67d443a0adb4a2981e44185080f27c5eebb",
+    "archivedSha256": "5d87743757cb939dc2868af140f6d67d443a0adb4a2981e44185080f27c5eebb",
+    "redacted": false
+  },
+  {
+    "file": "fresh-postgres-driver.log",
+    "originalSha256": "24574f7d2710681c1782e76706cfaa25c5d280c53a53d9e73b572312dae87213",
+    "archivedSha256": "24574f7d2710681c1782e76706cfaa25c5d280c53a53d9e73b572312dae87213",
+    "redacted": false
+  },
+  {
+    "file": "schema-sql-protocol-final.log",
+    "originalSha256": "2ad629b41115fe265af13be32c208c498f0f33e3a332021c32d88fcba0181b69",
+    "archivedSha256": "2ad629b41115fe265af13be32c208c498f0f33e3a332021c32d88fcba0181b69",
+    "redacted": false
+  },
+  {
+    "file": "portability-mutation.log",
+    "originalSha256": "6eaae8393283c3589665995b69ea461bdbcc147aec0d0473637907cc7b38dc4a",
+    "archivedSha256": "6eaae8393283c3589665995b69ea461bdbcc147aec0d0473637907cc7b38dc4a",
+    "redacted": false
+  },
+  {
+    "file": "engine-mutation-integrated.log",
+    "originalSha256": "9c45b574d36b98981481a65db2531bb3b7b3b77ff67918634ff0085b74b3e6d4",
+    "archivedSha256": "9c45b574d36b98981481a65db2531bb3b7b3b77ff67918634ff0085b74b3e6d4",
+    "redacted": false
+  },
+  {
+    "file": "lint-final.log",
+    "originalSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "archivedSha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "redacted": false
+  },
+  {
+    "file": "format-final.log",
+    "originalSha256": "586fb37ab03e326fd7d42974a2af011ba905524a2698a03c5a1b28499f83dd69",
+    "archivedSha256": "586fb37ab03e326fd7d42974a2af011ba905524a2698a03c5a1b28499f83dd69",
+    "redacted": false
+  },
+  {
+    "file": "docs-format-final.log",
+    "originalSha256": "b908c5a29f79556100c829a5211daef9cf1f48fea1865a31acab83e8e8884bcb",
+    "archivedSha256": "b908c5a29f79556100c829a5211daef9cf1f48fea1865a31acab83e8e8884bcb",
+    "redacted": false
+  },
+  {
+    "file": "archive-fixtures.log",
+    "originalSha256": "5af3ab5063cae81e6281aae8169f4b80ae5a5ec4d8f3e76c0f0963f44d44e912",
+    "archivedSha256": "5af3ab5063cae81e6281aae8169f4b80ae5a5ec4d8f3e76c0f0963f44d44e912",
+    "redacted": false
+  },
+  {
+    "file": "final-schema-parity.log",
+    "originalSha256": "e21aaf7b625191d1ab378da2973feeb3535486d7045a6f7f2c6e4fe6fb30ce72",
+    "archivedSha256": "e21aaf7b625191d1ab378da2973feeb3535486d7045a6f7f2c6e4fe6fb30ce72",
+    "redacted": false
+  },
+  {
+    "file": "fresh-postgres-full/pytest.log",
+    "originalSha256": "12288f0f87aa9c159190712fff30d27df969df77e50e98788133fdb50dfc1eeb",
+    "archivedSha256": "12288f0f87aa9c159190712fff30d27df969df77e50e98788133fdb50dfc1eeb",
+    "redacted": false
+  }
+]

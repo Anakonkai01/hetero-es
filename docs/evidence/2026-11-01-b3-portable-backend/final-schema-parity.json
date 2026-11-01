@@ -1,0 +1,2248 @@
+{
+  "equal": true,
+  "tables": 38,
+  "columns": 189,
+  "normalization": "SQLAlchemy logical type affinity; PK/unique column sets. SQLite TEXT PRIMARY KEY implicit nullability and identity/default mechanisms are deliberately dialect-specific; behavioral uniqueness/precision/order tests are separate.",
+  "sqlite": {
+    "assignment_members": {
+      "columns": [
+        [
+          "change_id",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "worker_id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "action",
+          "String"
+        ],
+        [
+          "actor",
+          "String"
+        ],
+        [
+          "created",
+          "Numeric"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "change_id"
+      ],
+      "unique": []
+    },
+    "assignments": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "coordinator",
+          "String"
+        ],
+        [
+          "epoch",
+          "Integer"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "snapshot",
+          "String"
+        ],
+        [
+          "released",
+          "Integer"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "run_id"
+        ],
+        [
+          "run_id",
+          "epoch"
+        ]
+      ]
+    },
+    "audit": {
+      "columns": [
+        [
+          "sequence",
+          "Integer"
+        ],
+        [
+          "actor",
+          "String"
+        ],
+        [
+          "action",
+          "String"
+        ],
+        [
+          "target",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "sequence"
+      ],
+      "unique": []
+    },
+    "cloud_downloads": {
+      "columns": [
+        [
+          "digest",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "session_digest",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "sha",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "digest"
+      ],
+      "unique": []
+    },
+    "cloud_objects": {
+      "columns": [
+        [
+          "sha",
+          "String"
+        ],
+        [
+          "size",
+          "Integer"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "upload_plan",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "sha"
+      ],
+      "unique": []
+    },
+    "cloud_refs": {
+      "columns": [
+        [
+          "point_id",
+          "String"
+        ],
+        [
+          "sha",
+          "String"
+        ]
+      ],
+      "pk": [
+        "point_id",
+        "sha"
+      ],
+      "unique": []
+    },
+    "cloud_requests": {
+      "columns": [
+        [
+          "month",
+          "String"
+        ],
+        [
+          "class_a",
+          "Integer"
+        ],
+        [
+          "class_b",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "month"
+      ],
+      "unique": []
+    },
+    "device_commands": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "dedupe",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "ack",
+          "Integer"
+        ],
+        [
+          "created",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "dedupe"
+        ]
+      ]
+    },
+    "device_reports": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ],
+        [
+          "sequence",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "assignment_id",
+        "sequence"
+      ],
+      "unique": []
+    },
+    "device_reservations": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id"
+      ],
+      "unique": []
+    },
+    "device_telemetry_history": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "boot_id",
+          "String"
+        ],
+        [
+          "sampled_at",
+          "Numeric"
+        ],
+        [
+          "received_at",
+          "Numeric"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "boot_id",
+        "sampled_at"
+      ],
+      "unique": []
+    },
+    "devices": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "worker_id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "token_digest",
+          "String"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "compute_url",
+          "String"
+        ],
+        [
+          "self_test",
+          "String"
+        ],
+        [
+          "boot_id",
+          "String"
+        ],
+        [
+          "seen",
+          "Numeric"
+        ],
+        [
+          "enabled",
+          "Integer"
+        ],
+        [
+          "desired",
+          "Integer"
+        ],
+        [
+          "processes",
+          "String"
+        ],
+        [
+          "telemetry",
+          "String"
+        ],
+        [
+          "bulk_url",
+          "String"
+        ],
+        [
+          "keep_on",
+          "Integer"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "worker_id"
+        ]
+      ]
+    },
+    "experiment_templates": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "owner_id",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "config",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "experiments": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "snapshot",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "invitations": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "workspace_id",
+          "user_id"
+        ]
+      ]
+    },
+    "join_requests": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "workspace_id",
+          "user_id"
+        ]
+      ]
+    },
+    "memberships": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "role",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id",
+        "user_id"
+      ],
+      "unique": []
+    },
+    "model_engine_qualifications": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "profile_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "engine",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "workspace_id",
+        "manifest_hash",
+        "engine"
+      ],
+      "unique": []
+    },
+    "model_engine_references": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "engine",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id",
+        "manifest_hash",
+        "engine"
+      ],
+      "unique": []
+    },
+    "model_probe_jobs": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "asset_id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "model_probe_reservations": {
+      "columns": [
+        [
+          "job_id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "resource_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "job_id"
+      ],
+      "unique": [
+        [
+          "device_id"
+        ],
+        [
+          "resource_id"
+        ]
+      ]
+    },
+    "model_qualifications": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "profile_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "workspace_id",
+        "manifest_hash"
+      ],
+      "unique": []
+    },
+    "model_references": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id",
+        "manifest_hash"
+      ],
+      "unique": []
+    },
+    "monitoring_events": {
+      "columns": [
+        [
+          "sequence",
+          "Integer"
+        ],
+        [
+          "event_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "sequence"
+      ],
+      "unique": [
+        [
+          "event_id"
+        ]
+      ]
+    },
+    "notifications": {
+      "columns": [
+        [
+          "id",
+          "Integer"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "kind",
+          "String"
+        ],
+        [
+          "params",
+          "String"
+        ],
+        [
+          "target",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ],
+        [
+          "read_at",
+          "String"
+        ],
+        [
+          "dedupe",
+          "String"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "dedupe"
+        ]
+      ]
+    },
+    "pairing_codes": {
+      "columns": [
+        [
+          "digest",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ],
+        [
+          "used",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "digest"
+      ],
+      "unique": []
+    },
+    "physical_reservations": {
+      "columns": [
+        [
+          "resource_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "resource_id"
+      ],
+      "unique": []
+    },
+    "queue": {
+      "columns": [
+        [
+          "sequence",
+          "Integer"
+        ],
+        [
+          "run_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "sequence"
+      ],
+      "unique": [
+        [
+          "run_id"
+        ]
+      ]
+    },
+    "recovery_points": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "generation",
+          "Integer"
+        ],
+        [
+          "final",
+          "Integer"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "manifest",
+          "String"
+        ],
+        [
+          "error",
+          "String"
+        ],
+        [
+          "created",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "schema_versions": {
+      "columns": [
+        [
+          "version",
+          "Integer"
+        ],
+        [
+          "applied",
+          "String"
+        ]
+      ],
+      "pk": [
+        "version"
+      ],
+      "unique": []
+    },
+    "sessions": {
+      "columns": [
+        [
+          "digest",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "digest"
+      ],
+      "unique": []
+    },
+    "settings": {
+      "columns": [
+        [
+          "key",
+          "String"
+        ],
+        [
+          "value",
+          "String"
+        ]
+      ],
+      "pk": [
+        "key"
+      ],
+      "unique": []
+    },
+    "study_assets": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "kind",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "study_uploads": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "asset_id",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "object_sha",
+          "String"
+        ],
+        [
+          "upload_key",
+          "String"
+        ],
+        [
+          "size",
+          "Integer"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "users": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "hash",
+          "String"
+        ],
+        [
+          "profile",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "worker_assignments": {
+      "columns": [
+        [
+          "worker_id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "worker_id"
+      ],
+      "unique": []
+    },
+    "workspace_settings": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id"
+      ],
+      "unique": []
+    },
+    "workspaces": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "description",
+          "String"
+        ],
+        [
+          "creator",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    }
+  },
+  "postgresql": {
+    "assignment_members": {
+      "columns": [
+        [
+          "change_id",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "worker_id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "action",
+          "String"
+        ],
+        [
+          "actor",
+          "String"
+        ],
+        [
+          "created",
+          "Numeric"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "change_id"
+      ],
+      "unique": []
+    },
+    "assignments": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "coordinator",
+          "String"
+        ],
+        [
+          "epoch",
+          "Integer"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "snapshot",
+          "String"
+        ],
+        [
+          "released",
+          "Integer"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "run_id"
+        ],
+        [
+          "run_id",
+          "epoch"
+        ]
+      ]
+    },
+    "audit": {
+      "columns": [
+        [
+          "sequence",
+          "Integer"
+        ],
+        [
+          "actor",
+          "String"
+        ],
+        [
+          "action",
+          "String"
+        ],
+        [
+          "target",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "sequence"
+      ],
+      "unique": []
+    },
+    "cloud_downloads": {
+      "columns": [
+        [
+          "digest",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "session_digest",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "sha",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "digest"
+      ],
+      "unique": []
+    },
+    "cloud_objects": {
+      "columns": [
+        [
+          "sha",
+          "String"
+        ],
+        [
+          "size",
+          "Integer"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "upload_plan",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "sha"
+      ],
+      "unique": []
+    },
+    "cloud_refs": {
+      "columns": [
+        [
+          "point_id",
+          "String"
+        ],
+        [
+          "sha",
+          "String"
+        ]
+      ],
+      "pk": [
+        "point_id",
+        "sha"
+      ],
+      "unique": []
+    },
+    "cloud_requests": {
+      "columns": [
+        [
+          "month",
+          "String"
+        ],
+        [
+          "class_a",
+          "Integer"
+        ],
+        [
+          "class_b",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "month"
+      ],
+      "unique": []
+    },
+    "device_commands": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "dedupe",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "ack",
+          "Integer"
+        ],
+        [
+          "created",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "dedupe"
+        ]
+      ]
+    },
+    "device_reports": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ],
+        [
+          "sequence",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "assignment_id",
+        "sequence"
+      ],
+      "unique": []
+    },
+    "device_reservations": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id"
+      ],
+      "unique": []
+    },
+    "device_telemetry_history": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "boot_id",
+          "String"
+        ],
+        [
+          "sampled_at",
+          "Numeric"
+        ],
+        [
+          "received_at",
+          "Numeric"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "boot_id",
+        "sampled_at"
+      ],
+      "unique": []
+    },
+    "devices": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "worker_id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "token_digest",
+          "String"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "compute_url",
+          "String"
+        ],
+        [
+          "self_test",
+          "String"
+        ],
+        [
+          "boot_id",
+          "String"
+        ],
+        [
+          "seen",
+          "Numeric"
+        ],
+        [
+          "enabled",
+          "Integer"
+        ],
+        [
+          "desired",
+          "Integer"
+        ],
+        [
+          "processes",
+          "String"
+        ],
+        [
+          "telemetry",
+          "String"
+        ],
+        [
+          "bulk_url",
+          "String"
+        ],
+        [
+          "keep_on",
+          "Integer"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "worker_id"
+        ]
+      ]
+    },
+    "experiment_templates": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "owner_id",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "config",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "experiments": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "snapshot",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "invitations": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "workspace_id",
+          "user_id"
+        ]
+      ]
+    },
+    "join_requests": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "workspace_id",
+          "user_id"
+        ]
+      ]
+    },
+    "memberships": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "role",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id",
+        "user_id"
+      ],
+      "unique": []
+    },
+    "model_engine_qualifications": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "profile_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "engine",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "workspace_id",
+        "manifest_hash",
+        "engine"
+      ],
+      "unique": []
+    },
+    "model_engine_references": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "engine",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id",
+        "manifest_hash",
+        "engine"
+      ],
+      "unique": []
+    },
+    "model_probe_jobs": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "asset_id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "model_probe_reservations": {
+      "columns": [
+        [
+          "job_id",
+          "String"
+        ],
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "resource_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "job_id"
+      ],
+      "unique": [
+        [
+          "device_id"
+        ],
+        [
+          "resource_id"
+        ]
+      ]
+    },
+    "model_qualifications": {
+      "columns": [
+        [
+          "device_id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "profile_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "device_id",
+        "workspace_id",
+        "manifest_hash"
+      ],
+      "unique": []
+    },
+    "model_references": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "manifest_hash",
+          "String"
+        ],
+        [
+          "reference_hash",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id",
+        "manifest_hash"
+      ],
+      "unique": []
+    },
+    "monitoring_events": {
+      "columns": [
+        [
+          "sequence",
+          "Integer"
+        ],
+        [
+          "event_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "sequence"
+      ],
+      "unique": [
+        [
+          "event_id"
+        ]
+      ]
+    },
+    "notifications": {
+      "columns": [
+        [
+          "id",
+          "Integer"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "kind",
+          "String"
+        ],
+        [
+          "params",
+          "String"
+        ],
+        [
+          "target",
+          "String"
+        ],
+        [
+          "created",
+          "String"
+        ],
+        [
+          "read_at",
+          "String"
+        ],
+        [
+          "dedupe",
+          "String"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "dedupe"
+        ]
+      ]
+    },
+    "pairing_codes": {
+      "columns": [
+        [
+          "digest",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ],
+        [
+          "used",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "digest"
+      ],
+      "unique": []
+    },
+    "physical_reservations": {
+      "columns": [
+        [
+          "resource_id",
+          "String"
+        ],
+        [
+          "assignment_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "resource_id"
+      ],
+      "unique": []
+    },
+    "queue": {
+      "columns": [
+        [
+          "sequence",
+          "Integer"
+        ],
+        [
+          "run_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "sequence"
+      ],
+      "unique": [
+        [
+          "run_id"
+        ]
+      ]
+    },
+    "recovery_points": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "run_id",
+          "String"
+        ],
+        [
+          "generation",
+          "Integer"
+        ],
+        [
+          "final",
+          "Integer"
+        ],
+        [
+          "status",
+          "String"
+        ],
+        [
+          "manifest",
+          "String"
+        ],
+        [
+          "error",
+          "String"
+        ],
+        [
+          "created",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "sessions": {
+      "columns": [
+        [
+          "digest",
+          "String"
+        ],
+        [
+          "user_id",
+          "String"
+        ],
+        [
+          "expires",
+          "Numeric"
+        ]
+      ],
+      "pk": [
+        "digest"
+      ],
+      "unique": []
+    },
+    "settings": {
+      "columns": [
+        [
+          "key",
+          "String"
+        ],
+        [
+          "value",
+          "String"
+        ]
+      ],
+      "pk": [
+        "key"
+      ],
+      "unique": []
+    },
+    "study_assets": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "kind",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "study_uploads": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "asset_id",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "object_sha",
+          "String"
+        ],
+        [
+          "upload_key",
+          "String"
+        ],
+        [
+          "size",
+          "Integer"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "users": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "hash",
+          "String"
+        ],
+        [
+          "profile",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "worker_assignments": {
+      "columns": [
+        [
+          "worker_id",
+          "String"
+        ],
+        [
+          "owner",
+          "String"
+        ],
+        [
+          "workspace_id",
+          "String"
+        ]
+      ],
+      "pk": [
+        "worker_id"
+      ],
+      "unique": []
+    },
+    "workspace_settings": {
+      "columns": [
+        [
+          "workspace_id",
+          "String"
+        ],
+        [
+          "body",
+          "String"
+        ]
+      ],
+      "pk": [
+        "workspace_id"
+      ],
+      "unique": []
+    },
+    "workspaces": {
+      "columns": [
+        [
+          "id",
+          "String"
+        ],
+        [
+          "name",
+          "String"
+        ],
+        [
+          "description",
+          "String"
+        ],
+        [
+          "creator",
+          "String"
+        ],
+        [
+          "_insert_order",
+          "Integer"
+        ]
+      ],
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "schema_versions": {
+      "columns": [
+        [
+          "version",
+          "Integer"
+        ],
+        [
+          "applied",
+          "String"
+        ]
+      ],
+      "pk": [
+        "version"
+      ],
+      "unique": []
+    }
+  }
+}

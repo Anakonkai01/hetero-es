@@ -1,0 +1,498 @@
+{
+  "baseline": "7e6781ff",
+  "normalization": "Only SQL string double-quoted literals become single-quoted literals; no assertion/control-flow normalization.",
+  "files": [
+    {
+      "file": "backend/tests/test_account_layers.py",
+      "baselineAssertions": 16,
+      "currentAssertions": 16,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_admission_hold.py",
+      "baselineAssertions": 13,
+      "currentAssertions": 13,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_agent_factory.py",
+      "baselineAssertions": 5,
+      "currentAssertions": 5,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_agent_protocol.py",
+      "baselineAssertions": 25,
+      "currentAssertions": 25,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_api.py",
+      "baselineAssertions": 37,
+      "currentAssertions": 37,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_catalog.py",
+      "baselineAssertions": 8,
+      "currentAssertions": 8,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_cpu_coordinator.py",
+      "baselineAssertions": 18,
+      "currentAssertions": 18,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_demo_export.py",
+      "baselineAssertions": 10,
+      "currentAssertions": 10,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_deployment.py",
+      "baselineAssertions": 14,
+      "currentAssertions": 14,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_device_approval_workspaces.py",
+      "baselineAssertions": 14,
+      "currentAssertions": 14,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_device_configuration.py",
+      "baselineAssertions": 12,
+      "currentAssertions": 12,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_device_layers.py",
+      "baselineAssertions": 26,
+      "currentAssertions": 26,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_device_removal.py",
+      "baselineAssertions": 40,
+      "currentAssertions": 40,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_device_self_control.py",
+      "baselineAssertions": 30,
+      "currentAssertions": 30,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_devices.py",
+      "baselineAssertions": 94,
+      "currentAssertions": 94,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_doctor.py",
+      "baselineAssertions": 32,
+      "currentAssertions": 32,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_endpoints.py",
+      "baselineAssertions": 10,
+      "currentAssertions": 10,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_events_list.py",
+      "baselineAssertions": 6,
+      "currentAssertions": 6,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_experiment_layers.py",
+      "baselineAssertions": 18,
+      "currentAssertions": 18,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_experiment_view.py",
+      "baselineAssertions": 11,
+      "currentAssertions": 11,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_join_requests.py",
+      "baselineAssertions": 20,
+      "currentAssertions": 20,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_lab.py",
+      "baselineAssertions": 49,
+      "currentAssertions": 49,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_lab_cli.py",
+      "baselineAssertions": 11,
+      "currentAssertions": 11,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_lab_replay.py",
+      "baselineAssertions": 22,
+      "currentAssertions": 22,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_large_datasets.py",
+      "baselineAssertions": 28,
+      "currentAssertions": 28,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_layer_imports.py",
+      "baselineAssertions": 1,
+      "currentAssertions": 1,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_linux_worker_installer.py",
+      "baselineAssertions": 13,
+      "currentAssertions": 13,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_local_lab.py",
+      "baselineAssertions": 21,
+      "currentAssertions": 21,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_local_storage.py",
+      "baselineAssertions": 17,
+      "currentAssertions": 17,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_local_storage_async.py",
+      "baselineAssertions": 11,
+      "currentAssertions": 11,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_membership.py",
+      "baselineAssertions": 95,
+      "currentAssertions": 95,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_metadata_restore.py",
+      "baselineAssertions": 5,
+      "currentAssertions": 5,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_model_qualification.py",
+      "baselineAssertions": 89,
+      "currentAssertions": 89,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_monitor.py",
+      "baselineAssertions": 5,
+      "currentAssertions": 5,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_mutation_check.py",
+      "baselineAssertions": 5,
+      "currentAssertions": 5,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_noise_engines.py",
+      "baselineAssertions": 12,
+      "currentAssertions": 12,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_notification_layers.py",
+      "baselineAssertions": 5,
+      "currentAssertions": 5,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_notifications.py",
+      "baselineAssertions": 39,
+      "currentAssertions": 39,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_operations.py",
+      "baselineAssertions": 6,
+      "currentAssertions": 6,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_operations_layers.py",
+      "baselineAssertions": 20,
+      "currentAssertions": 20,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_parallel_resources.py",
+      "baselineAssertions": 20,
+      "currentAssertions": 20,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_passwords.py",
+      "baselineAssertions": 18,
+      "currentAssertions": 18,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_pause_resume.py",
+      "baselineAssertions": 30,
+      "currentAssertions": 30,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_policies.py",
+      "baselineAssertions": 11,
+      "currentAssertions": 11,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_prepare_installers.py",
+      "baselineAssertions": 24,
+      "currentAssertions": 24,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_private_address.py",
+      "baselineAssertions": 4,
+      "currentAssertions": 4,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_recovery_routes.py",
+      "baselineAssertions": 19,
+      "currentAssertions": 19,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_recovery_storage.py",
+      "baselineAssertions": 19,
+      "currentAssertions": 19,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_research_options.py",
+      "baselineAssertions": 7,
+      "currentAssertions": 7,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_retired_routes.py",
+      "baselineAssertions": 1,
+      "currentAssertions": 1,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_route_contract.py",
+      "baselineAssertions": 3,
+      "currentAssertions": 3,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_run_stream.py",
+      "baselineAssertions": 21,
+      "currentAssertions": 21,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_sdk_lab.py",
+      "baselineAssertions": 10,
+      "currentAssertions": 10,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_self_administration.py",
+      "baselineAssertions": 6,
+      "currentAssertions": 6,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_server.py",
+      "baselineAssertions": 9,
+      "currentAssertions": 9,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_shared_runtime.py",
+      "baselineAssertions": 7,
+      "currentAssertions": 7,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_storage_layers.py",
+      "baselineAssertions": 14,
+      "currentAssertions": 14,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_store_layers.py",
+      "baselineAssertions": 6,
+      "currentAssertions": 9,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_study.py",
+      "baselineAssertions": 24,
+      "currentAssertions": 24,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_study_layers.py",
+      "baselineAssertions": 2,
+      "currentAssertions": 2,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_telemetry.py",
+      "baselineAssertions": 24,
+      "currentAssertions": 24,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_templates.py",
+      "baselineAssertions": 26,
+      "currentAssertions": 26,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_throttle.py",
+      "baselineAssertions": 29,
+      "currentAssertions": 29,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_timeline.py",
+      "baselineAssertions": 29,
+      "currentAssertions": 29,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_usage.py",
+      "baselineAssertions": 1,
+      "currentAssertions": 1,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_v3_study.py",
+      "baselineAssertions": 49,
+      "currentAssertions": 49,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_web.py",
+      "baselineAssertions": 18,
+      "currentAssertions": 18,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_worker_cli_lab.py",
+      "baselineAssertions": 3,
+      "currentAssertions": 3,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_worker_profile.py",
+      "baselineAssertions": 18,
+      "currentAssertions": 18,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    },
+    {
+      "file": "backend/tests/test_writer_lock.py",
+      "baselineAssertions": 10,
+      "currentAssertions": 10,
+      "missingAssertions": 0,
+      "perFunctionAssertionMultiplicityPreserved": true
+    }
+  ],
+  "missingAssertions": [],
+  "limitation": "Preserves assertion expressions/multiplicity per test/helper function; does not prove entire test-body equivalence. SQL fixture syntax, SQLite markers, snapshot calls, scanner traversal and patch paths intentionally changed."
+}

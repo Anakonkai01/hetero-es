@@ -1,0 +1,15 @@
+control ok    | 14 passed, 1 warning in 1.72s
+killed       upload size is truncated to PostgreSQL int32 | 1 failed, 13 passed, 1 warning in 1.90s
+killed       telemetry timestamp loses double precision | 1 failed, 13 passed, 1 warning in 1.77s
+killed       username uniqueness is omitted | 1 failed, 13 passed, 1 warning in 1.86s
+killed       legacy row order is not backfilled | 1 failed, 13 passed, 1 warning in 1.76s
+killed       new SQLite rows do not get an insertion order | 2 failed, 12 passed, 1 warning in 1.75s
+killed       PostgreSQL bootstrap is rerun on reopening | 1 failed, 13 passed, 1 warning in 1.87s
+killed       empty IN predicates become invalid on PostgreSQL | 2 failed, 12 passed, 1 warning in 1.82s
+killed       dynamic bindings ignore their parameter offset | 1 failed, 13 passed, 1 warning in 1.74s
+killed       PostgreSQL JSON text projection returns nothing | 1 failed, 13 passed, 1 warning in 1.71s
+killed       internal workspace order leaks into public columns | 2 failed, 12 passed, 1 warning in 1.73s
+killed       Core integrity errors leak past repository translation | 2 failed, 12 passed, 1 warning in 1.85s
+killed       caught PostgreSQL statement error poisons the root transaction | 2 failed, 12 passed, 1 warning in 1.84s
+
+12 of 12 mutants killed.

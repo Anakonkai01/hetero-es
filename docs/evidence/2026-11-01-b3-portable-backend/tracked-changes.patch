@@ -1,0 +1,2862 @@
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+index b199e73f..35307bbd 100644
+--- a/backend/apps/factory.py
++++ b/backend/apps/factory.py
+@@ -59,6 +59,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
+                 await run_in_threadpool(metadata_thread.join)
+             if dispatcher_started:
+                 await run_in_threadpool(thread.join)
++            store.close()
+             if writer_lock is not None:
+                 writer_lock.close()
+ 
+diff --git a/backend/db/backups.py b/backend/db/backups.py
+index 6847a803..24d08a13 100644
+--- a/backend/db/backups.py
++++ b/backend/db/backups.py
+@@ -4,5 +4,9 @@ import sqlite3
+ 
+ 
+ def backup_sqlite(store, database):
+-    with store.db() as source, sqlite3.connect(database) as destination:
++    if store.database.dialect != "sqlite":
++        raise RuntimeError("PostgreSQL metadata requires the pg_dump backup path")
++    # A separate read connection takes a consistent committed snapshot. Backing up the writer connection itself
++    # while it owns BEGIN IMMEDIATE would wait indefinitely for its own transaction.
++    with sqlite3.connect(store.database.url.database) as source, sqlite3.connect(database) as destination:
+         source.backup(destination)
+diff --git a/backend/db/engine.py b/backend/db/engine.py
+index b3f9e897..0168b741 100644
+--- a/backend/db/engine.py
++++ b/backend/db/engine.py
+@@ -21,9 +21,10 @@ _DML = re.compile(r"^\s*(INSERT|UPDATE|DELETE)\b", re.IGNORECASE)
+ class Connection:
+     """One borrowed transaction connection, with the repository's row/binding protocol."""
+ 
+-    def __init__(self, connection, dialect, write):
++    def __init__(self, connection, dialect, write, schema_ready=False):
+         self._connection, self.dialect, self.write = connection, dialect, write
+         self.closed, self.rollback_only = False, False
++        self.schema_ready = schema_ready
+ 
+     def _check(self, statement):
+         if self.closed:
+@@ -80,6 +81,7 @@ class Database:
+         if url.drivername not in {"sqlite", "sqlite+pysqlite", "postgresql+psycopg"}:
+             raise ValueError("Only SQLite and PostgreSQL with psycopg 3 are supported")
+         self.lock = lock if lock is not None else threading.RLock()
++        self.schema_ready = False
+         self._local = threading.local()
+         options = {"hide_parameters": True, "pool_pre_ping": True}
+         arguments = dict(connect_args or {})
+@@ -118,7 +120,7 @@ class Database:
+                 connection_info = physical.info
+                 connection_info["heteroes_write"] = writable
+                 transaction = physical.begin()
+-                borrowed = Connection(physical, self.dialect, writable)
++                borrowed = Connection(physical, self.dialect, writable, self.schema_ready)
+                 try:
+                     if self.dialect == "postgresql" and writable:
+                         physical.execute(
+@@ -142,3 +144,14 @@ class Database:
+ 
+     def close(self):
+         self.engine.dispose()
++
++    def initialize(self, passwords, hasher):
++        from .schema import initialize_database
++
++        initialize_database(self, passwords, hasher)
++
++    def __enter__(self):
++        return self
++
++    def __exit__(self, *_exc):
++        self.close()
+diff --git a/backend/db/migrations.py b/backend/db/migrations.py
+index 4ded9904..4e5870f8 100644
+--- a/backend/db/migrations.py
++++ b/backend/db/migrations.py
+@@ -65,6 +65,13 @@ def initialize_workspace_extras(db):
+ 
+ 
+ def initialize_agent_schema(store):
++    if getattr(getattr(store, "database", None), "schema_ready", False):
++        with store.db() as db:
++            db.execute(
++                "INSERT INTO settings(key,value) VALUES (:p0,:p1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++                ("controlMode", "agent-v2"),
++            )
++        return
+     with store.db() as db:
+         db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("controlMode", "agent-v2"))
+         db.executescript(
+@@ -101,6 +108,8 @@ def initialize_agent_schema(store):
+ 
+ 
+ def initialize_model_qualification_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.executescript("""
+         CREATE TABLE IF NOT EXISTS model_engine_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
+             reference_hash TEXT NOT NULL,body TEXT NOT NULL,engine TEXT NOT NULL,
+@@ -121,36 +130,48 @@ def initialize_model_qualification_schema(db):
+ 
+ 
+ def initialize_product_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.executescript(
+         "\n                PRAGMA journal_mode=WAL;\n                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);\n                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);\n                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);\n            "
+     )
+ 
+ 
+ def initialize_study_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.executescript(
+         "\n                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);\n            "
+     )
+ 
+ 
+ def initialize_templates_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.execute(
+         "CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)"
+     )
+ 
+ 
+ def initialize_notifications_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.execute(
+         "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)"
+     )
+ 
+ 
+ def initialize_recovery_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.execute(
+         "CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)"
+     )
+ 
+ 
+ def initialize_recovery_downloads_schema(db):
++    if getattr(db, "schema_ready", False):
++        return
+     db.executescript(
+         "CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);"
+     )
+diff --git a/backend/db/transactions.py b/backend/db/transactions.py
+index 18d0d70c..c2b4a020 100644
+--- a/backend/db/transactions.py
++++ b/backend/db/transactions.py
+@@ -2,4 +2,6 @@
+ 
+ 
+ def begin_write(db):
++    if hasattr(db, "begin_write"):
++        return db.begin_write()
+     return db.execute("BEGIN IMMEDIATE")
+diff --git a/backend/repositories/accounts.py b/backend/repositories/accounts.py
+index 8fc9709d..6a8f846b 100644
+--- a/backend/repositories/accounts.py
++++ b/backend/repositories/accounts.py
+@@ -1,6 +1,8 @@
+ """Account and session SQL. Transaction ownership belongs to the calling service."""
+ 
++from ..db.dialect import json_text
+ import sqlite3
++from sqlalchemy.exc import IntegrityError
+ 
+ 
+ class AccountExists(Exception):
+@@ -11,47 +13,47 @@ class AccountsRepository:
+     @staticmethod
+     def by_username(db, username):
+         return db.execute(
+-            "SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (username,)
++            f"SELECT id,hash,profile FROM users WHERE {json_text(db, 'profile', 'username')}=:p0", (username,)
+         ).fetchone()
+ 
+     @staticmethod
+     def profile(db, user_id):
+-        return db.execute("SELECT profile FROM users WHERE id=?", (user_id,)).fetchone()
++        return db.execute("SELECT profile FROM users WHERE id=:p0", (user_id,)).fetchone()
+ 
+     @staticmethod
+     def current_session(db, digest, now):
+         return db.execute(
+-            "SELECT users.profile FROM sessions JOIN users ON users.id=sessions.user_id WHERE digest=? AND expires>?",
++            "SELECT users.profile FROM sessions JOIN users ON users.id=sessions.user_id WHERE digest=:p0 AND expires>:p1",
+             (digest, now),
+         ).fetchone()
+ 
+     @staticmethod
+     def add_session(db, digest, user_id, expires):
+-        db.execute("INSERT INTO sessions VALUES (?,?,?)", (digest, user_id, expires))
++        db.execute("INSERT INTO sessions(digest,user_id,expires)  VALUES (:p0,:p1,:p2)", (digest, user_id, expires))
+ 
+     @staticmethod
+     def delete_session(db, digest):
+-        db.execute("DELETE FROM sessions WHERE digest=?", (digest,))
++        db.execute("DELETE FROM sessions WHERE digest=:p0", (digest,))
+ 
+     @staticmethod
+     def add_user(db, user_id, password_hash, profile):
+         try:
+-            db.execute("INSERT INTO users VALUES (?,?,?)", (user_id, password_hash, profile))
+-        except sqlite3.IntegrityError:
++            db.execute("INSERT INTO users(id,hash,profile)  VALUES (:p0,:p1,:p2)", (user_id, password_hash, profile))
++        except (sqlite3.IntegrityError, IntegrityError):
+             raise AccountExists from None
+ 
+     @staticmethod
+     def save_profile(db, user_id, profile):
+-        db.execute("UPDATE users SET profile=? WHERE id=?", (profile, user_id))
++        db.execute("UPDATE users SET profile=:p0 WHERE id=:p1", (profile, user_id))
+ 
+     @staticmethod
+     def password_hash(db, user_id):
+-        return db.execute("SELECT hash FROM users WHERE id=?", (user_id,)).fetchone()[0]
++        return db.execute("SELECT hash FROM users WHERE id=:p0", (user_id,)).fetchone()[0]
+ 
+     @staticmethod
+     def save_password(db, user_id, password_hash):
+-        db.execute("UPDATE users SET hash=? WHERE id=?", (password_hash, user_id))
++        db.execute("UPDATE users SET hash=:p0 WHERE id=:p1", (password_hash, user_id))
+ 
+     @staticmethod
+     def revoke_other_sessions(db, user_id, digest):
+-        db.execute("DELETE FROM sessions WHERE user_id=? AND digest<>?", (user_id, digest))
++        db.execute("DELETE FROM sessions WHERE user_id=:p0 AND digest<>:p1", (user_id, digest))
+diff --git a/backend/repositories/agent_commands.py b/backend/repositories/agent_commands.py
+index 64ace774..85cd6185 100644
+--- a/backend/repositories/agent_commands.py
++++ b/backend/repositories/agent_commands.py
+@@ -6,24 +6,34 @@ from .base import execute
+ class AgentCommandsRepository:
+     @staticmethod
+     def enqueue_insert_device_commands(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO device_commands VALUES (?,?,?,?,0,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO device_commands(id,device_id,dedupe,body,ack,created)  VALUES (:p0,:p1,:p2,:p3,0,:p4) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def require_command_select_settings(db, parameters=()):
+-        return execute(db, "SELECT value FROM settings WHERE key=?", parameters)
++        return execute(db, "SELECT value FROM settings WHERE key=:p0", parameters)
+ 
+     @staticmethod
+     def commands_select_device_commands(db, parameters=()):
+-        return execute(db, "SELECT body FROM device_commands WHERE device_id=? AND ack=0 ORDER BY created", parameters)
++        return execute(
++            db, "SELECT body FROM device_commands WHERE device_id=:p0 AND ack=0 ORDER BY created", parameters
++        )
+ 
+     @staticmethod
+     def commands_select_model_probe_jobs(db, parameters=()):
+-        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=?", parameters)
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def commands_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT released FROM assignments WHERE id=? AND epoch=?", parameters)
++        return execute(db, "SELECT released FROM assignments WHERE id=:p0 AND epoch=:p1", parameters)
+ 
+     @staticmethod
+     def worker_command_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+diff --git a/backend/repositories/agent_polling.py b/backend/repositories/agent_polling.py
+index 1e4d25a5..f370c6ec 100644
+--- a/backend/repositories/agent_polling.py
++++ b/backend/repositories/agent_polling.py
+@@ -1,28 +1,47 @@
+ """AgentPolling SQL; business decisions stay in the service mixin."""
+ 
++from ..db.dialect import json_text
+ from .base import execute
+ 
+ 
+ class AgentPollingRepository:
+     @staticmethod
+     def poll_insert_settings(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES (:p0,:p1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+ 
+     @staticmethod
+     def poll_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def poll_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE released=0", parameters)
++        return execute(
++            db,
++            "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE released=0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def poll_select_devices_2(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def poll_select_assignments_2(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE id=?", parameters)
++        return execute(
++            db, "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE id=:p0", parameters
++        )
+ 
+     @staticmethod
+     def poll_select_assignments_3(db, parameters=()):
+@@ -30,120 +49,134 @@ class AgentPollingRepository:
+ 
+     @staticmethod
+     def poll_select_assignments_4(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM assignments WHERE id=?", parameters)
++        return execute(db, "SELECT 1 FROM assignments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def poll_select_device_reservations(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM device_reservations WHERE device_id=? AND assignment_id=?", parameters)
++        return execute(db, "SELECT 1 FROM device_reservations WHERE device_id=:p0 AND assignment_id=:p1", parameters)
+ 
+     @staticmethod
+     def _refresh_observation_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET self_test=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET self_test=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _refresh_observation_update_devices_2(db, parameters=()):
+-        return execute(db, "UPDATE devices SET telemetry=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET telemetry=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _refresh_observation_insert_device_telemetry_history(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO device_telemetry_history VALUES (?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO device_telemetry_history(device_id,boot_id,sampled_at,received_at,body)  VALUES (:p0,:p1,:p2,:p3,:p4) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def _refresh_observation_delete_device_telemetry_history(db, parameters=()):
+         return execute(
+             db,
+-            "DELETE FROM device_telemetry_history WHERE device_id=? AND rowid NOT IN (SELECT rowid FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 180)",
++            "DELETE FROM device_telemetry_history WHERE device_id=:p0 AND (device_id,boot_id,sampled_at) NOT IN (SELECT device_id,boot_id,sampled_at FROM device_telemetry_history WHERE device_id=:p1 ORDER BY received_at DESC LIMIT 180)",
+             parameters,
+         )
+ 
+     @staticmethod
+     def _refresh_observation_update_devices_3(db, parameters=()):
+-        return execute(db, "UPDATE devices SET telemetry=NULL WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET telemetry=NULL WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def _update_boot_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET boot_id=?,seen=?,enabled=?,desired=?,processes=? WHERE id=?", parameters)
++        return execute(
++            db, "UPDATE devices SET boot_id=:p0,seen=:p1,enabled=:p2,desired=:p3,processes=:p4 WHERE id=:p5", parameters
++        )
+ 
+     @staticmethod
+     def _update_boot_update_device_commands(db, parameters=()):
+         return execute(
+             db,
+-            "UPDATE device_commands SET ack=1 WHERE device_id=? AND json_extract(body,'$.kind')='SET_CONTRIBUTION'",
++            f"UPDATE device_commands SET ack=1 WHERE device_id=:p0 AND {json_text(db, 'body', 'kind')}='SET_CONTRIBUTION'",
+             parameters,
+         )
+ 
+     @staticmethod
+     def _update_boot_update_device_commands_2(db, parameters=()):
+-        return execute(db, "UPDATE device_commands SET ack=1 WHERE id=? AND device_id=?", parameters)
++        return execute(db, "UPDATE device_commands SET ack=1 WHERE id=:p0 AND device_id=:p1", parameters)
+ 
+     @staticmethod
+     def _update_boot_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.* FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=?",
++            "SELECT a.id,a.run_id,a.coordinator,a.epoch,a.body,a.snapshot,a.released FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def _quarantine_processes_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET status=?,enabled=0,desired=0 WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET status=:p0,enabled=0,desired=0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _quarantine_processes_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
++            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def _accept_events_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT coordinator,epoch FROM assignments WHERE id=?", parameters)
++        return execute(db, "SELECT coordinator,epoch FROM assignments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def _accept_events_insert_monitoring_events(db, parameters=()):
+         return execute(
+-            db, "INSERT OR IGNORE INTO monitoring_events(event_id,assignment_id,body) VALUES (?,?,?)", parameters
++            db,
++            "INSERT INTO monitoring_events(event_id,assignment_id,body) VALUES (:p0,:p1,:p2) ON CONFLICT DO NOTHING",
++            parameters,
+         )
+ 
+     @staticmethod
+     def _accept_events_select_assignments_2(db, parameters=()):
+-        return execute(db, "SELECT body,released FROM assignments WHERE id=?", parameters)
++        return execute(db, "SELECT body,released FROM assignments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def _accept_events_update_devices(db, parameters=()):
+         return execute(
+             db,
+-            "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=? AND status='APPROVED'",
++            "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=:p0 AND status='APPROVED'",
+             parameters,
+         )
+ 
+     @staticmethod
+     def _accept_reports_insert_device_reports(db, parameters=()):
+-        return execute(db, "INSERT INTO device_reports VALUES (?,?,?)", parameters)
++        return execute(
++            db, "INSERT INTO device_reports(device_id,assignment_id,sequence)  VALUES (:p0,:p1,:p2)", parameters
++        )
+ 
+     @staticmethod
+     def _accept_reports_update_assignments(db, parameters=()):
+-        return execute(db, "UPDATE assignments SET snapshot=? WHERE id=?", parameters)
++        return execute(db, "UPDATE assignments SET snapshot=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _accept_reports_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE id=?", parameters)
++        return execute(
++            db, "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE id=:p0", parameters
++        )
+ 
+     @staticmethod
+     def _accept_reports_select_device_reports(db, parameters=()):
+         return execute(
+-            db, "SELECT 1 FROM device_reports WHERE device_id=? AND assignment_id=? AND sequence=?", parameters
++            db, "SELECT 1 FROM device_reports WHERE device_id=:p0 AND assignment_id=:p1 AND sequence=:p2", parameters
+         )
+ 
+     @staticmethod
+     def _accept_reports_update_experiments(db, parameters=()):
+-        return execute(db, "UPDATE experiments SET snapshot=? WHERE id=?", parameters)
++        return execute(db, "UPDATE experiments SET snapshot=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _accept_reports_select_device_reports_2(db, parameters=()):
+-        return execute(db, "SELECT max(sequence) FROM device_reports WHERE device_id=? AND assignment_id=?", parameters)
++        return execute(
++            db, "SELECT max(sequence) FROM device_reports WHERE device_id=:p0 AND assignment_id=:p1", parameters
++        )
+ 
+     @staticmethod
+     def _accept_reports_select_assignments_2(db, parameters=()):
+-        return execute(db, "SELECT id FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters)
++        return execute(db, "SELECT id FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1", parameters)
+diff --git a/backend/repositories/agent_scheduling.py b/backend/repositories/agent_scheduling.py
+index 17c2b8c1..6f239887 100644
+--- a/backend/repositories/agent_scheduling.py
++++ b/backend/repositories/agent_scheduling.py
+@@ -12,83 +12,97 @@ class AgentSchedulingRepository:
+ 
+     @staticmethod
+     def waiting_reason_select_settings(db, parameters=()):
+-        return execute(db, "SELECT value FROM settings WHERE key=?", parameters)
++        return execute(db, "SELECT value FROM settings WHERE key=:p0", parameters)
+ 
+     @staticmethod
+     def waiting_reason_select_physical_reservations(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE resource_id=?",
++            "SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE resource_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def intended_members_select_assignment_members(db, parameters=()):
+-        return execute(db, "SELECT worker_id, action FROM assignment_members WHERE run_id=? ORDER BY rowid", parameters)
++        return execute(
++            db, "SELECT worker_id, action FROM assignment_members WHERE run_id=:p0 ORDER BY _insert_order", parameters
++        )
+ 
+     @staticmethod
+     def change_members_insert_assignment_members(db, parameters=()):
+-        return execute(db, "INSERT INTO assignment_members VALUES (?,?,?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO assignment_members(change_id,run_id,worker_id,device_id,action,actor,created)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5,:p6)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def change_members_update_assignments(db, parameters=()):
+-        return execute(db, "UPDATE assignments SET body=? WHERE id=?", parameters)
++        return execute(db, "UPDATE assignments SET body=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def change_members_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters)
++        return execute(
++            db,
++            "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def change_members_insert_device_reservations(db, parameters=()):
+-        return execute(db, "INSERT INTO device_reservations VALUES (?,?)", parameters)
++        return execute(db, "INSERT INTO device_reservations(device_id,assignment_id)  VALUES (:p0,:p1)", parameters)
+ 
+     @staticmethod
+     def change_members_select_device_reservations(db, parameters=()):
+-        return execute(db, "SELECT assignment_id FROM device_reservations WHERE device_id=?", parameters)
++        return execute(db, "SELECT assignment_id FROM device_reservations WHERE device_id=:p0", parameters)
+ 
+     @staticmethod
+     def change_members_insert_physical_reservations(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO physical_reservations VALUES (?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO physical_reservations(resource_id,assignment_id)  VALUES (:p0,:p1) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def note_membership_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT body FROM experiments WHERE id=?", parameters)
++        return execute(db, "SELECT body FROM experiments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def auto_join_select_assignment_members(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM assignment_members WHERE run_id=? AND action='LEAVE'", parameters)
++        return execute(db, "SELECT worker_id FROM assignment_members WHERE run_id=:p0 AND action='LEAVE'", parameters)
+ 
+     @staticmethod
+     def auto_join_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=?", parameters)
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=:p0", parameters)
+ 
+     @staticmethod
+     def leave_on_disable_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=? AND a.released=0 AND a.coordinator!=?",
++            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=:p0 AND a.released=0 AND a.coordinator!=:p1",
+             parameters,
+         )
+ 
+     @staticmethod
+     def release_left_members_delete_device_reservations(db, parameters=()):
+-        return execute(db, "DELETE FROM device_reservations WHERE device_id=? AND assignment_id=?", parameters)
++        return execute(db, "DELETE FROM device_reservations WHERE device_id=:p0 AND assignment_id=:p1", parameters)
+ 
+     @staticmethod
+     def release_left_members_update_assignments(db, parameters=()):
+-        return execute(db, "UPDATE assignments SET body=? WHERE id=?", parameters)
++        return execute(db, "UPDATE assignments SET body=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def release_left_members_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT body FROM experiments WHERE id=?", parameters)
++        return execute(db, "SELECT body FROM experiments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def release_left_members_delete_physical_reservations(db, parameters=()):
+-        return execute(db, "DELETE FROM physical_reservations WHERE resource_id=? AND assignment_id=?", parameters)
++        return execute(db, "DELETE FROM physical_reservations WHERE resource_id=:p0 AND assignment_id=:p1", parameters)
+ 
+     @staticmethod
+     def release_left_members_select_devices(db, parameters=()):
+-        return execute(db, "SELECT self_test,seen FROM devices WHERE id=?", parameters)
++        return execute(db, "SELECT self_test,seen FROM devices WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def reservations_select_device_reservations(db, parameters=()):
+@@ -96,50 +110,64 @@ class AgentSchedulingRepository:
+ 
+     @staticmethod
+     def _assignment_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE id=?", parameters)
++        return execute(
++            db, "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE id=:p0", parameters
++        )
+ 
+     @staticmethod
+     def submit_insert_assignments(db, parameters=()):
+-        return execute(db, "INSERT INTO assignments VALUES (?,?,?,?,?,?,0)", parameters)
++        return execute(
++            db,
++            "INSERT INTO assignments(id,run_id,coordinator,epoch,body,snapshot,released)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5,0)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def submit_insert_device_reservations(db, parameters=()):
+-        return execute(db, "INSERT INTO device_reservations VALUES (?,?)", parameters)
++        return execute(db, "INSERT INTO device_reservations(device_id,assignment_id)  VALUES (:p0,:p1)", parameters)
+ 
+     @staticmethod
+     def submit_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters)
++        return execute(
++            db,
++            "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def submit_insert_physical_reservations(db, parameters=()):
+-        return execute(db, "INSERT INTO physical_reservations VALUES (?,?)", parameters)
++        return execute(db, "INSERT INTO physical_reservations(resource_id,assignment_id)  VALUES (:p0,:p1)", parameters)
+ 
+     @staticmethod
+     def cancel_select_assignments(db, parameters=()):
+         return execute(
+-            db, "SELECT id,body,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters
++            db, "SELECT id,body,released FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1", parameters
+         )
+ 
+     @staticmethod
+     def pause_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters)
++        return execute(
++            db,
++            "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def _release_confirmed_update_assignments(db, parameters=()):
+-        return execute(db, "UPDATE assignments SET released=1 WHERE id=?", parameters)
++        return execute(db, "UPDATE assignments SET released=1 WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def _release_confirmed_delete_device_reservations(db, parameters=()):
+-        return execute(db, "DELETE FROM device_reservations WHERE assignment_id=?", parameters)
++        return execute(db, "DELETE FROM device_reservations WHERE assignment_id=:p0", parameters)
+ 
+     @staticmethod
+     def _release_confirmed_delete_physical_reservations(db, parameters=()):
+-        return execute(db, "DELETE FROM physical_reservations WHERE assignment_id=?", parameters)
++        return execute(db, "DELETE FROM physical_reservations WHERE assignment_id=:p0", parameters)
+ 
+     @staticmethod
+     def _release_confirmed_update_assignments_2(db, parameters=()):
+-        return execute(db, "UPDATE assignments SET snapshot=? WHERE id=?", parameters)
++        return execute(db, "UPDATE assignments SET snapshot=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _release_confirmed_select_devices(db, parameters=()):
+-        return execute(db, "SELECT processes,seen FROM devices WHERE id=?", parameters)
++        return execute(db, "SELECT processes,seen FROM devices WHERE id=:p0", parameters)
+diff --git a/backend/repositories/audit.py b/backend/repositories/audit.py
+index f40bc581..f5120fe5 100644
+--- a/backend/repositories/audit.py
++++ b/backend/repositories/audit.py
+@@ -6,4 +6,6 @@ from .base import execute
+ class AuditRepository:
+     @staticmethod
+     def record(db, parameters):
+-        return execute(db, "INSERT INTO audit(actor,action,target,created,workspace_id) VALUES (?,?,?,?,?)", parameters)
++        return execute(
++            db, "INSERT INTO audit(actor,action,target,created,workspace_id) VALUES (:p0,:p1,:p2,:p3,:p4)", parameters
++        )
+diff --git a/backend/repositories/base.py b/backend/repositories/base.py
+index 5233e42a..07edf0ce 100644
+--- a/backend/repositories/base.py
++++ b/backend/repositories/base.py
+@@ -1,12 +1,15 @@
+ """Driver error translation shared by domain repositories."""
+ 
+ import sqlite3
++from sqlalchemy.exc import IntegrityError
+ 
+ from ..core.errors import DatabaseConflict
++from ..db.bindings import bind_parameters
+ 
+ 
+ def execute(db, statement, parameters=()):
+     try:
+-        return db.execute(statement, parameters)
+-    except sqlite3.IntegrityError:
++        sql, bindings = bind_parameters(statement, parameters)
++        return db.execute(sql, bindings)
++    except (sqlite3.IntegrityError, IntegrityError):
+         raise DatabaseConflict from None
+diff --git a/backend/repositories/bootstrap.py b/backend/repositories/bootstrap.py
+index 7b84986d..73ae2010 100644
+--- a/backend/repositories/bootstrap.py
++++ b/backend/repositories/bootstrap.py
+@@ -6,4 +6,8 @@ from .base import execute
+ class BootstrapRepository:
+     @staticmethod
+     def server_initialize_8(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES (:p0,:p1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+diff --git a/backend/repositories/device_state.py b/backend/repositories/device_state.py
+index 063a9455..b59f4294 100644
+--- a/backend/repositories/device_state.py
++++ b/backend/repositories/device_state.py
+@@ -6,27 +6,29 @@ from .base import execute
+ class DeviceStateRepository:
+     @staticmethod
+     def ensure_workers_insert_settings(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO settings VALUES (?,?)", parameters)
++        return execute(db, "INSERT INTO settings(key,value)  VALUES (:p0,:p1) ON CONFLICT DO NOTHING", parameters)
+ 
+     @staticmethod
+     def ensure_workers_insert_worker_assignments(db, parameters=()):
+-        return execute(db, "INSERT INTO worker_assignments VALUES (?,?,?)", parameters)
++        return execute(
++            db, "INSERT INTO worker_assignments(worker_id,owner,workspace_id)  VALUES (:p0,:p1,:p2)", parameters
++        )
+ 
+     @staticmethod
+     def ensure_workers_select_settings(db, parameters=()):
+-        return execute(db, 'SELECT value FROM settings WHERE key="workersInitialized"', parameters)
++        return execute(db, "SELECT value FROM settings WHERE key='workersInitialized'", parameters)
+ 
+     @staticmethod
+     def ensure_workers_select_workspaces(db, parameters=()):
+-        return execute(db, 'SELECT creator FROM workspaces WHERE id="lab"', parameters)
++        return execute(db, "SELECT creator FROM workspaces WHERE id='lab'", parameters)
+ 
+     @staticmethod
+     def ensure_workers_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM worker_assignments WHERE worker_id=?", parameters)
++        return execute(db, "SELECT 1 FROM worker_assignments WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def assignments_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=?", parameters)
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=:p0", parameters)
+ 
+     @staticmethod
+     def device_names_select_devices(db, parameters=()):
+diff --git a/backend/repositories/devices.py b/backend/repositories/devices.py
+index 6a509eab..f84ad1fd 100644
+--- a/backend/repositories/devices.py
++++ b/backend/repositories/devices.py
+@@ -6,234 +6,292 @@ from .base import execute
+ class DevicesRepository:
+     @staticmethod
+     def authenticate_device_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE token_digest=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE token_digest=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def authenticate_device_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM assignments WHERE coordinator=? AND released=0", parameters)
++        return execute(db, "SELECT 1 FROM assignments WHERE coordinator=:p0 AND released=0", parameters)
+ 
+     @staticmethod
+     def pairing_insert_pairing_codes(db, parameters=()):
+-        return execute(db, "INSERT INTO pairing_codes VALUES (?,?,?,0)", parameters)
++        return execute(db, "INSERT INTO pairing_codes(digest,owner,expires,used)  VALUES (:p0,:p1,:p2,0)", parameters)
+ 
+     @staticmethod
+     def enroll_insert_devices(db, parameters=()):
+         return execute(
+             db,
+-            "INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,bulk_url,self_test) VALUES (?,?,?,?,?,?,?,?,?)",
++            "INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,bulk_url,self_test) VALUES (:p0,:p1,:p2,:p3,:p4,:p5,:p6,:p7,:p8)",
+             parameters,
+         )
+ 
+     @staticmethod
+     def enroll_update_pairing_codes(db, parameters=()):
+-        return execute(db, "UPDATE pairing_codes SET used=1 WHERE digest=?", parameters)
++        return execute(db, "UPDATE pairing_codes SET used=1 WHERE digest=:p0", parameters)
+ 
+     @staticmethod
+     def enroll_insert_worker_assignments(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO worker_assignments VALUES (?,?,NULL)", parameters)
++        return execute(
++            db,
++            "INSERT INTO worker_assignments(worker_id,owner,workspace_id)  VALUES (:p0,:p1,NULL) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def enroll_select_pairing_codes(db, parameters=()):
+-        return execute(db, "SELECT * FROM pairing_codes WHERE digest=?", parameters)
++        return execute(db, "SELECT * FROM pairing_codes WHERE digest=:p0", parameters)
+ 
+     @staticmethod
+     def enroll_select_devices(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM devices WHERE worker_id=?", parameters)
++        return execute(db, "SELECT 1 FROM devices WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def enroll_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT owner FROM worker_assignments WHERE worker_id=?", parameters)
++        return execute(db, "SELECT owner FROM worker_assignments WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def update_endpoints_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET compute_url=?,bulk_url=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET compute_url=:p0,bulk_url=:p1 WHERE id=:p2", parameters)
+ 
+     @staticmethod
+     def update_endpoints_update_devices_2(db, parameters=()):
+-        return execute(db, "UPDATE devices SET self_test=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET self_test=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def update_endpoints_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=? AND owner=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0 AND owner=:p1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def qualification_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET self_test=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET self_test=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def qualification_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def devices_select_memberships(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT m.user_id,w.id,w.name FROM memberships m JOIN workspaces w ON w.id=m.workspace_id ORDER BY w.rowid",
++            "SELECT m.user_id,w.id,w.name FROM memberships m JOIN workspaces w ON w.id=m.workspace_id ORDER BY w._insert_order",
+             parameters,
+         )
+ 
+     @staticmethod
+     def approve_update_devices(db, parameters=()):
+-        return execute(db, 'UPDATE devices SET status="APPROVED" WHERE id=?', parameters)
++        return execute(db, "UPDATE devices SET status='APPROVED' WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def approve_update_worker_assignments(db, parameters=()):
+-        return execute(db, "UPDATE worker_assignments SET workspace_id=? WHERE worker_id=?", parameters)
++        return execute(db, "UPDATE worker_assignments SET workspace_id=:p0 WHERE worker_id=:p1", parameters)
+ 
+     @staticmethod
+     def approve_update_devices_2(db, parameters=()):
+-        return execute(db, 'UPDATE devices SET status="REVOKED",enabled=0,desired=0 WHERE id=?', parameters)
++        return execute(db, "UPDATE devices SET status='REVOKED',enabled=0,desired=0 WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def approve_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def approve_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
++            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def approve_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def remove_delete_devices(db, parameters=()):
+-        return execute(db, "DELETE FROM devices WHERE id=?", parameters)
++        return execute(db, "DELETE FROM devices WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def remove_delete_value(db, parameters=(), *, table):
+-        return execute(db, f"DELETE FROM {table} WHERE device_id=?", parameters)
++        return execute(db, f"DELETE FROM {table} WHERE device_id=:p0", parameters)
+ 
+     @staticmethod
+     def remove_delete_worker_assignments(db, parameters=()):
+-        return execute(db, "DELETE FROM worker_assignments WHERE worker_id=?", parameters)
++        return execute(db, "DELETE FROM worker_assignments WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def remove_select_devices(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM devices WHERE worker_id=?", parameters)
++        return execute(db, "SELECT 1 FROM devices WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def remove_device_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def managed_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def rename_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET name=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET name=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def delete_device_update_devices(db, parameters=()):
+-        return execute(db, 'UPDATE devices SET status="REVOKED",enabled=0,desired=0 WHERE id=?', parameters)
++        return execute(db, "UPDATE devices SET status='REVOKED',enabled=0,desired=0 WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def set_contribution_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET desired=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET desired=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def set_contribution_update_devices_2(db, parameters=()):
+-        return execute(db, "UPDATE devices SET keep_on=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET keep_on=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def set_contribution_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
++            "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def contribution_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=? AND owner=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0 AND owner=:p1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def contribution_preference_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET keep_on=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET keep_on=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def contribution_preference_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=? AND owner=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0 AND owner=:p1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def own_contribution_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def own_name_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET name=? WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET name=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def forget_self_update_devices(db, parameters=()):
+-        return execute(db, 'UPDATE devices SET status="REVOKED",enabled=0,desired=0,keep_on=0 WHERE id=?', parameters)
++        return execute(db, "UPDATE devices SET status='REVOKED',enabled=0,desired=0,keep_on=0 WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def forget_self_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def own_summary_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id,a.coordinator,a.snapshot FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=? AND a.released=0",
++            "SELECT a.run_id,a.coordinator,a.snapshot FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=:p0 AND a.released=0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def own_summary_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def devices_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices ORDER BY rowid", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices ORDER BY _insert_order",
++            parameters,
++        )
+ 
+     @staticmethod
+     def devices_select_device_reservations(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM device_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.device_id=?",
++            "SELECT a.run_id FROM device_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.device_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def devices_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", parameters)
++        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def devices_select_model_probe_reservations(db, parameters=()):
+-        return execute(db, "SELECT job_id FROM model_probe_reservations WHERE device_id=? OR resource_id=?", parameters)
++        return execute(
++            db, "SELECT job_id FROM model_probe_reservations WHERE device_id=:p0 OR resource_id=:p1", parameters
++        )
+ 
+     @staticmethod
+     def snapshot_select_assignments(db, parameters=()):
+         return execute(
+-            db, "SELECT snapshot,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters
++            db, "SELECT snapshot,released FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1", parameters
+         )
+ 
+     @staticmethod
+     def runs_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments ORDER BY rowid", parameters)
++        return execute(
++            db,
++            "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments ORDER BY _insert_order",
++            parameters,
++        )
+ 
+     @staticmethod
+     def devices_select_physical_reservations(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.resource_id=?",
++            "SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.resource_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def devices_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT snapshot FROM experiments WHERE id=?", parameters)
++        return execute(db, "SELECT snapshot FROM experiments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def devices_select_device_telemetry_history(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT body FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 60",
++            "SELECT body FROM device_telemetry_history WHERE device_id=:p0 ORDER BY received_at DESC LIMIT 60",
+             parameters,
+         )
+diff --git a/backend/repositories/experiments.py b/backend/repositories/experiments.py
+index c71a8757..66cd80ac 100644
+--- a/backend/repositories/experiments.py
++++ b/backend/repositories/experiments.py
+@@ -1,32 +1,33 @@
+ """Experiments SQL; transaction ownership is separate."""
+ 
++from ..db.dialect import bind_list
+ from .base import execute
+ 
+ 
+ class ExperimentsRepository:
+     @staticmethod
+     def submit_insert_queue(db, parameters=()):
+-        return execute(db, "INSERT INTO queue(run_id) VALUES (?)", parameters)
++        return execute(db, "INSERT INTO queue(run_id) VALUES (:p0)", parameters)
+ 
+     @staticmethod
+     def cancel_delete_queue(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def resume_insert_queue(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO queue(run_id) VALUES (?)", parameters)
++        return execute(db, "INSERT INTO queue(run_id) VALUES (:p0) ON CONFLICT DO NOTHING", parameters)
+ 
+     @staticmethod
+     def resume_select_assignments(db, parameters=()):
+         return execute(
+-            db, "SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters
++            db, "SELECT released,snapshot FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1", parameters
+         )
+ 
+     @staticmethod
+     def backup_policy_select_assignments(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
++            "SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1",
+             parameters,
+         )
+ 
+@@ -36,63 +37,61 @@ class ExperimentsRepository:
+ 
+     @staticmethod
+     def state_cancel_selected_delete_queue(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def state_cancel_selected_select_devices(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM devices WHERE id=?", parameters)
++        return execute(db, "SELECT worker_id FROM devices WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def state_cancel_owned_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT body FROM experiments WHERE owner=?", parameters)
++        return execute(db, "SELECT body FROM experiments WHERE owner=:p0", parameters)
+ 
+     @staticmethod
+     def state_cancel_owned_delete_queue(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def state_eligibility_select_users(db, parameters=()):
+-        return execute(db, "SELECT profile FROM users WHERE id=?", parameters)
++        return execute(db, "SELECT profile FROM users WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def state_eligibility_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=?", parameters)
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=:p0", parameters)
+ 
+     @staticmethod
+     def state_eligibility_select_devices(db, parameters=()):
+-        return execute(db, "SELECT worker_id,status,owner FROM devices WHERE id=?", parameters)
++        return execute(db, "SELECT worker_id,status,owner FROM devices WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def state_eligibility_select_devices_2(db, parameters=(), *, workers):
+         return execute(
+-            db,
+-            "SELECT owner,status FROM devices WHERE worker_id IN (" + ",".join(("?" for _ in workers)) + ")",
+-            parameters,
++            db, "SELECT owner,status FROM devices WHERE worker_id IN (" + bind_list(workers) + ")", parameters
+         )
+ 
+     @staticmethod
+     def state_eligibility_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def state_get_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT body,snapshot FROM experiments WHERE id=?", parameters)
++        return execute(db, "SELECT body,snapshot FROM experiments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def state_list_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT body,snapshot FROM experiments ORDER BY rowid", parameters)
++        return execute(db, "SELECT body,snapshot FROM experiments ORDER BY _insert_order", parameters)
+ 
+     @staticmethod
+     def state_save_update_experiments(db, parameters=()):
+-        return execute(db, "UPDATE experiments SET body=? WHERE id=?", parameters)
++        return execute(db, "UPDATE experiments SET body=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def state_create_insert_experiments(db, parameters=()):
+-        return execute(db, "INSERT INTO experiments VALUES (?,?,?,NULL)", parameters)
++        return execute(db, "INSERT INTO experiments(id,owner,body,snapshot)  VALUES (:p0,:p1,:p2,NULL)", parameters)
+ 
+     @staticmethod
+     def state_snapshot_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT snapshot FROM experiments WHERE id=?", parameters)
++        return execute(db, "SELECT snapshot FROM experiments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def queue_select_experiments(db, parameters=()):
+diff --git a/backend/repositories/history.py b/backend/repositories/history.py
+index 2fcf5bd5..bd10344b 100644
+--- a/backend/repositories/history.py
++++ b/backend/repositories/history.py
+@@ -1,5 +1,6 @@
+ """History SQL; transaction ownership is separate."""
+ 
++from ..db.dialect import bind_list, json_text
+ from .base import execute
+ 
+ 
+@@ -8,14 +9,14 @@ class HistoryRepository:
+     def event_list_select_monitoring_events(db, parameters=(), *, runs):
+         return execute(
+             db,
+-            f"SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id WHERE a.run_id IN ({','.join('?' * len(runs))}) AND json_extract(m.body,'$.event') IN (?,?) ORDER BY m.sequence",
++            f"SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id WHERE a.run_id IN ({bind_list(runs)}) AND {json_text(db, 'm.body', 'event')} IN (:p{len(runs)},:p{len(runs) + 1}) ORDER BY m.sequence",
+             parameters,
+         )
+ 
+     @staticmethod
+     def event_list_select_experiments(db, parameters=(), *, runs):
+-        return execute(db, f"SELECT id,snapshot FROM experiments WHERE id IN ({','.join('?' * len(runs))})", parameters)
++        return execute(db, f"SELECT id,snapshot FROM experiments WHERE id IN ({bind_list(runs)})", parameters)
+ 
+     @staticmethod
+     def audit_select_audit(db, parameters=()):
+-        return execute(db, "SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100", parameters)
++        return execute(db, "SELECT * FROM audit WHERE workspace_id=:p0 ORDER BY sequence DESC LIMIT 100", parameters)
+diff --git a/backend/repositories/inventory.py b/backend/repositories/inventory.py
+index d885463c..a6b9738f 100644
+--- a/backend/repositories/inventory.py
++++ b/backend/repositories/inventory.py
+@@ -1,5 +1,6 @@
+ """Inventory SQL; transaction ownership is separate."""
+ 
++from ..db.dialect import json_text
+ from .base import execute
+ 
+ 
+@@ -8,7 +9,7 @@ class InventoryRepository:
+     def get_capabilities_select_workspace_settings(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT json_extract(body,'$.defaultCoordinatorDeviceId') FROM workspace_settings WHERE workspace_id=?",
++            f"SELECT {json_text(db, 'body', 'defaultCoordinatorDeviceId')} FROM workspace_settings WHERE workspace_id=:p0",
+             parameters,
+         )
+ 
+@@ -16,6 +17,6 @@ class InventoryRepository:
+     def resources_select_memberships(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?",
++            "SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=:p0",
+             parameters,
+         )
+diff --git a/backend/repositories/metadata.py b/backend/repositories/metadata.py
+index 6908c2b9..d872c615 100644
+--- a/backend/repositories/metadata.py
++++ b/backend/repositories/metadata.py
+@@ -6,4 +6,8 @@ from .base import execute
+ class MetadataRepository:
+     @staticmethod
+     def set_backup_status(db, parameters):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES (:p0,:p1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+diff --git a/backend/repositories/model_qualification.py b/backend/repositories/model_qualification.py
+index 01d3a2a1..a1024346 100644
+--- a/backend/repositories/model_qualification.py
++++ b/backend/repositories/model_qualification.py
+@@ -6,23 +6,25 @@ from .base import execute
+ class ModelQualificationRepository:
+     @staticmethod
+     def status_select_model_probe_jobs(db, parameters=()):
+-        return execute(db, "SELECT body FROM model_probe_jobs WHERE asset_id=? ORDER BY rowid DESC", parameters)
++        return execute(
++            db, "SELECT body FROM model_probe_jobs WHERE asset_id=:p0 ORDER BY _insert_order DESC", parameters
++        )
+ 
+     @staticmethod
+     def cancel_select_model_probe_jobs(db, parameters=()):
+-        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=? AND asset_id=?", parameters)
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=:p0 AND asset_id=:p1", parameters)
+ 
+     @staticmethod
+     def transfer_select_model_probe_jobs(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT j.body FROM model_probe_jobs j JOIN model_probe_reservations r ON r.job_id=j.id WHERE j.id=? AND j.device_id=?",
++            "SELECT j.body FROM model_probe_jobs j JOIN model_probe_reservations r ON r.job_id=j.id WHERE j.id=:p0 AND j.device_id=:p1",
+             parameters,
+         )
+ 
+     @staticmethod
+     def save_update_model_probe_jobs(db, parameters=()):
+-        return execute(db, "UPDATE model_probe_jobs SET body=? WHERE id=?", parameters)
++        return execute(db, "UPDATE model_probe_jobs SET body=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def effective_profile_select_value(db, parameters=(), *, engine_clause, engine_column, references, table):
+@@ -30,65 +32,79 @@ class ModelQualificationRepository:
+             db,
+             f"SELECT q.manifest_hash,{engine_column} FROM {table} q JOIN {references} r ON r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash"
+             + engine_clause
+-            + " WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?",
++            + " WHERE q.device_id=:p0 AND q.workspace_id=:p1 AND q.profile_hash=:p2",
+             parameters,
+         )
+ 
+     @staticmethod
+     def start_insert_model_probe_jobs(db, parameters=()):
+-        return execute(db, "INSERT INTO model_probe_jobs VALUES (?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO model_probe_jobs(id,workspace_id,asset_id,device_id,body)  VALUES (:p0,:p1,:p2,:p3,:p4)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def start_insert_model_probe_reservations(db, parameters=()):
+-        return execute(db, "INSERT INTO model_probe_reservations VALUES (?,?,?)", parameters)
++        return execute(
++            db, "INSERT INTO model_probe_reservations(job_id,device_id,resource_id)  VALUES (:p0,:p1,:p2)", parameters
++        )
+ 
+     @staticmethod
+     def accept_delete_model_probe_reservations(db, parameters=()):
+-        return execute(db, "DELETE FROM model_probe_reservations WHERE job_id=?", parameters)
++        return execute(db, "DELETE FROM model_probe_reservations WHERE job_id=:p0", parameters)
+ 
+     @staticmethod
+     def reference_select_model_engine_references(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT * FROM model_engine_references WHERE workspace_id=? AND manifest_hash=? AND engine=?",
++            "SELECT * FROM model_engine_references WHERE workspace_id=:p0 AND manifest_hash=:p1 AND engine=:p2",
+             parameters,
+         )
+ 
+     @staticmethod
+     def start_select_model_probe_jobs(db, parameters=()):
+-        return execute(db, "SELECT body FROM model_probe_jobs WHERE workspace_id=?", parameters)
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE workspace_id=:p0", parameters)
+ 
+     @staticmethod
+     def accept_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def accept_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", parameters)
++        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def accept_select_model_probe_jobs(db, parameters=()):
+-        return execute(db, "SELECT body FROM model_probe_jobs WHERE device_id=?", parameters)
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE device_id=:p0", parameters)
+ 
+     @staticmethod
+     def accept_update_devices(db, parameters=()):
+-        return execute(db, "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=?", parameters)
++        return execute(db, "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def reference_select_model_references(db, parameters=()):
+-        return execute(db, "SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?", parameters)
++        return execute(db, "SELECT * FROM model_references WHERE workspace_id=:p0 AND manifest_hash=:p1", parameters)
+ 
+     @staticmethod
+     def start_select_devices(db, parameters=()):
+-        return execute(db, "SELECT * FROM devices WHERE id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,worker_id,owner,name,token_digest,status,compute_url,self_test,boot_id,seen,enabled,desired,processes,telemetry,bulk_url,keep_on FROM devices WHERE id=:p0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def accept_select_model_probe_jobs_2(db, parameters=()):
+-        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=? AND device_id=?", parameters)
++        return execute(db, "SELECT body FROM model_probe_jobs WHERE id=:p0 AND device_id=:p1", parameters)
+ 
+     @staticmethod
+     def start_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", parameters)
++        return execute(db, "SELECT workspace_id FROM worker_assignments WHERE worker_id=:p0", parameters)
+ 
+     @staticmethod
+     def start_select_device_reservations(db, parameters=()):
+@@ -100,9 +116,9 @@ class ModelQualificationRepository:
+     def accept_insert_model_references(db, parameters=(), *, engine_args):
+         return execute(
+             db,
+-            "INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)"
++            "INSERT INTO model_references(workspace_id,manifest_hash,reference_hash,body)  VALUES (:p0,:p1,:p2,:p3) ON CONFLICT DO NOTHING"
+             if not engine_args
+-            else "INSERT OR IGNORE INTO model_engine_references VALUES (?,?,?,?,?)",
++            else "INSERT INTO model_engine_references(workspace_id,manifest_hash,reference_hash,body,engine)  VALUES (:p0,:p1,:p2,:p3,:p4) ON CONFLICT DO NOTHING",
+             parameters,
+         )
+ 
+@@ -110,8 +126,8 @@ class ModelQualificationRepository:
+     def accept_insert_model_qualifications(db, parameters=(), *, engine_args):
+         return execute(
+             db,
+-            "INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)"
++            "INSERT INTO model_qualifications(device_id,workspace_id,manifest_hash,profile_hash,reference_hash,body)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5) ON CONFLICT(device_id,workspace_id,manifest_hash) DO UPDATE SET profile_hash=excluded.profile_hash,reference_hash=excluded.reference_hash,body=excluded.body"
+             if not engine_args
+-            else "INSERT OR REPLACE INTO model_engine_qualifications VALUES (?,?,?,?,?,?,?)",
++            else "INSERT INTO model_engine_qualifications(device_id,workspace_id,manifest_hash,profile_hash,reference_hash,body,engine)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5,:p6) ON CONFLICT(device_id,workspace_id,manifest_hash,engine) DO UPDATE SET profile_hash=excluded.profile_hash,reference_hash=excluded.reference_hash,body=excluded.body",
+             parameters,
+         )
+diff --git a/backend/repositories/notifications.py b/backend/repositories/notifications.py
+index 1e6dbd2f..18d30ca1 100644
+--- a/backend/repositories/notifications.py
++++ b/backend/repositories/notifications.py
+@@ -1,5 +1,6 @@
+ """Notifications SQL; transaction ownership is separate."""
+ 
++from ..db.dialect import bind_list
+ from .base import execute
+ 
+ 
+@@ -8,7 +9,7 @@ class NotificationsRepository:
+     def _add_insert_notifications(db, parameters=()):
+         return execute(
+             db,
+-            "INSERT OR IGNORE INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (?,?,?,?,?,?)",
++            "INSERT INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (:p0,:p1,:p2,:p3,:p4,:p5) ON CONFLICT DO NOTHING",
+             parameters,
+         )
+ 
+@@ -18,25 +19,37 @@ class NotificationsRepository:
+ 
+     @staticmethod
+     def start_following_insert_settings(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES ('notificationCursor',:p0) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+ 
+     @staticmethod
+     def start_following_insert_settings_2(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES ('notificationSince',:p0) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+ 
+     @staticmethod
+     def catch_up_insert_settings(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES ('notificationCursor',:p0) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+ 
+     @staticmethod
+     def mark_read_update_notifications(db, parameters=()):
+-        return execute(db, "UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL", parameters)
++        return execute(db, "UPDATE notifications SET read_at=:p0 WHERE user_id=:p1 AND read_at IS NULL", parameters)
+ 
+     @staticmethod
+     def mark_read_update_notifications_2(db, parameters=(), *, numbers):
+         return execute(
+             db,
+-            f"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})"
++            f"UPDATE notifications SET read_at=:p0 WHERE user_id=:p1 AND read_at IS NULL AND id IN ({bind_list(numbers, start=2)})"
+             if numbers
+             else "SELECT 1",
+             parameters,
+@@ -52,11 +65,13 @@ class NotificationsRepository:
+ 
+     @staticmethod
+     def catch_up_select_audit(db, parameters=()):
+-        return execute(db, "SELECT sequence, action, target FROM audit WHERE sequence>? ORDER BY sequence", parameters)
++        return execute(
++            db, "SELECT sequence, action, target FROM audit WHERE sequence>:p0 ORDER BY sequence", parameters
++        )
+ 
+     @staticmethod
+     def listing_select_notifications(db, parameters=()):
+-        return execute(db, "SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT ?", parameters)
++        return execute(db, "SELECT * FROM notifications WHERE user_id=:p0 ORDER BY id DESC LIMIT :p1", parameters)
+ 
+     @staticmethod
+     def start_following_select_settings(db, parameters=()):
+@@ -64,7 +79,7 @@ class NotificationsRepository:
+ 
+     @staticmethod
+     def listing_select_notifications_2(db, parameters=()):
+-        return execute(db, "SELECT COUNT(*) FROM notifications WHERE user_id=? AND read_at IS NULL", parameters)
++        return execute(db, "SELECT COUNT(*) FROM notifications WHERE user_id=:p0 AND read_at IS NULL", parameters)
+ 
+     @staticmethod
+     def start_following_select_audit(db, parameters=()):
+@@ -72,8 +87,14 @@ class NotificationsRepository:
+ 
+     @staticmethod
+     def catch_up_select_sqlite_master(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM sqlite_master WHERE name='devices'", parameters)
++        return execute(
++            db,
++            "SELECT 1 FROM pg_tables WHERE schemaname=current_schema() AND tablename='devices'"
++            if getattr(db, "dialect", "sqlite") == "postgresql"
++            else "SELECT 1 FROM sqlite_master WHERE name='devices'",
++            parameters,
++        )
+ 
+     @staticmethod
+     def catch_up_select_devices(db, parameters=()):
+-        return execute(db, "SELECT name, status FROM devices WHERE id=?", parameters)
++        return execute(db, "SELECT name, status FROM devices WHERE id=:p0", parameters)
+diff --git a/backend/repositories/operations.py b/backend/repositories/operations.py
+index 7eb52825..541c16e4 100644
+--- a/backend/repositories/operations.py
++++ b/backend/repositories/operations.py
+@@ -6,27 +6,27 @@ from .base import execute
+ class OperationsRepository:
+     @staticmethod
+     def users_select_users(db, parameters=()):
+-        return execute(db, "SELECT profile FROM users ORDER BY rowid", parameters)
++        return execute(db, "SELECT profile FROM users ORDER BY _insert_order", parameters)
+ 
+     @staticmethod
+     def edit_account_update_users(db, parameters=()):
+-        return execute(db, "UPDATE users SET profile=? WHERE id=?", parameters)
++        return execute(db, "UPDATE users SET profile=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def edit_account_delete_sessions(db, parameters=()):
+-        return execute(db, "DELETE FROM sessions WHERE user_id=?", parameters)
++        return execute(db, "DELETE FROM sessions WHERE user_id=:p0", parameters)
+ 
+     @staticmethod
+     def edit_account_select_users(db, parameters=()):
+-        return execute(db, "SELECT profile FROM users WHERE id<>?", parameters)
++        return execute(db, "SELECT profile FROM users WHERE id<>:p0", parameters)
+ 
+     @staticmethod
+     def edit_account_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM worker_assignments WHERE owner=?", parameters)
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE owner=:p0", parameters)
+ 
+     @staticmethod
+     def revoke_sessions_delete_sessions(db, parameters=()):
+-        return execute(db, "DELETE FROM sessions WHERE user_id=?", parameters)
++        return execute(db, "DELETE FROM sessions WHERE user_id=:p0", parameters)
+ 
+     @staticmethod
+     def platform_audit_select_audit(db, parameters=()):
+@@ -36,7 +36,7 @@ class OperationsRepository:
+ 
+     @staticmethod
+     def operations_select_settings(db, parameters=()):
+-        return execute(db, 'SELECT value FROM settings WHERE key="metadataBackupStatus"', parameters)
++        return execute(db, "SELECT value FROM settings WHERE key='metadataBackupStatus'", parameters)
+ 
+     @staticmethod
+     def operations_select_queue(db, parameters=()):
+@@ -44,8 +44,8 @@ class OperationsRepository:
+ 
+     @staticmethod
+     def resume_update_settings(db, parameters=()):
+-        return execute(db, 'UPDATE settings SET value="false" WHERE key="dispatchHold"', parameters)
++        return execute(db, "UPDATE settings SET value='false' WHERE key='dispatchHold'", parameters)
+ 
+     @staticmethod
+     def resume_delete_settings(db, parameters=()):
+-        return execute(db, 'DELETE FROM settings WHERE key IN ("maintenanceId","agentMaintenance")', parameters)
++        return execute(db, "DELETE FROM settings WHERE key IN ('maintenanceId','agentMaintenance')", parameters)
+diff --git a/backend/repositories/policies.py b/backend/repositories/policies.py
+index 9338d015..7cb4f8da 100644
+--- a/backend/repositories/policies.py
++++ b/backend/repositories/policies.py
+@@ -6,20 +6,24 @@ from .base import execute
+ class PoliciesRepository:
+     @staticmethod
+     def read_setting_settings(db, parameters=()):
+-        return execute(db, "SELECT value FROM settings WHERE key=?", parameters)
++        return execute(db, "SELECT value FROM settings WHERE key=:p0", parameters)
+ 
+     @staticmethod
+     def set_disabled_workers_settings(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES (?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES (:p0,:p1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+ 
+     @staticmethod
+     def has_device_reservation_device_reservations(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM device_reservations WHERE device_id=?", parameters)
++        return execute(db, "SELECT 1 FROM device_reservations WHERE device_id=:p0", parameters)
+ 
+     @staticmethod
+     def has_device_reservation_physical_reservations(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM physical_reservations WHERE resource_id=?", parameters)
++        return execute(db, "SELECT 1 FROM physical_reservations WHERE resource_id=:p0", parameters)
+ 
+     @staticmethod
+     def has_device_reservation_model_probe_reservations(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM model_probe_reservations WHERE device_id=? OR resource_id=?", parameters)
++        return execute(db, "SELECT 1 FROM model_probe_reservations WHERE device_id=:p0 OR resource_id=:p1", parameters)
+diff --git a/backend/repositories/recovery_storage.py b/backend/repositories/recovery_storage.py
+index 94d6492b..836ec03d 100644
+--- a/backend/repositories/recovery_storage.py
++++ b/backend/repositories/recovery_storage.py
+@@ -6,85 +6,99 @@ from .base import execute
+ class RecoveryStorageRepository:
+     @staticmethod
+     def grant_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT coordinator,epoch,run_id FROM assignments WHERE id=?", parameters)
++        return execute(db, "SELECT coordinator,epoch,run_id FROM assignments WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def point_run_select_recovery_points(db, parameters=()):
+-        return execute(db, "SELECT run_id FROM recovery_points WHERE id=?", parameters)
++        return execute(db, "SELECT run_id FROM recovery_points WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def device_status_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT coordinator FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters)
++        return execute(
++            db, "SELECT coordinator FROM assignments WHERE run_id=:p0 ORDER BY epoch DESC LIMIT 1", parameters
++        )
+ 
+     @staticmethod
+     def historical_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM assignments WHERE run_id=?", parameters)
++        return execute(db, "SELECT 1 FROM assignments WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def ticket_insert_cloud_downloads(db, parameters=()):
+-        return execute(db, "INSERT INTO cloud_downloads VALUES (?,?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO cloud_downloads(digest,user_id,session_digest,run_id,sha,expires)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def consume_delete_cloud_downloads(db, parameters=()):
+-        return execute(db, "DELETE FROM cloud_downloads WHERE digest=?", parameters)
++        return execute(db, "DELETE FROM cloud_downloads WHERE digest=:p0", parameters)
+ 
+     @staticmethod
+     def consume_select_cloud_downloads(db, parameters=()):
+-        return execute(db, "SELECT * FROM cloud_downloads WHERE digest=? AND expires>?", parameters)
++        return execute(db, "SELECT * FROM cloud_downloads WHERE digest=:p0 AND expires>:p1", parameters)
+ 
+     @staticmethod
+     def consume_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "SELECT role FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def consume_select_sessions(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM sessions WHERE digest=? AND user_id=? AND expires>?", parameters)
++        return execute(db, "SELECT 1 FROM sessions WHERE digest=:p0 AND user_id=:p1 AND expires>:p2", parameters)
+ 
+     @staticmethod
+     def begin_insert_recovery_points(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO recovery_points VALUES (?,?,?,?,?,?,NULL,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO recovery_points(id,run_id,generation,final,status,manifest,error,created)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5,NULL,:p6) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def complete_object_update_cloud_objects(db, parameters=()):
+-        return execute(db, 'UPDATE cloud_objects SET status="UPLOADED" WHERE sha=?', parameters)
++        return execute(db, "UPDATE cloud_objects SET status='UPLOADED' WHERE sha=:p0", parameters)
+ 
+     @staticmethod
+     def delete_point_delete_cloud_refs(db, parameters=()):
+-        return execute(db, "DELETE FROM cloud_refs WHERE point_id=?", parameters)
++        return execute(db, "DELETE FROM cloud_refs WHERE point_id=:p0", parameters)
+ 
+     @staticmethod
+     def delete_point_delete_recovery_points(db, parameters=()):
+-        return execute(db, "DELETE FROM recovery_points WHERE id=?", parameters)
++        return execute(db, "DELETE FROM recovery_points WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def begin_insert_cloud_objects(db, parameters=()):
+-        return execute(db, 'INSERT OR IGNORE INTO cloud_objects VALUES (?,?,"PENDING",NULL,NULL)', parameters)
++        return execute(
++            db,
++            "INSERT INTO cloud_objects(sha,size,status,upload_plan,expires)  VALUES (:p0,:p1,'PENDING',NULL,NULL) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def begin_insert_cloud_refs(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO cloud_refs VALUES (?,?)", parameters)
++        return execute(db, "INSERT INTO cloud_refs(point_id,sha)  VALUES (:p0,:p1) ON CONFLICT DO NOTHING", parameters)
+ 
+     @staticmethod
+     def verify_update_recovery_points(db, parameters=()):
+-        return execute(db, 'UPDATE recovery_points SET status="READY",error=NULL WHERE id=?', parameters)
++        return execute(db, "UPDATE recovery_points SET status='READY',error=NULL WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def points_select_recovery_points(db, parameters=()):
+         return execute(
+-            db, "SELECT * FROM recovery_points WHERE run_id=? ORDER BY generation DESC,created DESC", parameters
++            db, "SELECT * FROM recovery_points WHERE run_id=:p0 ORDER BY generation DESC,created DESC", parameters
+         )
+ 
+     @staticmethod
+     def manifest_select_recovery_points(db, parameters=()):
+-        return execute(db, "SELECT manifest,status FROM recovery_points WHERE id=?", parameters)
++        return execute(db, "SELECT manifest,status FROM recovery_points WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def delete_point_delete_cloud_objects(db, parameters=()):
+-        return execute(db, "DELETE FROM cloud_objects WHERE sha=?", parameters)
++        return execute(db, "DELETE FROM cloud_objects WHERE sha=:p0", parameters)
+ 
+     @staticmethod
+     def begin_select_recovery_points(db, parameters=()):
+-        return execute(db, "SELECT manifest,status FROM recovery_points WHERE id=?", parameters)
++        return execute(db, "SELECT manifest,status FROM recovery_points WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def begin_select_cloud_objects(db, parameters=()):
+@@ -92,29 +106,29 @@ class RecoveryStorageRepository:
+ 
+     @staticmethod
+     def begin_update_cloud_objects(db, parameters=()):
+-        return execute(db, "UPDATE cloud_objects SET upload_plan=?,expires=? WHERE sha=?", parameters)
++        return execute(db, "UPDATE cloud_objects SET upload_plan=:p0,expires=:p1 WHERE sha=:p2", parameters)
+ 
+     @staticmethod
+     def complete_object_select_cloud_objects(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT o.* FROM cloud_objects o JOIN cloud_refs r ON o.sha=r.sha WHERE r.point_id=? AND o.sha=?",
++            "SELECT o.* FROM cloud_objects o JOIN cloud_refs r ON o.sha=r.sha WHERE r.point_id=:p0 AND o.sha=:p1",
+             parameters,
+         )
+ 
+     @staticmethod
+     def verify_select_recovery_points(db, parameters=()):
+-        return execute(db, "SELECT * FROM recovery_points WHERE id=?", parameters)
++        return execute(db, "SELECT * FROM recovery_points WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def verify_update_cloud_objects(db, parameters=()):
+         return execute(
+-            db, 'UPDATE cloud_objects SET status="READY",upload_plan=NULL,expires=NULL WHERE sha=?', parameters
++            db, "UPDATE cloud_objects SET status='READY',upload_plan=NULL,expires=NULL WHERE sha=:p0", parameters
+         )
+ 
+     @staticmethod
+     def verify_update_recovery_points_2(db, parameters=()):
+-        return execute(db, "UPDATE recovery_points SET status=?,error=? WHERE id=?", parameters)
++        return execute(db, "UPDATE recovery_points SET status=:p0,error=:p1 WHERE id=:p2", parameters)
+ 
+     @staticmethod
+     def delete_point_select_cloud_objects(db, parameters=()):
+@@ -126,18 +140,18 @@ class RecoveryStorageRepository:
+ 
+     @staticmethod
+     def usage_select_cloud_objects(db, parameters=()):
+-        return execute(db, 'SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!="READY"', parameters)
++        return execute(db, "SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!='READY'", parameters)
+ 
+     @staticmethod
+     def begin_select_cloud_objects_2(db, parameters=()):
+-        return execute(db, "SELECT * FROM cloud_objects WHERE sha=?", parameters)
++        return execute(db, "SELECT * FROM cloud_objects WHERE sha=:p0", parameters)
+ 
+     @staticmethod
+     def verify_update_cloud_objects_2(db, parameters=()):
+         return execute(
+-            db, 'UPDATE cloud_objects SET status="PENDING",upload_plan=NULL,expires=NULL WHERE sha=?', parameters
++            db, "UPDATE cloud_objects SET status='PENDING',upload_plan=NULL,expires=NULL WHERE sha=:p0", parameters
+         )
+ 
+     @staticmethod
+     def verify_select_cloud_objects(db, parameters=()):
+-        return execute(db, "SELECT * FROM cloud_objects WHERE sha=?", parameters)
++        return execute(db, "SELECT * FROM cloud_objects WHERE sha=:p0", parameters)
+diff --git a/backend/repositories/scheduling.py b/backend/repositories/scheduling.py
+index e28eb4c7..23e5c432 100644
+--- a/backend/repositories/scheduling.py
++++ b/backend/repositories/scheduling.py
+@@ -10,20 +10,20 @@ class SchedulingRepository:
+ 
+     @staticmethod
+     def _dispatch_once_delete_queue(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def _dispatch_run_update_experiments(db, parameters=()):
+-        return execute(db, "UPDATE experiments SET snapshot=? WHERE id=?", parameters)
++        return execute(db, "UPDATE experiments SET snapshot=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def _dispatch_run_delete_queue(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def _dispatch_run_delete_queue_2(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+ 
+     @staticmethod
+     def _dispatch_run_delete_queue_3(db, parameters=()):
+-        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++        return execute(db, "DELETE FROM queue WHERE run_id=:p0", parameters)
+diff --git a/backend/repositories/study_registry.py b/backend/repositories/study_registry.py
+index 65350d97..d151781b 100644
+--- a/backend/repositories/study_registry.py
++++ b/backend/repositories/study_registry.py
+@@ -6,23 +6,39 @@ from .base import execute
+ class StudyRegistryRepository:
+     @staticmethod
+     def set_dataset_limits_insert_settings(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO settings VALUES ('datasetLimits', ?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO settings(key,value)  VALUES ('datasetLimits', :p0) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            parameters,
++        )
+ 
+     @staticmethod
+     def upload_plan_insert_study_uploads(db, parameters=()):
+-        return execute(db, "INSERT INTO study_uploads VALUES (?,?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO study_uploads(id,asset_id,name,object_sha,upload_key,size)  VALUES (:p0,:p1,:p2,:p3,:p4,:p5)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def publish_update_study_assets(db, parameters=()):
+-        return execute(db, "UPDATE study_assets SET body=? WHERE id=?", parameters)
++        return execute(db, "UPDATE study_assets SET body=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def publish_select_study_uploads(db, parameters=()):
+-        return execute(db, "SELECT * FROM study_uploads WHERE asset_id=? AND name=? ORDER BY rowid DESC", parameters)
++        return execute(
++            db,
++            "SELECT id,asset_id,name,object_sha,upload_key,size FROM study_uploads WHERE asset_id=:p0 AND name=:p1 ORDER BY _insert_order DESC",
++            parameters,
++        )
+ 
+     @staticmethod
+     def transfer_select_assignments(db, parameters=()):
+-        return execute(db, "SELECT * FROM assignments WHERE id=? AND epoch=? AND released=0", parameters)
++        return execute(
++            db,
++            "SELECT id,run_id,coordinator,epoch,body,snapshot,released FROM assignments WHERE id=:p0 AND epoch=:p1 AND released=0",
++            parameters,
++        )
+ 
+     @staticmethod
+     def dataset_limits_select_settings(db, parameters=()):
+@@ -30,12 +46,16 @@ class StudyRegistryRepository:
+ 
+     @staticmethod
+     def save_insert_study_assets(db, parameters=()):
+-        return execute(db, "INSERT INTO study_assets VALUES (?,?,?,?,?)", parameters)
++        return execute(
++            db, "INSERT INTO study_assets(id,workspace_id,owner,kind,body)  VALUES (:p0,:p1,:p2,:p3,:p4)", parameters
++        )
+ 
+     @staticmethod
+     def list_select_study_assets(db, parameters=()):
+-        return execute(db, "SELECT body FROM study_assets WHERE workspace_id=? AND kind=? ORDER BY rowid", parameters)
++        return execute(
++            db, "SELECT body FROM study_assets WHERE workspace_id=:p0 AND kind=:p1 ORDER BY _insert_order", parameters
++        )
+ 
+     @staticmethod
+     def get_select_study_assets(db, parameters=()):
+-        return execute(db, "SELECT body FROM study_assets WHERE id=? AND workspace_id=? AND kind=?", parameters)
++        return execute(db, "SELECT body FROM study_assets WHERE id=:p0 AND workspace_id=:p1 AND kind=:p2", parameters)
+diff --git a/backend/repositories/templates.py b/backend/repositories/templates.py
+index 57d297f0..3c4d7e25 100644
+--- a/backend/repositories/templates.py
++++ b/backend/repositories/templates.py
+@@ -7,25 +7,25 @@ class TemplatesRepository:
+     @staticmethod
+     def list_templates_select_experiment_templates(db, parameters=()):
+         return execute(
+-            db, "SELECT * FROM experiment_templates WHERE workspace_id=? ORDER BY created DESC, id", parameters
++            db, "SELECT * FROM experiment_templates WHERE workspace_id=:p0 ORDER BY created DESC, id", parameters
+         )
+ 
+     @staticmethod
+     def create_template_insert_experiment_templates(db, parameters=()):
+         return execute(
+             db,
+-            "INSERT INTO experiment_templates VALUES (:id,:workspace_id,:owner_id,:name,:config,:created)",
++            "INSERT INTO experiment_templates(id,workspace_id,owner_id,name,config,created)  VALUES (:id,:workspace_id,:owner_id,:name,:config,:created)",
+             parameters,
+         )
+ 
+     @staticmethod
+     def create_template_select_experiment_templates(db, parameters=()):
+-        return execute(db, "SELECT name FROM experiment_templates WHERE workspace_id=?", parameters)
++        return execute(db, "SELECT name FROM experiment_templates WHERE workspace_id=:p0", parameters)
+ 
+     @staticmethod
+     def delete_template_delete_experiment_templates(db, parameters=()):
+-        return execute(db, "DELETE FROM experiment_templates WHERE id=?", parameters)
++        return execute(db, "DELETE FROM experiment_templates WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def delete_template_select_experiment_templates(db, parameters=()):
+-        return execute(db, "SELECT * FROM experiment_templates WHERE id=? AND workspace_id=?", parameters)
++        return execute(db, "SELECT * FROM experiment_templates WHERE id=:p0 AND workspace_id=:p1", parameters)
+diff --git a/backend/repositories/workspaces.py b/backend/repositories/workspaces.py
+index 6c8a931f..e0bdbd9d 100644
+--- a/backend/repositories/workspaces.py
++++ b/backend/repositories/workspaces.py
+@@ -1,138 +1,165 @@
+ """Workspace SQL; transaction boundaries belong to business operations."""
+ 
++from ..db.dialect import json_text
+ from .base import execute
+ 
+ 
+ class WorkspacesRepository:
+     @staticmethod
+     def create_workspace_insert_workspaces(db, parameters=()):
+-        return execute(db, "INSERT INTO workspaces VALUES (?,?,?,?)", parameters)
++        return execute(db, "INSERT INTO workspaces(id,name,description,creator)  VALUES (:p0,:p1,:p2,:p3)", parameters)
+ 
+     @staticmethod
+     def create_workspace_insert_memberships(db, parameters=()):
+-        return execute(db, "INSERT INTO memberships VALUES (?,?,?)", parameters)
++        return execute(db, "INSERT INTO memberships(workspace_id,user_id,role)  VALUES (:p0,:p1,:p2)", parameters)
+ 
+     @staticmethod
+     def invite_insert_invitations(db, parameters=()):
+-        return execute(db, "INSERT INTO invitations VALUES (?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO invitations(id,workspace_id,user_id,status,created)  VALUES (:p0,:p1,:p2,:p3,:p4)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def invite_select_users(db, parameters=()):
+-        return execute(db, "SELECT id,profile FROM users WHERE json_extract(profile,'$.username')=?", parameters)
++        return execute(db, f"SELECT id,profile FROM users WHERE {json_text(db, 'profile', 'username')}=:p0", parameters)
+ 
+     @staticmethod
+     def invite_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def coordinator_devices_select_devices(db, parameters=()):
+         return execute(
+             db,
+-            'SELECT d.id,d.self_test FROM devices d JOIN worker_assignments a ON a.worker_id=d.worker_id WHERE d.status="APPROVED" AND a.workspace_id=?',
++            "SELECT d.id,d.self_test FROM devices d JOIN worker_assignments a ON a.worker_id=d.worker_id WHERE d.status='APPROVED' AND a.workspace_id=:p0",
+             parameters,
+         )
+ 
+     @staticmethod
+     def settings_select_workspace_settings(db, parameters=()):
+-        return execute(db, "SELECT body FROM workspace_settings WHERE workspace_id=?", parameters)
++        return execute(db, "SELECT body FROM workspace_settings WHERE workspace_id=:p0", parameters)
+ 
+     @staticmethod
+     def save_settings_insert_workspace_settings(db, parameters=()):
+-        return execute(db, "INSERT OR REPLACE INTO workspace_settings VALUES (?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO workspace_settings(workspace_id,body)  VALUES (:p0,:p1) ON CONFLICT(workspace_id) DO UPDATE SET body=excluded.body",
++            parameters,
++        )
+ 
+     @staticmethod
+     def listed_workspaces_select_workspaces(db, parameters=()):
+-        return execute(db, "SELECT w.* FROM workspaces w ORDER BY w.rowid", parameters)
++        return execute(
++            db, "SELECT w.id,w.name,w.description,w.creator FROM workspaces w ORDER BY w._insert_order", parameters
++        )
+ 
+     @staticmethod
+     def listed_workspaces_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT workspace_id FROM memberships WHERE user_id=?", parameters)
++        return execute(db, "SELECT workspace_id FROM memberships WHERE user_id=:p0", parameters)
+ 
+     @staticmethod
+     def listed_workspaces_select_join_requests(db, parameters=()):
+-        return execute(db, 'SELECT workspace_id FROM join_requests WHERE user_id=? AND status="PENDING"', parameters)
++        return execute(db, "SELECT workspace_id FROM join_requests WHERE user_id=:p0 AND status='PENDING'", parameters)
+ 
+     @staticmethod
+     def ask_to_join_insert_join_requests(db, parameters=()):
+-        return execute(db, "INSERT INTO join_requests VALUES (?,?,?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO join_requests(id,workspace_id,user_id,status,created)  VALUES (:p0,:p1,:p2,:p3,:p4)",
++            parameters,
++        )
+ 
+     @staticmethod
+     def ask_to_join_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def ask_to_join_select_workspaces(db, parameters=()):
+-        return execute(db, "SELECT 1 FROM workspaces WHERE id=?", parameters)
++        return execute(db, "SELECT 1 FROM workspaces WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def join_requests_select_join_requests(db, parameters=()):
+         return execute(
+             db,
+-            'SELECT j.*,u.profile FROM join_requests j JOIN users u ON u.id=j.user_id WHERE j.workspace_id=? AND j.status="PENDING" ORDER BY j.rowid',
++            "SELECT j.id,j.workspace_id,j.user_id,j.status,j.created,u.profile FROM join_requests j JOIN users u ON u.id=j.user_id WHERE j.workspace_id=:p0 AND j.status='PENDING' ORDER BY j._insert_order",
+             parameters,
+         )
+ 
+     @staticmethod
+     def decide_join_update_join_requests(db, parameters=()):
+-        return execute(db, "UPDATE join_requests SET status=? WHERE id=?", parameters)
++        return execute(db, "UPDATE join_requests SET status=:p0 WHERE id=:p1", parameters)
+ 
+     @staticmethod
+     def decide_join_insert_memberships(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO memberships VALUES (?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO memberships(workspace_id,user_id,role)  VALUES (:p0,:p1,:p2) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def decide_join_select_join_requests(db, parameters=()):
+-        return execute(db, "SELECT * FROM join_requests WHERE id=? AND workspace_id=?", parameters)
++        return execute(
++            db,
++            "SELECT id,workspace_id,user_id,status,created FROM join_requests WHERE id=:p0 AND workspace_id=:p1",
++            parameters,
++        )
+ 
+     @staticmethod
+     def invitations_select_invitations(db, parameters=()):
+         return execute(
+             db,
+-            'SELECT i.*,w.name FROM invitations i JOIN workspaces w ON w.id=i.workspace_id WHERE i.user_id=? AND i.status="PENDING"',
++            "SELECT i.*,w.name FROM invitations i JOIN workspaces w ON w.id=i.workspace_id WHERE i.user_id=:p0 AND i.status='PENDING'",
+             parameters,
+         )
+ 
+     @staticmethod
+     def accept_insert_memberships(db, parameters=()):
+-        return execute(db, "INSERT OR IGNORE INTO memberships VALUES (?,?,?)", parameters)
++        return execute(
++            db,
++            "INSERT INTO memberships(workspace_id,user_id,role)  VALUES (:p0,:p1,:p2) ON CONFLICT DO NOTHING",
++            parameters,
++        )
+ 
+     @staticmethod
+     def accept_update_invitations(db, parameters=()):
+-        return execute(db, 'UPDATE invitations SET status="ACCEPTED" WHERE id=?', parameters)
++        return execute(db, "UPDATE invitations SET status='ACCEPTED' WHERE id=:p0", parameters)
+ 
+     @staticmethod
+     def accept_select_invitations(db, parameters=()):
+-        return execute(db, "SELECT * FROM invitations WHERE id=? AND user_id=?", parameters)
++        return execute(db, "SELECT * FROM invitations WHERE id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def member_change_update_memberships(db, parameters=()):
+-        return execute(db, "UPDATE memberships SET role=? WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "UPDATE memberships SET role=:p0 WHERE workspace_id=:p1 AND user_id=:p2", parameters)
+ 
+     @staticmethod
+     def member_change_delete_memberships(db, parameters=()):
+-        return execute(db, "DELETE FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "DELETE FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def member_change_update_invitations(db, parameters=()):
+         return execute(
+             db,
+-            'UPDATE invitations SET status="REVOKED" WHERE workspace_id=? AND user_id=? AND status="PENDING"',
++            "UPDATE invitations SET status='REVOKED' WHERE workspace_id=:p0 AND user_id=:p1 AND status='PENDING'",
+             parameters,
+         )
+ 
+     @staticmethod
+     def member_change_select_memberships(db, parameters=()):
+-        return execute(db, "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++        return execute(db, "SELECT role FROM memberships WHERE workspace_id=:p0 AND user_id=:p1", parameters)
+ 
+     @staticmethod
+     def member_change_select_worker_assignments(db, parameters=()):
+-        return execute(db, "SELECT worker_id FROM worker_assignments WHERE owner=? AND workspace_id=?", parameters)
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE owner=:p0 AND workspace_id=:p1", parameters)
+ 
+     @staticmethod
+     def member_change_select_memberships_2(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT count(*) FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=? AND m.role='ADMIN' AND m.user_id<>? AND json_extract(u.profile,'$.accountStatus')='ACTIVE'",
++            f"SELECT count(*) FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=:p0 AND m.role='ADMIN' AND m.user_id<>:p1 AND {json_text(db, 'u.profile', 'accountStatus')}='ACTIVE'",
+             parameters,
+         )
+ 
+@@ -140,6 +167,6 @@ class WorkspacesRepository:
+     def state_workspaces_select_workspaces(db, parameters=()):
+         return execute(
+             db,
+-            "SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid",
++            "SELECT w.id,w.name,w.description,w.creator,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=:p0 ORDER BY w._insert_order",
+             parameters,
+         )
+diff --git a/backend/services/store.py b/backend/services/store.py
+index e9cf5fc6..d8137321 100644
+--- a/backend/services/store.py
++++ b/backend/services/store.py
+@@ -13,15 +13,14 @@ from .scheduling import SchedulingService
+ from .experiment_state import ExperimentStateService
+ from .workspaces import WorkspaceStateService
+ from ..core.clock import now as now
+-from ..db.database import SQLiteDatabase
++from ..db.engine import Database
+ from .audit import AuditService
+ from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
+ 
+ 
+ class Store:
+-    def __init__(self, path, passwords, runtime):
++    def __init__(self, path, passwords, runtime, *, database_url=None, database_connect_args=None):
+         self.path, self.runtime = str(path), runtime
+-        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+         self.lock = threading.RLock()
+         self.operation_lock = threading.RLock()
+         self.hasher = PasswordHasher()
+@@ -32,9 +31,11 @@ class Store:
+         self.experiments = ExperimentStateService(self)
+         self.workspace_state = WorkspaceStateService(self)
+         self.last_error = None
+-        self.database = SQLiteDatabase(self.path, self.lock)
++        self.database = Database(database_url or path, lock=self.lock, connect_args=database_connect_args)
+         self.database.initialize(passwords, self.hasher)
+-        os.chmod(path, 0o600)
++        if self.database.dialect == "sqlite":
++            self.path = self.database.url.database
++            os.chmod(self.path, 0o600)
+         runtime.attach_store(self)
+         try:
+             self.ensure_workers(runtime.capabilities()["workerIds"])
+@@ -43,9 +44,12 @@ class Store:
+ 
+     @contextmanager
+     def db(self):
+-        with self.database.connection() as connection:
++        with self.database.transaction() as connection:
+             yield connection
+ 
++    def close(self):
++        self.database.close()
++
+     def audit(self, db, actor, action, target, workspace_id=None):
+         return self.audit_service.audit(db=db, actor=actor, action=action, target=target, workspace_id=workspace_id)
+ 
+diff --git a/backend/tests/conftest.py b/backend/tests/conftest.py
+index 2eee0ad6..83a3e6ee 100644
+--- a/backend/tests/conftest.py
++++ b/backend/tests/conftest.py
+@@ -3,6 +3,8 @@
+ from fastapi.testclient import TestClient
+ import pytest
+ 
++from dbkit import database as database, product_database_target as product_database_target
++
+ from backend.app import create_app
+ from backend.devices import AgentRuntime
+ from labkit import USERS, enable, login, pair
+@@ -28,3 +30,30 @@ def setup(tmp_path):
+         for alias in ("5070ti", "3060"):
+             enable(kit, *pair(kit, alias))
+         yield client, app.state.store, runtime
++
++
++def pytest_configure(config):
++    config.addinivalue_line(
++        "markers", "sqlite_file: explicit legacy SQLite file-format, migration, backup or local deployment contract"
++    )
++
++
++def pytest_sessionfinish(session, exitstatus):
++    import json
++    import os
++    from pathlib import Path
++
++    destination = os.environ.get("HETEROES_TEST_DATABASE_AUDIT_FILE")
++    audit = getattr(session.config, "_heteroes_database_audit", None)
++    if destination and audit is not None:
++        Path(destination).write_text(json.dumps(audit, indent=2) + "\n")
++
++
++def pytest_terminal_summary(terminalreporter, exitstatus, config):
++    audit = getattr(config, "_heteroes_database_audit", None)
++    if audit is not None:
++        counts = audit["productStores"]
++        terminalreporter.write_line(
++            f"Product database targets: PostgreSQL {counts['postgresql']}, SQLite {counts['sqlite']}; "
++            f"explicit SQLite file contracts {len(audit['explicitSQLiteContracts'])}."
++        )
+diff --git a/backend/tests/test_admission_hold.py b/backend/tests/test_admission_hold.py
+index efed4777..031fbca2 100644
+--- a/backend/tests/test_admission_hold.py
++++ b/backend/tests/test_admission_hold.py
+@@ -7,7 +7,7 @@ from test_pause_resume import paused_report, stopped
+ 
+ def hold(store, value=True):
+     with store.db() as db:
+-        db.execute('UPDATE settings SET value=? WHERE key="dispatchHold"', (json.dumps(value),))
++        db.execute("UPDATE settings SET value=? WHERE key='dispatchHold'", (json.dumps(value),))
+ 
+ 
+ def test_held_queue_stays_queued_without_creating_an_assignment(lab):
+diff --git a/backend/tests/test_agent_factory.py b/backend/tests/test_agent_factory.py
+index 40855163..fadb4340 100644
+--- a/backend/tests/test_agent_factory.py
++++ b/backend/tests/test_agent_factory.py
+@@ -3,6 +3,7 @@
+ import json
+ 
+ import pytest
++
+ from fastapi.testclient import TestClient
+ 
+ from backend.app import app_from_environment
+@@ -10,6 +11,8 @@ from backend.devices import AgentRuntime
+ from backend.server import initialize
+ from backend.writer_lock import acquire_writer
+ 
++pytestmark = pytest.mark.sqlite_file(reason="local private-config factory and SQLite writer ownership")
++
+ 
+ @pytest.fixture
+ def deployment(tmp_path, monkeypatch):
+diff --git a/backend/tests/test_api.py b/backend/tests/test_api.py
+index 11eb6e86..7ed94a36 100644
+--- a/backend/tests/test_api.py
++++ b/backend/tests/test_api.py
+@@ -96,6 +96,7 @@ def test_config_is_immutable_after_submission(setup):
+     )
+ 
+ 
++@pytest.mark.sqlite_file(reason="inspects the SQLite database file for plaintext credentials")
+ def test_credentials_are_hashed_and_no_lease_secrets_in_product(setup):
+     client, store, _ = setup
+     headers = login(client, "admin")
+diff --git a/backend/tests/test_database_engine.py b/backend/tests/test_database_engine.py
+index 39b6c73c..226be10e 100644
+--- a/backend/tests/test_database_engine.py
++++ b/backend/tests/test_database_engine.py
+@@ -1,44 +1,9 @@
+ """The same transaction contract runs on SQLite files and a real PostgreSQL test schema."""
+ 
+-from contextlib import ExitStack
+-import os
+ import threading
+-import uuid
+ 
+ import pytest
+ 
+-from backend.db.engine import Database
+-
+-_DIALECTS = ["sqlite"] + (["postgresql"] if os.environ.get("HETEROES_TEST_DATABASE_URL") else [])
+-
+-
+-@pytest.fixture(params=_DIALECTS)
+-def database(request, tmp_path):
+-    with ExitStack() as cleanup:
+-        options = {}
+-        if request.param == "sqlite":
+-            target = tmp_path / "engine.sqlite"
+-        else:
+-            target = os.environ["HETEROES_TEST_DATABASE_URL"]
+-            administrator = Database(target)
+-            cleanup.callback(administrator.close)
+-            schema = "engine_test_" + uuid.uuid4().hex
+-            with administrator.transaction() as connection:
+-                connection.execute("CREATE SCHEMA " + schema)
+-
+-            def drop_schema():
+-                with administrator.transaction() as connection:
+-                    connection.execute("DROP SCHEMA " + schema + " CASCADE")
+-
+-            cleanup.callback(drop_schema)
+-            # A broken nested-transaction implementation must fail instead of waiting indefinitely on itself.
+-            options = {"options": "-csearch_path=" + schema + " -clock_timeout=2000"}
+-        owner = Database(target, connect_args=options)
+-        cleanup.callback(owner.close)
+-        with owner.transaction() as connection:
+-            connection.execute("CREATE TABLE entries(id BIGINT PRIMARY KEY,value TEXT,enabled BIGINT,large BIGINT)")
+-        yield owner, lambda: Database(target, connect_args=options)
+-
+ 
+ def test_database_commit_row_protocol_and_integer_parity(database):
+     owner, _ = database
+@@ -50,7 +15,7 @@ def test_database_commit_row_protocol_and_integer_parity(database):
+         row = connection.execute("SELECT id,value,enabled,large FROM entries").fetchone()
+         assert dict(row) == {"id": 1, "value": "fixture", "enabled": 1, "large": 2**34}
+         assert type(row["enabled"]) is int and tuple(row) == (1, "fixture", 1, 2**34)
+-    assert owner.dialect in _DIALECTS
++    assert owner.dialect in {"sqlite", "postgresql"}
+ 
+ 
+ def test_failure_rolls_back_and_nested_calls_reuse_the_outer_connection(database):
+diff --git a/backend/tests/test_deployment.py b/backend/tests/test_deployment.py
+index 27f746cc..d134117d 100644
+--- a/backend/tests/test_deployment.py
++++ b/backend/tests/test_deployment.py
+@@ -43,6 +43,7 @@ def test_public_downloads_are_opt_in_and_open_only_the_installers():
+         caddyfile({**base, "publicDownloads": "yes"})
+ 
+ 
++@pytest.mark.sqlite_file(reason="local deployment guard reads the actual SQLite state file")
+ def test_private_config_and_idle_guard(tmp_path):
+     root = tmp_path / "private"
+     initialize(
+diff --git a/backend/tests/test_device_removal.py b/backend/tests/test_device_removal.py
+index 913b5a1f..37a36a30 100644
+--- a/backend/tests/test_device_removal.py
++++ b/backend/tests/test_device_removal.py
+@@ -77,7 +77,7 @@ def test_a_quarantined_device_cannot_be_removed(lab):
+     c, s, r, a = lab
+     d, h = pair(lab, "quarantined-pc")
+     with s.db() as db:
+-        db.execute('UPDATE devices SET status="QUARANTINED" WHERE id=?', (d["deviceId"],))
++        db.execute("UPDATE devices SET status='QUARANTINED' WHERE id=?", (d["deviceId"],))
+     response = c.delete(path(d), headers=a)
+     assert response.status_code == 409
+     assert "quarantine" in response.text.lower(), 'the owner is told why, not only "revoke first"'
+@@ -159,7 +159,7 @@ def test_one_step_delete_never_cancels_a_run_nor_removes_a_quarantined_device(la
+     with s.db() as db:
+         assert db.execute("SELECT status FROM devices WHERE id=?", (d["deviceId"],)).fetchone()[0] == "APPROVED"
+         db.execute("DELETE FROM device_reservations")
+-        db.execute('UPDATE devices SET status="QUARANTINED" WHERE id=?', (d["deviceId"],))
++        db.execute("UPDATE devices SET status='QUARANTINED' WHERE id=?", (d["deviceId"],))
+     assert c.delete(own(d), headers=a).status_code == 409
+     assert "busy-pc" in listed(lab)
+ 
+diff --git a/backend/tests/test_doctor.py b/backend/tests/test_doctor.py
+index edaa926c..b06068af 100644
+--- a/backend/tests/test_doctor.py
++++ b/backend/tests/test_doctor.py
+@@ -3,9 +3,12 @@ import sqlite3
+ 
+ import pytest
+ 
++
+ from backend.doctor import FAIL, PASS, WARN, main, run_checks
+ from backend.server import initialize
+ 
++pytestmark = pytest.mark.sqlite_file(reason="SQLite diagnostics and deliberate on-disk corruption")
++
+ 
+ @pytest.fixture
+ def lab(tmp_path):
+@@ -118,11 +121,13 @@ def test_storage_directory_is_required_and_free_space_is_judged(lab, tmp_path, m
+     import shutil
+ 
+     monkeypatch.setattr(
+-        "backend.doctor.shutil.disk_usage", lambda path: shutil._ntuple_diskusage(500 * 10**9, 100 * 10**9, 400 * 10**9)
++        "backend.services.doctor.shutil.disk_usage",
++        lambda path: shutil._ntuple_diskusage(500 * 10**9, 100 * 10**9, 400 * 10**9),
+     )
+     assert levels(lab)["storage"][0] == PASS
+     monkeypatch.setattr(
+-        "backend.doctor.shutil.disk_usage", lambda path: shutil._ntuple_diskusage(100 * 10**9, 99 * 10**9, 1 * 10**9)
++        "backend.services.doctor.shutil.disk_usage",
++        lambda path: shutil._ntuple_diskusage(100 * 10**9, 99 * 10**9, 1 * 10**9),
+     )
+     assert levels(lab)["storage"][0] == WARN and "free" in levels(lab)["storage"][1]
+     monkeypatch.undo()
+diff --git a/backend/tests/test_experiment_view.py b/backend/tests/test_experiment_view.py
+index 464068d7..1744473f 100644
+--- a/backend/tests/test_experiment_view.py
++++ b/backend/tests/test_experiment_view.py
+@@ -35,7 +35,8 @@ def test_completed_run_clears_stale_shutdown_notice_and_counts_audits_after_reco
+     original = copy.deepcopy(body)
+     with store.db() as db:
+         db.execute(
+-            "INSERT INTO experiments VALUES (?,?,?,?)", (run_id, "admin", json.dumps(body), json.dumps(snapshot))
++            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
++            (run_id, "admin", json.dumps(body), json.dumps(snapshot)),
+         )
+     for shown in (
+         client.get(f"/api/v1/experiments/{run_id}", headers=headers).json(),
+diff --git a/backend/tests/test_lab.py b/backend/tests/test_lab.py
+index 548b4c6a..97126b72 100644
+--- a/backend/tests/test_lab.py
++++ b/backend/tests/test_lab.py
+@@ -2,6 +2,7 @@
+ 
+ import json
+ import sqlite3
++import pytest
+ 
+ from backend.store import Store
+ from labkit import draft, login, pending_commands, submitted
+@@ -133,6 +134,7 @@ def test_password_change_revokes_other_sessions_and_does_not_allow_privilege_edi
+     assert client.patch("/api/v1/profile", json={"canCreateWorkspace": True}, headers=first).status_code == 422
+ 
+ 
++@pytest.mark.sqlite_file(reason="migrates an actual legacy SQLite database and checks user_version")
+ def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
+     _, _, runtime = setup
+     path = tmp_path / "legacy.sqlite"
+@@ -152,11 +154,11 @@ def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
+         CREATE TABLE audit(sequence INTEGER PRIMARY KEY AUTOINCREMENT,actor TEXT,action TEXT,target TEXT,created TEXT);""")
+         for name in ("admin", "participant"):
+             db.execute(
+-                "INSERT INTO users VALUES (?,?,?)",
++                "INSERT INTO users(id,hash,profile) VALUES (?,?,?)",
+                 (name, "preserved-hash", json.dumps({"userId": name, "username": name})),
+             )
+         db.execute(
+-            "INSERT INTO experiments VALUES (?,?,?,?)",
++            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,?)",
+             ("fixed-id", "participant", json.dumps(body), "preserved-snapshot"),
+         )
+         db.execute("INSERT INTO queue VALUES (?,?)", (42, "fixed-id"))
+@@ -169,7 +171,7 @@ def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
+             "preserved-snapshot",
+         )
+         assert db.execute("SELECT sequence,run_id FROM queue").fetchone() == (42, "fixed-id")
+-        assert db.execute('SELECT hash FROM users WHERE id="admin"').fetchone()[0] == "preserved-hash"
++        assert db.execute("SELECT hash FROM users WHERE id='admin'").fetchone()[0] == "preserved-hash"
+         assert db.execute("SELECT count(*) FROM memberships").fetchone()[0] == 2
+ 
+ 
+@@ -181,7 +183,7 @@ def test_dispatch_revalidates_assignment_before_launch(setup):
+     rid = draft(client, admin, coordinatorDeviceId=coordinator, workerIds=["5070ti"]).json()["experimentId"]
+     client.post(f"/api/v1/experiments/{rid}/submit", headers=admin)
+     with store.db() as db:
+-        db.execute('UPDATE worker_assignments SET workspace_id=NULL WHERE worker_id="5070ti"')
++        db.execute("UPDATE worker_assignments SET workspace_id=NULL WHERE worker_id='5070ti'")
+     store.dispatch_once()
+     assert submitted(runtime) == []
+     assert store.get(rid)["status"] == "CANCELLED"
+@@ -196,7 +198,7 @@ def test_platform_privilege_is_persisted_independently_of_username(setup):
+     with store.db() as db:
+         p = store.profile("admin")
+         p["username"] = "operator"
+-        db.execute('UPDATE users SET profile=? WHERE id="admin"', (json.dumps(p),))
++        db.execute("UPDATE users SET profile=? WHERE id='admin'", (json.dumps(p),))
+     response = client.post("/api/v1/auth/login", json={"username": "operator", "password": "test-admin-pass"})
+     assert response.status_code == 200
+     headers = {"Authorization": "Bearer " + response.json()["accessToken"]}
+diff --git a/backend/tests/test_local_lab.py b/backend/tests/test_local_lab.py
+index 898b7a3a..8455549a 100644
+--- a/backend/tests/test_local_lab.py
++++ b/backend/tests/test_local_lab.py
+@@ -8,6 +8,9 @@ import sys
+ 
+ import pytest
+ 
++pytestmark = pytest.mark.sqlite_file(reason="installed local-lab SQLite management adapter")
++
++
+ SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "local-lab.py"
+ 
+ 
+@@ -102,7 +105,8 @@ def add_run(db_path, status):
+ 
+     with sqlite3.connect(db_path) as db:
+         db.execute(
+-            "INSERT INTO experiments VALUES (?,?,?,NULL)", (status + "-run", "admin", json.dumps({"status": status}))
++            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,NULL)",
++            (status + "-run", "admin", json.dumps({"status": status})),
+         )
+ 
+ 
+diff --git a/backend/tests/test_metadata_restore.py b/backend/tests/test_metadata_restore.py
+index a73082e7..c755872d 100644
+--- a/backend/tests/test_metadata_restore.py
++++ b/backend/tests/test_metadata_restore.py
+@@ -6,8 +6,12 @@ import json
+ from pathlib import Path
+ import sqlite3
+ import pytest
++
+ from backend.devices import AgentRuntime
+ from backend.store import Store
++from backend.db.backups import backup_sqlite
++
++pytestmark = pytest.mark.sqlite_file(reason="SQLite snapshot file restoration and corruption checks")
+ 
+ spec = importlib.util.spec_from_file_location("restore_m2", Path(__file__).parents[2] / "scripts/restore-metadata.py")
+ module = importlib.util.module_from_spec(spec)
+@@ -21,8 +25,7 @@ def test_metadata_restore_preserves_unknown_ownership_and_rejects_corruption(tmp
+         db.execute("INSERT INTO device_reservations VALUES (?,?)", ("offline-device", "unknown-assignment"))
+         db.execute("INSERT INTO sessions VALUES (?,?,?)", ("old-session", "admin", 9999999999))
+     source = tmp_path / "snapshot.sqlite"
+-    with store.db() as old, sqlite3.connect(source) as new:
+-        old.backup(new)
++    backup_sqlite(store, source)
+     data = source.read_bytes()
+     manifest = tmp_path / "manifest.json"
+     manifest.write_text(
+@@ -40,7 +43,7 @@ def test_metadata_restore_preserves_unknown_ownership_and_rejects_corruption(tmp
+     with sqlite3.connect(target / "state/product.sqlite") as db:
+         assert db.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
+         assert db.execute("SELECT * FROM device_reservations").fetchone() == ("offline-device", "unknown-assignment")
+-        assert db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0] == "true"
++        assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0] == "true"
+     assert len(json.loads((target / "credentials.json").read_text())["users"]["admin"]) >= 12
+     with pytest.raises(FileExistsError):
+         module.restore(source, manifest, target)
+diff --git a/backend/tests/test_operations.py b/backend/tests/test_operations.py
+index 268a98cc..7f14c78b 100644
+--- a/backend/tests/test_operations.py
++++ b/backend/tests/test_operations.py
+@@ -23,7 +23,7 @@ def test_newly_configured_gpu_starts_unassigned_and_disabled(setup):
+     assert "new-gpu" not in store.assignments("lab")
+     with store.db() as db:
+         assert "new-gpu" in store.disabled_workers(db)
+-        assert db.execute('SELECT workspace_id FROM worker_assignments WHERE worker_id="new-gpu"').fetchone()[0] is None
++        assert db.execute("SELECT workspace_id FROM worker_assignments WHERE worker_id='new-gpu'").fetchone()[0] is None
+ 
+ 
+ def test_restore_publication_cannot_replace_existing_empty_directory(tmp_path):
+diff --git a/backend/tests/test_operations_layers.py b/backend/tests/test_operations_layers.py
+index c2a01d48..73724d1f 100644
+--- a/backend/tests/test_operations_layers.py
++++ b/backend/tests/test_operations_layers.py
+@@ -52,7 +52,10 @@ def test_explicit_resume_clears_the_hold_and_old_maintenance_flags(lab):
+             ("maintenanceId", '"old-fixture-maintenance"'),
+             ("agentMaintenance", "true"),
+         ):
+-            db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, value))
++            db.execute(
++                "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++                (key, value),
++            )
+     response = client.post(
+         "/api/v1/platform/maintenance/resume", headers=owner, json={"workerConfigurationConfirmed": True}
+     )
+@@ -76,7 +79,10 @@ def test_resume_keeps_hold_when_imported_queued_workers_are_not_configured(lab):
+     body["workerIds"] = ["unknown-imported-worker"]
+     with store.db() as db:
+         store.save(db, body)
+-        db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("dispatchHold", "true"))
++        db.execute(
++            "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
++            ("dispatchHold", "true"),
++        )
+     response = client.post(
+         "/api/v1/platform/maintenance/resume", headers=owner, json={"workerConfigurationConfirmed": True}
+     )
+diff --git a/backend/tests/test_policies.py b/backend/tests/test_policies.py
+index 8b661866..6f98a28d 100644
+--- a/backend/tests/test_policies.py
++++ b/backend/tests/test_policies.py
+@@ -29,7 +29,7 @@ def test_shared_settings_preserve_hold_and_sorted_disabled_workers(lab):
+     _, store, _, _ = lab
+     with store.db() as db:
+         assert dispatch_held(db) is False
+-        db.execute('UPDATE settings SET value=? WHERE key="dispatchHold"', ("true",))
++        db.execute("UPDATE settings SET value=? WHERE key='dispatchHold'", ("true",))
+         assert dispatch_held(db) is True
+         set_disabled_workers(db, {"z", "a"})
+         assert read_setting(db, "disabledWorkers") == ["a", "z"]
+diff --git a/backend/tests/test_recovery_routes.py b/backend/tests/test_recovery_routes.py
+index 3f6adf7c..f5d982fd 100644
+--- a/backend/tests/test_recovery_routes.py
++++ b/backend/tests/test_recovery_routes.py
+@@ -109,7 +109,10 @@ def test_historical_import_requires_final_lineage_and_scoped_admin(lab):
+         "modelVersion": m["childWeightsSha256"],
+     }
+     with s.db() as db:
+-        db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (rid, "admin", __import__("json").dumps(body)))
++        db.execute(
++            "INSERT INTO experiments(id,owner,body,snapshot) VALUES (?,?,?,NULL)",
++            (rid, "admin", __import__("json").dumps(body)),
++        )
+     path = "/api/v1/experiments/" + rid + "/recovery-import"
+     assert c.post(path, headers=a, json={**m, "childWeightsSha256": "0" * 64}).status_code == 422
+     assert c.post(path, headers=login(c, "participant"), json=m).status_code == 404
+diff --git a/backend/tests/test_recovery_storage.py b/backend/tests/test_recovery_storage.py
+index 7d566e5f..e71e1370 100644
+--- a/backend/tests/test_recovery_storage.py
++++ b/backend/tests/test_recovery_storage.py
+@@ -126,6 +126,7 @@ def test_unsafe_paths_and_changed_point_identity_are_rejected(storage):
+         st.begin({**m, "generation": 1})
+ 
+ 
++@pytest.mark.sqlite_file(reason="SQLite metadata backup and integrity_check")
+ def test_metadata_backup_is_consistent_and_keeps_local_copy(storage):
+     from backend.metadata_backup import create_metadata_backup
+     from pathlib import Path
+diff --git a/backend/tests/test_self_administration.py b/backend/tests/test_self_administration.py
+index 897eb9c2..7224c077 100644
+--- a/backend/tests/test_self_administration.py
++++ b/backend/tests/test_self_administration.py
+@@ -49,7 +49,10 @@ def test_workspace_admin_cannot_remove_own_membership_or_role(lab, method):
+     client, store, _, admin = lab
+     users = accounts(lab)
+     with store.db() as db:
+-        db.execute("INSERT OR REPLACE INTO memberships VALUES (?,?,?)", ("lab", users["participant"], "ADMIN"))
++        db.execute(
++            "INSERT INTO memberships(workspace_id,user_id,role) VALUES (?,?,?) ON CONFLICT(workspace_id,user_id) DO UPDATE SET role=excluded.role",
++            ("lab", users["participant"], "ADMIN"),
++        )
+     path = f"/api/v1/workspaces/lab/members/{users['admin']}"
+     response = (
+         client.patch(path, headers=admin, json={"role": "PARTICIPANT"})
+diff --git a/backend/tests/test_server.py b/backend/tests/test_server.py
+index 24dd8935..b17dee4b 100644
+--- a/backend/tests/test_server.py
++++ b/backend/tests/test_server.py
+@@ -1,10 +1,13 @@
+ import json
+ import sqlite3
+ import pytest
++
+ from fastapi.testclient import TestClient
+ from backend.app import app_from_environment
+ from backend.server import initialize
+ 
++pytestmark = pytest.mark.sqlite_file(reason="desktop/local SQLite bootstrap and file publication")
++
+ 
+ def test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash(tmp_path, monkeypatch):
+     root = tmp_path / "lab"
+diff --git a/backend/tests/test_shared_runtime.py b/backend/tests/test_shared_runtime.py
+index 836c88a6..35c2f36b 100644
+--- a/backend/tests/test_shared_runtime.py
++++ b/backend/tests/test_shared_runtime.py
+@@ -67,6 +67,8 @@ def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs(
+     root = repo / "runtime/src/heteroes"
+ 
+     def file_of(module):
++        if module == "heteroes":
++            return "__init__.py"
+         relative = Path(*module.split(".")[1:])
+         for candidate in (relative.with_suffix(".py"), relative / "__init__.py"):
+             if (root / candidate).is_file():
+@@ -74,7 +76,9 @@ def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs(
+         return None  # a name imported FROM a module (a function, a constant), not a module
+ 
+     needed = set()
+-    for path in (repo / "backend").glob("*.py"):
++    for path in (repo / "backend").rglob("*.py"):
++        if "tests" in path.relative_to(repo / "backend").parts:
++            continue
+         needed |= {file_of(m) for m in _runtime_imports(path, "backend")} - {None}
+     queue = list(needed)
+     while queue:
+diff --git a/backend/tests/test_store_layers.py b/backend/tests/test_store_layers.py
+index 05a1d138..c5960cc6 100644
+--- a/backend/tests/test_store_layers.py
++++ b/backend/tests/test_store_layers.py
+@@ -52,3 +52,18 @@ def test_borrowed_connection_is_unusable_after_its_transaction_scope(tmp_path):
+         assert connection.execute("SELECT 1").fetchone()[0] == 1
+     with pytest.raises(Exception):
+         connection.execute("SELECT 1")
++
++
++def test_store_uses_the_core_owner_and_nested_reads_share_uncommitted_state(tmp_path):
++    from backend.db.engine import Database
++
++    store = Store(tmp_path / "core-owner.sqlite", {"admin": "store-fixture-password"}, AgentRuntime())
++    try:
++        assert isinstance(store.database, Database)
++        with store.db() as db:
++            db.execute("UPDATE users SET profile=:p0 WHERE id=:p1", ('{"userId":"admin","fixture":true}', "admin"))
++            assert store.profile("admin") == {"userId": "admin", "fixture": True}
++            with store.db() as nested:
++                assert nested is db
++    finally:
++        store.close()
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index ddc1f978..39c20493 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -73,7 +73,13 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   B3 foundation: SQLAlchemy Core transaction/row/binding owner tested on SQLite and real PostgreSQL 17.11;
+   full SQLite backend 520, dedicated matrix 24, protocol/engine mutation 6/6 each. Store integration and full PostgreSQL
+   backend remain in progress; this is not full B3 acceptance. Evidence `2026-11-01-b3-database-foundation`.
+-  B3–B10 and C remain. Before B9, strengthen the old runtime scanner and modernize doctor instrumentation paths.
++  B3 integration: Store now uses the Core owner; portable named repository SQL, explicit ordering, real PG17 schema
++  and SQLite additive migrations. Full SQLite 528 / PostgreSQL 538, zero skips; PG audit 334 real PostgreSQL Stores +39
++  explicit SQLite file-contract Stores. Two product processes competing for a device/GPU grant exactly one assignment.
++  Fresh `scripts/check-backend-postgres.sh` invocation passed and removed its owned container. Original assertions in
++  all 70 B2 test modules remain; recursive runtime scanner and doctor instrumentation paths modernized before B9.
++  Evidence `2026-11-01-b3-portable-backend`: schema/SQL mutation 12/12, integrated engine mutation 6/6; B3 complete.
++  B4–B10 and C remain; PostgreSQL metadata dump/restore belongs to B4, recursive package resources/shim removal to B9.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+diff --git a/docs/design/lab-server-architecture.md b/docs/design/lab-server-architecture.md
+index 65c5d57a..9432e39d 100644
+--- a/docs/design/lab-server-architecture.md
++++ b/docs/design/lab-server-architecture.md
+@@ -71,8 +71,8 @@ point on the coordinator. The runtime's write-ahead generation record prevents s
+ 
+ ## Implemented layering after B2 (2026-11-01)
+ 
+-The working branch now separates HTTP, business policy and persistence. It still runs the combined SQLite service;
+-process separation and PostgreSQL belong to B3–B4. Compatibility namespaces remain until B9.
++At the end of B2, HTTP, business policy and persistence were separated while the combined service still used SQLite.
++The B3 portability result is recorded below; process separation belongs to B4. Compatibility namespaces remain until B9.
+ 
+ | Responsibility                                                                    | Current owner                                                                    |
+ | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+@@ -93,9 +93,40 @@ Independent audits preserve all 278 unique SQL expression ASTs and the full fres
+ not add or remove a distinct expression. Final composition mutations pass 12/12 after closing the same-workspace list
+ owner coverage gap. Evidence: `2026-11-01-b2-composition` on `evidence-archive`.
+ 
+-This is source/CPU layering evidence. PostgreSQL, separate replicas/leadership, OIDC, MinIO and recursive packaged apps
+-are still pending. A scratch recursive production import-closure check passes; the original flat-only test remains
+-unchanged for B2 and must be strengthened during post-B2 adaptation before B9 removes its compatibility premise.
++This historical B2 result establishes source/CPU layering only. PostgreSQL and recursive runtime scanning are covered
++by B3 below; separate replicas/leadership, OIDC, MinIO and recursive packaged apps remain later work.
++
++## Database portability after B3 (2026-11-01)
++
++The combined application now uses `backend/db/engine.py`: SQLAlchemy Core owns SQLite and PostgreSQL connections,
++transactions, pools and result adaptation. psycopg 3 is an optional cloud dependency. Repository source uses named
++parameters, explicit INSERT/public SELECT columns, portable ON CONFLICT, deliberate dialect JSON text projections and
++explicit `_insert_order`; it does not translate SQLite DML at runtime. Positional binding compatibility remains for
++existing direct callers. Empty positive IN lists use IN (NULL), since PostgreSQL rejects SQLite's accepted IN ().
++
++SQLite keeps its original version-one migration and `PRAGMA user_version=1`. Additive migrations preserve old row
++order and exact experiment bodies/snapshots; ten private order columns never enter public rows. PostgreSQL 17 uses
++`db/postgres_schema.sql`, BIGINT/double precision and identity sequences. The logical schema is now 38 tables and
++189 columns: the original 37/177, ten order columns and a two-column `schema_versions` table. Real-dialect inspection
++compares columns/type affinity, primary keys and unique columns; behavioral tests enforce username and partial uniqueness.
++Tests also detect 32-bit upload-size truncation and float4 timestamp rounding.
++
++Outer writes acquire SQLite BEGIN IMMEDIATE or the PostgreSQL lab advisory transaction lock before any business read.
++Nested calls reuse the outer connection; caught nested-scope errors force outer rollback. PostgreSQL statement savepoints
++allow deliberate integrity-error recovery without losing the root serialization lock. Consistent SQLite backups use a
++separate read connection; PostgreSQL pg_dump/restore and scheduler session leadership are B4 work.
++
++Full backend: SQLite 528 tests; PostgreSQL invocation 538 (ten extra real-dialect engine/schema/repository cases), zero
++skips, one existing dependency warning each. Its audit records 334 actual PostgreSQL product Stores and 39 SQLite Stores
++in 35 explicitly marked file/migration/corruption/local-deployment contracts. No dummy SQLite files or silent PostgreSQL
++fallbacks are used. Two independent product processes racing for one device and physical GPU grant exactly one assignment.
++`scripts/check-backend-postgres.sh` reproduces the whole invocation on an owned PostgreSQL 17 container bound to a random
++loopback port, writes its target audit/receipt and removes that container. Evidence: `2026-11-01-b3-portable-backend`.
++
++B3 legitimately modernizes test SQL, marks SQLite file contracts, uses the dedicated snapshot API, strengthens the
++runtime closure scanner to recursive production traversal and updates doctor instrumentation paths. Every baseline
++assertion from the 70 B2 test modules is retained (SQL literal quoting normalized in the proof). This is separate from
++B9's later import-only shim-removal proof. Services still run together; B4–B10 and MiniCloud C remain unfinished.
+ 
+ ## Planned service boundaries
+ 
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index 045add0e..124f2491 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -3,16 +3,17 @@
+ Source: owner's colleague's notes in `~/projects/app_finding.md`, imported 2026-10-31.
+ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original concerns are preserved below.
+ 
+-| ID    | Area                                   | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                | Status                                                                                                                |
+-| ----- | -------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+-| B-001 | `backend/`                             | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services. | Open                                                                                                                  |
+-| B-002 | `backend/routes_*.py`                  | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                           | Open                                                                                                                  |
+-| B-003 | `backend/store.py`                     | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                    | Open                                                                                                                  |
+-| B-004 | Experiment submission maintenance hold | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.        | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments` |
+-| B-005 | Independent device lifecycle guards    | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.  | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                         |
+-| B-006 | Experiment-list owner privacy          | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.           | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                            |
+-| B-Q1  | Lab Server responsibilities            | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).   | Answered in A5 (architecture document)                                                                                |
+-| B-Q2  | Data and backups                       | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                              | Answered in A5                                                                                                        |
++| ID    | Area                                    | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                   | Status                                                                                                                                                          |
++| ----- | --------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
++| B-001 | `backend/`                              | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.    | Open                                                                                                                                                            |
++| B-002 | `backend/routes_*.py`                   | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                              | Open                                                                                                                                                            |
++| B-003 | `backend/store.py`                      | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                       | Open                                                                                                                                                            |
++| B-004 | Experiment submission maintenance hold  | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.           | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                           |
++| B-005 | Independent device lifecycle guards     | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.     | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                   |
++| B-006 | Experiment-list owner privacy           | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.              | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                      |
++| B-007 | Empty dynamic SQL filters on PostgreSQL | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects. | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`. |
++| B-Q1  | Lab Server responsibilities             | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).      | Answered in A5 (architecture document)                                                                                                                          |
++| B-Q2  | Data and backups                        | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                 | Answered in A5                                                                                                                                                  |
+ 
+ The colleague's parenthetical text denotes examples, English explanations or personal comments. These notes do not claim
+ that the existing modular monolith is a correctness defect; the approved multi-service work is tracked as architecture.

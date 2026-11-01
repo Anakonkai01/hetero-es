@@ -1,0 +1,26 @@
+[
+  {
+    "file": "backend/tests/test_admission_hold.py",
+    "SQL_literals": 1
+  },
+  {
+    "file": "backend/tests/test_device_removal.py",
+    "SQL_literals": 2
+  },
+  {
+    "file": "backend/tests/test_lab.py",
+    "SQL_literals": 3
+  },
+  {
+    "file": "backend/tests/test_metadata_restore.py",
+    "SQL_literals": 1
+  },
+  {
+    "file": "backend/tests/test_operations.py",
+    "SQL_literals": 1
+  },
+  {
+    "file": "backend/tests/test_policies.py",
+    "SQL_literals": 1
+  }
+]

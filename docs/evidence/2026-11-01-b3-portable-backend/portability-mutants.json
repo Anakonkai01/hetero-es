@@ -1,0 +1,74 @@
+[
+  {
+    "name": "upload size is truncated to PostgreSQL int32",
+    "file": "backend/db/postgres_schema.sql",
+    "old": "upload_key TEXT NOT NULL,size BIGINT NOT NULL",
+    "new": "upload_key TEXT NOT NULL,size INTEGER NOT NULL"
+  },
+  {
+    "name": "telemetry timestamp loses double precision",
+    "file": "backend/db/postgres_schema.sql",
+    "old": "sampled_at DOUBLE PRECISION NOT NULL",
+    "new": "sampled_at REAL NOT NULL"
+  },
+  {
+    "name": "username uniqueness is omitted",
+    "file": "backend/db/postgres_schema.sql",
+    "old": "CREATE UNIQUE INDEX IF NOT EXISTS username ON users((profile::jsonb->>'username'));",
+    "new": ""
+  },
+  {
+    "name": "legacy row order is not backfilled",
+    "file": "backend/db/schema.py",
+    "old": "db.execute(\"UPDATE \" + table + \" SET _insert_order=rowid\")",
+    "new": "db.execute(\"SELECT 1\")"
+  },
+  {
+    "name": "new SQLite rows do not get an insertion order",
+    "file": "backend/db/schema.py",
+    "old": " WHEN NEW._insert_order=0 BEGIN UPDATE ",
+    "new": " WHEN 0 BEGIN UPDATE "
+  },
+  {
+    "name": "PostgreSQL bootstrap is rerun on reopening",
+    "file": "backend/db/schema.py",
+    "old": "if version:",
+    "new": "if False:"
+  },
+  {
+    "name": "empty IN predicates become invalid on PostgreSQL",
+    "file": "backend/db/dialect.py",
+    "old": "or \"NULL\"",
+    "new": "or \"\""
+  },
+  {
+    "name": "dynamic bindings ignore their parameter offset",
+    "file": "backend/db/dialect.py",
+    "old": "range(start, start + len(values))",
+    "new": "range(0, len(values))"
+  },
+  {
+    "name": "PostgreSQL JSON text projection returns nothing",
+    "file": "backend/db/dialect.py",
+    "old": "return \"(CAST(\" + column + \" AS JSONB)->>'\" + key + \"')\"",
+    "new": "return \"NULL\""
+  },
+  {
+    "name": "internal workspace order leaks into public columns",
+    "file": "backend/repositories/workspaces.py",
+    "old": "SELECT w.id,w.name,w.description,w.creator FROM workspaces w ORDER BY w._insert_order",
+    "new": "SELECT w.* FROM workspaces w ORDER BY w._insert_order"
+  },
+  {
+    "name": "Core integrity errors leak past repository translation",
+    "file": "backend/repositories/base.py",
+    "old": "except (sqlite3.IntegrityError, IntegrityError):",
+    "new": "except sqlite3.IntegrityError:"
+  },
+  {
+    "name": "caught PostgreSQL statement error poisons the root transaction",
+    "file": "backend/db/engine.py",
+    "old": "savepoint = (\n            self._connection.begin_nested() if self.dialect == \"postgresql\" and _DML.match(sql) else nullcontext()\n        )\n        with savepoint:\n            result = self._connection.execute(text(sql), bindings)",
+    "new": "savepoint = nullcontext()\n        with savepoint:\n            result = self._connection.execute(text(sql), bindings)"
+  }
+]
