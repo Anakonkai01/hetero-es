@@ -1,0 +1,1128 @@
+[
+  {
+    "path": "/api/v1/auth/login",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_auth",
+    "name": "sign_in",
+    "source": "backend/routes_auth.py"
+  },
+  {
+    "path": "/api/v1/auth/session",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_auth",
+    "name": "get_session",
+    "source": "backend/routes_auth.py"
+  },
+  {
+    "path": "/api/v1/auth/logout",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_auth",
+    "name": "sign_out",
+    "source": "backend/routes_auth.py"
+  },
+  {
+    "path": "/api/v1/health",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "health",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/capabilities",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "get_capabilities",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/resources",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "resources",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/models",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "models",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/workers",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "workers",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/workers/{worker_id}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "worker",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/datasets",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_inventory",
+    "name": "datasets",
+    "source": "backend/routes_inventory.py"
+  },
+  {
+    "path": "/api/v1/experiments",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "experiments",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "create",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "experiment",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/timeline",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "run_timeline",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/stream",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "run_stream",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "edit",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/submit",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "submit",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/cancel",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "cancel",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "archive",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/pause",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "pause",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/resume",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "resume",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/backup-policy",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "backup_policy",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/workers",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_experiments",
+    "name": "members",
+    "source": "backend/routes_experiments.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/generations",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "generations",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/generations/{generation_id}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "generation",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/generations/{generation_id}/candidates",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "candidates",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/candidates/{candidate_id}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "candidate",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/attempts/{attempt_id}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "attempt",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/events",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "event_list",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/artifacts",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "artifact_list",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/artifacts/{artifact_id}/download",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "download",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/audit",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_history",
+    "name": "audit",
+    "source": "backend/routes_history.py"
+  },
+  {
+    "path": "/api/v1/auth/register",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_accounts",
+    "name": "register",
+    "source": "backend/routes_accounts.py"
+  },
+  {
+    "path": "/api/v1/profile",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_accounts",
+    "name": "edit_profile",
+    "source": "backend/routes_accounts.py"
+  },
+  {
+    "path": "/api/v1/auth/password",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_accounts",
+    "name": "change_password",
+    "source": "backend/routes_accounts.py"
+  },
+  {
+    "path": "/api/v1/auth/revoke-other-sessions",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_accounts",
+    "name": "revoke_other_sessions",
+    "source": "backend/routes_accounts.py"
+  },
+  {
+    "path": "/api/v1/workspaces",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "create_workspace",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/invitations",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "invite",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/listing",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "listing",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/default-coordinator",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "default_coordinator",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/listed-workspaces",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "listed_workspaces",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/join-requests",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "ask_to_join",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/join-requests",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "join_requests",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/join-requests/{request_id}",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "decide_join",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/my-invitations",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "invitations",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/my-invitations/{invitation_id}/accept",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "accept",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "change_role",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/workspaces/{workspace_id}/members/{user_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "remove_member",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/queue",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_workspaces",
+    "name": "queue",
+    "source": "backend/routes_workspaces.py"
+  },
+  {
+    "path": "/api/v1/platform/users",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_operations",
+    "name": "users",
+    "source": "backend/routes_operations.py"
+  },
+  {
+    "path": "/api/v1/platform/users/{user_id}",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_operations",
+    "name": "edit_account",
+    "source": "backend/routes_operations.py"
+  },
+  {
+    "path": "/api/v1/platform/users/{user_id}/revoke-sessions",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_operations",
+    "name": "revoke_sessions",
+    "source": "backend/routes_operations.py"
+  },
+  {
+    "path": "/api/v1/platform/audit",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_operations",
+    "name": "platform_audit",
+    "source": "backend/routes_operations.py"
+  },
+  {
+    "path": "/api/v1/platform/operations",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_operations",
+    "name": "operations",
+    "source": "backend/routes_operations.py"
+  },
+  {
+    "path": "/api/v1/platform/maintenance/resume",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_operations",
+    "name": "resume",
+    "source": "backend/routes_operations.py"
+  },
+  {
+    "path": "/api/v1/experiment-templates",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.templates",
+    "name": "list_templates",
+    "source": "backend/templates.py"
+  },
+  {
+    "path": "/api/v1/experiment-templates",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.templates",
+    "name": "create_template",
+    "source": "backend/templates.py"
+  },
+  {
+    "path": "/api/v1/experiment-templates/{template_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.templates",
+    "name": "delete_template",
+    "source": "backend/templates.py"
+  },
+  {
+    "path": "/api/v1/notifications",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.notifications",
+    "name": "list_notifications",
+    "source": "backend/notifications.py"
+  },
+  {
+    "path": "/api/v1/notifications/read",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.notifications",
+    "name": "read_notifications",
+    "source": "backend/notifications.py"
+  },
+  {
+    "path": "/api/v1/devices/pairing-codes",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "pairing",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/enroll",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "enroll",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "own_devices",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices/{device_id}/endpoints",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "owned_endpoints",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices/{device_id}/configuration",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "owned_configuration",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/qualification",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "qualification",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/platform/devices",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "devices",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/platform/devices/{device_id}",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "approve",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/platform/devices/{device_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "remove_device",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices/{device_id}",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "rename",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices/{device_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "delete_device",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices/{device_id}/contribution",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "contribution",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/devices/{device_id}/contribution",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "contribution_preference",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/contribution",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "own_contribution",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/name",
+    "methods": [
+      "PATCH"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "own_name",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "forget_self",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/summary",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "own_summary",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/poll",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "poll",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/device/worker-command",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.devices",
+    "name": "worker",
+    "source": "backend/devices.py"
+  },
+  {
+    "path": "/api/v1/datasets/import",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "import_data",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/platform/dataset-limits",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "get_dataset_limits",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/platform/dataset-limits",
+    "methods": [
+      "PUT"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "set_dataset_limits",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/datasets/upload-plan",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "dataset_upload_plan",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/datasets/uploads/{upload_id}/build",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "build_uploaded_dataset",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/models/register",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "register_model",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/models/{asset_id}/upload-plan",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "upload_plan",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/models/{asset_id}/publish",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "publish",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/device/study-transfer",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.study_registry",
+    "name": "transfer",
+    "source": "backend/study_registry.py"
+  },
+  {
+    "path": "/api/v1/models/{asset_id}/qualifications",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.model_qualification",
+    "name": "start",
+    "source": "backend/model_qualification.py"
+  },
+  {
+    "path": "/api/v1/models/{asset_id}/qualifications",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.model_qualification",
+    "name": "status",
+    "source": "backend/model_qualification.py"
+  },
+  {
+    "path": "/api/v1/models/{asset_id}/qualifications/{job_id}/cancel",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.model_qualification",
+    "name": "cancel",
+    "source": "backend/model_qualification.py"
+  },
+  {
+    "path": "/api/v1/device/model-transfer",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.model_qualification",
+    "name": "transfer",
+    "source": "backend/model_qualification.py"
+  },
+  {
+    "path": "/api/v1/device/recovery-points",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "begin",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/device/recovery-points/complete-object",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "complete",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/device/recovery-points/{point_id}/verify",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "verify",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/device/recovery-points/{point_id}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "device_status",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/device/recovery-points/{point_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "abandon",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/recovery-import",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "import_begin",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/recovery-import/complete-object",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "import_complete",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/recovery-import/{point_id}/verify",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "import_verify",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/experiments/{run_id}/recovery-points",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "points",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/recovery-points/{point_id}/download-plan",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "download_plan",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/recovery-points/{point_id}",
+    "methods": [
+      "DELETE"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "delete",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/artifacts/{artifact_id}/download-ticket",
+    "methods": [
+      "POST"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "ticket",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/cloud-downloads/{ticket_digest}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.recovery_storage",
+    "name": "consume",
+    "source": "backend/recovery_storage.py"
+  },
+  {
+    "path": "/api/v1/local-storage/{token}",
+    "methods": [
+      "PUT"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.local_storage",
+    "name": "upload",
+    "source": "backend/local_storage.py"
+  },
+  {
+    "path": "/api/v1/public-upload/{token}",
+    "methods": [
+      "PUT"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.local_storage",
+    "name": "public_upload",
+    "source": "backend/local_storage.py"
+  },
+  {
+    "path": "/api/v1/public-study/{token}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.local_storage",
+    "name": "public_study",
+    "source": "backend/local_storage.py"
+  },
+  {
+    "path": "/api/v1/local-storage/{token}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.local_storage",
+    "name": "download",
+    "source": "backend/local_storage.py"
+  },
+  {
+    "path": "/assets",
+    "methods": [],
+    "kind": "Mount",
+    "module": "",
+    "name": "web-assets",
+    "source": ""
+  },
+  {
+    "path": "/downloads/manifest.json",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_web",
+    "name": "installer_manifest",
+    "source": "backend/routes_web.py"
+  },
+  {
+    "path": "/downloads",
+    "methods": [],
+    "kind": "Mount",
+    "module": "",
+    "name": "worker-downloads",
+    "source": ""
+  },
+  {
+    "path": "/{route:path}",
+    "methods": [
+      "GET"
+    ],
+    "kind": "APIRoute",
+    "module": "backend.routes_web",
+    "name": "web_page",
+    "source": "backend/routes_web.py"
+  }
+]

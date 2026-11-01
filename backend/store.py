@@ -1,28 +1,23 @@
 """SQLite product state. Runtime ledgers remain owned by device agents."""
 
 from .migrations import initialize_product_schema
-from .experiment_view import experiment_view
 from .policies import dispatch_held, read_setting, set_disabled_workers
 from contextlib import contextmanager
-from datetime import datetime, timezone
-import hashlib
 import json
 import os
 from pathlib import Path
 import sqlite3
 import threading
-import uuid
 
 from argon2 import PasswordHasher
 from .errors import RuntimeRejected
 from .migrations import initialize_workspace_extras, migrate
 
-from .constants import ACTIVE, TERMINAL, REVISION, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
+from .constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
 from .services.accounts import AccountService
-
-
-def now():
-    return datetime.now(timezone.utc).isoformat()
+from .services.experiment_state import ExperimentStateService
+from .services.workspaces import WorkspaceStateService
+from .core.clock import now
 
 
 class Store:
@@ -33,6 +28,8 @@ class Store:
         self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()
         self.accounts = AccountService(self)
+        self.experiments = ExperimentStateService(self)
+        self.workspace_state = WorkspaceStateService(self)
         self.last_error = None
         with self.db() as db:
             initialize_product_schema(db)
@@ -96,20 +93,7 @@ class Store:
         return self.accounts.profile(user_id)
 
     def workspaces(self, user_id):
-        with self.db() as db:
-            return [
-                {
-                    "workspaceId": r["id"],
-                    "name": r["name"],
-                    "description": r["description"],
-                    "creatorUserId": r["creator"],
-                    "role": r["role"],
-                }
-                for r in db.execute(
-                    "SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid",
-                    (user_id,),
-                )
-            ]
+        return self.workspace_state.workspaces(user_id=user_id)
 
     def assignments(self, workspace_id, include_disabled=False):
         with self.db() as db:
@@ -124,117 +108,25 @@ class Store:
         return set(read_setting(db, "disabledWorkers", []))
 
     def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
-        for row in db.execute("SELECT body FROM experiments").fetchall():
-            b = json.loads(row[0])
-            if b["experimentId"] in keep:
-                continue  # the worker leaves this run instead (ADR-009)
-            coordinator = b.get("coordinatorDeviceId")
-            coordinator_alias = None
-            if coordinator:
-                row = db.execute("SELECT worker_id FROM devices WHERE id=?", (coordinator,)).fetchone()
-                coordinator_alias = row[0] if row else None
-            if worker_id not in set(b["workerIds"]) | {coordinator_alias} or b["status"] in TERMINAL | {
-                "DRAFT",
-                "PAUSED",
-            }:
-                continue
-            if not include_queued and b["status"] == "QUEUED":
-                continue
-            b["cancelRequested"] = True
-            if b["status"] in ("QUEUED", "PAUSED"):
-                b.update(status="CANCELLED", completedAt=now(), failureReason="GPU contribution was disabled")
-                db.execute("DELETE FROM queue WHERE run_id=?", (b["experimentId"],))
-            else:
-                b["status"] = "CANCELLING"
-            self.save(db, b)
-            self.audit(db, "system", "GPU_CONTRIBUTION_DISABLED", b["experimentId"], b["workspaceId"])
+        return self.experiments.cancel_selected(db=db, worker_id=worker_id, include_queued=include_queued, keep=keep)
 
     def cancel_owned(self, db, owner, workspace_id=None):
-        for row in db.execute("SELECT body FROM experiments WHERE owner=?", (owner,)).fetchall():
-            body = json.loads(row[0])
-            if workspace_id and body["workspaceId"] != workspace_id:
-                continue
-            if body["status"] in TERMINAL | {"DRAFT"}:
-                continue
-            body["cancelRequested"] = True
-            if body["status"] in ("QUEUED", "PAUSED"):
-                body.update(status="CANCELLED", completedAt=now(), failureReason="Resource access revoked")
-                db.execute("DELETE FROM queue WHERE run_id=?", (body["experimentId"],))
-            else:
-                body["status"] = "CANCELLING"
-            self.save(db, body)
-            self.audit(db, "system", "ACCESS_REVOKED", body["experimentId"], body["workspaceId"])
+        return self.experiments.cancel_owned(db=db, owner=owner, workspace_id=workspace_id)
 
     def eligibility(self, db, body, workers=None):
-        row = db.execute("SELECT profile FROM users WHERE id=?", (body["ownerUserId"],)).fetchone()
-        if not row or json.loads(row[0])["accountStatus"] != "ACTIVE":
-            return "Owner account is not active"
-        if not db.execute(
-            "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", (body["workspaceId"], body["ownerUserId"])
-        ).fetchone():
-            return "Workspace membership was revoked"
-        ids = {
-            r[0]
-            for r in db.execute("SELECT worker_id FROM worker_assignments WHERE workspace_id=?", (body["workspaceId"],))
-        }
-        if workers is None:  # every member, including the ones that joined (ADR-009); or only a joining worker
-            workers = self.runtime.intended_members(db, body["experimentId"], body["workerIds"])
-        if not set(workers) <= ids - self.disabled_workers(db):
-            return "Selected GPU assignment changed before launch"
-        co = db.execute(
-            "SELECT worker_id,status,owner FROM devices WHERE id=?", (body.get("coordinatorDeviceId"),)
-        ).fetchone()
-        if not co or co["status"] != "APPROVED" or co["worker_id"] not in ids - self.disabled_workers(db):
-            return "Coordinator approval or workspace assignment changed"
-        chosen = db.execute(
-            "SELECT owner,status FROM devices WHERE worker_id IN (" + ",".join("?" for _ in workers) + ")",
-            workers,
-        ).fetchall()
-        if len(chosen) != len(workers) or any(
-            d["status"] != "APPROVED" or self.profile(d["owner"])["accountStatus"] != "ACTIVE" for d in [co, *chosen]
-        ):
-            return "Device owner or approval was revoked"
-        return None
+        return self.experiments.eligibility(db=db, body=body, workers=workers)
 
     def get(self, run_id):
-        with self.db() as db:
-            row = db.execute("SELECT body,snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()
-            return experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None) if row else None
+        return self.experiments.get(run_id=run_id)
 
     def list(self):
-        with self.db() as db:
-            return [
-                experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None)
-                for row in db.execute("SELECT body,snapshot FROM experiments ORDER BY rowid")
-            ]
+        return self.experiments.list()
 
     def save(self, db, body):
-        db.execute(
-            "UPDATE experiments SET body=? WHERE id=?", (json.dumps(body, allow_nan=False), body["experimentId"])
-        )
+        return self.experiments.save(db=db, body=body)
 
     def create(self, owner, config, workspace_id="lab"):
-        run_id = uuid.uuid4().hex
-        digest = hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-        body = {
-            **config,
-            "experimentId": run_id,
-            "workspaceId": workspace_id,
-            "ownerUserId": owner,
-            "status": "DRAFT",
-            "cancelRequested": False,
-            "modelVersion": config.get("modelManifest", {}).get("revision", REVISION),
-            "configHash": digest,
-            "createdAt": now(),
-            "completedGenerations": 0,
-        }
-        with self.db() as db:
-            db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (run_id, owner, json.dumps(body)))
-            self.audit(db, owner, "CREATE", run_id, workspace_id)
-            for entry in config.get("pythonCode", []):  # which researcher code this experiment's coordinator will run
-                target = f"{run_id}:{entry['role']}:{entry['codeSha256']}"
-                self.audit(db, owner, "PYTHON_CODE_FROZEN", target, workspace_id)
-        return body
+        return self.experiments.create(owner=owner, config=config, workspace_id=workspace_id)
 
     def device_names(self):
         """{worker id: the name its owner gave the device}, for screens that would otherwise show the raw id."""
@@ -255,13 +147,7 @@ class Store:
             }
 
     def snapshot(self, run_id):
-        with self.db() as db:
-            row = db.execute("SELECT snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()
-            return (
-                json.loads(row[0])
-                if row and row[0]
-                else {"generations": [], "candidates": [], "attempts": [], "events": [], "artifacts": []}
-            )
+        return self.experiments.snapshot(run_id=run_id)
 
     def dispatch_once(self):
         with self.operation_lock:

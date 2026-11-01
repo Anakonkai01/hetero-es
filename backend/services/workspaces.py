@@ -4,8 +4,8 @@ import json
 import uuid
 from types import SimpleNamespace
 from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
-from ..policies import dispatch_held, set_disabled_workers
-from ..store import now
+from ..policies import set_disabled_workers
+from ..core.clock import now
 from ..core.errors import ServiceError, DatabaseConflict
 from ..repositories.workspaces import WorkspacesRepository as repository
 
@@ -206,31 +206,6 @@ def operations(store, scoped, active, workspace_admin):
             member_change(db, workspace_id, user_id, current)
         return None
 
-    def queue(*, current):
-        with store.db() as db:
-            held = dispatch_held(db)
-            positions = {r["run_id"]: i + 1 for i, r in enumerate(repository.queue_select_queue(db))}
-            result = []
-            for r in repository.queue_select_experiments(db):
-                b = json.loads(r[0])
-                if (
-                    b["workspaceId"] == current["workspaceId"]
-                    and b["experimentId"] in positions
-                    and (current["workspaceRole"] == "ADMIN" or b["ownerUserId"] == current["userId"])
-                ):
-                    result.append(
-                        {
-                            "experimentId": b["experimentId"],
-                            "position": positions[b["experimentId"]],
-                            "reason": "Maintenance hold"
-                            if held
-                            else b.get("waitingReason", "Waiting for runtime release")
-                            if b["status"] == "QUEUED"
-                            else b["status"],
-                        }
-                    )
-            return result
-
     return SimpleNamespace(
         create_workspace=create_workspace,
         invite=invite,
@@ -244,5 +219,22 @@ def operations(store, scoped, active, workspace_admin):
         accept=accept,
         change_role=change_role,
         remove_member=remove_member,
-        queue=queue,
     )
+
+
+class WorkspaceStateService:
+    def __init__(self, store):
+        self.store = store
+
+    def workspaces(self, user_id):
+        with self.store.db() as db:
+            return [
+                {
+                    "workspaceId": r["id"],
+                    "name": r["name"],
+                    "description": r["description"],
+                    "creatorUserId": r["creator"],
+                    "role": r["role"],
+                }
+                for r in repository.state_workspaces_select_workspaces(db, (user_id,))
+            ]

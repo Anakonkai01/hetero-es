@@ -58,8 +58,4 @@ def install_routes(app, store, scoped, active, workspace_admin):
         service.remove_member(workspace_id=workspace_id, user_id=user_id, current=current)
         return Response(status_code=204)
 
-    @router.get("/api/v1/queue")
-    def queue(current=Depends(scoped)):
-        return service.queue(current=current)
-
     app.include_router(router)

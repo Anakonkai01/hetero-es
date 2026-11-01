@@ -137,9 +137,9 @@ class WorkspacesRepository:
         )
 
     @staticmethod
-    def queue_select_experiments(db, parameters=()):
-        return execute(db, "SELECT body FROM experiments", parameters)
-
-    @staticmethod
-    def queue_select_queue(db, parameters=()):
-        return execute(db, "SELECT run_id FROM queue ORDER BY sequence", parameters)
+    def state_workspaces_select_workspaces(db, parameters=()):
+        return execute(
+            db,
+            "SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid",
+            parameters,
+        )

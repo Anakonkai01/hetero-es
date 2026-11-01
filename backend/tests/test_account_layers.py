@@ -49,6 +49,11 @@ def test_account_layer_boundaries():
         "services/accounts.py",
         "api/workspaces.py",
         "services/workspaces.py",
+        "api/experiments.py",
+        "services/experiments.py",
+        "services/experiment_state.py",
+        "api/history.py",
+        "services/history.py",
     ):
         tree = ast.parse((backend / relative).read_text())
         for node in ast.walk(tree):
@@ -76,3 +81,16 @@ def test_repository_conflict_is_translated_without_exposing_driver_errors():
         with pytest.raises(DatabaseConflict):
             execute(db, "INSERT INTO entries VALUES (?)", ("same",))
         assert execute(db, "SELECT count(*) FROM entries").fetchone()[0] == 1
+
+
+def test_explicit_write_transaction_rolls_back_uncommitted_changes():
+    import sqlite3
+
+    from backend.db.transactions import begin_write
+
+    with sqlite3.connect(":memory:") as db:
+        db.execute("CREATE TABLE changes(id INTEGER)")
+        begin_write(db)
+        db.execute("INSERT INTO changes VALUES (1)")
+        db.rollback()
+        assert db.execute("SELECT count(*) FROM changes").fetchone()[0] == 0
