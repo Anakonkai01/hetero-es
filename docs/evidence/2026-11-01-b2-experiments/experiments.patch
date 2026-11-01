@@ -1,0 +1,2798 @@
+diff --git a/backend/api/experiments.py b/backend/api/experiments.py
+new file mode 100644
+index 00000000..855d75d0
+--- /dev/null
++++ b/backend/api/experiments.py
+@@ -0,0 +1,79 @@
++"""Experiments HTTP adapters."""
++
++from ..request_models import BackupPolicy, Configuration, MembershipRequest
++from fastapi import Depends, HTTPException, Response
++from fastapi.responses import StreamingResponse
++from fastapi import APIRouter
++from ..services.experiments import operations
++
++
++def install_routes(app, store, runtime, scoped, visible, authorized, validate):
++    service = operations(store, runtime, scoped, visible, authorized, validate)
++    router = APIRouter()
++
++    @router.get("/api/v1/experiments")
++    def experiments(current=Depends(scoped)):
++        return service.experiments(current=current)
++
++    @router.post("/api/v1/experiments")
++    def create(body: Configuration, current=Depends(scoped)):
++        return service.create(body=body, current=current)
++
++    @router.get("/api/v1/experiments/{run_id}")
++    def experiment(run_id: str, current=Depends(scoped)):
++        return service.experiment(run_id=run_id, current=current)
++
++    @router.get("/api/v1/experiments/{run_id}/timeline")
++    def run_timeline(run_id: str, current=Depends(scoped)):
++        return service.run_timeline(run_id=run_id, current=current)
++
++    @router.get("/api/v1/experiments/{run_id}/stream")
++    def run_stream(run_id: str, current=Depends(scoped)):
++        authorized(run_id, current)
++        if not app.state.live.acquire():
++            raise HTTPException(429, "Too many live views are open. Close one and try again.")
++        return StreamingResponse(
++            app.state.live.frames(store, run_id),
++            media_type="text/event-stream",
++            headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
++        )
++
++    @router.patch("/api/v1/experiments/{run_id}")
++    def edit(run_id: str, request: dict, current=Depends(scoped)):
++        return service.edit(run_id=run_id, request=request, current=current)
++
++    @router.post("/api/v1/experiments/{run_id}/submit")
++    def submit(run_id: str, current=Depends(scoped)):
++        return service.submit(run_id=run_id, current=current)
++
++    @router.post("/api/v1/experiments/{run_id}/cancel")
++    def cancel(run_id: str, current=Depends(scoped)):
++        return service.cancel(run_id=run_id, current=current)
++
++    @router.delete("/api/v1/experiments/{run_id}", status_code=204)
++    def archive(run_id: str, current=Depends(scoped)):
++        service.archive(run_id=run_id, current=current)
++        return Response(status_code=204)
++
++    @router.post("/api/v1/experiments/{run_id}/pause")
++    def pause(run_id: str, current=Depends(scoped)):
++        return service.pause(run_id=run_id, current=current)
++
++    @router.post("/api/v1/experiments/{run_id}/resume")
++    def resume(run_id: str, current=Depends(scoped)):
++        return service.resume(run_id=run_id, current=current)
++
++    @router.patch("/api/v1/experiments/{run_id}/backup-policy")
++    def backup_policy(run_id: str, policy: BackupPolicy, current=Depends(scoped)):
++        return service.backup_policy(run_id=run_id, policy=policy, current=current)
++
++    @router.post("/api/v1/experiments/{run_id}/workers")
++    def members(run_id: str, request: MembershipRequest, current=Depends(scoped)):
++        """Add or remove a worker while the experiment runs (ADR-009); it applies at the next generation boundary."""
++        return service.members(run_id=run_id, request=request, current=current)
++
++    @router.get("/api/v1/queue")
++    def queue(current=Depends(scoped)):
++        return service.queue(current=current)
++
++    app.include_router(router)
+diff --git a/backend/api/history.py b/backend/api/history.py
+new file mode 100644
+index 00000000..80dc2e77
+--- /dev/null
++++ b/backend/api/history.py
+@@ -0,0 +1,58 @@
++"""History HTTP adapters."""
++
++from fastapi import Depends
++from fastapi.responses import StreamingResponse
++from fastapi import APIRouter
++from ..services.history import operations
++
++
++def install_routes(app, store, runtime, scoped, visible, authorized):
++    service = operations(store, runtime, scoped, visible, authorized)
++    router = APIRouter()
++    lookup = service.lookup
++
++    @router.get("/api/v1/experiments/{run_id}/generations")
++    def generations(run_id: str, current=Depends(scoped)):
++        return service.generations(run_id=run_id, current=current)
++
++    @router.get("/api/v1/experiments/{run_id}/generations/{generation_id}")
++    def generation(run_id: str, generation_id: str, current=Depends(scoped)):
++        return service.generation(run_id=run_id, generation_id=generation_id, current=current)
++
++    @router.get("/api/v1/generations/{generation_id}/candidates")
++    def candidates(generation_id: str, current=Depends(scoped)):
++        return service.candidates(generation_id=generation_id, current=current)
++
++    @router.get("/api/v1/candidates/{candidate_id}")
++    def candidate(candidate_id: str, current=Depends(scoped)):
++        return service.candidate(candidate_id=candidate_id, current=current)
++
++    @router.get("/api/v1/attempts/{attempt_id}")
++    def attempt(attempt_id: str, current=Depends(scoped)):
++        return service.attempt(attempt_id=attempt_id, current=current)
++
++    @router.get("/api/v1/events")
++    def event_list(experimentId: str | None = None, limit: int = 2000, current=Depends(scoped)):
++        """The newest events of the visible runs (or of one). Every read happens in ONE database session: the store
++        serializes sessions, and during a busy run the agents' polls hold it; one session per run made this list wait
++        behind them for minutes (HTTP 524 at the public edge, GSM8K demo tier 2)."""
++        return service.event_list(experimentId=experimentId, limit=limit, current=current)
++
++    @router.get("/api/v1/artifacts")
++    def artifact_list(current=Depends(scoped)):
++        return service.artifact_list(current=current)
++
++    @router.get("/api/v1/artifacts/{artifact_id}/download")
++    def download(artifact_id: str, current=Depends(scoped)):
++        artifact = lookup(artifact_id, "artifactId", "artifacts", current)
++        return StreamingResponse(
++            runtime.artifact(artifact["experimentId"], artifact["name"]),
++            media_type="application/octet-stream",
++            headers={"Content-Disposition": f'''attachment; filename="{artifact["name"]}"'''},
++        )
++
++    @router.get("/api/v1/audit")
++    def audit(current=Depends(scoped)):
++        return service.audit(current=current)
++
++    app.include_router(router)
+diff --git a/backend/api/workspaces.py b/backend/api/workspaces.py
+index 5725bc54..2168f60c 100644
+--- a/backend/api/workspaces.py
++++ b/backend/api/workspaces.py
+@@ -58,8 +58,4 @@ def install_routes(app, store, scoped, active, workspace_admin):
+         service.remove_member(workspace_id=workspace_id, user_id=user_id, current=current)
+         return Response(status_code=204)
+ 
+-    @router.get("/api/v1/queue")
+-    def queue(current=Depends(scoped)):
+-        return service.queue(current=current)
+-
+     app.include_router(router)
+diff --git a/backend/core/clock.py b/backend/core/clock.py
+new file mode 100644
+index 00000000..f522607f
+--- /dev/null
++++ b/backend/core/clock.py
+@@ -0,0 +1,7 @@
++"""Product UTC timestamp formatting shared by business services."""
++
++from datetime import datetime, timezone
++
++
++def now():
++    return datetime.now(timezone.utc).isoformat()
+diff --git a/backend/db/__init__.py b/backend/db/__init__.py
+new file mode 100644
+index 00000000..3eca5429
+--- /dev/null
++++ b/backend/db/__init__.py
+@@ -0,0 +1 @@
++"""Product database schema and transaction ownership."""
+diff --git a/backend/db/transactions.py b/backend/db/transactions.py
+new file mode 100644
+index 00000000..18d0d70c
+--- /dev/null
++++ b/backend/db/transactions.py
+@@ -0,0 +1,5 @@
++"""Explicit legacy write boundaries, centralized before the engine migration."""
++
++
++def begin_write(db):
++    return db.execute("BEGIN IMMEDIATE")
+diff --git a/backend/repositories/experiments.py b/backend/repositories/experiments.py
+new file mode 100644
+index 00000000..c71a8757
+--- /dev/null
++++ b/backend/repositories/experiments.py
+@@ -0,0 +1,103 @@
++"""Experiments SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class ExperimentsRepository:
++    @staticmethod
++    def submit_insert_queue(db, parameters=()):
++        return execute(db, "INSERT INTO queue(run_id) VALUES (?)", parameters)
++
++    @staticmethod
++    def cancel_delete_queue(db, parameters=()):
++        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++
++    @staticmethod
++    def resume_insert_queue(db, parameters=()):
++        return execute(db, "INSERT OR IGNORE INTO queue(run_id) VALUES (?)", parameters)
++
++    @staticmethod
++    def resume_select_assignments(db, parameters=()):
++        return execute(
++            db, "SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", parameters
++        )
++
++    @staticmethod
++    def backup_policy_select_assignments(db, parameters=()):
++        return execute(
++            db,
++            "SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
++            parameters,
++        )
++
++    @staticmethod
++    def state_cancel_selected_select_experiments(db, parameters=()):
++        return execute(db, "SELECT body FROM experiments", parameters)
++
++    @staticmethod
++    def state_cancel_selected_delete_queue(db, parameters=()):
++        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++
++    @staticmethod
++    def state_cancel_selected_select_devices(db, parameters=()):
++        return execute(db, "SELECT worker_id FROM devices WHERE id=?", parameters)
++
++    @staticmethod
++    def state_cancel_owned_select_experiments(db, parameters=()):
++        return execute(db, "SELECT body FROM experiments WHERE owner=?", parameters)
++
++    @staticmethod
++    def state_cancel_owned_delete_queue(db, parameters=()):
++        return execute(db, "DELETE FROM queue WHERE run_id=?", parameters)
++
++    @staticmethod
++    def state_eligibility_select_users(db, parameters=()):
++        return execute(db, "SELECT profile FROM users WHERE id=?", parameters)
++
++    @staticmethod
++    def state_eligibility_select_worker_assignments(db, parameters=()):
++        return execute(db, "SELECT worker_id FROM worker_assignments WHERE workspace_id=?", parameters)
++
++    @staticmethod
++    def state_eligibility_select_devices(db, parameters=()):
++        return execute(db, "SELECT worker_id,status,owner FROM devices WHERE id=?", parameters)
++
++    @staticmethod
++    def state_eligibility_select_devices_2(db, parameters=(), *, workers):
++        return execute(
++            db,
++            "SELECT owner,status FROM devices WHERE worker_id IN (" + ",".join(("?" for _ in workers)) + ")",
++            parameters,
++        )
++
++    @staticmethod
++    def state_eligibility_select_memberships(db, parameters=()):
++        return execute(db, "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", parameters)
++
++    @staticmethod
++    def state_get_select_experiments(db, parameters=()):
++        return execute(db, "SELECT body,snapshot FROM experiments WHERE id=?", parameters)
++
++    @staticmethod
++    def state_list_select_experiments(db, parameters=()):
++        return execute(db, "SELECT body,snapshot FROM experiments ORDER BY rowid", parameters)
++
++    @staticmethod
++    def state_save_update_experiments(db, parameters=()):
++        return execute(db, "UPDATE experiments SET body=? WHERE id=?", parameters)
++
++    @staticmethod
++    def state_create_insert_experiments(db, parameters=()):
++        return execute(db, "INSERT INTO experiments VALUES (?,?,?,NULL)", parameters)
++
++    @staticmethod
++    def state_snapshot_select_experiments(db, parameters=()):
++        return execute(db, "SELECT snapshot FROM experiments WHERE id=?", parameters)
++
++    @staticmethod
++    def queue_select_experiments(db, parameters=()):
++        return execute(db, "SELECT body FROM experiments", parameters)
++
++    @staticmethod
++    def queue_select_queue(db, parameters=()):
++        return execute(db, "SELECT run_id FROM queue ORDER BY sequence", parameters)
+diff --git a/backend/repositories/history.py b/backend/repositories/history.py
+new file mode 100644
+index 00000000..2fcf5bd5
+--- /dev/null
++++ b/backend/repositories/history.py
+@@ -0,0 +1,21 @@
++"""History SQL; transaction ownership is separate."""
++
++from .base import execute
++
++
++class HistoryRepository:
++    @staticmethod
++    def event_list_select_monitoring_events(db, parameters=(), *, runs):
++        return execute(
++            db,
++            f"SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id WHERE a.run_id IN ({','.join('?' * len(runs))}) AND json_extract(m.body,'$.event') IN (?,?) ORDER BY m.sequence",
++            parameters,
++        )
++
++    @staticmethod
++    def event_list_select_experiments(db, parameters=(), *, runs):
++        return execute(db, f"SELECT id,snapshot FROM experiments WHERE id IN ({','.join('?' * len(runs))})", parameters)
++
++    @staticmethod
++    def audit_select_audit(db, parameters=()):
++        return execute(db, "SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100", parameters)
+diff --git a/backend/repositories/workspaces.py b/backend/repositories/workspaces.py
+index b29e7ee1..6c8a931f 100644
+--- a/backend/repositories/workspaces.py
++++ b/backend/repositories/workspaces.py
+@@ -137,9 +137,9 @@ class WorkspacesRepository:
+         )
+ 
+     @staticmethod
+-    def queue_select_experiments(db, parameters=()):
+-        return execute(db, "SELECT body FROM experiments", parameters)
+-
+-    @staticmethod
+-    def queue_select_queue(db, parameters=()):
+-        return execute(db, "SELECT run_id FROM queue ORDER BY sequence", parameters)
++    def state_workspaces_select_workspaces(db, parameters=()):
++        return execute(
++            db,
++            "SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid",
++            parameters,
++        )
+diff --git a/backend/routes_experiments.py b/backend/routes_experiments.py
+index 45bb0d3d..142264e3 100644
+--- a/backend/routes_experiments.py
++++ b/backend/routes_experiments.py
+@@ -1,197 +1,3 @@
+-from .errors import RuntimeRejected
+-from .request_models import BackupPolicy, Configuration, MembershipRequest
+-from .policies import dispatch_held
+-import hashlib
+-import json
+-import secrets
++"""Compatibility import retained during the three-layer extraction."""
+ 
+-from fastapi import Depends, HTTPException, Response
+-from fastapi.responses import StreamingResponse
+-
+-from .store import TERMINAL, now
+-from .constants import REVISION
+-from .timeline import build_timeline
+-
+-
+-from fastapi import APIRouter
+-
+-
+-def install_routes(app, store, runtime, scoped, visible, authorized, validate):
+-    router = APIRouter()
+-
+-    @router.get("/api/v1/experiments")
+-    def experiments(current=Depends(scoped)):
+-        return visible(current)
+-
+-    @router.post("/api/v1/experiments")
+-    def create(body: Configuration, current=Depends(scoped)):
+-        with store.lock:
+-            return store.create(current["userId"], validate(body, current), current["workspaceId"])
+-
+-    @router.get("/api/v1/experiments/{run_id}")
+-    def experiment(run_id: str, current=Depends(scoped)):
+-        return authorized(run_id, current)
+-
+-    @router.get("/api/v1/experiments/{run_id}/timeline")
+-    def run_timeline(run_id: str, current=Depends(scoped)):
+-        return build_timeline(authorized(run_id, current), store.snapshot(run_id), names=store.device_identities())
+-
+-    @router.get("/api/v1/experiments/{run_id}/stream")
+-    def run_stream(run_id: str, current=Depends(scoped)):
+-        authorized(run_id, current)
+-        if not app.state.live.acquire():
+-            raise HTTPException(429, "Too many live views are open. Close one and try again.")
+-        return StreamingResponse(
+-            app.state.live.frames(store, run_id),
+-            media_type="text/event-stream",
+-            headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
+-        )
+-
+-    @router.patch("/api/v1/experiments/{run_id}")
+-    def edit(run_id: str, request: dict, current=Depends(scoped)):
+-        with store.db() as db:
+-            old = authorized(run_id, current)
+-            if old["status"] != "DRAFT":
+-                raise HTTPException(409, "Submitted configuration is immutable")
+-            try:
+-                body = validate(Configuration(**request), current)
+-            except ValueError:
+-                raise HTTPException(422, "Invalid configuration") from None
+-            digest = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+-            for key in set(Configuration.model_fields) | {
+-                "modelManifest",
+-                "modelSource",
+-                "datasetObjectSha256",
+-                "datasetIdentity",
+-            }:
+-                old.pop(key, None)
+-            old.update(**body, configHash=digest, modelVersion=body.get("modelManifest", {}).get("revision", REVISION))
+-            store.save(db, old)
+-            store.audit(db, current["userId"], "EDIT", run_id, current["workspaceId"])
+-            return old
+-
+-    @router.post("/api/v1/experiments/{run_id}/submit")
+-    def submit(run_id: str, current=Depends(scoped)):
+-        with store.db() as db:
+-            body = authorized(run_id, current)
+-            if body["status"] == "DRAFT":
+-                if dispatch_held(db):
+-                    raise HTTPException(409, "Submissions are held for maintenance or restored deployment review")
+-                if reason := store.eligibility(db, body):
+-                    raise HTTPException(409, reason)
+-                body["status"] = "QUEUED"
+-                db.execute("INSERT INTO queue(run_id) VALUES (?)", (run_id,))
+-                store.save(db, body)
+-                store.audit(db, current["userId"], "SUBMIT", run_id, current["workspaceId"])
+-            elif body["status"] in TERMINAL:
+-                raise HTTPException(409, "Experiment already finished")
+-            return body
+-
+-    @router.post("/api/v1/experiments/{run_id}/cancel")
+-    def cancel(run_id: str, current=Depends(scoped)):
+-        with store.db() as db:
+-            body = authorized(run_id, current)
+-            if body["status"] in TERMINAL:
+-                return body
+-            body["cancelRequested"] = True
+-            if body["status"] in ("DRAFT", "QUEUED", "PAUSED"):
+-                body.update(status="CANCELLED", completedAt=now())
+-                db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
+-            else:
+-                body["status"] = "CANCELLING"
+-            store.save(db, body)
+-            store.audit(db, current["userId"], "CANCEL", run_id, current["workspaceId"])
+-            return body
+-
+-    @router.delete("/api/v1/experiments/{run_id}", status_code=204)
+-    def archive(run_id: str, current=Depends(scoped)):
+-        with store.db() as db:
+-            body = authorized(run_id, current)
+-            if body["status"] not in TERMINAL | {"DRAFT"}:
+-                raise HTTPException(409, "Cancel and wait for the experiment to finish before archiving")
+-            body["archivedAt"] = now()
+-            store.save(db, body)
+-            store.audit(db, current["userId"], "ARCHIVE", run_id, current["workspaceId"])
+-        return Response(status_code=204)
+-
+-    @router.post("/api/v1/experiments/{run_id}/pause")
+-    def pause(run_id: str, current=Depends(scoped)):
+-        with store.db() as db:
+-            db.execute("BEGIN IMMEDIATE")
+-            body = authorized(run_id, current)
+-            if body["status"] == "PAUSED":
+-                return body
+-            if body.get("cancelRequested") or body["status"] not in ("STARTING", "RUNNING", "PAUSING"):
+-                raise HTTPException(409, "Pause requires a running experiment")
+-            runtime.require_command(db, body["coordinatorDeviceId"], "PAUSE_ASSIGNMENT")
+-            runtime.pause(run_id, db=db)
+-            body.update(pauseRequested=True, status="PAUSING")
+-            store.save(db, body)
+-            store.audit(db, current["userId"], "PAUSE_REQUESTED", run_id, body["workspaceId"])
+-        return body
+-
+-    @router.post("/api/v1/experiments/{run_id}/resume")
+-    def resume(run_id: str, current=Depends(scoped)):
+-        with store.db() as db:
+-            db.execute("BEGIN IMMEDIATE")
+-            body = authorized(run_id, current)
+-            if body.get("resumeRequested") and body["status"] in ("QUEUED", "STARTING"):
+-                return body
+-            row = db.execute(
+-                "SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", (run_id,)
+-            ).fetchone()
+-            if (
+-                body["status"] != "PAUSED"
+-                or not row
+-                or not row["released"]
+-                or json.loads(row["snapshot"])["state"]["status"] != "PAUSED"
+-            ):
+-                raise HTTPException(409, "Wait for the completed checkpoint and confirmed resource release")
+-            if reason := store.eligibility(db, body):
+-                raise HTTPException(409, reason)
+-            body.update(status="QUEUED", resumeRequested=True, pauseRequested=False, cancelRequested=False)
+-            body.pop("waitingReason", None)
+-            store.save(db, body)
+-            db.execute("INSERT OR IGNORE INTO queue(run_id) VALUES (?)", (run_id,))
+-            store.audit(db, current["userId"], "RESUME_REQUESTED", run_id, body["workspaceId"])
+-        return body
+-
+-    @router.patch("/api/v1/experiments/{run_id}/backup-policy")
+-    def backup_policy(run_id: str, policy: BackupPolicy, current=Depends(scoped)):
+-        with store.db() as db:
+-            body = authorized(run_id, current)
+-            if body["status"] in TERMINAL:
+-                raise HTTPException(409, "Experiment is already finished")
+-            assignment = db.execute(
+-                "SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+-                (run_id,),
+-            ).fetchone()
+-            if assignment and not assignment["released"]:
+-                runtime.require_command(db, assignment["coordinator"], "UPDATE_BACKUP_POLICY")
+-                runtime.enqueue(
+-                    db,
+-                    assignment["coordinator"],
+-                    "UPDATE_BACKUP_POLICY",
+-                    {"assignmentId": assignment["id"], "epoch": assignment["epoch"], "policy": policy.model_dump()},
+-                    "backup-policy:" + secrets.token_hex(16),
+-                )
+-            body["requestedBackupPolicy"] = policy.model_dump()
+-            store.save(db, body)
+-            store.audit(db, current["userId"], "BACKUP_POLICY_REQUESTED", run_id, body["workspaceId"])
+-        return {"policy": policy.model_dump(), "appliesBeforeNextGeneration": True}
+-
+-    @router.post("/api/v1/experiments/{run_id}/workers")
+-    def members(run_id: str, request: MembershipRequest, current=Depends(scoped)):
+-        """Add or remove a worker while the experiment runs (ADR-009); it applies at the next generation boundary."""
+-        action = {"add": "JOIN", "remove": "LEAVE", "retry": "RETRY"}[request.action]
+-        with store.db() as db:
+-            db.execute("BEGIN IMMEDIATE")
+-            authorized(run_id, current)
+-            try:
+-                change = runtime.change_members(db, run_id, request.workerId, action, current["username"])
+-            except RuntimeRejected as error:
+-                raise HTTPException(409, str(error)) from None
+-            runtime.note_membership(db, run_id, change, current["userId"])
+-        return {**change, "appliesAtNextGeneration": action != "RETRY"}
+-
+-    app.include_router(router)
++from .api.experiments import install_routes as install_routes
+diff --git a/backend/routes_history.py b/backend/routes_history.py
+index 2e0a6757..8ad1aef7 100644
+--- a/backend/routes_history.py
++++ b/backend/routes_history.py
+@@ -1,144 +1,4 @@
+-import json
++"""Compatibility import retained during the three-layer extraction."""
+ 
+-from fastapi import Depends, HTTPException
+-from fastapi.responses import StreamingResponse
+-
+-
+-from fastapi import APIRouter
+-
+-# What a device's agent says about a command it could not finish. Unlike the coordinator's events these never reach the
+-# run snapshot, and a run that is still STARTING has no snapshot at all.
+-DEVICE_EVENTS = ("agent_command_failed", "agent_command_deferred")
+-
+-
+-def severity(name):
+-    if "error" in name or "failed" in name:
+-        return "ERROR"
+-    if "unavailable" in name or "unknown" in name or "deferred" in name:
+-        return "WARNING"
+-    return "INFO"
+-
+-
+-def message(event):
+-    phrase = event["event"].replace("_", " ")
+-    if event["event"] in DEVICE_EVENTS:
+-        return event.get("reason", phrase)
+-    return event.get("error", phrase)
+-
+-
+-def install_routes(app, store, runtime, scoped, visible, authorized):
+-    router = APIRouter()
+-
+-    @router.get("/api/v1/experiments/{run_id}/generations")
+-    def generations(run_id: str, current=Depends(scoped)):
+-        authorized(run_id, current)
+-        return store.snapshot(run_id)["generations"]
+-
+-    @router.get("/api/v1/experiments/{run_id}/generations/{generation_id}")
+-    def generation(run_id: str, generation_id: str, current=Depends(scoped)):
+-        value = next((value for value in generations(run_id, current) if value["generationId"] == generation_id), None)
+-        if not value:
+-            raise HTTPException(404, "Generation not found")
+-        return value
+-
+-    def lookup(identifier, key, collection, current):
+-        run_id = identifier.split(".", 1)[0]
+-        authorized(run_id, current)
+-        value = next((item for item in store.snapshot(run_id)[collection] if item[key] == identifier), None)
+-        if not value:
+-            raise HTTPException(404, "Object not found")
+-        return value
+-
+-    @router.get("/api/v1/generations/{generation_id}/candidates")
+-    def candidates(generation_id: str, current=Depends(scoped)):
+-        run_id = generation_id.split(".", 1)[0]
+-        authorized(run_id, current)
+-        return [item for item in store.snapshot(run_id)["candidates"] if item["generationId"] == generation_id]
+-
+-    @router.get("/api/v1/candidates/{candidate_id}")
+-    def candidate(candidate_id: str, current=Depends(scoped)):
+-        return lookup(candidate_id, "candidateId", "candidates", current)
+-
+-    @router.get("/api/v1/attempts/{attempt_id}")
+-    def attempt(attempt_id: str, current=Depends(scoped)):
+-        return lookup(attempt_id, "attemptId", "attempts", current)
+-
+-    @router.get("/api/v1/events")
+-    def event_list(experimentId: str | None = None, limit: int = 2000, current=Depends(scoped)):
+-        """The newest events of the visible runs (or of one). Every read happens in ONE database session: the store
+-        serializes sessions, and during a busy run the agents' polls hold it; one session per run made this list wait
+-        behind them for minutes (HTTP 524 at the public edge, GSM8K demo tier 2)."""
+-        from datetime import datetime, timezone
+-
+-        limit = max(1, min(limit, 2000))
+-        runs = [run["experimentId"] for run in visible(current) if experimentId in (None, run["experimentId"])]
+-        if experimentId and not runs:
+-            raise HTTPException(404, "Experiment not found")
+-        with store.db() as db:
+-            snapshots = {
+-                row["id"]: json.loads(row["snapshot"]) if row["snapshot"] else {"events": []}
+-                for row in db.execute(
+-                    f"SELECT id,snapshot FROM experiments WHERE id IN ({','.join('?' * len(runs))})", runs
+-                )
+-            }
+-            device = {}
+-            for row in db.execute(
+-                "SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id "
+-                f"WHERE a.run_id IN ({','.join('?' * len(runs))}) AND json_extract(m.body,'$.event') IN (?,?) "
+-                "ORDER BY m.sequence",
+-                (*runs, *DEVICE_EVENTS),
+-            ):
+-                device.setdefault(row["run_id"], []).append((f"m{row['sequence']}", json.loads(row["body"])))
+-        result = []
+-        for run_id in runs:
+-            events = [(f"e{index}", event) for index, event in enumerate(snapshots.get(run_id, {}).get("events", []))]
+-            for key, event in events + device.get(run_id, []):
+-                result.append(
+-                    {
+-                        "eventId": f"{run_id}.{key}",
+-                        "experimentId": run_id,
+-                        "timestamp": datetime.fromtimestamp(event.get("t", 0), timezone.utc).isoformat(),
+-                        "eventType": event["event"],
+-                        "severity": severity(event["event"]),
+-                        "message": message(event),
+-                        "workerId": event.get("worker_id"),
+-                        "candidateId": event.get("uiCandidateId"),
+-                        "generationId": f"{run_id}.g{event['generation']}" if "generation" in event else None,
+-                        "details": event,
+-                    }
+-                )
+-        return sorted(result, key=lambda item: item["timestamp"])[-limit:]
+-
+-    @router.get("/api/v1/artifacts")
+-    def artifact_list(current=Depends(scoped)):
+-        return [item for run in visible(current) for item in store.snapshot(run["experimentId"])["artifacts"]]
+-
+-    @router.get("/api/v1/artifacts/{artifact_id}/download")
+-    def download(artifact_id: str, current=Depends(scoped)):
+-        artifact = lookup(artifact_id, "artifactId", "artifacts", current)
+-        return StreamingResponse(
+-            runtime.artifact(artifact["experimentId"], artifact["name"]),
+-            media_type="application/octet-stream",
+-            headers={"Content-Disposition": f'attachment; filename="{artifact["name"]}"'},
+-        )
+-
+-    @router.get("/api/v1/audit")
+-    def audit(current=Depends(scoped)):
+-        with store.db() as db:
+-            return [
+-                {
+-                    "auditId": str(row["sequence"]),
+-                    "workspaceId": row["workspace_id"],
+-                    "actorUserId": row["actor"],
+-                    "action": row["action"],
+-                    "targetId": row["target"],
+-                    "createdAt": row["created"],
+-                }
+-                for row in db.execute(
+-                    "SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100",
+-                    (current["workspaceId"],),
+-                )
+-                if current["workspaceRole"] == "ADMIN" or row["actor"] == current["userId"]
+-            ]
+-
+-    app.include_router(router)
++from .api.history import install_routes as install_routes
++from .services.history import DEVICE_EVENTS as DEVICE_EVENTS, message as message, severity as severity
+diff --git a/backend/services/experiment_state.py b/backend/services/experiment_state.py
+new file mode 100644
+index 00000000..e0b97388
+--- /dev/null
++++ b/backend/services/experiment_state.py
+@@ -0,0 +1,129 @@
++"""Experiment state and admission business rules, behind the Store facade."""
++
++import hashlib
++import json
++import uuid
++from ..core.clock import now
++from ..constants import TERMINAL, REVISION
++from ..experiment_view import experiment_view
++from ..repositories.experiments import ExperimentsRepository as repository
++
++
++class ExperimentStateService:
++    def __init__(self, store):
++        self.store = store
++
++    def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
++        for row in repository.state_cancel_selected_select_experiments(db, ()).fetchall():
++            b = json.loads(row[0])
++            if b["experimentId"] in keep:
++                continue
++            coordinator = b.get("coordinatorDeviceId")
++            coordinator_alias = None
++            if coordinator:
++                row = repository.state_cancel_selected_select_devices(db, (coordinator,)).fetchone()
++                coordinator_alias = row[0] if row else None
++            if worker_id not in set(b["workerIds"]) | {coordinator_alias} or b["status"] in TERMINAL | {
++                "DRAFT",
++                "PAUSED",
++            }:
++                continue
++            if not include_queued and b["status"] == "QUEUED":
++                continue
++            b["cancelRequested"] = True
++            if b["status"] in ("QUEUED", "PAUSED"):
++                b.update(status="CANCELLED", completedAt=now(), failureReason="GPU contribution was disabled")
++                repository.state_cancel_selected_delete_queue(db, (b["experimentId"],))
++            else:
++                b["status"] = "CANCELLING"
++            self.store.save(db, b)
++            self.store.audit(db, "system", "GPU_CONTRIBUTION_DISABLED", b["experimentId"], b["workspaceId"])
++
++    def cancel_owned(self, db, owner, workspace_id=None):
++        for row in repository.state_cancel_owned_select_experiments(db, (owner,)).fetchall():
++            body = json.loads(row[0])
++            if workspace_id and body["workspaceId"] != workspace_id:
++                continue
++            if body["status"] in TERMINAL | {"DRAFT"}:
++                continue
++            body["cancelRequested"] = True
++            if body["status"] in ("QUEUED", "PAUSED"):
++                body.update(status="CANCELLED", completedAt=now(), failureReason="Resource access revoked")
++                repository.state_cancel_owned_delete_queue(db, (body["experimentId"],))
++            else:
++                body["status"] = "CANCELLING"
++            self.store.save(db, body)
++            self.store.audit(db, "system", "ACCESS_REVOKED", body["experimentId"], body["workspaceId"])
++
++    def eligibility(self, db, body, workers=None):
++        row = repository.state_eligibility_select_users(db, (body["ownerUserId"],)).fetchone()
++        if not row or json.loads(row[0])["accountStatus"] != "ACTIVE":
++            return "Owner account is not active"
++        if not repository.state_eligibility_select_memberships(
++            db, (body["workspaceId"], body["ownerUserId"])
++        ).fetchone():
++            return "Workspace membership was revoked"
++        ids = {r[0] for r in repository.state_eligibility_select_worker_assignments(db, (body["workspaceId"],))}
++        if workers is None:
++            workers = self.store.runtime.intended_members(db, body["experimentId"], body["workerIds"])
++        if not set(workers) <= ids - self.store.disabled_workers(db):
++            return "Selected GPU assignment changed before launch"
++        co = repository.state_eligibility_select_devices(db, (body.get("coordinatorDeviceId"),)).fetchone()
++        if not co or co["status"] != "APPROVED" or co["worker_id"] not in ids - self.store.disabled_workers(db):
++            return "Coordinator approval or workspace assignment changed"
++        chosen = repository.state_eligibility_select_devices_2(db, workers, workers=workers).fetchall()
++        if len(chosen) != len(workers) or any(
++            (
++                d["status"] != "APPROVED" or self.store.profile(d["owner"])["accountStatus"] != "ACTIVE"
++                for d in [co, *chosen]
++            )
++        ):
++            return "Device owner or approval was revoked"
++        return None
++
++    def get(self, run_id):
++        with self.store.db() as db:
++            row = repository.state_get_select_experiments(db, (run_id,)).fetchone()
++            return experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None) if row else None
++
++    def list(self):
++        with self.store.db() as db:
++            return [
++                experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None)
++                for row in repository.state_list_select_experiments(db, ())
++            ]
++
++    def save(self, db, body):
++        repository.state_save_update_experiments(db, (json.dumps(body, allow_nan=False), body["experimentId"]))
++
++    def create(self, owner, config, workspace_id="lab"):
++        run_id = uuid.uuid4().hex
++        digest = hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
++        body = {
++            **config,
++            "experimentId": run_id,
++            "workspaceId": workspace_id,
++            "ownerUserId": owner,
++            "status": "DRAFT",
++            "cancelRequested": False,
++            "modelVersion": config.get("modelManifest", {}).get("revision", REVISION),
++            "configHash": digest,
++            "createdAt": now(),
++            "completedGenerations": 0,
++        }
++        with self.store.db() as db:
++            repository.state_create_insert_experiments(db, (run_id, owner, json.dumps(body)))
++            self.store.audit(db, owner, "CREATE", run_id, workspace_id)
++            for entry in config.get("pythonCode", []):
++                target = f"{run_id}:{entry['role']}:{entry['codeSha256']}"
++                self.store.audit(db, owner, "PYTHON_CODE_FROZEN", target, workspace_id)
++        return body
++
++    def snapshot(self, run_id):
++        with self.store.db() as db:
++            row = repository.state_snapshot_select_experiments(db, (run_id,)).fetchone()
++            return (
++                json.loads(row[0])
++                if row and row[0]
++                else {"generations": [], "candidates": [], "attempts": [], "events": [], "artifacts": []}
++            )
+diff --git a/backend/services/experiments.py b/backend/services/experiments.py
+new file mode 100644
+index 00000000..732afd2a
+--- /dev/null
++++ b/backend/services/experiments.py
+@@ -0,0 +1,205 @@
++"""Experiments business operations; HTTP responses stay in api/."""
++
++from ..errors import RuntimeRejected
++from ..request_models import BackupPolicy, Configuration, MembershipRequest
++from ..policies import dispatch_held
++import hashlib
++import json
++import secrets
++from ..store import TERMINAL, now
++from ..constants import REVISION
++from ..timeline import build_timeline
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.experiments import ExperimentsRepository as repository
++from ..db.transactions import begin_write
++
++
++def operations(store, runtime, scoped, visible, authorized, validate):
++    def experiments(*, current):
++        return visible(current)
++
++    def create(body: Configuration, *, current):
++        with store.lock:
++            return store.create(current["userId"], validate(body, current), current["workspaceId"])
++
++    def experiment(run_id: str, *, current):
++        return authorized(run_id, current)
++
++    def run_timeline(run_id: str, *, current):
++        return build_timeline(authorized(run_id, current), store.snapshot(run_id), names=store.device_identities())
++
++    def edit(run_id: str, request: dict, *, current):
++        with store.db() as db:
++            old = authorized(run_id, current)
++            if old["status"] != "DRAFT":
++                raise ServiceError(409, "Submitted configuration is immutable")
++            try:
++                body = validate(Configuration(**request), current)
++            except ValueError:
++                raise ServiceError(422, "Invalid configuration") from None
++            digest = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
++            for key in set(Configuration.model_fields) | {
++                "modelManifest",
++                "modelSource",
++                "datasetObjectSha256",
++                "datasetIdentity",
++            }:
++                old.pop(key, None)
++            old.update(**body, configHash=digest, modelVersion=body.get("modelManifest", {}).get("revision", REVISION))
++            store.save(db, old)
++            store.audit(db, current["userId"], "EDIT", run_id, current["workspaceId"])
++            return old
++
++    def submit(run_id: str, *, current):
++        with store.db() as db:
++            body = authorized(run_id, current)
++            if body["status"] == "DRAFT":
++                if dispatch_held(db):
++                    raise ServiceError(409, "Submissions are held for maintenance or restored deployment review")
++                if reason := store.eligibility(db, body):
++                    raise ServiceError(409, reason)
++                body["status"] = "QUEUED"
++                repository.submit_insert_queue(db, (run_id,))
++                store.save(db, body)
++                store.audit(db, current["userId"], "SUBMIT", run_id, current["workspaceId"])
++            elif body["status"] in TERMINAL:
++                raise ServiceError(409, "Experiment already finished")
++            return body
++
++    def cancel(run_id: str, *, current):
++        with store.db() as db:
++            body = authorized(run_id, current)
++            if body["status"] in TERMINAL:
++                return body
++            body["cancelRequested"] = True
++            if body["status"] in ("DRAFT", "QUEUED", "PAUSED"):
++                body.update(status="CANCELLED", completedAt=now())
++                repository.cancel_delete_queue(db, (run_id,))
++            else:
++                body["status"] = "CANCELLING"
++            store.save(db, body)
++            store.audit(db, current["userId"], "CANCEL", run_id, current["workspaceId"])
++            return body
++
++    def archive(run_id: str, *, current):
++        with store.db() as db:
++            body = authorized(run_id, current)
++            if body["status"] not in TERMINAL | {"DRAFT"}:
++                raise ServiceError(409, "Cancel and wait for the experiment to finish before archiving")
++            body["archivedAt"] = now()
++            store.save(db, body)
++            store.audit(db, current["userId"], "ARCHIVE", run_id, current["workspaceId"])
++        return None
++
++    def pause(run_id: str, *, current):
++        with store.db() as db:
++            begin_write(db)
++            body = authorized(run_id, current)
++            if body["status"] == "PAUSED":
++                return body
++            if body.get("cancelRequested") or body["status"] not in ("STARTING", "RUNNING", "PAUSING"):
++                raise ServiceError(409, "Pause requires a running experiment")
++            runtime.require_command(db, body["coordinatorDeviceId"], "PAUSE_ASSIGNMENT")
++            runtime.pause(run_id, db=db)
++            body.update(pauseRequested=True, status="PAUSING")
++            store.save(db, body)
++            store.audit(db, current["userId"], "PAUSE_REQUESTED", run_id, body["workspaceId"])
++        return body
++
++    def resume(run_id: str, *, current):
++        with store.db() as db:
++            begin_write(db)
++            body = authorized(run_id, current)
++            if body.get("resumeRequested") and body["status"] in ("QUEUED", "STARTING"):
++                return body
++            row = repository.resume_select_assignments(db, (run_id,)).fetchone()
++            if (
++                body["status"] != "PAUSED"
++                or not row
++                or not row["released"]
++                or json.loads(row["snapshot"])["state"]["status"] != "PAUSED"
++            ):
++                raise ServiceError(409, "Wait for the completed checkpoint and confirmed resource release")
++            if reason := store.eligibility(db, body):
++                raise ServiceError(409, reason)
++            body.update(status="QUEUED", resumeRequested=True, pauseRequested=False, cancelRequested=False)
++            body.pop("waitingReason", None)
++            store.save(db, body)
++            repository.resume_insert_queue(db, (run_id,))
++            store.audit(db, current["userId"], "RESUME_REQUESTED", run_id, body["workspaceId"])
++        return body
++
++    def backup_policy(run_id: str, policy: BackupPolicy, *, current):
++        with store.db() as db:
++            body = authorized(run_id, current)
++            if body["status"] in TERMINAL:
++                raise ServiceError(409, "Experiment is already finished")
++            assignment = repository.backup_policy_select_assignments(db, (run_id,)).fetchone()
++            if assignment and not assignment["released"]:
++                runtime.require_command(db, assignment["coordinator"], "UPDATE_BACKUP_POLICY")
++                runtime.enqueue(
++                    db,
++                    assignment["coordinator"],
++                    "UPDATE_BACKUP_POLICY",
++                    {"assignmentId": assignment["id"], "epoch": assignment["epoch"], "policy": policy.model_dump()},
++                    "backup-policy:" + secrets.token_hex(16),
++                )
++            body["requestedBackupPolicy"] = policy.model_dump()
++            store.save(db, body)
++            store.audit(db, current["userId"], "BACKUP_POLICY_REQUESTED", run_id, body["workspaceId"])
++        return {"policy": policy.model_dump(), "appliesBeforeNextGeneration": True}
++
++    def members(run_id: str, request: MembershipRequest, *, current):
++        """Add or remove a worker while the experiment runs (ADR-009); it applies at the next generation boundary."""
++        action = {"add": "JOIN", "remove": "LEAVE", "retry": "RETRY"}[request.action]
++        with store.db() as db:
++            begin_write(db)
++            authorized(run_id, current)
++            try:
++                change = runtime.change_members(db, run_id, request.workerId, action, current["username"])
++            except RuntimeRejected as error:
++                raise ServiceError(409, str(error)) from None
++            runtime.note_membership(db, run_id, change, current["userId"])
++        return {**change, "appliesAtNextGeneration": action != "RETRY"}
++
++    def queue(*, current):
++        with store.db() as db:
++            held = dispatch_held(db)
++            positions = {r["run_id"]: i + 1 for i, r in enumerate(repository.queue_select_queue(db))}
++            result = []
++            for r in repository.queue_select_experiments(db):
++                b = json.loads(r[0])
++                if (
++                    b["workspaceId"] == current["workspaceId"]
++                    and b["experimentId"] in positions
++                    and (current["workspaceRole"] == "ADMIN" or b["ownerUserId"] == current["userId"])
++                ):
++                    result.append(
++                        {
++                            "experimentId": b["experimentId"],
++                            "position": positions[b["experimentId"]],
++                            "reason": "Maintenance hold"
++                            if held
++                            else b.get("waitingReason", "Waiting for runtime release")
++                            if b["status"] == "QUEUED"
++                            else b["status"],
++                        }
++                    )
++            return result
++
++    return SimpleNamespace(
++        experiments=experiments,
++        create=create,
++        experiment=experiment,
++        run_timeline=run_timeline,
++        edit=edit,
++        submit=submit,
++        cancel=cancel,
++        archive=archive,
++        pause=pause,
++        resume=resume,
++        backup_policy=backup_policy,
++        members=members,
++        queue=queue,
++    )
+diff --git a/backend/services/history.py b/backend/services/history.py
+new file mode 100644
+index 00000000..86f8258c
+--- /dev/null
++++ b/backend/services/history.py
+@@ -0,0 +1,124 @@
++"""History business operations; HTTP responses stay in api/."""
++
++import json
++from types import SimpleNamespace
++from ..core.errors import ServiceError
++from ..repositories.history import HistoryRepository as repository
++
++DEVICE_EVENTS = ("agent_command_failed", "agent_command_deferred")
++
++
++def severity(name):
++    if "error" in name or "failed" in name:
++        return "ERROR"
++    if "unavailable" in name or "unknown" in name or "deferred" in name:
++        return "WARNING"
++    return "INFO"
++
++
++def message(event):
++    phrase = event["event"].replace("_", " ")
++    if event["event"] in DEVICE_EVENTS:
++        return event.get("reason", phrase)
++    return event.get("error", phrase)
++
++
++def operations(store, runtime, scoped, visible, authorized):
++    def generations(run_id: str, *, current):
++        authorized(run_id, current)
++        return store.snapshot(run_id)["generations"]
++
++    def generation(run_id: str, generation_id: str, *, current):
++        value = next(
++            (value for value in generations(run_id, current=current) if value["generationId"] == generation_id), None
++        )
++        if not value:
++            raise ServiceError(404, "Generation not found")
++        return value
++
++    def lookup(identifier, key, collection, current):
++        run_id = identifier.split(".", 1)[0]
++        authorized(run_id, current)
++        value = next((item for item in store.snapshot(run_id)[collection] if item[key] == identifier), None)
++        if not value:
++            raise ServiceError(404, "Object not found")
++        return value
++
++    def candidates(generation_id: str, *, current):
++        run_id = generation_id.split(".", 1)[0]
++        authorized(run_id, current)
++        return [item for item in store.snapshot(run_id)["candidates"] if item["generationId"] == generation_id]
++
++    def candidate(candidate_id: str, *, current):
++        return lookup(candidate_id, "candidateId", "candidates", current)
++
++    def attempt(attempt_id: str, *, current):
++        return lookup(attempt_id, "attemptId", "attempts", current)
++
++    def event_list(experimentId: str | None = None, limit: int = 2000, *, current):
++        """The newest events of the visible runs (or of one). Every read happens in ONE database session: the store
++        serializes sessions, and during a busy run the agents' polls hold it; one session per run made this list wait
++        behind them for minutes (HTTP 524 at the public edge, GSM8K demo tier 2)."""
++        from datetime import datetime, timezone
++
++        limit = max(1, min(limit, 2000))
++        runs = [run["experimentId"] for run in visible(current) if experimentId in (None, run["experimentId"])]
++        if experimentId and not runs:
++            raise ServiceError(404, "Experiment not found")
++        with store.db() as db:
++            snapshots = {
++                row["id"]: json.loads(row["snapshot"]) if row["snapshot"] else {"events": []}
++                for row in repository.event_list_select_experiments(db, runs, runs=runs)
++            }
++            device = {}
++            for row in repository.event_list_select_monitoring_events(db, (*runs, *DEVICE_EVENTS), runs=runs):
++                device.setdefault(row["run_id"], []).append((f"m{row['sequence']}", json.loads(row["body"])))
++        result = []
++        for run_id in runs:
++            events = [(f"e{index}", event) for index, event in enumerate(snapshots.get(run_id, {}).get("events", []))]
++            for key, event in events + device.get(run_id, []):
++                result.append(
++                    {
++                        "eventId": f"{run_id}.{key}",
++                        "experimentId": run_id,
++                        "timestamp": datetime.fromtimestamp(event.get("t", 0), timezone.utc).isoformat(),
++                        "eventType": event["event"],
++                        "severity": severity(event["event"]),
++                        "message": message(event),
++                        "workerId": event.get("worker_id"),
++                        "candidateId": event.get("uiCandidateId"),
++                        "generationId": f"{run_id}.g{event['generation']}" if "generation" in event else None,
++                        "details": event,
++                    }
++                )
++        return sorted(result, key=lambda item: item["timestamp"])[-limit:]
++
++    def artifact_list(*, current):
++        return [item for run in visible(current) for item in store.snapshot(run["experimentId"])["artifacts"]]
++
++    def audit(*, current):
++        with store.db() as db:
++            return [
++                {
++                    "auditId": str(row["sequence"]),
++                    "workspaceId": row["workspace_id"],
++                    "actorUserId": row["actor"],
++                    "action": row["action"],
++                    "targetId": row["target"],
++                    "createdAt": row["created"],
++                }
++                for row in repository.audit_select_audit(db, (current["workspaceId"],))
++                if current["workspaceRole"] == "ADMIN" or row["actor"] == current["userId"]
++            ]
++
++    return SimpleNamespace(
++        generations=generations,
++        generation=generation,
++        lookup=lookup,
++        candidates=candidates,
++        candidate=candidate,
++        attempt=attempt,
++        event_list=event_list,
++        artifact_list=artifact_list,
++        audit=audit,
++    )
+diff --git a/backend/services/workspaces.py b/backend/services/workspaces.py
+index 0d73c712..6719022d 100644
+--- a/backend/services/workspaces.py
++++ b/backend/services/workspaces.py
+@@ -4,8 +4,8 @@ import json
+ import uuid
+ from types import SimpleNamespace
+ from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+-from ..policies import dispatch_held, set_disabled_workers
+-from ..store import now
++from ..policies import set_disabled_workers
++from ..core.clock import now
+ from ..core.errors import ServiceError, DatabaseConflict
+ from ..repositories.workspaces import WorkspacesRepository as repository
+ 
+@@ -206,31 +206,6 @@ def operations(store, scoped, active, workspace_admin):
+             member_change(db, workspace_id, user_id, current)
+         return None
+ 
+-    def queue(*, current):
+-        with store.db() as db:
+-            held = dispatch_held(db)
+-            positions = {r["run_id"]: i + 1 for i, r in enumerate(repository.queue_select_queue(db))}
+-            result = []
+-            for r in repository.queue_select_experiments(db):
+-                b = json.loads(r[0])
+-                if (
+-                    b["workspaceId"] == current["workspaceId"]
+-                    and b["experimentId"] in positions
+-                    and (current["workspaceRole"] == "ADMIN" or b["ownerUserId"] == current["userId"])
+-                ):
+-                    result.append(
+-                        {
+-                            "experimentId": b["experimentId"],
+-                            "position": positions[b["experimentId"]],
+-                            "reason": "Maintenance hold"
+-                            if held
+-                            else b.get("waitingReason", "Waiting for runtime release")
+-                            if b["status"] == "QUEUED"
+-                            else b["status"],
+-                        }
+-                    )
+-            return result
+-
+     return SimpleNamespace(
+         create_workspace=create_workspace,
+         invite=invite,
+@@ -244,5 +219,22 @@ def operations(store, scoped, active, workspace_admin):
+         accept=accept,
+         change_role=change_role,
+         remove_member=remove_member,
+-        queue=queue,
+     )
++
++
++class WorkspaceStateService:
++    def __init__(self, store):
++        self.store = store
++
++    def workspaces(self, user_id):
++        with self.store.db() as db:
++            return [
++                {
++                    "workspaceId": r["id"],
++                    "name": r["name"],
++                    "description": r["description"],
++                    "creatorUserId": r["creator"],
++                    "role": r["role"],
++                }
++                for r in repository.state_workspaces_select_workspaces(db, (user_id,))
++            ]
+diff --git a/backend/store.py b/backend/store.py
+index 48097414..2a1b3790 100644
+--- a/backend/store.py
++++ b/backend/store.py
+@@ -1,28 +1,23 @@
+ """SQLite product state. Runtime ledgers remain owned by device agents."""
+ 
+ from .migrations import initialize_product_schema
+-from .experiment_view import experiment_view
+ from .policies import dispatch_held, read_setting, set_disabled_workers
+ from contextlib import contextmanager
+-from datetime import datetime, timezone
+-import hashlib
+ import json
+ import os
+ from pathlib import Path
+ import sqlite3
+ import threading
+-import uuid
+ 
+ from argon2 import PasswordHasher
+ from .errors import RuntimeRejected
+ from .migrations import initialize_workspace_extras, migrate
+ 
+-from .constants import ACTIVE, TERMINAL, REVISION, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
++from .constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
+ from .services.accounts import AccountService
+-
+-
+-def now():
+-    return datetime.now(timezone.utc).isoformat()
++from .services.experiment_state import ExperimentStateService
++from .services.workspaces import WorkspaceStateService
++from .core.clock import now
+ 
+ 
+ class Store:
+@@ -33,6 +28,8 @@ class Store:
+         self.operation_lock = threading.RLock()
+         self.hasher = PasswordHasher()
+         self.accounts = AccountService(self)
++        self.experiments = ExperimentStateService(self)
++        self.workspace_state = WorkspaceStateService(self)
+         self.last_error = None
+         with self.db() as db:
+             initialize_product_schema(db)
+@@ -96,20 +93,7 @@ class Store:
+         return self.accounts.profile(user_id)
+ 
+     def workspaces(self, user_id):
+-        with self.db() as db:
+-            return [
+-                {
+-                    "workspaceId": r["id"],
+-                    "name": r["name"],
+-                    "description": r["description"],
+-                    "creatorUserId": r["creator"],
+-                    "role": r["role"],
+-                }
+-                for r in db.execute(
+-                    "SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid",
+-                    (user_id,),
+-                )
+-            ]
++        return self.workspace_state.workspaces(user_id=user_id)
+ 
+     def assignments(self, workspace_id, include_disabled=False):
+         with self.db() as db:
+@@ -124,117 +108,25 @@ class Store:
+         return set(read_setting(db, "disabledWorkers", []))
+ 
+     def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
+-        for row in db.execute("SELECT body FROM experiments").fetchall():
+-            b = json.loads(row[0])
+-            if b["experimentId"] in keep:
+-                continue  # the worker leaves this run instead (ADR-009)
+-            coordinator = b.get("coordinatorDeviceId")
+-            coordinator_alias = None
+-            if coordinator:
+-                row = db.execute("SELECT worker_id FROM devices WHERE id=?", (coordinator,)).fetchone()
+-                coordinator_alias = row[0] if row else None
+-            if worker_id not in set(b["workerIds"]) | {coordinator_alias} or b["status"] in TERMINAL | {
+-                "DRAFT",
+-                "PAUSED",
+-            }:
+-                continue
+-            if not include_queued and b["status"] == "QUEUED":
+-                continue
+-            b["cancelRequested"] = True
+-            if b["status"] in ("QUEUED", "PAUSED"):
+-                b.update(status="CANCELLED", completedAt=now(), failureReason="GPU contribution was disabled")
+-                db.execute("DELETE FROM queue WHERE run_id=?", (b["experimentId"],))
+-            else:
+-                b["status"] = "CANCELLING"
+-            self.save(db, b)
+-            self.audit(db, "system", "GPU_CONTRIBUTION_DISABLED", b["experimentId"], b["workspaceId"])
++        return self.experiments.cancel_selected(db=db, worker_id=worker_id, include_queued=include_queued, keep=keep)
+ 
+     def cancel_owned(self, db, owner, workspace_id=None):
+-        for row in db.execute("SELECT body FROM experiments WHERE owner=?", (owner,)).fetchall():
+-            body = json.loads(row[0])
+-            if workspace_id and body["workspaceId"] != workspace_id:
+-                continue
+-            if body["status"] in TERMINAL | {"DRAFT"}:
+-                continue
+-            body["cancelRequested"] = True
+-            if body["status"] in ("QUEUED", "PAUSED"):
+-                body.update(status="CANCELLED", completedAt=now(), failureReason="Resource access revoked")
+-                db.execute("DELETE FROM queue WHERE run_id=?", (body["experimentId"],))
+-            else:
+-                body["status"] = "CANCELLING"
+-            self.save(db, body)
+-            self.audit(db, "system", "ACCESS_REVOKED", body["experimentId"], body["workspaceId"])
++        return self.experiments.cancel_owned(db=db, owner=owner, workspace_id=workspace_id)
+ 
+     def eligibility(self, db, body, workers=None):
+-        row = db.execute("SELECT profile FROM users WHERE id=?", (body["ownerUserId"],)).fetchone()
+-        if not row or json.loads(row[0])["accountStatus"] != "ACTIVE":
+-            return "Owner account is not active"
+-        if not db.execute(
+-            "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", (body["workspaceId"], body["ownerUserId"])
+-        ).fetchone():
+-            return "Workspace membership was revoked"
+-        ids = {
+-            r[0]
+-            for r in db.execute("SELECT worker_id FROM worker_assignments WHERE workspace_id=?", (body["workspaceId"],))
+-        }
+-        if workers is None:  # every member, including the ones that joined (ADR-009); or only a joining worker
+-            workers = self.runtime.intended_members(db, body["experimentId"], body["workerIds"])
+-        if not set(workers) <= ids - self.disabled_workers(db):
+-            return "Selected GPU assignment changed before launch"
+-        co = db.execute(
+-            "SELECT worker_id,status,owner FROM devices WHERE id=?", (body.get("coordinatorDeviceId"),)
+-        ).fetchone()
+-        if not co or co["status"] != "APPROVED" or co["worker_id"] not in ids - self.disabled_workers(db):
+-            return "Coordinator approval or workspace assignment changed"
+-        chosen = db.execute(
+-            "SELECT owner,status FROM devices WHERE worker_id IN (" + ",".join("?" for _ in workers) + ")",
+-            workers,
+-        ).fetchall()
+-        if len(chosen) != len(workers) or any(
+-            d["status"] != "APPROVED" or self.profile(d["owner"])["accountStatus"] != "ACTIVE" for d in [co, *chosen]
+-        ):
+-            return "Device owner or approval was revoked"
+-        return None
++        return self.experiments.eligibility(db=db, body=body, workers=workers)
+ 
+     def get(self, run_id):
+-        with self.db() as db:
+-            row = db.execute("SELECT body,snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()
+-            return experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None) if row else None
++        return self.experiments.get(run_id=run_id)
+ 
+     def list(self):
+-        with self.db() as db:
+-            return [
+-                experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None)
+-                for row in db.execute("SELECT body,snapshot FROM experiments ORDER BY rowid")
+-            ]
++        return self.experiments.list()
+ 
+     def save(self, db, body):
+-        db.execute(
+-            "UPDATE experiments SET body=? WHERE id=?", (json.dumps(body, allow_nan=False), body["experimentId"])
+-        )
++        return self.experiments.save(db=db, body=body)
+ 
+     def create(self, owner, config, workspace_id="lab"):
+-        run_id = uuid.uuid4().hex
+-        digest = hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+-        body = {
+-            **config,
+-            "experimentId": run_id,
+-            "workspaceId": workspace_id,
+-            "ownerUserId": owner,
+-            "status": "DRAFT",
+-            "cancelRequested": False,
+-            "modelVersion": config.get("modelManifest", {}).get("revision", REVISION),
+-            "configHash": digest,
+-            "createdAt": now(),
+-            "completedGenerations": 0,
+-        }
+-        with self.db() as db:
+-            db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (run_id, owner, json.dumps(body)))
+-            self.audit(db, owner, "CREATE", run_id, workspace_id)
+-            for entry in config.get("pythonCode", []):  # which researcher code this experiment's coordinator will run
+-                target = f"{run_id}:{entry['role']}:{entry['codeSha256']}"
+-                self.audit(db, owner, "PYTHON_CODE_FROZEN", target, workspace_id)
+-        return body
++        return self.experiments.create(owner=owner, config=config, workspace_id=workspace_id)
+ 
+     def device_names(self):
+         """{worker id: the name its owner gave the device}, for screens that would otherwise show the raw id."""
+@@ -255,13 +147,7 @@ class Store:
+             }
+ 
+     def snapshot(self, run_id):
+-        with self.db() as db:
+-            row = db.execute("SELECT snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()
+-            return (
+-                json.loads(row[0])
+-                if row and row[0]
+-                else {"generations": [], "candidates": [], "attempts": [], "events": [], "artifacts": []}
+-            )
++        return self.experiments.snapshot(run_id=run_id)
+ 
+     def dispatch_once(self):
+         with self.operation_lock:
+diff --git a/backend/tests/fixtures/archive/docs/evidence/2026-11-01-backend-inventory/routes-before.json b/backend/tests/fixtures/archive/docs/evidence/2026-11-01-backend-inventory/routes-before.json
+new file mode 100644
+index 00000000..8787925d
+--- /dev/null
++++ b/backend/tests/fixtures/archive/docs/evidence/2026-11-01-backend-inventory/routes-before.json
+@@ -0,0 +1,1128 @@
++[
++  {
++    "path": "/api/v1/auth/login",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_auth",
++    "name": "sign_in",
++    "source": "backend/routes_auth.py"
++  },
++  {
++    "path": "/api/v1/auth/session",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_auth",
++    "name": "get_session",
++    "source": "backend/routes_auth.py"
++  },
++  {
++    "path": "/api/v1/auth/logout",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_auth",
++    "name": "sign_out",
++    "source": "backend/routes_auth.py"
++  },
++  {
++    "path": "/api/v1/health",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "health",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/capabilities",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "get_capabilities",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/resources",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "resources",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/models",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "models",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/workers",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "workers",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/workers/{worker_id}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "worker",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/datasets",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_inventory",
++    "name": "datasets",
++    "source": "backend/routes_inventory.py"
++  },
++  {
++    "path": "/api/v1/experiments",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "experiments",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "create",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "experiment",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/timeline",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "run_timeline",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/stream",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "run_stream",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "edit",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/submit",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "submit",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/cancel",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "cancel",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "archive",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/pause",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "pause",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/resume",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "resume",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/backup-policy",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "backup_policy",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/workers",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_experiments",
++    "name": "members",
++    "source": "backend/routes_experiments.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/generations",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "generations",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/generations/{generation_id}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "generation",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/generations/{generation_id}/candidates",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "candidates",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/candidates/{candidate_id}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "candidate",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/attempts/{attempt_id}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "attempt",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/events",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "event_list",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/artifacts",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "artifact_list",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/artifacts/{artifact_id}/download",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "download",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/audit",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_history",
++    "name": "audit",
++    "source": "backend/routes_history.py"
++  },
++  {
++    "path": "/api/v1/auth/register",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_accounts",
++    "name": "register",
++    "source": "backend/routes_accounts.py"
++  },
++  {
++    "path": "/api/v1/profile",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_accounts",
++    "name": "edit_profile",
++    "source": "backend/routes_accounts.py"
++  },
++  {
++    "path": "/api/v1/auth/password",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_accounts",
++    "name": "change_password",
++    "source": "backend/routes_accounts.py"
++  },
++  {
++    "path": "/api/v1/auth/revoke-other-sessions",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_accounts",
++    "name": "revoke_other_sessions",
++    "source": "backend/routes_accounts.py"
++  },
++  {
++    "path": "/api/v1/workspaces",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "create_workspace",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/invitations",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "invite",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/listing",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "listing",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/default-coordinator",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "default_coordinator",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/listed-workspaces",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "listed_workspaces",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/join-requests",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "ask_to_join",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/join-requests",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "join_requests",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/join-requests/{request_id}",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "decide_join",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/my-invitations",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "invitations",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/my-invitations/{invitation_id}/accept",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "accept",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/members/{user_id}",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "change_role",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/workspaces/{workspace_id}/members/{user_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "remove_member",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/queue",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_workspaces",
++    "name": "queue",
++    "source": "backend/routes_workspaces.py"
++  },
++  {
++    "path": "/api/v1/platform/users",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_operations",
++    "name": "users",
++    "source": "backend/routes_operations.py"
++  },
++  {
++    "path": "/api/v1/platform/users/{user_id}",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_operations",
++    "name": "edit_account",
++    "source": "backend/routes_operations.py"
++  },
++  {
++    "path": "/api/v1/platform/users/{user_id}/revoke-sessions",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_operations",
++    "name": "revoke_sessions",
++    "source": "backend/routes_operations.py"
++  },
++  {
++    "path": "/api/v1/platform/audit",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_operations",
++    "name": "platform_audit",
++    "source": "backend/routes_operations.py"
++  },
++  {
++    "path": "/api/v1/platform/operations",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_operations",
++    "name": "operations",
++    "source": "backend/routes_operations.py"
++  },
++  {
++    "path": "/api/v1/platform/maintenance/resume",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_operations",
++    "name": "resume",
++    "source": "backend/routes_operations.py"
++  },
++  {
++    "path": "/api/v1/experiment-templates",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.templates",
++    "name": "list_templates",
++    "source": "backend/templates.py"
++  },
++  {
++    "path": "/api/v1/experiment-templates",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.templates",
++    "name": "create_template",
++    "source": "backend/templates.py"
++  },
++  {
++    "path": "/api/v1/experiment-templates/{template_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.templates",
++    "name": "delete_template",
++    "source": "backend/templates.py"
++  },
++  {
++    "path": "/api/v1/notifications",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.notifications",
++    "name": "list_notifications",
++    "source": "backend/notifications.py"
++  },
++  {
++    "path": "/api/v1/notifications/read",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.notifications",
++    "name": "read_notifications",
++    "source": "backend/notifications.py"
++  },
++  {
++    "path": "/api/v1/devices/pairing-codes",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "pairing",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/enroll",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "enroll",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "own_devices",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices/{device_id}/endpoints",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "owned_endpoints",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices/{device_id}/configuration",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "owned_configuration",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/qualification",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "qualification",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/platform/devices",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "devices",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/platform/devices/{device_id}",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "approve",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/platform/devices/{device_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "remove_device",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices/{device_id}",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "rename",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices/{device_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "delete_device",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices/{device_id}/contribution",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "contribution",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/devices/{device_id}/contribution",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "contribution_preference",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/contribution",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "own_contribution",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/name",
++    "methods": [
++      "PATCH"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "own_name",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "forget_self",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/summary",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "own_summary",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/poll",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "poll",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/device/worker-command",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.devices",
++    "name": "worker",
++    "source": "backend/devices.py"
++  },
++  {
++    "path": "/api/v1/datasets/import",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "import_data",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/platform/dataset-limits",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "get_dataset_limits",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/platform/dataset-limits",
++    "methods": [
++      "PUT"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "set_dataset_limits",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/datasets/upload-plan",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "dataset_upload_plan",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/datasets/uploads/{upload_id}/build",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "build_uploaded_dataset",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/models/register",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "register_model",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/models/{asset_id}/upload-plan",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "upload_plan",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/models/{asset_id}/publish",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "publish",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/device/study-transfer",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.study_registry",
++    "name": "transfer",
++    "source": "backend/study_registry.py"
++  },
++  {
++    "path": "/api/v1/models/{asset_id}/qualifications",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.model_qualification",
++    "name": "start",
++    "source": "backend/model_qualification.py"
++  },
++  {
++    "path": "/api/v1/models/{asset_id}/qualifications",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.model_qualification",
++    "name": "status",
++    "source": "backend/model_qualification.py"
++  },
++  {
++    "path": "/api/v1/models/{asset_id}/qualifications/{job_id}/cancel",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.model_qualification",
++    "name": "cancel",
++    "source": "backend/model_qualification.py"
++  },
++  {
++    "path": "/api/v1/device/model-transfer",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.model_qualification",
++    "name": "transfer",
++    "source": "backend/model_qualification.py"
++  },
++  {
++    "path": "/api/v1/device/recovery-points",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "begin",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/device/recovery-points/complete-object",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "complete",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/device/recovery-points/{point_id}/verify",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "verify",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/device/recovery-points/{point_id}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "device_status",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/device/recovery-points/{point_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "abandon",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/recovery-import",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "import_begin",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/recovery-import/complete-object",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "import_complete",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/recovery-import/{point_id}/verify",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "import_verify",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/experiments/{run_id}/recovery-points",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "points",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/recovery-points/{point_id}/download-plan",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "download_plan",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/recovery-points/{point_id}",
++    "methods": [
++      "DELETE"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "delete",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/artifacts/{artifact_id}/download-ticket",
++    "methods": [
++      "POST"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "ticket",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/cloud-downloads/{ticket_digest}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.recovery_storage",
++    "name": "consume",
++    "source": "backend/recovery_storage.py"
++  },
++  {
++    "path": "/api/v1/local-storage/{token}",
++    "methods": [
++      "PUT"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.local_storage",
++    "name": "upload",
++    "source": "backend/local_storage.py"
++  },
++  {
++    "path": "/api/v1/public-upload/{token}",
++    "methods": [
++      "PUT"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.local_storage",
++    "name": "public_upload",
++    "source": "backend/local_storage.py"
++  },
++  {
++    "path": "/api/v1/public-study/{token}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.local_storage",
++    "name": "public_study",
++    "source": "backend/local_storage.py"
++  },
++  {
++    "path": "/api/v1/local-storage/{token}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.local_storage",
++    "name": "download",
++    "source": "backend/local_storage.py"
++  },
++  {
++    "path": "/assets",
++    "methods": [],
++    "kind": "Mount",
++    "module": "",
++    "name": "web-assets",
++    "source": ""
++  },
++  {
++    "path": "/downloads/manifest.json",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_web",
++    "name": "installer_manifest",
++    "source": "backend/routes_web.py"
++  },
++  {
++    "path": "/downloads",
++    "methods": [],
++    "kind": "Mount",
++    "module": "",
++    "name": "worker-downloads",
++    "source": ""
++  },
++  {
++    "path": "/{route:path}",
++    "methods": [
++      "GET"
++    ],
++    "kind": "APIRoute",
++    "module": "backend.routes_web",
++    "name": "web_page",
++    "source": "backend/routes_web.py"
++  }
++]
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index cc5dea28..7222c6fa 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -49,6 +49,11 @@ def test_account_layer_boundaries():
+         "services/accounts.py",
+         "api/workspaces.py",
+         "services/workspaces.py",
++        "api/experiments.py",
++        "services/experiments.py",
++        "services/experiment_state.py",
++        "api/history.py",
++        "services/history.py",
+     ):
+         tree = ast.parse((backend / relative).read_text())
+         for node in ast.walk(tree):
+@@ -76,3 +81,16 @@ def test_repository_conflict_is_translated_without_exposing_driver_errors():
+         with pytest.raises(DatabaseConflict):
+             execute(db, "INSERT INTO entries VALUES (?)", ("same",))
+         assert execute(db, "SELECT count(*) FROM entries").fetchone()[0] == 1
++
++
++def test_explicit_write_transaction_rolls_back_uncommitted_changes():
++    import sqlite3
++
++    from backend.db.transactions import begin_write
++
++    with sqlite3.connect(":memory:") as db:
++        db.execute("CREATE TABLE changes(id INTEGER)")
++        begin_write(db)
++        db.execute("INSERT INTO changes VALUES (1)")
++        db.rollback()
++        assert db.execute("SELECT count(*) FROM changes").fetchone()[0] == 0
+diff --git a/backend/tests/test_experiment_layers.py b/backend/tests/test_experiment_layers.py
+new file mode 100644
+index 00000000..4017f0ff
+--- /dev/null
++++ b/backend/tests/test_experiment_layers.py
+@@ -0,0 +1,109 @@
++"""Public experiment boundaries still hold when the layers and SQL move."""
++
++import json
++import sqlite3
++
++import pytest
++
++from backend.db.transactions import begin_write
++from labkit import draft, login
++
++
++def test_queued_cancel_removes_the_entry_and_updates_remaining_fifo_position(setup):
++    client, _, _ = setup
++    admin = login(client, "admin")
++    ids = [draft(client, admin, name=f"Queue contract {i}").json()["experimentId"] for i in range(2)]
++    for run in ids:
++        assert client.post(f"/api/v1/experiments/{run}/submit", headers=admin).status_code == 200
++    assert client.post(f"/api/v1/experiments/{ids[0]}/cancel", headers=admin).status_code == 200
++    queued = client.get("/api/v1/queue", headers=admin).json()
++    assert [(row["experimentId"], row["position"]) for row in queued] == [(ids[1], 1)]
++
++
++def test_queue_is_scoped_to_the_owner_unless_the_caller_is_an_administrator(setup):
++    client, _, _ = setup
++    admin, participant = login(client, "admin"), login(client, "participant")
++    first = draft(client, admin).json()["experimentId"]
++    second = draft(client, participant).json()["experimentId"]
++    for run, headers in [(first, admin), (second, participant)]:
++        assert client.post(f"/api/v1/experiments/{run}/submit", headers=headers).status_code == 200
++    assert [row["experimentId"] for row in client.get("/api/v1/queue", headers=admin).json()] == [first, second]
++    assert [row["experimentId"] for row in client.get("/api/v1/queue", headers=participant).json()] == [second]
++
++
++def test_recorded_candidate_is_readable_by_owner_but_not_another_participant(setup):
++    client, store, _ = setup
++    admin, participant = login(client, "admin"), login(client, "participant")
++    run = draft(client, admin).json()["experimentId"]
++    candidate = run + ".g0.c0"
++    snapshot = {
++        "generations": [],
++        "candidates": [{"candidateId": candidate}],
++        "attempts": [],
++        "events": [],
++        "artifacts": [],
++    }
++    with store.db() as db:
++        db.execute("UPDATE experiments SET snapshot=? WHERE id=?", (json.dumps(snapshot), run))
++    path = f"/api/v1/candidates/{candidate}"
++    assert client.get(path, headers=admin).json()["candidateId"] == candidate
++    assert client.get(path, headers=participant).status_code == 404
++
++
++def test_store_config_identity_is_order_independent_and_nonfinite_save_writes_nothing(setup):
++    client, store, _ = setup
++    body = draft(client, login(client, "admin")).json()
++    metadata = {
++        "experimentId",
++        "workspaceId",
++        "ownerUserId",
++        "status",
++        "cancelRequested",
++        "modelVersion",
++        "configHash",
++        "createdAt",
++        "completedGenerations",
++    }
++    config = {key: value for key, value in body.items() if key not in metadata}
++    first = store.create("admin", config)
++    second = store.create("admin", dict(reversed(list(config.items()))))
++    assert first["configHash"] == second["configHash"] == body["configHash"]
++    first["invalidMetric"] = float("nan")
++    with store.db() as db:
++        with pytest.raises(ValueError):
++            store.save(db, first)
++    assert "invalidMetric" not in store.get(first["experimentId"])
++
++
++def test_explicit_write_claim_blocks_a_second_writer_before_the_first_change(tmp_path):
++    path = tmp_path / "write-claim.sqlite"
++    with sqlite3.connect(path, timeout=0.05) as first, sqlite3.connect(path, timeout=0.05) as second:
++        first.execute("CREATE TABLE changes(id INTEGER)")
++        begin_write(first)
++        with pytest.raises(sqlite3.OperationalError, match="locked"):
++            second.execute("INSERT INTO changes VALUES (1)")
++        first.rollback()
++        second.execute("INSERT INTO changes VALUES (2)")
++        second.commit()
++        assert first.execute("SELECT id FROM changes").fetchall() == [(2,)]
++
++
++def test_empty_event_view_and_unknown_run_are_distinct(lab):
++    client, _, _, admin = lab
++    assert client.get("/api/v1/events", headers=admin).json() == []
++    assert client.get("/api/v1/events?experimentId=missing", headers=admin).status_code == 404
++
++
++def test_held_submission_preserves_draft_and_queue_then_resumes_after_release(setup):
++    client, store, _ = setup
++    admin = login(client, "admin")
++    run = draft(client, admin).json()["experimentId"]
++    with store.db() as db:
++        db.execute("UPDATE settings SET value=? WHERE key=?", ("true", "dispatchHold"))
++    assert client.post(f"/api/v1/experiments/{run}/submit", headers=admin).status_code == 409
++    assert store.get(run)["status"] == "DRAFT"
++    assert client.get("/api/v1/queue", headers=admin).json() == []
++    with store.db() as db:
++        db.execute("UPDATE settings SET value=? WHERE key=?", ("false", "dispatchHold"))
++    assert client.post(f"/api/v1/experiments/{run}/submit", headers=admin).status_code == 200
++    assert store.get(run)["status"] == "QUEUED"
+diff --git a/backend/tests/test_route_contract.py b/backend/tests/test_route_contract.py
+new file mode 100644
+index 00000000..f2c433e8
+--- /dev/null
++++ b/backend/tests/test_route_contract.py
+@@ -0,0 +1,50 @@
++"""The full pre-split product route contract survives every domain extraction."""
++
++import json
++from pathlib import Path
++
++from backend.app import create_app
++from backend.devices import AgentRuntime
++from backend.local_storage import LocalBackend
++
++
++def test_product_route_contract_matches_archived_pre_split_inventory(tmp_path, monkeypatch):
++    monkeypatch.delenv("HETEROES_PRIVATE_CONFIG", raising=False)
++    web = tmp_path / "web"
++    (web / "assets").mkdir(parents=True)
++    (web / "index.html").write_text("<html>Contract fixture</html>")
++    downloads = tmp_path / "downloads"
++    downloads.mkdir()
++    storage = LocalBackend(tmp_path / "objects", tmp_path / "signing.key", "http://127.0.0.1:18052")
++    app = create_app(
++        tmp_path / "product.sqlite",
++        {"admin": "route-contract-test-password"},
++        AgentRuntime(storage),
++        dispatch=False,
++        web_directory=web,
++        downloads_directory=downloads,
++    )
++    baseline = json.loads(
++        (
++            Path(__file__).parent / "fixtures/archive/docs/evidence/2026-11-01-backend-inventory/routes-before.json"
++        ).read_text()
++    )
++    expected_pairs = {(method, row["path"]) for row in baseline for method in row.get("methods", [])}
++    expected_mounts = {row["path"] for row in baseline if row["kind"] == "Mount"}
++    pairs, mounts = [], set()
++
++    def walk(router):
++        for route in router.routes:
++            if hasattr(route, "original_router"):
++                walk(route.original_router)
++            elif hasattr(route, "methods"):
++                pairs.extend((method, route.path) for method in route.methods)
++            elif type(route).__name__ == "Mount":
++                mounts.add(route.path)
++            else:
++                raise AssertionError(f"Unaccounted route type: {type(route).__name__}")
++
++    walk(app.router)
++    assert len(pairs) == len(set(pairs)) == 111
++    assert set(pairs) == expected_pairs
++    assert mounts == expected_mounts

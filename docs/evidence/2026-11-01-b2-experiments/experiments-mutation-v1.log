@@ -1,0 +1,13 @@
+control ok    | 80 passed, 1 warning in 16.22s
+killed       submitted configuration editable | 1 failed, 24 passed, 1 warning in 4.68s
+SURVIVED     maintenance hold ignored | 80 passed, 1 warning in 16.31s
+killed       cancel deletes other queue entries | 1 failed, 1 warning in 0.40s
+killed       unknown requested event run accepted | 1 failed, 5 passed, 1 warning in 1.35s
+killed       recorded child skips owner authorization | 1 failed, 2 passed, 1 warning in 0.96s
+killed       queue reveals another owners run | 1 failed, 1 passed, 1 warning in 0.71s
+killed       nonfinite product body persisted | 1 failed, 3 passed, 1 warning in 1.27s
+killed       config hash depends on input key order | 1 failed, 3 passed, 1 warning in 1.21s
+killed       write claim deferred until first change | 1 failed, 4 passed, 1 warning in 1.22s
+killed       recorded snapshot ignored | 1 failed, 2 passed, 1 warning in 0.95s
+
+9 of 10 mutants killed.

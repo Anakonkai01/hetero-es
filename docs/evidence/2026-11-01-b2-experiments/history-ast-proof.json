@@ -1,0 +1,41 @@
+{
+  "domain": "history",
+  "sqlCalls": 3,
+  "businessFunctions": 9,
+  "httpFunctions": 9,
+  "transportFunctionsKeptInAPI": [
+    "download"
+  ],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "event_list_select_monitoring_events",
+      "scope": "event_list",
+      "statement": "f\"SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id WHERE a.run_id IN ({','.join('?' * len(runs))}) AND json_extract(m.body,'$.event') IN (?,?) ORDER BY m.sequence\"",
+      "dynamic": true,
+      "free": [
+        "runs"
+      ],
+      "line": 85
+    },
+    {
+      "name": "event_list_select_experiments",
+      "scope": "event_list",
+      "statement": "f\"SELECT id,snapshot FROM experiments WHERE id IN ({','.join('?' * len(runs))})\"",
+      "dynamic": true,
+      "free": [
+        "runs"
+      ],
+      "line": 80
+    },
+    {
+      "name": "audit_select_audit",
+      "scope": "audit",
+      "statement": "'SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100'",
+      "dynamic": false,
+      "free": [],
+      "line": 137
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "submitted configuration editable",
+    "file": "backend/services/experiments.py",
+    "old": "if old[\"status\"] != \"DRAFT\":",
+    "new": "if False:"
+  },
+  {
+    "name": "maintenance hold ignored",
+    "file": "backend/services/experiments.py",
+    "old": "if dispatch_held(db):",
+    "new": "if False:"
+  },
+  {
+    "name": "cancel deletes other queue entries",
+    "file": "backend/repositories/experiments.py",
+    "old": "def cancel_delete_queue(db, parameters=()):\n        return execute(db, \"DELETE FROM queue WHERE run_id=?\", parameters)",
+    "new": "def cancel_delete_queue(db, parameters=()):\n        return execute(db, \"DELETE FROM queue WHERE run_id<>?\", parameters)"
+  },
+  {
+    "name": "unknown requested event run accepted",
+    "file": "backend/services/history.py",
+    "old": "if experimentId and not runs:",
+    "new": "if False:"
+  },
+  {
+    "name": "recorded child skips owner authorization",
+    "file": "backend/services/history.py",
+    "old": "run_id = identifier.split(\".\", 1)[0]\n        authorized(run_id, current)",
+    "new": "run_id = identifier.split(\".\", 1)[0]\n        pass"
+  },
+  {
+    "name": "queue reveals another owners run",
+    "file": "backend/services/experiments.py",
+    "old": "(current[\"workspaceRole\"] == \"ADMIN\" or b[\"ownerUserId\"] == current[\"userId\"])",
+    "new": "True"
+  },
+  {
+    "name": "nonfinite product body persisted",
+    "file": "backend/services/experiment_state.py",
+    "old": "json.dumps(body, allow_nan=False)",
+    "new": "json.dumps(body, allow_nan=True)"
+  },
+  {
+    "name": "config hash depends on input key order",
+    "file": "backend/services/experiment_state.py",
+    "old": "json.dumps(config, sort_keys=True, separators=(\",\", \":\"))",
+    "new": "json.dumps(config, sort_keys=False, separators=(\",\", \":\"))"
+  },
+  {
+    "name": "write claim deferred until first change",
+    "file": "backend/db/transactions.py",
+    "old": "return db.execute(\"BEGIN IMMEDIATE\")",
+    "new": "return None"
+  },
+  {
+    "name": "recorded snapshot ignored",
+    "file": "backend/services/experiment_state.py",
+    "old": "if row and row[0]",
+    "new": "if False"
+  }
+]

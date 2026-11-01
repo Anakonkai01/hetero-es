@@ -1,0 +1,53 @@
+{
+  "domain": "experiments",
+  "sqlCalls": 8,
+  "businessFunctions": 12,
+  "httpFunctions": 13,
+  "transportFunctionsKeptInAPI": [
+    "run_stream"
+  ],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "submit_insert_queue",
+      "scope": "submit",
+      "statement": "'INSERT INTO queue(run_id) VALUES (?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 83
+    },
+    {
+      "name": "cancel_delete_queue",
+      "scope": "cancel",
+      "statement": "'DELETE FROM queue WHERE run_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 99
+    },
+    {
+      "name": "resume_insert_queue",
+      "scope": "resume",
+      "statement": "'INSERT OR IGNORE INTO queue(run_id) VALUES (?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 155
+    },
+    {
+      "name": "resume_select_assignments",
+      "scope": "resume",
+      "statement": "'SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "dynamic": false,
+      "free": [],
+      "line": 140
+    },
+    {
+      "name": "backup_policy_select_assignments",
+      "scope": "backup_policy",
+      "statement": "'SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "dynamic": false,
+      "free": [],
+      "line": 165
+    }
+  ]
+}

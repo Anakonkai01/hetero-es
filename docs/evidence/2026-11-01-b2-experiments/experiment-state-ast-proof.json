@@ -1,0 +1,156 @@
+{
+  "base": "07aba634",
+  "methods": [
+    {
+      "method": "cancel_selected",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "cancel_owned",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "eligibility",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "get",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "list",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "save",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "create",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "snapshot",
+      "service": "ExperimentStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    },
+    {
+      "method": "workspaces",
+      "service": "WorkspaceStateService",
+      "bodyAST": "same after self.store forwarding and repository calls"
+    }
+  ],
+  "queries": {
+    "experiments": [
+      {
+        "method": "state_cancel_selected_select_experiments",
+        "statement": "'SELECT body FROM experiments'",
+        "free": [],
+        "scope": "cancel_selected"
+      },
+      {
+        "method": "state_cancel_selected_delete_queue",
+        "statement": "'DELETE FROM queue WHERE run_id=?'",
+        "free": [],
+        "scope": "cancel_selected"
+      },
+      {
+        "method": "state_cancel_selected_select_devices",
+        "statement": "'SELECT worker_id FROM devices WHERE id=?'",
+        "free": [],
+        "scope": "cancel_selected"
+      },
+      {
+        "method": "state_cancel_owned_select_experiments",
+        "statement": "'SELECT body FROM experiments WHERE owner=?'",
+        "free": [],
+        "scope": "cancel_owned"
+      },
+      {
+        "method": "state_cancel_owned_delete_queue",
+        "statement": "'DELETE FROM queue WHERE run_id=?'",
+        "free": [],
+        "scope": "cancel_owned"
+      },
+      {
+        "method": "state_eligibility_select_users",
+        "statement": "'SELECT profile FROM users WHERE id=?'",
+        "free": [],
+        "scope": "eligibility"
+      },
+      {
+        "method": "state_eligibility_select_worker_assignments",
+        "statement": "'SELECT worker_id FROM worker_assignments WHERE workspace_id=?'",
+        "free": [],
+        "scope": "eligibility"
+      },
+      {
+        "method": "state_eligibility_select_devices",
+        "statement": "'SELECT worker_id,status,owner FROM devices WHERE id=?'",
+        "free": [],
+        "scope": "eligibility"
+      },
+      {
+        "method": "state_eligibility_select_devices_2",
+        "statement": "'SELECT owner,status FROM devices WHERE worker_id IN (' + ','.join(('?' for _ in workers)) + ')'",
+        "free": [
+          "workers"
+        ],
+        "scope": "eligibility"
+      },
+      {
+        "method": "state_eligibility_select_memberships",
+        "statement": "'SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?'",
+        "free": [],
+        "scope": "eligibility"
+      },
+      {
+        "method": "state_get_select_experiments",
+        "statement": "'SELECT body,snapshot FROM experiments WHERE id=?'",
+        "free": [],
+        "scope": "get"
+      },
+      {
+        "method": "state_list_select_experiments",
+        "statement": "'SELECT body,snapshot FROM experiments ORDER BY rowid'",
+        "free": [],
+        "scope": "list"
+      },
+      {
+        "method": "state_save_update_experiments",
+        "statement": "'UPDATE experiments SET body=? WHERE id=?'",
+        "free": [],
+        "scope": "save"
+      },
+      {
+        "method": "state_create_insert_experiments",
+        "statement": "'INSERT INTO experiments VALUES (?,?,?,NULL)'",
+        "free": [],
+        "scope": "create"
+      },
+      {
+        "method": "state_snapshot_select_experiments",
+        "statement": "'SELECT snapshot FROM experiments WHERE id=?'",
+        "free": [],
+        "scope": "snapshot"
+      }
+    ],
+    "workspaces": [
+      {
+        "method": "state_workspaces_select_workspaces",
+        "statement": "'SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid'",
+        "free": [],
+        "scope": "workspaces"
+      }
+    ]
+  },
+  "clockAST": "identical",
+  "facadeSignatures": "identical"
+}
