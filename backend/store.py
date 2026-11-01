@@ -1,7 +1,6 @@
 """SQLite product state. Runtime ledgers remain owned by device agents."""
 
 from .migrations import initialize_product_schema
-from .policies import dispatch_held, read_setting, set_disabled_workers
 from contextlib import contextmanager
 import json
 import os
@@ -10,14 +9,15 @@ import sqlite3
 import threading
 
 from argon2 import PasswordHasher
-from .errors import RuntimeRejected
 from .migrations import initialize_workspace_extras, migrate
 
-from .constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
 from .services.accounts import AccountService
+from .services.device_state import DeviceStateService
+from .services.scheduling import SchedulingService
 from .services.experiment_state import ExperimentStateService
 from .services.workspaces import WorkspaceStateService
 from .core.clock import now
+from .core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
 
 
 class Store:
@@ -28,6 +28,8 @@ class Store:
         self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()
         self.accounts = AccountService(self)
+        self.device_state = DeviceStateService(self)
+        self.scheduling = SchedulingService(self)
         self.experiments = ExperimentStateService(self)
         self.workspace_state = WorkspaceStateService(self)
         self.last_error = None
@@ -73,21 +75,7 @@ class Store:
         )
 
     def ensure_workers(self, ids):
-        with self.db() as db:
-            initialized = bool(db.execute('SELECT value FROM settings WHERE key="workersInitialized"').fetchone())
-            creator = db.execute('SELECT creator FROM workspaces WHERE id="lab"').fetchone()[0]
-            disabled = self.disabled_workers(db)
-            for wid in ids:
-                if not db.execute("SELECT 1 FROM worker_assignments WHERE worker_id=?", (wid,)).fetchone():
-                    db.execute(
-                        "INSERT INTO worker_assignments VALUES (?,?,?)", (wid, creator, None if initialized else "lab")
-                    )
-                    if initialized:
-                        disabled.add(wid)
-            set_disabled_workers(db, disabled)
-            db.execute("INSERT OR IGNORE INTO settings VALUES (?,?)", ("workersInitialized", "true"))
-        if self.last_error == "WorkerConfigurationUnavailable":
-            self.last_error = None
+        return self.device_state.ensure_workers(ids=ids)
 
     def profile(self, user_id):
         return self.accounts.profile(user_id)
@@ -96,16 +84,10 @@ class Store:
         return self.workspace_state.workspaces(user_id=user_id)
 
     def assignments(self, workspace_id, include_disabled=False):
-        with self.db() as db:
-            disabled = self.disabled_workers(db)
-            return [
-                r[0]
-                for r in db.execute("SELECT worker_id FROM worker_assignments WHERE workspace_id=?", (workspace_id,))
-                if include_disabled or r[0] not in disabled
-            ]
+        return self.device_state.assignments(workspace_id=workspace_id, include_disabled=include_disabled)
 
     def disabled_workers(self, db):
-        return set(read_setting(db, "disabledWorkers", []))
+        return self.device_state.disabled_workers(db=db)
 
     def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
         return self.experiments.cancel_selected(db=db, worker_id=worker_id, include_queued=include_queued, keep=keep)
@@ -129,212 +111,22 @@ class Store:
         return self.experiments.create(owner=owner, config=config, workspace_id=workspace_id)
 
     def device_names(self):
-        """{worker id: the name its owner gave the device}, for screens that would otherwise show the raw id."""
-        with self.db() as db:
-            return {r[0]: r[1] for r in db.execute("SELECT worker_id,name FROM devices WHERE name<>''")}
+        return self.device_state.device_names()
 
     def device_identities(self):
-        with self.db() as db:
-            return {
-                row["worker_id"]: {
-                    "name": row["name"],
-                    "gpuName": json.loads(row["self_test"]).get("gpuName"),
-                    "gpuUUID": json.loads(row["self_test"]).get("gpuUUID"),
-                    "gpuIndex": json.loads(row["self_test"]).get("gpuIndex"),
-                    "source": "current",
-                }
-                for row in db.execute("SELECT worker_id,name,self_test FROM devices")
-            }
+        return self.device_state.device_identities()
 
     def snapshot(self, run_id):
         return self.experiments.snapshot(run_id=run_id)
 
     def dispatch_once(self):
-        with self.operation_lock:
-            self._dispatch_once()
+        return self.scheduling.dispatch_once()
 
     def _dispatch_once(self):
-        """Always reconcile admitted work; hold only admission of new queued work."""
-        errors = []
-        for active in [body for body in self.list() if body["status"] in ACTIVE]:
-            try:
-                self._dispatch_run(active)
-                with self.db() as db:
-                    db.execute("BEGIN IMMEDIATE")
-                    self.runtime.auto_join(db, self.get(active["experimentId"]))  # it checks allowJoin itself
-            except Exception as error:
-                errors.append(type(error).__name__)
-        with self.db() as db:
-            queued = [row[0] for row in db.execute("SELECT run_id FROM queue ORDER BY sequence")]
-        for run_id in queued:
-            with self.db() as db:
-                # Recheck under the same lock as the queued-to-STARTING claim.
-                # An operator can hold admission while reconciliation is running.
-                if dispatch_held(db):
-                    break
-                active = self.get(run_id)
-                if not active or active["status"] != "QUEUED":
-                    continue
-                if reason := self.eligibility(db, active):
-                    active.update(status="CANCELLED", cancelRequested=True, completedAt=now(), failureReason=reason)
-                    self.save(db, active)
-                    db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
-                    self.audit(db, "system", "QUEUE_ACCESS_REVOKED", run_id, active["workspaceId"])
-                    continue
-                if waiting := self.runtime.waiting_reason(active):
-                    active["waitingReason"] = waiting
-                    self.save(db, active)
-                    continue
-                active.pop("waitingReason", None)
-                active.update(status="STARTING", startedAt=now())
-                self.save(db, active)
-            # Reserve before considering the next job; retry this frozen run on
-            # lost responses, and keep unrelated jobs progressing through errors.
-            try:
-                self._dispatch_run(active)
-            except Exception as error:
-                errors.append(type(error).__name__)
-        self.last_error = errors[0] if errors else None
+        return self.scheduling._dispatch_once()
 
     def _dispatch_run(self, active):
-        run_id = active["experimentId"]
-        # Submission can succeed while its response is lost. The runtime rejects
-        # changes to an existing run and accepts retries of this exact payload.
-        config = {
-            "runId": run_id,
-            "workerIds": active["workerIds"],
-            "workload": active["task"],
-            **{
-                key: active[key]
-                for key in (
-                    "candidatesPerGeneration",
-                    "maxGenerations",
-                    "alpha",
-                    "sigma",
-                    "decodeEngine",
-                    "schedulerPolicy",
-                    "syncMode",
-                )
-            },
-        }
-        config.update(
-            coordinatorDeviceId=active["coordinatorDeviceId"],
-            backupPolicy=active.get("backupPolicy", {"interval": 1, "retain": 3}),
-        )
-        if active.get("recipeVersion") in (2, 3):
-            config.update(
-                {
-                    key: active[key]
-                    for key in (
-                        "recipeVersion",
-                        "modelManifest",
-                        "modelSource",
-                        "datasetObjectSha256",
-                        "datasetIdentity",
-                        "batchSize",
-                        "batchSeed",
-                        "sigmaSchedule",
-                        "sigmaMinimum",
-                        "maxNewTokens",
-                        "validationInterval",
-                    )
-                }
-            )
-        if "datasetSplitObjects" in active:  # a file-backed dataset (format 3)
-            config["datasetSplitObjects"] = active["datasetSplitObjects"]
-        if active.get("recipeVersion") == 3:
-            config.update({key: active[key] for key in V3_KEYS})
-            config.update({key: active[key] for key in (*V3_UPDATE_KEYS, *V3_CODE_KEYS) if key in active})
-        try:
-            self.runtime.submit(config)
-        except RuntimeRejected as error:
-            with self.db() as db:
-                body = self.get(run_id)
-                body.update(status="FAILED", failureReason=str(error), completedAt=now())
-                self.save(db, body)
-                db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
-            return
-        current = self.get(run_id)
-        if current.get("cancelRequested"):
-            self.runtime.cancel(run_id)
-        elif current.get("pauseRequested"):
-            self.runtime.pause(run_id)
-        snapshot = self.runtime.snapshot(run_id)
-        with self.db() as db:
-            body = self.get(run_id)
-            state = snapshot["state"]
-            body["status"] = state["status"]
-            if body.get("cancelRequested") and body["status"] == "PAUSED":
-                body["status"] = "CANCELLED"
-            if (
-                body.get("pauseRequested")
-                and not body.get("cancelRequested")
-                and body["status"] in ("STARTING", "RUNNING")
-            ):
-                body["status"] = "PAUSING"
-            if state.get("pauseCheckpoint"):
-                body["pauseCheckpoint"] = state["pauseCheckpoint"]
-            if body["status"] == "PAUSED":
-                body["pausedAt"] = now()
-                db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
-            if "cloudSync" in snapshot:
-                previous = body.get("cloudSync", {})
-                incoming = snapshot["cloudSync"]
-                body["cloudSync"] = {**incoming}
-                if previous.get("lastCloudGeneration", -1) > incoming.get("lastCloudGeneration", -1):
-                    body["cloudSync"].update(
-                        {k: previous[k] for k in ("lastCloudGeneration", "pointId") if k in previous}
-                    )
-            generations = snapshot["generations"]
-            complete = [item for item in generations if item["status"] == "COMPLETED"]
-            body["completedGenerations"] = snapshot.get("completedGenerationCount", len(complete))
-            body["monitoringPartial"] = bool(snapshot.get("monitoringPartial"))
-            body["workerBlocks"] = {
-                worker: {"reason": value["stopReason"], "blockedAt": value.get("blockedAt")}
-                for worker, value in state.get("workerStates", {}).items()
-                if value.get("stopReason")
-            }
-            if snapshot.get("auditSummary") is not None:
-                body["auditSummary"] = snapshot["auditSummary"]
-            if isinstance(
-                snapshot.get("membership"), dict
-            ):  # who works on it now, as its coordinator recorded (ADR-009)
-                body["membership"] = {
-                    key: snapshot["membership"].get(key, []) for key in ("members", "left", "refused")
-                } | {"generation": snapshot["membership"].get("generation")}
-            if snapshot.get("usageSummary") is not None:
-                body["usageSummary"] = snapshot["usageSummary"]
-            if snapshot.get("studyMetrics"):
-                body["studyMetrics"] = snapshot["studyMetrics"]
-                best = snapshot["studyMetrics"].get("best") or {}
-                if "validationAccuracy" in best:
-                    body["validationScore"] = best["validationAccuracy"]
-                if "validationReward" in best:
-                    body["validationScore"] = best["validationReward"]
-                if "testReward" in snapshot["studyMetrics"]:
-                    body["testScore"] = snapshot["studyMetrics"]["testReward"]
-                if "testAccuracy" in snapshot["studyMetrics"]:
-                    body["testScore"] = snapshot["studyMetrics"]["testAccuracy"]
-            latest = snapshot.get("latestGeneration") or (generations[-1] if generations else None)
-            if latest:
-                body["currentGenerationId"] = latest["generationId"]
-                body["committedCandidateCount"] = latest["committedCandidateCount"]
-                body["modelVersion"] = latest["modelVersion"]
-            if "failureReason" in state:
-                body["failureReason"] = state["failureReason"]
-            if state.get("finalWeightsSha256"):
-                body["modelVersion"] = state["finalWeightsSha256"]
-            elif body["status"] in TERMINAL and snapshot.get("checkpointSha256"):
-                body["modelVersion"] = snapshot["checkpointSha256"]
-            if body["status"] in TERMINAL:
-                body["completedAt"] = now()
-                db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
-            self.save(db, body)
-            db.execute("UPDATE experiments SET snapshot=? WHERE id=?", (json.dumps(snapshot, allow_nan=False), run_id))
+        return self.scheduling._dispatch_run(active=active)
 
     def dispatch(self, stop):
-        while not stop.wait(1):
-            try:
-                self.dispatch_once()
-            except Exception as error:
-                self.last_error = type(error).__name__  # errors never become fabricated success/rewards
+        return self.scheduling.dispatch(stop=stop)  # errors never become fabricated success/rewards

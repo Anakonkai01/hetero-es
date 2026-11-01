@@ -56,7 +56,10 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   10/10 mutants; 111 product routes + two mounts preserved. B-004 hold-guard coverage fixed; original 62 tests unchanged.
   Evidence `2026-11-01-b2-experiments`. Templates/notifications + DB schema ownership extracted: 479 backend tests, 11/11 mutants; original tests unchanged.
   Schema module copied byte-identically, legacy helper HTTP contract preserved. Evidence `2026-11-01-b2-templates-notifications`.
-  Devices/agent, studies/qualification, storage, operations and remaining Store work, B3–B10 and C remain.
+  Devices/agent and nine Store device/scheduler methods extracted: 488 backend tests, 13/13 mutants; original 62 tests
+  unchanged. Seven initial surviving mutants led to nine independent guard regressions (B-005).
+  Evidence `2026-11-01-b2-devices-agents`. Studies/qualification, storage, operations and remaining Store work,
+  B3–B10 and C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.

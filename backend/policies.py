@@ -2,15 +2,7 @@
 
 import json
 from fastapi import HTTPException
-from pydantic import BaseModel, ConfigDict
-
-
-class Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-
-class FiniteStrict(Strict):
-    model_config = ConfigDict(allow_inf_nan=False)
+from .core.models import Strict as Strict, FiniteStrict as FiniteStrict
 
 
 def backup_policy(value):
