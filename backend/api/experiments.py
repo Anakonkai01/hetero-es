@@ -7,8 +7,8 @@ from fastapi import APIRouter
 from ..services.experiments import operations
 
 
-def install_routes(app, store, runtime, scoped, visible, authorized, validate):
-    service = operations(store, runtime, scoped, visible, authorized, validate)
+def install_routes(app, store, runtime, scoped, visible, authorized, validate, *, service_scoped=None):
+    service = operations(store, runtime, service_scoped or scoped, visible, authorized, validate)
     router = APIRouter()
 
     @router.get("/api/v1/experiments")

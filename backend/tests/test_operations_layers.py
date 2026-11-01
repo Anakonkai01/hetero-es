@@ -85,3 +85,40 @@ def test_resume_keeps_hold_when_imported_queued_workers_are_not_configured(lab):
     with store.db() as db:
         assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0] == "true"
         assert db.execute("SELECT count(*) FROM audit WHERE action='MAINTENANCE_END'").fetchone()[0] == 0
+
+
+def test_workspace_scope_rechecks_stored_status_when_the_supplied_profile_is_stale(lab):
+    import json
+    from backend.services.access import AccessService
+
+    _, store, runtime, _ = lab
+    access = AccessService(store, runtime)
+    stale = store.profile("admin")
+    changed = {**stale, "accountStatus": "SUSPENDED"}
+    with store.db() as db:
+        db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(changed), "admin"))
+    with pytest.raises(ServiceError) as denied:
+        access.scope(stale, "lab")
+    assert denied.value.status_code == 403
+    changed.update(accountStatus="ACTIVE", displayName="Updated fixture name")
+    with store.db() as db:
+        db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(changed), "admin"))
+    assert access.scope(stale, "lab")["displayName"] == "Updated fixture name"
+
+
+def test_participant_list_hides_other_owners_runs_in_the_same_workspace(setup):
+    from labkit import draft, login
+
+    client, _, _ = setup
+    participant = login(client, "participant")
+    admin = login(client, "admin")
+    own = draft(client, participant, name="Participant visibility fixture")
+    other = draft(client, admin, name="Administrator visibility fixture")
+    assert own.status_code == other.status_code == 200
+    own_id, other_id = own.json()["experimentId"], other.json()["experimentId"]
+    visible = client.get("/api/v1/experiments", headers=participant)
+    assert visible.status_code == 200
+    assert {run["experimentId"] for run in visible.json()} == {own_id}
+    administrator_view = client.get("/api/v1/experiments", headers=admin)
+    assert administrator_view.status_code == 200
+    assert {run["experimentId"] for run in administrator_view.json()} == {own_id, other_id}

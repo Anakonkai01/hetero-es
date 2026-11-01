@@ -66,7 +66,11 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   Operations/inventory/policies/validation + core contracts extracted: 496 backend tests, 12/12 mutants;
   four new access/maintenance checks, original tests unchanged. Recursive production runtime dependency closure passes
   separately; upgrade the old flat-only scanner after B2, before B9. Evidence `2026-11-01-b2-operations-core`.
-  Application composition/access, remaining Store/diagnostic SQL cleanup, B3–B10 and C remain.
+  B2 complete: DB/Store/audit, diagnostics/bootstrap and application/access composition separated. Full backend 502,
+  final mutation 12/12; B-006 list-owner coverage fixed. All 62 original tests unchanged, 111 routes + two mounts retained.
+  All 278 unique SQL expression ASTs and the fresh 37-table/177-column schema match B1; every SQL/snapshot call belongs
+  to DB/repositories. Every service imports with FastAPI/Starlette/Torch blocked. Evidence `2026-11-01-b2-composition`.
+  B3–B10 and C remain. Before B9, strengthen the old runtime scanner and modernize doctor instrumentation paths.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.

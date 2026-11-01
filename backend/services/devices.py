@@ -28,7 +28,7 @@ from ..core.device_models import (
 from ..agent_scheduling import AgentScheduling
 from ..agent_commands import AgentCommands
 from ..agent_polling import AgentPolling
-from ..model_qualification import ModelQualifications
+from .model_qualification import ModelQualifications
 from ..db.migrations import initialize_agent_schema
 from .policies import has_device_reservation, processes_drained
 from .policies import set_disabled_workers, active_profile, platform_profile

@@ -6,9 +6,10 @@ from .policies import dispatch_held
 import hashlib
 import json
 import secrets
-from ..store import TERMINAL, now
+from ..core.constants import TERMINAL
+from ..core.clock import now
 from ..constants import REVISION
-from ..timeline import build_timeline
+from .timeline import build_timeline
 from types import SimpleNamespace
 from ..core.errors import ServiceError
 from ..repositories.experiments import ExperimentsRepository as repository

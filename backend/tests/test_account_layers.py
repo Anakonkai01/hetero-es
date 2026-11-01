@@ -42,54 +42,10 @@ def test_service_errors_are_plain_errors_and_keep_public_message_headers():
 
 def test_account_layer_boundaries():
     backend = Path(__file__).resolve().parents[1]
-    for relative in (
-        "api/auth.py",
-        "api/accounts.py",
-        "api/security.py",
-        "services/accounts.py",
-        "api/workspaces.py",
-        "services/workspaces.py",
-        "api/experiments.py",
-        "services/experiments.py",
-        "services/experiment_state.py",
-        "api/history.py",
-        "services/history.py",
-        "api/templates.py",
-        "services/templates.py",
-        "api/notifications.py",
-        "services/notifications.py",
-        "services/agent_commands.py",
-        "services/agent_polling.py",
-        "services/agent_scheduling.py",
-        "core/models.py",
-        "core/device_models.py",
-        "api/devices.py",
-        "services/devices.py",
-        "services/device_state.py",
-        "services/scheduling.py",
-        "core/study_models.py",
-        "api/study_registry.py",
-        "services/study_registry.py",
-        "api/model_qualification.py",
-        "services/model_qualification.py",
-        "core/storage_models.py",
-        "core/filesystem.py",
-        "services/recovery_storage.py",
-        "services/metadata_backup.py",
-        "storage/local_backend.py",
-        "api/recovery_storage.py",
-        "api/local_storage.py",
-        "api/operations.py",
-        "services/operations.py",
-        "api/inventory.py",
-        "services/inventory.py",
-        "services/policies.py",
-        "services/validation.py",
-        "core/request_models.py",
-        "core/config.py",
-        "core/throttle.py",
-        "core/addresses.py",
-        "core/monitor_models.py",
+    for relative in sorted(
+        path.relative_to(backend).as_posix()
+        for group in ("api", "services", "core", "storage")
+        for path in (backend / group).rglob("*.py")
     ):
         tree = ast.parse((backend / relative).read_text())
         for node in ast.walk(tree):

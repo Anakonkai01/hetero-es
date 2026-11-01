@@ -69,6 +69,34 @@ A product database backup does not contain model/recovery object bytes or a coor
 complete recovery procedure must restore metadata and its referenced objects, then resume a run from a verified recovery
 point on the coordinator. The runtime's write-ahead generation record prevents silently recomputing a different update.
 
+## Implemented layering after B2 (2026-11-01)
+
+The working branch now separates HTTP, business policy and persistence. It still runs the combined SQLite service;
+process separation and PostgreSQL belong to B3–B4. Compatibility namespaces remain until B9.
+
+| Responsibility                                                                    | Current owner                                                                    |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| HTTP routers, headers/cookies, SSE and static files                               | `backend/api/`                                                                   |
+| Application construction, background lifetime and CLI                             | `backend/apps/factory.py`, `apps/server.py`, `apps/doctor.py`, `apps/monitor.py` |
+| Business policy, access, domain operations, projections and thin Store facade     | `backend/services/`                                                              |
+| Domain SQL                                                                        | `backend/repositories/`                                                          |
+| SQLite initialization, transactions, schema, diagnostics and consistent snapshots | `backend/db/`                                                                    |
+| Plain errors, configuration, request contracts, constants, clock and kernel lock  | `backend/core/`                                                                  |
+| Filesystem object storage and signed capabilities                                 | `backend/storage/local_backend.py`; HTTP adapters remain in `api/`               |
+
+The final B2 SQLite suite passes 502 tests; 62 original test files remain byte-identical. The full product contract
+retains 111 method/path pairs plus two mounts. Every service imports in a fresh process with FastAPI, Starlette and
+Torch blocked. Complete-tree guards keep direct SQL and snapshot execution inside repositories/DB.
+
+Independent audits preserve all 278 unique SQL expression ASTs and the full fresh schema catalog, columns and indexes
+(37 tables/177 columns). Sharing transaction/session helpers changes static SQL definitions from 358 to 350; it does
+not add or remove a distinct expression. Final composition mutations pass 12/12 after closing the same-workspace list
+owner coverage gap. Evidence: `2026-11-01-b2-composition` on `evidence-archive`.
+
+This is source/CPU layering evidence. PostgreSQL, separate replicas/leadership, OIDC, MinIO and recursive packaged apps
+are still pending. A scratch recursive production import-closure check passes; the original flat-only test remains
+unchanged for B2 and must be strengthened during post-B2 adaptation before B9 removes its compatibility premise.
+
 ## Planned service boundaries
 
 Plan B first separates API, business services, repositories and DB transactions, with compatibility imports while tests

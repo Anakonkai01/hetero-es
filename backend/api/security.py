@@ -1,6 +1,6 @@
 """HTTP authentication dependencies."""
 
-from fastapi import Header, HTTPException
+from fastapi import Depends, Header, HTTPException
 
 
 def local_user(accounts):
@@ -10,3 +10,10 @@ def local_user(accounts):
         return accounts.current(authorization[7:])
 
     return user
+
+
+def workspace_scope(access, user):
+    def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
+        return access.scope(current, x_workspace_id)
+
+    return scoped

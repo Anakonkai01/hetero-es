@@ -6,8 +6,8 @@ from fastapi import APIRouter
 from ..services.operations import operations as business_operations
 
 
-def install_routes(app, store, runtime, platform):
-    service = business_operations(store, runtime, platform)
+def install_routes(app, store, runtime, platform, *, check_platform=None):
+    service = business_operations(store, runtime, check_platform or platform)
     router = APIRouter()
 
     @router.get("/api/v1/platform/users")

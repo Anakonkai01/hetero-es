@@ -5,8 +5,8 @@ from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDe
 from ..services.workspaces import operations
 
 
-def install_routes(app, store, scoped, active, workspace_admin):
-    service = operations(store, scoped, active, workspace_admin)
+def install_routes(app, store, scoped, active, workspace_admin, *, service_scoped=None, service_active=None):
+    service = operations(store, service_scoped or scoped, service_active or active, workspace_admin)
     router = APIRouter()
 
     @router.post("/api/v1/workspaces", status_code=201)
