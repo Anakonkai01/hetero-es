@@ -7,3 +7,7 @@ class ServiceError(Exception):
         self.status_code = status_code
         self.detail = detail
         self.headers = headers
+
+
+class DatabaseConflict(Exception):
+    """A persistence constraint conflict; callers decide its business meaning."""

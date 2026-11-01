@@ -42,7 +42,14 @@ def test_service_errors_are_plain_errors_and_keep_public_message_headers():
 
 def test_account_layer_boundaries():
     backend = Path(__file__).resolve().parents[1]
-    for relative in ("api/auth.py", "api/accounts.py", "api/security.py", "services/accounts.py"):
+    for relative in (
+        "api/auth.py",
+        "api/accounts.py",
+        "api/security.py",
+        "services/accounts.py",
+        "api/workspaces.py",
+        "services/workspaces.py",
+    ):
         tree = ast.parse((backend / relative).read_text())
         for node in ast.walk(tree):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
@@ -55,3 +62,17 @@ def test_account_layer_boundaries():
                     assert not module.startswith(("fastapi", "starlette")), (relative, module)
             if isinstance(node, ast.Import) and relative.startswith("services/"):
                 assert not any(n.name.startswith(("fastapi", "starlette")) for n in node.names)
+
+
+def test_repository_conflict_is_translated_without_exposing_driver_errors():
+    import sqlite3
+
+    from backend.core.errors import DatabaseConflict
+    from backend.repositories.base import execute
+
+    with sqlite3.connect(":memory:") as db:
+        execute(db, "CREATE TABLE entries(id TEXT PRIMARY KEY)")
+        execute(db, "INSERT INTO entries VALUES (?)", ("same",))
+        with pytest.raises(DatabaseConflict):
+            execute(db, "INSERT INTO entries VALUES (?)", ("same",))
+        assert execute(db, "SELECT count(*) FROM entries").fetchone()[0] == 1
