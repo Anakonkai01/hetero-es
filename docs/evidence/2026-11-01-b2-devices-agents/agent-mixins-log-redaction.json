@@ -1,0 +1,7 @@
+{
+  "original_sha256": "e284a8f126ccf198119e7dcd4bd5ad3f5064abd1d35303b8b474740119f0a123",
+  "redacted_sha256": "e8d13db105f3dcebb59979a6261ff42c542ec888089db319c964245eaf844234",
+  "bearer_replacements": 3,
+  "named_token_replacements": 0,
+  "scope": "disposable test fixture credentials, no live lab credentials"
+}

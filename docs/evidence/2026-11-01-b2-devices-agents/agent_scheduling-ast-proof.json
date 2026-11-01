@@ -1,0 +1,202 @@
+{
+  "module": "agent_scheduling",
+  "class": "AgentScheduling",
+  "sqlCalls": 33,
+  "classBodyAST": "same except repository/write-boundary calls, plain service errors and relocated relative imports",
+  "methodSignatures": "identical",
+  "comments": "preserved by source-span edits",
+  "queries": [
+    {
+      "method": "waiting_reason_select_device_reservations",
+      "scope": "waiting_reason",
+      "statement": "'SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id'",
+      "free": []
+    },
+    {
+      "method": "waiting_reason_select_settings",
+      "scope": "waiting_reason",
+      "statement": "'SELECT value FROM settings WHERE key=?'",
+      "free": []
+    },
+    {
+      "method": "waiting_reason_select_physical_reservations",
+      "scope": "waiting_reason",
+      "statement": "'SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE resource_id=?'",
+      "free": []
+    },
+    {
+      "method": "intended_members_select_assignment_members",
+      "scope": "intended_members",
+      "statement": "'SELECT worker_id, action FROM assignment_members WHERE run_id=? ORDER BY rowid'",
+      "free": []
+    },
+    {
+      "method": "change_members_insert_assignment_members",
+      "scope": "change_members",
+      "statement": "'INSERT INTO assignment_members VALUES (?,?,?,?,?,?,?)'",
+      "free": []
+    },
+    {
+      "method": "change_members_update_assignments",
+      "scope": "change_members",
+      "statement": "'UPDATE assignments SET body=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "change_members_select_assignments",
+      "scope": "change_members",
+      "statement": "'SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "free": []
+    },
+    {
+      "method": "change_members_insert_device_reservations",
+      "scope": "change_members",
+      "statement": "'INSERT INTO device_reservations VALUES (?,?)'",
+      "free": []
+    },
+    {
+      "method": "change_members_select_device_reservations",
+      "scope": "change_members",
+      "statement": "'SELECT assignment_id FROM device_reservations WHERE device_id=?'",
+      "free": []
+    },
+    {
+      "method": "change_members_insert_physical_reservations",
+      "scope": "change_members",
+      "statement": "'INSERT OR IGNORE INTO physical_reservations VALUES (?,?)'",
+      "free": []
+    },
+    {
+      "method": "note_membership_select_experiments",
+      "scope": "note_membership",
+      "statement": "'SELECT body FROM experiments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "auto_join_select_assignment_members",
+      "scope": "auto_join",
+      "statement": "\"SELECT worker_id FROM assignment_members WHERE run_id=? AND action='LEAVE'\"",
+      "free": []
+    },
+    {
+      "method": "auto_join_select_worker_assignments",
+      "scope": "auto_join",
+      "statement": "'SELECT worker_id FROM worker_assignments WHERE workspace_id=?'",
+      "free": []
+    },
+    {
+      "method": "leave_on_disable_select_assignments",
+      "scope": "leave_on_disable",
+      "statement": "'SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=? AND a.released=0 AND a.coordinator!=?'",
+      "free": []
+    },
+    {
+      "method": "release_left_members_delete_device_reservations",
+      "scope": "release_left_members",
+      "statement": "'DELETE FROM device_reservations WHERE device_id=? AND assignment_id=?'",
+      "free": []
+    },
+    {
+      "method": "release_left_members_update_assignments",
+      "scope": "release_left_members",
+      "statement": "'UPDATE assignments SET body=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "release_left_members_select_experiments",
+      "scope": "release_left_members",
+      "statement": "'SELECT body FROM experiments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "release_left_members_delete_physical_reservations",
+      "scope": "release_left_members",
+      "statement": "'DELETE FROM physical_reservations WHERE resource_id=? AND assignment_id=?'",
+      "free": []
+    },
+    {
+      "method": "release_left_members_select_devices",
+      "scope": "release_left_members",
+      "statement": "'SELECT self_test,seen FROM devices WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "reservations_select_device_reservations",
+      "scope": "reservations",
+      "statement": "'SELECT * FROM device_reservations'",
+      "free": []
+    },
+    {
+      "method": "_assignment_select_assignments",
+      "scope": "_assignment",
+      "statement": "'SELECT * FROM assignments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "submit_insert_assignments",
+      "scope": "submit",
+      "statement": "'INSERT INTO assignments VALUES (?,?,?,?,?,?,0)'",
+      "free": []
+    },
+    {
+      "method": "submit_insert_device_reservations",
+      "scope": "submit",
+      "statement": "'INSERT INTO device_reservations VALUES (?,?)'",
+      "free": []
+    },
+    {
+      "method": "submit_select_assignments",
+      "scope": "submit",
+      "statement": "'SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "free": []
+    },
+    {
+      "method": "submit_insert_physical_reservations",
+      "scope": "submit",
+      "statement": "'INSERT INTO physical_reservations VALUES (?,?)'",
+      "free": []
+    },
+    {
+      "method": "cancel_select_assignments",
+      "scope": "cancel",
+      "statement": "'SELECT id,body,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "free": []
+    },
+    {
+      "method": "pause_select_assignments",
+      "scope": "pause",
+      "statement": "'SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "free": []
+    },
+    {
+      "method": "_release_confirmed_update_assignments",
+      "scope": "_release_confirmed",
+      "statement": "'UPDATE assignments SET released=1 WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_release_confirmed_delete_device_reservations",
+      "scope": "_release_confirmed",
+      "statement": "'DELETE FROM device_reservations WHERE assignment_id=?'",
+      "free": []
+    },
+    {
+      "method": "_release_confirmed_delete_physical_reservations",
+      "scope": "_release_confirmed",
+      "statement": "'DELETE FROM physical_reservations WHERE assignment_id=?'",
+      "free": []
+    },
+    {
+      "method": "_release_confirmed_update_assignments_2",
+      "scope": "_release_confirmed",
+      "statement": "'UPDATE assignments SET snapshot=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_release_confirmed_select_devices",
+      "scope": "_release_confirmed",
+      "statement": "'SELECT processes,seen FROM devices WHERE id=?'",
+      "free": []
+    }
+  ]
+}

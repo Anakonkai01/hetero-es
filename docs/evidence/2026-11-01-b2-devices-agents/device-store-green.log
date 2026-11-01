@@ -1,0 +1,8 @@
+ImportError while loading conftest '/home/pc5070ti/projects/heteroes/backend/tests/conftest.py'.
+backend/tests/conftest.py:6: in <module>
+    from backend.app import create_app
+backend/app.py:2: in <module>
+    from .routes_inventory import install_routes as install_inventory_routes
+backend/routes_inventory.py:8: in <module>
+    from .store import ACTIVE
+E   ImportError: cannot import name 'ACTIVE' from 'backend.store' (/home/pc5070ti/projects/heteroes/backend/store.py)

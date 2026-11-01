@@ -1,0 +1,8 @@
+{
+  "constantsBytesIdentical": true,
+  "constantsSha256": "bd56660bee76ccea16a303c139d061474c134e59c5fdefb71a19d4ba6efeedf5",
+  "modelBaseAST": "identical",
+  "policyFunctionAST": "identical",
+  "deviceContractAST": "identical except relocated imports and plain capability errors",
+  "compatibility": "module identity aliases for old imports"
+}

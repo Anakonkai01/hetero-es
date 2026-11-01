@@ -1,0 +1,80 @@
+[
+  {
+    "name": "expired pairing code accepted",
+    "file": "backend/services/devices.py",
+    "old": "if not code or code[\"used\"] or code[\"expires\"] <= time.time():",
+    "new": "if not code or code[\"used\"]:"
+  },
+  {
+    "name": "revoked control credential accepted",
+    "file": "backend/services/devices.py",
+    "old": "drain = purpose == \"poll\"",
+    "new": "drain = True"
+  },
+  {
+    "name": "pairing credential reusable",
+    "file": "backend/repositories/devices.py",
+    "old": "UPDATE pairing_codes SET used=1 WHERE digest=?",
+    "new": "UPDATE pairing_codes SET used=0 WHERE digest=?"
+  },
+  {
+    "name": "undeclared agent command delivered",
+    "file": "backend/services/agent_commands.py",
+    "old": "if command_kinds is not None and command[\"kind\"] not in command_kinds:",
+    "new": "if False:"
+  },
+  {
+    "name": "worker command ignores coordinator identity",
+    "file": "backend/services/agent_commands.py",
+    "old": "row[\"coordinator\"] != device[\"id\"]",
+    "new": "False"
+  },
+  {
+    "name": "stale snapshot epoch accepted",
+    "file": "backend/services/agent_polling.py",
+    "old": "row[\"epoch\"] != report.epoch",
+    "new": "False"
+  },
+  {
+    "name": "unverified pause checkpoint accepted",
+    "file": "backend/services/agent_polling.py",
+    "old": "point.get(\"verified\") is not True",
+    "new": "False"
+  },
+  {
+    "name": "stale monitoring event identity accepted",
+    "file": "backend/services/agent_polling.py",
+    "old": "and event.eventId == expected",
+    "new": "and True"
+  },
+  {
+    "name": "reserved device identity may change",
+    "file": "backend/services/agent_polling.py",
+    "old": "if reserved and (",
+    "new": "if False and ("
+  },
+  {
+    "name": "strict GPU layout skipped during admission",
+    "file": "backend/services/agent_scheduling.py",
+    "old": "if reason := strict_layout(body, coordinator, chosen[1:]):\n            return reason",
+    "new": "if False:\n            return None"
+  },
+  {
+    "name": "offline process ownership released",
+    "file": "backend/services/agent_scheduling.py",
+    "old": "if time.time() - d[\"seen\"] >= 30 or len(reports) != 1:",
+    "new": "if len(reports) != 1:"
+  },
+  {
+    "name": "scheduler ignores admission hold",
+    "file": "backend/services/scheduling.py",
+    "old": "if dispatch_held(db):",
+    "new": "if False:"
+  },
+  {
+    "name": "scheduler skips active reconciliation",
+    "file": "backend/services/scheduling.py",
+    "old": "for active in [body for body in self.store.list() if body[\"status\"] in ACTIVE]:",
+    "new": "for active in []:"
+  }
+]

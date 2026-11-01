@@ -1,0 +1,413 @@
+{
+  "domain": "devices",
+  "sqlCalls": 52,
+  "businessFunctions": 26,
+  "httpFunctions": 19,
+  "transportFunctionsKeptInAPI": [],
+  "businessAST": "same except repository/transaction calls, plain errors, dependency parameters/internal calls, HTTP response removal",
+  "httpSignaturesAndDecorators": "identical",
+  "queries": [
+    {
+      "name": "authenticate_device_select_devices",
+      "scope": "authenticate_device",
+      "statement": "'SELECT * FROM devices WHERE token_digest=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 272
+    },
+    {
+      "name": "authenticate_device_select_assignments",
+      "scope": "authenticate_device",
+      "statement": "'SELECT 1 FROM assignments WHERE coordinator=? AND released=0'",
+      "dynamic": false,
+      "free": [],
+      "line": 278
+    },
+    {
+      "name": "pairing_insert_pairing_codes",
+      "scope": "pairing",
+      "statement": "'INSERT INTO pairing_codes VALUES (?,?,?,0)'",
+      "dynamic": false,
+      "free": [],
+      "line": 288
+    },
+    {
+      "name": "enroll_insert_devices",
+      "scope": "enroll",
+      "statement": "'INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,bulk_url,self_test) VALUES (?,?,?,?,?,?,?,?,?)'",
+      "dynamic": false,
+      "free": [],
+      "line": 308
+    },
+    {
+      "name": "enroll_update_pairing_codes",
+      "scope": "enroll",
+      "statement": "'UPDATE pairing_codes SET used=1 WHERE digest=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 322
+    },
+    {
+      "name": "enroll_insert_worker_assignments",
+      "scope": "enroll",
+      "statement": "'INSERT OR IGNORE INTO worker_assignments VALUES (?,?,NULL)'",
+      "dynamic": false,
+      "free": [],
+      "line": 323
+    },
+    {
+      "name": "enroll_select_pairing_codes",
+      "scope": "enroll",
+      "statement": "'SELECT * FROM pairing_codes WHERE digest=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 296
+    },
+    {
+      "name": "enroll_select_devices",
+      "scope": "enroll",
+      "statement": "'SELECT 1 FROM devices WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 301
+    },
+    {
+      "name": "enroll_select_worker_assignments",
+      "scope": "enroll",
+      "statement": "'SELECT owner FROM worker_assignments WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 303
+    },
+    {
+      "name": "update_endpoints_update_devices",
+      "scope": "update_endpoints",
+      "statement": "'UPDATE devices SET compute_url=?,bulk_url=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 358
+    },
+    {
+      "name": "update_endpoints_update_devices_2",
+      "scope": "update_endpoints",
+      "statement": "'UPDATE devices SET self_test=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 357
+    },
+    {
+      "name": "update_endpoints_select_devices",
+      "scope": "update_endpoints",
+      "statement": "'SELECT * FROM devices WHERE id=? AND owner=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 335
+    },
+    {
+      "name": "qualification_update_devices",
+      "scope": "qualification",
+      "statement": "'UPDATE devices SET self_test=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 394
+    },
+    {
+      "name": "qualification_select_devices",
+      "scope": "qualification",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 376
+    },
+    {
+      "name": "devices_select_memberships",
+      "scope": "devices",
+      "statement": "'SELECT m.user_id,w.id,w.name FROM memberships m JOIN workspaces w ON w.id=m.workspace_id ORDER BY w.rowid'",
+      "dynamic": false,
+      "free": [],
+      "line": 403
+    },
+    {
+      "name": "approve_update_devices",
+      "scope": "approve",
+      "statement": "'UPDATE devices SET status=\"APPROVED\" WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 433
+    },
+    {
+      "name": "approve_update_worker_assignments",
+      "scope": "approve",
+      "statement": "'UPDATE worker_assignments SET workspace_id=? WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 434
+    },
+    {
+      "name": "approve_update_devices_2",
+      "scope": "approve",
+      "statement": "'UPDATE devices SET status=\"REVOKED\",enabled=0,desired=0 WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 447
+    },
+    {
+      "name": "approve_select_devices",
+      "scope": "approve",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 412
+    },
+    {
+      "name": "approve_select_assignments",
+      "scope": "approve",
+      "statement": "'SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 442
+    },
+    {
+      "name": "approve_select_memberships",
+      "scope": "approve",
+      "statement": "'SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 426
+    },
+    {
+      "name": "remove_delete_devices",
+      "scope": "remove",
+      "statement": "'DELETE FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 466
+    },
+    {
+      "name": "remove_delete_value",
+      "scope": "remove",
+      "statement": "f'DELETE FROM {table} WHERE device_id=?'",
+      "dynamic": true,
+      "free": [
+        "table"
+      ],
+      "line": 465
+    },
+    {
+      "name": "remove_delete_worker_assignments",
+      "scope": "remove",
+      "statement": "'DELETE FROM worker_assignments WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 468
+    },
+    {
+      "name": "remove_select_devices",
+      "scope": "remove",
+      "statement": "'SELECT 1 FROM devices WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 467
+    },
+    {
+      "name": "remove_device_select_devices",
+      "scope": "remove_device",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 475
+    },
+    {
+      "name": "managed_select_devices",
+      "scope": "managed",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 485
+    },
+    {
+      "name": "rename_update_devices",
+      "scope": "rename",
+      "statement": "'UPDATE devices SET name=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 495
+    },
+    {
+      "name": "delete_device_update_devices",
+      "scope": "delete_device",
+      "statement": "'UPDATE devices SET status=\"REVOKED\",enabled=0,desired=0 WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 509
+    },
+    {
+      "name": "set_contribution_update_devices",
+      "scope": "set_contribution",
+      "statement": "'UPDATE devices SET desired=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 514
+    },
+    {
+      "name": "set_contribution_update_devices_2",
+      "scope": "set_contribution",
+      "statement": "'UPDATE devices SET keep_on=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 516
+    },
+    {
+      "name": "set_contribution_select_assignments",
+      "scope": "set_contribution",
+      "statement": "'SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 527
+    },
+    {
+      "name": "contribution_select_devices",
+      "scope": "contribution",
+      "statement": "'SELECT * FROM devices WHERE id=? AND owner=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 540
+    },
+    {
+      "name": "contribution_preference_update_devices",
+      "scope": "contribution_preference",
+      "statement": "'UPDATE devices SET keep_on=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 555
+    },
+    {
+      "name": "contribution_preference_select_devices",
+      "scope": "contribution_preference",
+      "statement": "'SELECT * FROM devices WHERE id=? AND owner=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 552
+    },
+    {
+      "name": "own_contribution_select_devices",
+      "scope": "own_contribution",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 563
+    },
+    {
+      "name": "own_name_update_devices",
+      "scope": "own_name",
+      "statement": "'UPDATE devices SET name=? WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 571
+    },
+    {
+      "name": "forget_self_update_devices",
+      "scope": "forget_self",
+      "statement": "'UPDATE devices SET status=\"REVOKED\",enabled=0,desired=0,keep_on=0 WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 584
+    },
+    {
+      "name": "forget_self_select_devices",
+      "scope": "forget_self",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 581
+    },
+    {
+      "name": "own_summary_select_assignments",
+      "scope": "own_summary",
+      "statement": "'SELECT a.run_id,a.coordinator,a.snapshot FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=? AND a.released=0'",
+      "dynamic": false,
+      "free": [],
+      "line": 593
+    },
+    {
+      "name": "own_summary_select_devices",
+      "scope": "own_summary",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 591
+    },
+    {
+      "name": "devices_select_devices",
+      "scope": "devices",
+      "statement": "'SELECT * FROM devices ORDER BY rowid'",
+      "dynamic": false,
+      "free": [],
+      "line": 72
+    },
+    {
+      "name": "devices_select_device_reservations",
+      "scope": "devices",
+      "statement": "'SELECT a.run_id FROM device_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.device_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 74
+    },
+    {
+      "name": "devices_select_worker_assignments",
+      "scope": "devices",
+      "statement": "'SELECT workspace_id FROM worker_assignments WHERE worker_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 83
+    },
+    {
+      "name": "devices_select_model_probe_reservations",
+      "scope": "devices",
+      "statement": "'SELECT job_id FROM model_probe_reservations WHERE device_id=? OR resource_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 86
+    },
+    {
+      "name": "snapshot_select_assignments",
+      "scope": "snapshot",
+      "statement": "'SELECT snapshot,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "dynamic": false,
+      "free": [],
+      "line": 213
+    },
+    {
+      "name": "runs_select_assignments",
+      "scope": "runs",
+      "statement": "'SELECT * FROM assignments ORDER BY rowid'",
+      "dynamic": false,
+      "free": [],
+      "line": 239
+    },
+    {
+      "name": "devices_select_physical_reservations",
+      "scope": "devices",
+      "statement": "'SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.resource_id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 79
+    },
+    {
+      "name": "devices_select_experiments",
+      "scope": "devices",
+      "statement": "'SELECT snapshot FROM experiments WHERE id=?'",
+      "dynamic": false,
+      "free": [],
+      "line": 95
+    },
+    {
+      "name": "devices_select_device_telemetry_history",
+      "scope": "devices",
+      "statement": "'SELECT body FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 60'",
+      "dynamic": false,
+      "free": [],
+      "line": 123
+    }
+  ]
+}

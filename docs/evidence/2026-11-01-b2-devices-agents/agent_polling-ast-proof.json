@@ -1,0 +1,190 @@
+{
+  "module": "agent_polling",
+  "class": "AgentPolling",
+  "sqlCalls": 30,
+  "classBodyAST": "same except repository/write-boundary calls, plain service errors and relocated relative imports",
+  "methodSignatures": "identical",
+  "comments": "preserved by source-span edits",
+  "queries": [
+    {
+      "method": "poll_insert_settings",
+      "scope": "poll",
+      "statement": "'INSERT OR REPLACE INTO settings VALUES (?,?)'",
+      "free": []
+    },
+    {
+      "method": "poll_select_devices",
+      "scope": "poll",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "poll_select_assignments",
+      "scope": "poll",
+      "statement": "'SELECT * FROM assignments WHERE released=0'",
+      "free": []
+    },
+    {
+      "method": "poll_select_devices_2",
+      "scope": "poll",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "poll_select_assignments_2",
+      "scope": "poll",
+      "statement": "'SELECT * FROM assignments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "poll_select_assignments_3",
+      "scope": "poll",
+      "statement": "'SELECT id,body FROM assignments WHERE released=1'",
+      "free": []
+    },
+    {
+      "method": "poll_select_assignments_4",
+      "scope": "poll",
+      "statement": "'SELECT 1 FROM assignments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "poll_select_device_reservations",
+      "scope": "poll",
+      "statement": "'SELECT 1 FROM device_reservations WHERE device_id=? AND assignment_id=?'",
+      "free": []
+    },
+    {
+      "method": "_refresh_observation_update_devices",
+      "scope": "_refresh_observation",
+      "statement": "'UPDATE devices SET self_test=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_refresh_observation_update_devices_2",
+      "scope": "_refresh_observation",
+      "statement": "'UPDATE devices SET telemetry=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_refresh_observation_insert_device_telemetry_history",
+      "scope": "_refresh_observation",
+      "statement": "'INSERT OR IGNORE INTO device_telemetry_history VALUES (?,?,?,?,?)'",
+      "free": []
+    },
+    {
+      "method": "_refresh_observation_delete_device_telemetry_history",
+      "scope": "_refresh_observation",
+      "statement": "'DELETE FROM device_telemetry_history WHERE device_id=? AND rowid NOT IN (SELECT rowid FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 180)'",
+      "free": []
+    },
+    {
+      "method": "_refresh_observation_update_devices_3",
+      "scope": "_refresh_observation",
+      "statement": "'UPDATE devices SET telemetry=NULL WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_update_boot_update_devices",
+      "scope": "_update_boot",
+      "statement": "'UPDATE devices SET boot_id=?,seen=?,enabled=?,desired=?,processes=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_update_boot_update_device_commands",
+      "scope": "_update_boot",
+      "statement": "\"UPDATE device_commands SET ack=1 WHERE device_id=? AND json_extract(body,'$.kind')='SET_CONTRIBUTION'\"",
+      "free": []
+    },
+    {
+      "method": "_update_boot_update_device_commands_2",
+      "scope": "_update_boot",
+      "statement": "'UPDATE device_commands SET ack=1 WHERE id=? AND device_id=?'",
+      "free": []
+    },
+    {
+      "method": "_update_boot_select_assignments",
+      "scope": "_update_boot",
+      "statement": "'SELECT a.* FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=?'",
+      "free": []
+    },
+    {
+      "method": "_quarantine_processes_update_devices",
+      "scope": "_quarantine_processes",
+      "statement": "'UPDATE devices SET status=?,enabled=0,desired=0 WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_quarantine_processes_select_assignments",
+      "scope": "_quarantine_processes",
+      "statement": "'SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_events_select_assignments",
+      "scope": "_accept_events",
+      "statement": "'SELECT coordinator,epoch FROM assignments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_events_insert_monitoring_events",
+      "scope": "_accept_events",
+      "statement": "'INSERT OR IGNORE INTO monitoring_events(event_id,assignment_id,body) VALUES (?,?,?)'",
+      "free": []
+    },
+    {
+      "method": "_accept_events_select_assignments_2",
+      "scope": "_accept_events",
+      "statement": "'SELECT body,released FROM assignments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_events_update_devices",
+      "scope": "_accept_events",
+      "statement": "\"UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=? AND status='APPROVED'\"",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_insert_device_reports",
+      "scope": "_accept_reports",
+      "statement": "'INSERT INTO device_reports VALUES (?,?,?)'",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_update_assignments",
+      "scope": "_accept_reports",
+      "statement": "'UPDATE assignments SET snapshot=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_select_assignments",
+      "scope": "_accept_reports",
+      "statement": "'SELECT * FROM assignments WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_select_device_reports",
+      "scope": "_accept_reports",
+      "statement": "'SELECT 1 FROM device_reports WHERE device_id=? AND assignment_id=? AND sequence=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_update_experiments",
+      "scope": "_accept_reports",
+      "statement": "'UPDATE experiments SET snapshot=? WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_select_device_reports_2",
+      "scope": "_accept_reports",
+      "statement": "'SELECT max(sequence) FROM device_reports WHERE device_id=? AND assignment_id=?'",
+      "free": []
+    },
+    {
+      "method": "_accept_reports_select_assignments_2",
+      "scope": "_accept_reports",
+      "statement": "'SELECT id FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1'",
+      "free": []
+    }
+  ]
+}

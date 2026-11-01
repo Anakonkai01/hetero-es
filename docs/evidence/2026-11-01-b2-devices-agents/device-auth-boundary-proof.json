@@ -1,0 +1,8 @@
+{
+  "base": "96d662e7",
+  "httpSignature": "identical",
+  "bearerPrefixGuardAST": "identical",
+  "businessBody": "same after token argument extraction and path-to-action mapping",
+  "pathActionTruthTable": "poll,worker-command,all other paths preserved",
+  "factoryReturns": "device_auth dependency"
+}

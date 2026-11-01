@@ -1,0 +1,151 @@
+{
+  "base": "96d662e7",
+  "methods": [
+    {
+      "method": "ensure_workers",
+      "service": "DeviceStateService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "assignments",
+      "service": "DeviceStateService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "disabled_workers",
+      "service": "DeviceStateService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "device_names",
+      "service": "DeviceStateService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "device_identities",
+      "service": "DeviceStateService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "dispatch_once",
+      "service": "SchedulingService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "_dispatch_once",
+      "service": "SchedulingService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "_dispatch_run",
+      "service": "SchedulingService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    },
+    {
+      "method": "dispatch",
+      "service": "SchedulingService",
+      "body": "same except self.store/repository/write-boundary forwarding",
+      "signature": "identical"
+    }
+  ],
+  "queries": {
+    "device_state": [
+      {
+        "method": "ensure_workers_insert_settings",
+        "scope": "ensure_workers",
+        "statement": "'INSERT OR IGNORE INTO settings VALUES (?,?)'",
+        "free": []
+      },
+      {
+        "method": "ensure_workers_insert_worker_assignments",
+        "scope": "ensure_workers",
+        "statement": "'INSERT INTO worker_assignments VALUES (?,?,?)'",
+        "free": []
+      },
+      {
+        "method": "ensure_workers_select_settings",
+        "scope": "ensure_workers",
+        "statement": "'SELECT value FROM settings WHERE key=\"workersInitialized\"'",
+        "free": []
+      },
+      {
+        "method": "ensure_workers_select_workspaces",
+        "scope": "ensure_workers",
+        "statement": "'SELECT creator FROM workspaces WHERE id=\"lab\"'",
+        "free": []
+      },
+      {
+        "method": "ensure_workers_select_worker_assignments",
+        "scope": "ensure_workers",
+        "statement": "'SELECT 1 FROM worker_assignments WHERE worker_id=?'",
+        "free": []
+      },
+      {
+        "method": "assignments_select_worker_assignments",
+        "scope": "assignments",
+        "statement": "'SELECT worker_id FROM worker_assignments WHERE workspace_id=?'",
+        "free": []
+      },
+      {
+        "method": "device_names_select_devices",
+        "scope": "device_names",
+        "statement": "\"SELECT worker_id,name FROM devices WHERE name<>''\"",
+        "free": []
+      },
+      {
+        "method": "device_identities_select_devices",
+        "scope": "device_identities",
+        "statement": "'SELECT worker_id,name,self_test FROM devices'",
+        "free": []
+      }
+    ],
+    "scheduling": [
+      {
+        "method": "_dispatch_once_select_queue",
+        "scope": "_dispatch_once",
+        "statement": "'SELECT run_id FROM queue ORDER BY sequence'",
+        "free": []
+      },
+      {
+        "method": "_dispatch_once_delete_queue",
+        "scope": "_dispatch_once",
+        "statement": "'DELETE FROM queue WHERE run_id=?'",
+        "free": []
+      },
+      {
+        "method": "_dispatch_run_update_experiments",
+        "scope": "_dispatch_run",
+        "statement": "'UPDATE experiments SET snapshot=? WHERE id=?'",
+        "free": []
+      },
+      {
+        "method": "_dispatch_run_delete_queue",
+        "scope": "_dispatch_run",
+        "statement": "'DELETE FROM queue WHERE run_id=?'",
+        "free": []
+      },
+      {
+        "method": "_dispatch_run_delete_queue_2",
+        "scope": "_dispatch_run",
+        "statement": "'DELETE FROM queue WHERE run_id=?'",
+        "free": []
+      },
+      {
+        "method": "_dispatch_run_delete_queue_3",
+        "scope": "_dispatch_run",
+        "statement": "'DELETE FROM queue WHERE run_id=?'",
+        "free": []
+      }
+    ]
+  },
+  "sqlCalls": 15,
+  "comments": "preserved with source-span edits"
+}

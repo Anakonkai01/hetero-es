@@ -1,0 +1,46 @@
+{
+  "module": "agent_commands",
+  "class": "AgentCommands",
+  "sqlCalls": 6,
+  "classBodyAST": "same except repository/write-boundary calls, plain service errors and relocated relative imports",
+  "methodSignatures": "identical",
+  "comments": "preserved by source-span edits",
+  "queries": [
+    {
+      "method": "enqueue_insert_device_commands",
+      "scope": "enqueue",
+      "statement": "'INSERT OR IGNORE INTO device_commands VALUES (?,?,?,?,0,?)'",
+      "free": []
+    },
+    {
+      "method": "require_command_select_settings",
+      "scope": "require_command",
+      "statement": "'SELECT value FROM settings WHERE key=?'",
+      "free": []
+    },
+    {
+      "method": "commands_select_device_commands",
+      "scope": "commands",
+      "statement": "'SELECT body FROM device_commands WHERE device_id=? AND ack=0 ORDER BY created'",
+      "free": []
+    },
+    {
+      "method": "commands_select_model_probe_jobs",
+      "scope": "commands",
+      "statement": "'SELECT body FROM model_probe_jobs WHERE id=?'",
+      "free": []
+    },
+    {
+      "method": "commands_select_assignments",
+      "scope": "commands",
+      "statement": "'SELECT released FROM assignments WHERE id=? AND epoch=?'",
+      "free": []
+    },
+    {
+      "method": "worker_command_select_devices",
+      "scope": "worker_command",
+      "statement": "'SELECT * FROM devices WHERE id=?'",
+      "free": []
+    }
+  ]
+}

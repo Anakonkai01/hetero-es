@@ -1,0 +1,6 @@
+    def device_auth(request: Request, authorization: str=Header(default='')):
+        if not authorization.startswith('Bearer '):
+            raise HTTPException(401, 'Device authentication required')
+        path = request.url.path
+        purpose = 'poll' if path == '/api/v1/device/poll' else 'worker-command' if path == '/api/v1/device/worker-command' else 'control'
+        return service.authenticate_device(authorization[7:], purpose)

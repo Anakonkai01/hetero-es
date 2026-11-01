@@ -1,0 +1,16 @@
+control ok    | 97 passed, 1 warning in 15.54s
+killed       expired pairing code accepted | 1 failed, 96 passed, 1 warning in 15.52s
+killed       revoked control credential accepted | 2 failed, 95 passed, 1 warning in 15.73s
+killed       pairing credential reusable | 1 failed, 96 passed, 1 warning in 15.87s
+killed       undeclared agent command delivered | 3 failed, 94 passed, 1 warning in 15.55s
+killed       worker command ignores coordinator identity | 1 failed, 96 passed, 1 warning in 15.19s
+killed       stale snapshot epoch accepted | 1 failed, 96 passed, 1 warning in 15.03s
+killed       unverified pause checkpoint accepted | 1 failed, 96 passed, 1 warning in 15.16s
+killed       stale monitoring event identity accepted | 1 failed, 96 passed, 1 warning in 15.15s
+killed       reserved device identity may change | 1 failed, 96 passed, 1 warning in 15.21s
+killed       strict GPU layout skipped during admission | 2 failed, 95 passed, 1 warning in 15.10s
+killed       offline process ownership released | 1 failed, 96 passed, 1 warning in 15.05s
+killed       scheduler ignores admission hold | 2 failed, 95 passed, 1 warning in 15.21s
+killed       scheduler skips active reconciliation | 15 failed, 82 passed, 1 warning in 15.19s
+
+13 of 13 mutants killed.

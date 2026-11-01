@@ -1,0 +1,31 @@
+{
+  "base": "96d662e7",
+  "backendFull": "CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m pytest -q --tb=short backend/tests",
+  "mutation": {
+    "driver": "scripts/mutation-check.py",
+    "copy": [
+      "backend",
+      "runtime/src"
+    ],
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "PYTHONPATH": "runtime/src:."
+    },
+    "test": [
+      "/home/pc5070ti/projects/heteroes/.venv-backend/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=short",
+      "backend/tests/test_device_layers.py",
+      "backend/tests/test_devices.py",
+      "backend/tests/test_agent_protocol.py",
+      "backend/tests/test_parallel_resources.py",
+      "backend/tests/test_pause_resume.py",
+      "backend/tests/test_admission_hold.py",
+      "backend/tests/test_model_qualification.py"
+    ],
+    "mutants": "devices-agents-mutants.json"
+  },
+  "initialMutationControlFailures": "Two invocations named nonexistent strict-layout/GPU-separation test paths; stopped before mutants."
+}
