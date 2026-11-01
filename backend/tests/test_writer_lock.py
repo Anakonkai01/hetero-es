@@ -7,10 +7,13 @@ import subprocess
 import sys
 import threading
 import pytest
+
 from fastapi.testclient import TestClient
 from backend.app import app_from_environment
 from backend.server import initialize
 from backend.writer_lock import acquire_writer
+
+pytestmark = pytest.mark.sqlite_file(reason="local SQLite kernel writer ownership and shutdown ordering")
 
 
 def deployment(tmp_path, monkeypatch):

@@ -103,10 +103,12 @@ class Database:
                 )
 
     @contextmanager
-    def transaction(self, *, write=None):
+    def transaction(self, *, write=None, physical=None):
         with self.lock:
             existing = getattr(self._local, "connection", None)
             if existing is not None:
+                if physical is not None and physical is not existing._connection:
+                    raise RuntimeError("Cannot replace the active transaction connection")
                 if write is True and not existing.write:
                     raise RuntimeError("Cannot upgrade an active read transaction")
                 try:
@@ -116,7 +118,15 @@ class Database:
                     raise
                 return
             writable = True if write is None else write
-            with self.engine.connect() as physical:
+            if physical is None:
+                physical = getattr(self._local, "session", None)
+            if physical is None:
+                owner = self.engine.connect()
+            else:
+                if physical.engine is not self.engine or physical.closed or physical.invalidated:
+                    raise RuntimeError("Dedicated transaction connection is unavailable")
+                owner = nullcontext(physical)
+            with owner as physical:
                 connection_info = physical.info
                 connection_info["heteroes_write"] = writable
                 transaction = physical.begin()
@@ -144,6 +154,27 @@ class Database:
 
     def close(self):
         self.engine.dispose()
+
+    @contextmanager
+    def use_session(self, physical):
+        """Bind subsequent root transactions to a caller-owned session without merging their commit boundaries."""
+        with self.lock:
+            if getattr(self._local, "connection", None) is not None:
+                raise RuntimeError("Cannot bind a physical session inside an active transaction")
+            previous = getattr(self._local, "session", None)
+            if previous is not None and previous is not physical:
+                raise RuntimeError("Cannot replace the active database session")
+            if physical.engine is not self.engine or physical.closed or physical.invalidated:
+                raise RuntimeError("Dedicated database session is unavailable")
+            self._local.session = physical
+            try:
+                yield
+            finally:
+                self._local.session = previous
+
+    def ping(self):
+        with self.transaction(write=False) as connection:
+            return connection.execute("SELECT 1").fetchone()[0] == 1
 
     def initialize(self, passwords, hasher):
         from .schema import initialize_database

@@ -38,7 +38,8 @@ def test_product_route_contract_matches_archived_pre_split_inventory(tmp_path, m
             if hasattr(route, "original_router"):
                 walk(route.original_router)
             elif hasattr(route, "methods"):
-                pairs.extend((method, route.path) for method in route.methods)
+                if route.path not in {"/healthz", "/readyz", "/metrics"}:
+                    pairs.extend((method, route.path) for method in route.methods)
             elif type(route).__name__ == "Mount":
                 mounts.add(route.path)
             else:

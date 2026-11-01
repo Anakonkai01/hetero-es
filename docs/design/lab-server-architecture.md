@@ -126,7 +126,35 @@ loopback port, writes its target audit/receipt and removes that container. Evide
 B3 legitimately modernizes test SQL, marks SQLite file contracts, uses the dedicated snapshot API, strengthens the
 runtime closure scanner to recursive production traversal and updates doctor instrumentation paths. Every baseline
 assertion from the 70 B2 test modules is retained (SQL literal quoting normalized in the proof). This is separate from
-B9's later import-only shim-removal proof. Services still run together; B4–B10 and MiniCloud C remain unfinished.
+B9's later import-only shim-removal proof. At the end of B3 the services still ran together; B4 progress is described below. B4–B10 and MiniCloud C remain unfinished.
+
+## B4 service and scheduler core (2026-11-01)
+
+The shared factory now accepts all/api/devices/storage/scheduler. An explicit registration facade partitions the actual
+handlers before registration, while retaining dependency factories needed by other services. The route exporter
+`python -m backend.apps.routes --json` constructs only throwaway local state. Four matching feature profiles cover web
+and local object storage on/off; their disjoint product union matches all. The full profile retains API 67, devices 21,
+storage 23 and two API-owned mounts. Health/readiness/metrics are three separately shared operational routes, registered
+before the SPA. API/devices start no scheduler or metadata-backup loop; storage owns the backup loop.
+
+Each role has `python -m backend.apps.<role>` with configurable host/port. Production split factories require PostgreSQL
+and do not take the local SQLite writer descriptor; all+SQLite retains the existing descriptor/shutdown contract.
+HETEROES_SERVICE and HETEROES_DATABASE_URL have initial support; the complete environment-only config belongs to B9.
+PostgreSQL replicas persist/validate cluster identity and scheduler error types in settings. SQLite keeps configured
+identity and process-local diagnostics. No error messages or bearer credentials enter the shared public health state.
+
+A dedicated detached PostgreSQL session holds the scheduler advisory lock (a distinct key from lab writes). Heartbeats
+never reacquire it and leave no idle transaction. Graceful exit explicitly unlocks and literally closes the session;
+process death releases it automatically. Active/standby controllers dispatch only while owning it. Every business
+transaction uses that physical session, preventing a lost leader from reconnecting on a new business session. Independent
+operation commit/rollback boundaries remain intact: a failed job cannot erase completed or unrelated jobs (B-008).
+Real PostgreSQL tests cover graceful takeover, process death, lost-session rollback, replica diagnostics/identity and
+independent-job progress. Local all keeps the previous dispatch loop. Core acceptance: SQLite 541 / PostgreSQL 559, zero skips, mutation 16/16.
+Evidence: `2026-11-01-b4-service-scheduler-core`.
+
+This is not full B4 completion: PostgreSQL pg_dump-to-backup-storage and an isolated restore drill remain. Metrics here
+establish route/liveness ownership; B7 adds the full instrumentation. OIDC, S3/MinIO, cloud config/packaging and B10/C
+acceptance remain later work; nothing was deployed to the live lab.
 
 ## Planned service boundaries
 

@@ -25,25 +25,43 @@ from ..throttle import Throttle
 from ..api.security import local_user, workspace_scope
 from ..services.access import AccessService
 from ..core.errors import ServiceError
+from .routing import SERVICES, ServiceRegistration
+from ..api.operational import install_routes as install_operational_routes
+from ..services.scheduler_controller import SchedulerController
 
 
-def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
-    store = Store(path, passwords, runtime)
+def create_app(
+    path,
+    passwords,
+    runtime,
+    dispatch=True,
+    web_directory=None,
+    downloads_directory=None,
+    writer_lock=None,
+    *,
+    service="all",
+    database_url=None,
+    database_connect_args=None,
+):
+    if service not in SERVICES:
+        raise ValueError("Unknown backend service")
+    store = Store(path, passwords, runtime, database_url=database_url, database_connect_args=database_connect_args)
     from ..services.study_registry import Registry
 
     registry = Registry(store)
     stop = threading.Event()
+    scheduler = SchedulerController(store)
 
     @asynccontextmanager
     async def lifespan(_):
-        thread = threading.Thread(target=store.dispatch, args=(stop,), daemon=True)
+        thread = threading.Thread(target=scheduler.run, args=(stop,), daemon=True)
         dispatcher_started = False
         metadata_thread = None
         try:
-            if dispatch:
+            if dispatch and service in {"all", "scheduler"}:
                 thread.start()
                 dispatcher_started = True
-            if getattr(runtime, "storage_backend", None) is not None:
+            if service in {"all", "storage"} and getattr(runtime, "storage_backend", None) is not None:
                 from ..services.metadata_backup import backup_loop
 
                 metadata_thread = threading.Thread(
@@ -64,12 +82,16 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 writer_lock.close()
 
     # The interactive documentation lists every route: keep it for development, not for a served lab.
-    private_docs = {} if web_directory is None else {"docs_url": None, "redoc_url": None, "openapi_url": None}
+    private_docs = (
+        {} if web_directory is None and service == "all" else {"docs_url": None, "redoc_url": None, "openapi_url": None}
+    )
     app = FastAPI(title="HeteroES product API", lifespan=lifespan, **private_docs)
     app.state.login_failures = Throttle(5, 600)  # per caller address and username
     app.state.login_failures_by_address = Throttle(30, 600)  # per caller address, any username
     app.state.registrations = Throttle(10, 3600)
     app.state.store = store
+    app.state.service = service
+    app.state.scheduler = scheduler
     app.state.live = LiveStreams()
 
     @app.exception_handler(ServiceError)
@@ -99,23 +121,28 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         capabilities=capabilities,
     )
 
-    install_auth_routes(app, store, user, session)
-    install_inventory_routes(app, store, runtime, scoped, visible, capabilities, registry)
-    install_experiments_routes(app, store, runtime, scoped, visible, authorized, validate, service_scoped=access.scope)
-    install_history_routes(app, store, runtime, scoped, visible, authorized)
+    install_operational_routes(app, store, service)
+    registration = ServiceRegistration(app, service)
 
-    install_lab_routes(app, store, user, scoped, runtime)
-    install_template_routes(app, store, scoped)
-    install_notification_routes(app, store, user)
+    install_auth_routes(registration, store, user, session)
+    install_inventory_routes(registration, store, runtime, scoped, visible, capabilities, registry)
+    install_experiments_routes(
+        registration, store, runtime, scoped, visible, authorized, validate, service_scoped=access.scope
+    )
+    install_history_routes(registration, store, runtime, scoped, visible, authorized)
+
+    install_lab_routes(registration, store, user, scoped, runtime)
+    install_template_routes(registration, store, scoped)
+    install_notification_routes(registration, store, user)
     from ..api.devices import install_routes as install_device_routes
 
-    device_auth = install_device_routes(app, store, user, runtime)
+    device_auth = install_device_routes(registration, store, user, runtime)
     from ..api.study_registry import install_routes as study_routes
 
-    study_routes(app, registry, runtime, scoped, device_auth)
+    study_routes(registration, registry, runtime, scoped, device_auth)
     from ..api.model_qualification import install_routes as qualification_routes
 
-    qualification_routes(app, registry, runtime, scoped, device_auth)
+    qualification_routes(registration, registry, runtime, scoped, device_auth)
     if runtime.storage_backend is not None:
         from ..services.recovery_storage import RecoveryStorage
         from ..api.recovery_storage import install_routes as install_storage_routes
@@ -125,32 +152,56 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         )
         app.state.storage = storage
         runtime.storage = storage
-        install_storage_routes(app, store, storage, device_auth, user, scoped, authorized)
+        install_storage_routes(registration, store, storage, device_auth, user, scoped, authorized)
         if hasattr(runtime.storage_backend, "install_routes"):
-            runtime.storage_backend.install_routes(app)
+            runtime.storage_backend.install_routes(registration)
 
-    install_web_routes(app, web_directory, downloads_directory)
+    install_web_routes(registration, web_directory, downloads_directory)
     return app
 
 
-def app_from_environment():
+def app_from_environment(*, service=None):
+    service = service or os.environ.get("HETEROES_SERVICE", "all")
+    if service not in SERVICES:
+        raise ValueError("Unknown backend service")
     private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
     if not private_root:
         raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
     root = Path(private_root)
     credentials = json.loads((root / "credentials.json").read_text())
     config = load_config(root)
-    from ..core.writer_lock import acquire_writer
+    database_url = os.environ.get("HETEROES_DATABASE_URL") or config.get("databaseUrl")
+    postgres = False
+    path = Path(config["productStateDirectory"]) / "product.sqlite"
+    if database_url:
+        from sqlalchemy.engine import make_url
+        from sqlalchemy.exc import ArgumentError
 
-    writer = acquire_writer(Path(config["productStateDirectory"]) / "product.sqlite")
+        try:
+            url = make_url(database_url)
+        except ArgumentError:
+            raise ValueError("Invalid database URL") from None
+        postgres = url.get_backend_name() in {"postgres", "postgresql"}
+        if not postgres:
+            if url.get_backend_name() != "sqlite" or not url.database or url.database == ":memory:":
+                raise ValueError("Use a persistent SQLite file or PostgreSQL database")
+            path = Path(url.database).resolve()
+    if service != "all" and not postgres:
+        raise ValueError("Split production services require PostgreSQL")
+    writer = None
+    if not postgres:
+        from ..core.writer_lock import acquire_writer
+
+        writer = acquire_writer(path)
     try:
-        return _app_from_config(root, credentials, config, writer)
+        return _app_from_config(root, credentials, config, writer, service=service, database_url=database_url)
     except BaseException:
-        writer.close()
+        if writer is not None:
+            writer.close()
         raise
 
 
-def _app_from_config(root, credentials, config, writer):
+def _app_from_config(root, credentials, config, writer, *, service="all", database_url=None):
     if config.get("deploymentMode") != "agent":
         raise ValueError("Only agent deployment mode is supported")
     if config.get("storageMode") not in (None, "local") or config.get("storageFile"):
@@ -178,4 +229,6 @@ def _app_from_config(root, credentials, config, writer):
         web_directory=os.environ.get("HETEROES_WEB_DIRECTORY"),
         downloads_directory=os.environ.get("HETEROES_DOWNLOADS_DIRECTORY"),
         writer_lock=writer,
+        service=service,
+        database_url=database_url,
     )

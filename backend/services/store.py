@@ -15,6 +15,7 @@ from .workspaces import WorkspaceStateService
 from ..core.clock import now as now
 from ..db.engine import Database
 from .audit import AuditService
+from .cluster_state import ClusterStateService
 from ..core.constants import ACTIVE as ACTIVE, TERMINAL as TERMINAL
 
 
@@ -30,13 +31,18 @@ class Store:
         self.scheduling = SchedulingService(self)
         self.experiments = ExperimentStateService(self)
         self.workspace_state = WorkspaceStateService(self)
-        self.last_error = None
         self.database = Database(database_url or path, lock=self.lock, connect_args=database_connect_args)
         self.database.initialize(passwords, self.hasher)
         if self.database.dialect == "sqlite":
             self.path = self.database.url.database
             os.chmod(self.path, 0o600)
-        runtime.attach_store(self)
+        self.cluster_state = ClusterStateService(self)
+        try:
+            runtime.server_instance_id = self.cluster_state.identity(getattr(runtime, "server_instance_id", None))
+            runtime.attach_store(self)
+        except BaseException:
+            self.database.close()
+            raise
         try:
             self.ensure_workers(runtime.capabilities()["workerIds"])
         except Exception:
@@ -49,6 +55,14 @@ class Store:
 
     def close(self):
         self.database.close()
+
+    @property
+    def last_error(self):
+        return self.cluster_state.last_error
+
+    @last_error.setter
+    def last_error(self, value):
+        self.cluster_state.last_error = value
 
     def audit(self, db, actor, action, target, workspace_id=None):
         return self.audit_service.audit(db=db, actor=actor, action=action, target=target, workspace_id=workspace_id)

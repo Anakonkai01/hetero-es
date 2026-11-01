@@ -80,6 +80,11 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   all 70 B2 test modules remain; recursive runtime scanner and doctor instrumentation paths modernized before B9.
   Evidence `2026-11-01-b3-portable-backend`: schema/SQL mutation 12/12, integrated engine mutation 6/6; B3 complete.
   B4–B10 and C remain; PostgreSQL metadata dump/restore belongs to B4, recursive package resources/shim removal to B9.
+  B4 core: route partition/export and five role entrypoints implemented; product union remains 111 (API67/devices21/
+  storage23) plus two mounts and three shared operational routes. PostgreSQL cluster identity/diagnostics persist.
+  Dedicated scheduler session leadership and active/standby controller preserve job commit boundaries and fence lost
+  connections; graceful and process-death takeover pass real PG tests. Core SQLite541 / PostgreSQL559, zero skips; mutation16/16. Evidence
+  `2026-11-01-b4-service-scheduler-core`. B4 still needs PostgreSQL metadata dump/restore; B5–B10 and all C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
