@@ -67,6 +67,11 @@ def test_account_layer_boundaries():
         "services/devices.py",
         "services/device_state.py",
         "services/scheduling.py",
+        "core/study_models.py",
+        "api/study_registry.py",
+        "services/study_registry.py",
+        "api/model_qualification.py",
+        "services/model_qualification.py",
     ):
         tree = ast.parse((backend / relative).read_text())
         for node in ast.walk(tree):
