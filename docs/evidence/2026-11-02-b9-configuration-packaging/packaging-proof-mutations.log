@@ -1,0 +1,11 @@
+control ok    | 26 passed, 1 warning in 1.67s
+killed       server-source-omits-postgres-ddl | 1 failed, 25 passed, 1 warning in 1.69s
+killed       server-source-uses-flat-python-glob | 1 failed, 25 passed, 1 warning in 1.68s
+killed       server-source-includes-tests | 1 failed, 25 passed, 1 warning in 1.85s
+killed       proof-ignores-non-import-values | 1 failed, 25 passed, 1 warning in 1.71s
+killed       proof-ignores-changes-outside-import-lines | 1 failed, 25 passed, 1 warning in 1.71s
+killed       proof-does-not-verify-child-program-imports | 1 failed, 25 passed, 1 warning in 1.75s
+killed       public-storage-instrumentation-alias-removed | 5 failed, 21 passed, 1 warning in 1.88s
+killed       shared-study-instrumentation-alias-removed | 1 failed, 25 passed, 1 warning in 1.80s
+
+8 of 8 mutants killed.

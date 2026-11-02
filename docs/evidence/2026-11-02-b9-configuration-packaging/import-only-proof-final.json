@@ -1,0 +1,258 @@
+{
+  "baseline": "e23a296320f076c05cd0d342bae49709d1072864",
+  "checkedExistingFiles": 96,
+  "changedFiles": {
+    "backend/tests/conftest.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "34921b85b05f2b75f4155e67b03d8766a360ea58462705b9203fc3e77bed3f39",
+      "afterSha256": "3995caad8ffb646fa17d7033b8efb4062e3b4a2a455a1f9f80a1b87d68a24fb3"
+    },
+    "backend/tests/test_account_layers.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "7cb2f3e35b533df4bb58719412024e9e7c493a62ab39f44b1b436d5e0ca13384",
+      "afterSha256": "70c719d506e1899a386a7ecb8787d6fe43940cb8aa9bf20ba56c602a0490f1d9"
+    },
+    "backend/tests/test_agent_factory.py": {
+      "changedLines": 8,
+      "embeddedPrograms": 0,
+      "beforeSha256": "cd01b4a0391078f5fc34286999866a661cd3b0c0364e1428f52a2bc8ce208354",
+      "afterSha256": "06982db71b9400db2a564d474fc1c369f719d15828725f607689a0df7d8ca2dc"
+    },
+    "backend/tests/test_api.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "2ecfc0787d251d17179ef9579d82e43c57a3b981c001025ec274290c9034d1f7",
+      "afterSha256": "40b45fff4726d596120b40a8f41132d20371113232f8b8e0f0f5af1707a4e675"
+    },
+    "backend/tests/test_cpu_coordinator.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "d88a31de65102d5140aa58ae015c2b0437a3c63502207e5f28083204e3d5bc15",
+      "afterSha256": "df83297d9b6861c5d321f073bdd67ac9ae3883bdca6ef0dc2971001e093d1ef6"
+    },
+    "backend/tests/test_deployment.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "9ed3ec5a0e6c1b4ec25d0a0d96ac37f668364d1d133e93086aab03ffc4e5e78f",
+      "afterSha256": "324753556541ac2c3574b5e5e9860f2f8e3e3b97943a0cd0bf53fb9001ee65bf"
+    },
+    "backend/tests/test_device_removal.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "bdaf30cd2dbf174bc2a0bc91434d87c74a63a5db39183510765427567bcafec4",
+      "afterSha256": "336416036977f4d118c9766eaf9e24bccf81378eac1d8f4b43031da877847c3c"
+    },
+    "backend/tests/test_devices.py": {
+      "changedLines": 8,
+      "embeddedPrograms": 0,
+      "beforeSha256": "a92fb1ad5e4892b2d3d5d47aba7ed38a5a3ea77ebf665d20b497dfc919eb3644",
+      "afterSha256": "b84363ec4b534c599ebbd5e15a7c951b618f8d0cc01ddd5644d367097effc168"
+    },
+    "backend/tests/test_doctor.py": {
+      "changedLines": 5,
+      "embeddedPrograms": 0,
+      "beforeSha256": "46c7f6269b41b51dfdf8debee4b994738325e4db06c70de6b70d773848cd5e38",
+      "afterSha256": "c5c4ce64aa6a1d28a3ed49eac129063ec9bc07a70a090da06faeb681e62aafe0"
+    },
+    "backend/tests/test_endpoints.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "c74a7ae72561510e62f6f80fc77d844c3c354c330422d554fc752ddb7863ac60",
+      "afterSha256": "ffdb25bbb014c3fe8d688105ebe39a9c8caeb3552a953d744e08c3f264bd1ee2"
+    },
+    "backend/tests/test_lab.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "f11f91f25199c0e12db273ef56a6148d775bcc49213bb924186938fe5bb10525",
+      "afterSha256": "aaac5732d0e0002bfcba42a8181688d89c507a34580da5755d69f9144049744b"
+    },
+    "backend/tests/test_large_datasets.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "caf6149323628f3b74d8fb013409eeddeda35f6629b85dc717913b21bf2a857b",
+      "afterSha256": "60a7475e47b420c0ff3ecb0623b51877728c4a2c5a55005b1a547b949f668724"
+    },
+    "backend/tests/test_local_lab.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "e31e307c8cf33d15ef6948824edb90dce04e57b95c295331e5a87da6eca74534",
+      "afterSha256": "893c29eb0fc2752af5c43dd8323c257718bebd3df37adff0450fa19d9905c6d1"
+    },
+    "backend/tests/test_local_storage.py": {
+      "changedLines": 8,
+      "embeddedPrograms": 0,
+      "beforeSha256": "c460fd6470da730bb79e18608c3e65a196e50db74da14635e84fbd5e89c58b0c",
+      "afterSha256": "defb223b8f096c638c8a691f618681ad78fe4f6f8bd614c61fee365f5b5b5b0b"
+    },
+    "backend/tests/test_local_storage_async.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "053664e73660cccc73a4b4007eb490df3303148929ec9e2e20bec96a3d24d0f2",
+      "afterSha256": "f05a7299fce4cec2fce348a89b7f1b3b4bb93cedfa3d37b1b04467677845e4af"
+    },
+    "backend/tests/test_membership.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "b40f91413bf8922827dfa550c2a330a26ae7317379593ff90621da8f82b5e3f4",
+      "afterSha256": "fe7b50853e0cdfbdfec9ced2320e766f7fe15a4435f77a5de957b411b6663f9b"
+    },
+    "backend/tests/test_metadata_restore.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "50ad6c652089ef14b5cf8b035808204ba6d7c852fdaaf78fa28f3e44f45b9b75",
+      "afterSha256": "6849b2960658f47614a4550820388c3244c9e1ecc3b0e90429bb101e9933dbd0"
+    },
+    "backend/tests/test_model_qualification.py": {
+      "changedLines": 10,
+      "embeddedPrograms": 0,
+      "beforeSha256": "d3fc2f1c1a3b09f8ea982ab06147ba7420f61cf18c9aae15845ee0c546dd13bd",
+      "afterSha256": "fa6bd56ad07f758efa9b1bbf28cd228948828715a80608df77f8fd2e415453b5"
+    },
+    "backend/tests/test_noise_engines.py": {
+      "changedLines": 6,
+      "embeddedPrograms": 0,
+      "beforeSha256": "b44fa05d54bc7a88299bff244b3f809a54fbd81c051c141eecf3fdeefa5b532f",
+      "afterSha256": "69f4c073b7a0755a816609d3f32a047275936987cb9cd7865a79f3a9743cd471"
+    },
+    "backend/tests/test_notifications.py": {
+      "changedLines": 8,
+      "embeddedPrograms": 0,
+      "beforeSha256": "7602a650125ae2cded5f9f4ef42e13098b96aad1481417bfa1b0c18e7e1919ed",
+      "afterSha256": "c1a604fb5c101547c1ce9adbf08e414efbc9e14332a96bc08577bc0b43a704c0"
+    },
+    "backend/tests/test_oidc_accounts.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "3d2971d2664ac86929f34479744f058133e837d99c34bd6a41e79d20aac1c0d2",
+      "afterSha256": "03034bf79fa3b86cab1d659f483e6409785d219f4cce432642ac68e36b5178d2"
+    },
+    "backend/tests/test_operations.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "dfee19eacaff6f675860473526af3cde3f878a23c586524c839cb5350b96d31b",
+      "afterSha256": "0432e4e4f47e4067ba7a8abd4d63fc7f515e4a4a538093b037d2f164f867a72a"
+    },
+    "backend/tests/test_operations_layers.py": {
+      "changedLines": 6,
+      "embeddedPrograms": 0,
+      "beforeSha256": "0dcf09b91e4444d9e6faf2f2c3059d2a0a6bd8635932615f09d230790e101788",
+      "afterSha256": "ac82649730c887a7df888f8e4e51e9f92b35cfd291f5bacdae7fba71e5c9ad1b"
+    },
+    "backend/tests/test_parallel_resources.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "9e8d4ab5cd8d5e9e205404cf7481026b0aae949e56ed6ce42c0e1b57731c3ebb",
+      "afterSha256": "757229a01d22577879af09a29b2dfbceb8127d462628fdcb2513f139c8b05383"
+    },
+    "backend/tests/test_passwords.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "28a4c7d72dab069f4100f71d7cdc97727d0761a2587e80dad70bd3163f620aa3",
+      "afterSha256": "ff19b6fbadaddc8fd1664c72f9aaf3403b911a740b53cf9a81fcbe005f66769e"
+    },
+    "backend/tests/test_pause_resume.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "eb3e0d3c2e90f10267a35c15d8b95d6041b194b71241f83b8ce5e5c72062c4e4",
+      "afterSha256": "0aeac1265b8e1c3928a4e49e4a86eb1d36317dc5ee228b27ee963878ac3629ed"
+    },
+    "backend/tests/test_policies.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "c2c1726679ea43f4f3ab1f85d4799cbd7a1aed8a9b343d2523ca2e98fadc86ff",
+      "afterSha256": "b87617797775d1f8aa6d1531aed33d4aad3698bcfe554d06bbfa7fc527c5a408"
+    },
+    "backend/tests/test_recovery_routes.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "da73a47b7de17e58e4a72042c48b14f1c4e959c5e4b2ab3ca80a0eaf75cb39ee",
+      "afterSha256": "a4d0d049d8059d766cd49f8ec06d3e9c31c0b34eec36dfa082dca55f154971c9"
+    },
+    "backend/tests/test_recovery_storage.py": {
+      "changedLines": 8,
+      "embeddedPrograms": 0,
+      "beforeSha256": "cd3c097b2359542a857df624f3e82234f68b603166b5eaa47322a0872189b982",
+      "afterSha256": "900907643971b951a079e19eac18ef08e4e7ac1ffbd76b4cef99831282e223c1"
+    },
+    "backend/tests/test_route_contract.py": {
+      "changedLines": 6,
+      "embeddedPrograms": 0,
+      "beforeSha256": "b8f459ad7e75e05fb2e02c01a7d30405dae4cf4aa4679a7884ac3881345e1d5a",
+      "afterSha256": "033acbbbfbfa805fc4668978d89f63e9aab744b76d19eff2a3822381318f4b22"
+    },
+    "backend/tests/test_server.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "7efff72d58af0e2a54b89e4f8d1cc8c77d743869513c30e5cff5fc5fa69e0552",
+      "afterSha256": "a94db77b9048aec90820b95497fbe0c695006dc2ef647a9e9044ac4c74032ef6"
+    },
+    "backend/tests/test_shared_runtime.py": {
+      "changedLines": 6,
+      "embeddedPrograms": 1,
+      "beforeSha256": "c74671c76ee11b3c76cd9568a6eff62522a19c56bb64875142664012fecc4cfa",
+      "afterSha256": "f171d052b760245f7da5220ba98e1f16774f681ca1aadf2fac614b517b2d986c"
+    },
+    "backend/tests/test_storage_layers.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "371443b6c922bf16e67850b9eed38b97e50f811a895a3a3fcfae7c89a658b9c1",
+      "afterSha256": "3d184a2cd6a1581804d038f1fee3d7b815e14125697f7bdc1929ac0bb6ad56de"
+    },
+    "backend/tests/test_store_layers.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "2dcd6577b22e7329e7b0e8c49ec64d3a8c4ab833911c2890f6bec1d8e4068801",
+      "afterSha256": "31ca1d652fba17301b39a8fd916113e3d878b303938d32d064bef9e9cd7002f9"
+    },
+    "backend/tests/test_study.py": {
+      "changedLines": 6,
+      "embeddedPrograms": 0,
+      "beforeSha256": "f8c37441560408b5599946f109a6c4820a195b8a9e3b377b61170f685073d558",
+      "afterSha256": "519dfa8e6092a997b0271b9324c615d64abeb120675e785be74224154e8390a2"
+    },
+    "backend/tests/test_study_layers.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "660e90844ffb18e9d206f0973e5850634cdb448b0b2a553acb163fca839c8e70",
+      "afterSha256": "3bbf3bf82b79ccd72fc34f2be3691fa2f72451f086f8cb97aac5d1bd0be92992"
+    },
+    "backend/tests/test_throttle.py": {
+      "changedLines": 6,
+      "embeddedPrograms": 0,
+      "beforeSha256": "9e65588882782f57757dcc7dfa99d3d3fec82de7376475591fa55101cd13471f",
+      "afterSha256": "0590ede3504c5af9b82ee7da2e45ba999c5352e57cc399ab8d3645afcfe84ac7"
+    },
+    "backend/tests/test_timeline.py": {
+      "changedLines": 2,
+      "embeddedPrograms": 0,
+      "beforeSha256": "a7eb19599ed0acf83bf68bd5055409b153094c84b12da863532ec39cb09ddca4",
+      "afterSha256": "3aeb4f4d10151c370ae9d07bb5bc4254ea3ad64e9591b650c196b895e7d139bd"
+    },
+    "backend/tests/test_v3_study.py": {
+      "changedLines": 16,
+      "embeddedPrograms": 0,
+      "beforeSha256": "631a7f0a6f871cf89b0453dbca663d8cfc5ee39b8d6710d43ea59b404dd2d901",
+      "afterSha256": "8a7582bc3fd84968604faebdae016fa8d23523301baa4bc79063b34407182f2b"
+    },
+    "backend/tests/test_web.py": {
+      "changedLines": 4,
+      "embeddedPrograms": 0,
+      "beforeSha256": "a445bf4f3b6d61b15759519e53ed10356e688e032a462447cfae3eb4853e2b53",
+      "afterSha256": "98c60fac692c2c5a24de11d1af57d5509d95ae7958e6a00ea22b331160fa6053"
+    },
+    "backend/tests/test_writer_lock.py": {
+      "changedLines": 8,
+      "embeddedPrograms": 1,
+      "beforeSha256": "d48776af96a2e1eb78009f0c6a5b0adba9f6aee28d46cda0a6eb16ff82786352",
+      "afterSha256": "a3a452f832e77f1b0284ff8dce94f798517ef94a365440f031d94c7e0dbf6726"
+    }
+  },
+  "addedTestsAndHelpers": [
+    "backend/tests/test_environment_configuration.py",
+    "backend/tests/test_import_only_proof.py",
+    "backend/tests/test_server_packaging.py"
+  ],
+  "nonImportAstUnchanged": true
+}

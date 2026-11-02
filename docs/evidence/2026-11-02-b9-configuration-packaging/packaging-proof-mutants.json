@@ -1,0 +1,50 @@
+[
+  {
+    "name": "server-source-omits-postgres-ddl",
+    "file": "backend/core/runtime_sources.py",
+    "old": "*backend.rglob(\"*.sql\")",
+    "new": "*()"
+  },
+  {
+    "name": "server-source-uses-flat-python-glob",
+    "file": "backend/core/runtime_sources.py",
+    "old": "*backend.rglob(\"*.py\")",
+    "new": "*backend.glob(\"*.py\")"
+  },
+  {
+    "name": "server-source-includes-tests",
+    "file": "backend/core/runtime_sources.py",
+    "old": "not {\"tests\", \"__pycache__\"} & set(path.relative_to(backend).parts)",
+    "new": "not {\"__pycache__\"} & set(path.relative_to(backend).parts)"
+  },
+  {
+    "name": "proof-ignores-non-import-values",
+    "file": "scripts/check-test-imports-only.py",
+    "old": "elif left != right:",
+    "new": "elif False:"
+  },
+  {
+    "name": "proof-ignores-changes-outside-import-lines",
+    "file": "scripts/check-test-imports-only.py",
+    "old": "if not lines <= allowed[index]:",
+    "new": "if False:"
+  },
+  {
+    "name": "proof-does-not-verify-child-program-imports",
+    "file": "scripts/check-test-imports-only.py",
+    "old": "result = assert_imports_only(left.value, right.value)",
+    "new": "result = {\"embeddedPrograms\": 0}"
+  },
+  {
+    "name": "public-storage-instrumentation-alias-removed",
+    "file": "backend/__init__.py",
+    "old": "\"local_storage\": \".storage.local_backend\"",
+    "new": "\"unused_storage\": \".storage.local_backend\""
+  },
+  {
+    "name": "shared-study-instrumentation-alias-removed",
+    "file": "backend/__init__.py",
+    "old": "\"study_registry\": \".services.study_registry\"",
+    "new": "\"unused_study\": \".services.study_registry\""
+  }
+]

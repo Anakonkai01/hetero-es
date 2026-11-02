@@ -1,0 +1,6 @@
+{"ts":"2026-11-02T04:59:11.099+00:00","level":"INFO","service":"all","method":"GET","route":"/healthz","status":200,"duration_ms":5.553770002734382,"request_id":"d8281863848c4dedb3195e8a2e51c7c2"}
+{"ts":"2026-11-02T04:59:11.101+00:00","level":"INFO","service":"all","method":"GET","route":"/readyz","status":200,"duration_ms":1.420632004737854,"request_id":"17acdab54e534b4ebd26e5417dc0771b"}
+{"ts":"2026-11-02T04:59:11.102+00:00","level":"INFO","service":"all","method":"GET","route":"/api/v1/health","status":200,"duration_ms":0.531833000422921,"request_id":"f6d88ed7b6774571b2a232681487c162"}
+{"ts":"2026-11-02T04:59:11.149+00:00","level":"INFO","service":"all","method":"POST","route":"/api/v1/auth/login","status":200,"duration_ms":46.42806599440519,"request_id":"6619775e4fb9423caf109942444b519d"}
+{"ts":"2026-11-02T04:59:11.151+00:00","level":"INFO","service":"all","method":"GET","route":"/api/v1/auth/session","status":200,"duration_ms":1.5039970021462068,"request_id":"b92da3850d234399866fd558893641b8"}
+{"ts":"2026-11-02T04:59:11.151+00:00","level":"INFO","service":"all","method":"GET","route":"/metrics","status":200,"duration_ms":0.21070899674668908,"request_id":"c0a22fb4825f4a509879427c56792fb2"}

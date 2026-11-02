@@ -1,0 +1,669 @@
+{
+  "baseline": "e23a2963",
+  "modules": {
+    "backend.addresses": {
+      "default": "backend.core.addresses",
+      "symbols": {}
+    },
+    "backend.agent_commands": {
+      "default": "backend.services.agent_commands",
+      "symbols": {}
+    },
+    "backend.agent_polling": {
+      "default": "backend.services.agent_polling",
+      "symbols": {}
+    },
+    "backend.agent_scheduling": {
+      "default": "backend.services.agent_scheduling",
+      "symbols": {}
+    },
+    "backend.app": {
+      "default": "backend.apps.factory",
+      "symbols": {}
+    },
+    "backend.config": {
+      "default": "backend.core.config",
+      "symbols": {}
+    },
+    "backend.constants": {
+      "default": "backend.core.constants",
+      "symbols": {}
+    },
+    "backend.deployment": {
+      "default": "backend.services.deployment",
+      "symbols": {}
+    },
+    "backend.device_models": {
+      "default": "backend.core.device_models",
+      "symbols": {}
+    },
+    "backend.devices": {
+      "default": null,
+      "symbols": {
+        "command_capabilities": [
+          "backend.core.device_models",
+          "command_capabilities"
+        ],
+        "re_checkpoint": [
+          "backend.core.device_models",
+          "re_checkpoint"
+        ],
+        "digest": [
+          "backend.core.device_models",
+          "digest"
+        ],
+        "SelfTest": [
+          "backend.core.device_models",
+          "SelfTest"
+        ],
+        "EndpointUpdate": [
+          "backend.core.device_models",
+          "EndpointUpdate"
+        ],
+        "DeviceConfigurationUpdate": [
+          "backend.core.device_models",
+          "DeviceConfigurationUpdate"
+        ],
+        "QualificationUpdate": [
+          "backend.core.device_models",
+          "QualificationUpdate"
+        ],
+        "Enrollment": [
+          "backend.core.device_models",
+          "Enrollment"
+        ],
+        "Approval": [
+          "backend.core.device_models",
+          "Approval"
+        ],
+        "Contribution": [
+          "backend.core.device_models",
+          "Contribution"
+        ],
+        "DeviceContribution": [
+          "backend.core.device_models",
+          "DeviceContribution"
+        ],
+        "ContributionPreference": [
+          "backend.core.device_models",
+          "ContributionPreference"
+        ],
+        "DeviceName": [
+          "backend.core.device_models",
+          "DeviceName"
+        ],
+        "ProcessReport": [
+          "backend.core.device_models",
+          "ProcessReport"
+        ],
+        "Report": [
+          "backend.core.device_models",
+          "Report"
+        ],
+        "MonitoringEvent": [
+          "backend.core.device_models",
+          "MonitoringEvent"
+        ],
+        "GPUObservation": [
+          "backend.core.device_models",
+          "GPUObservation"
+        ],
+        "HostObservation": [
+          "backend.core.device_models",
+          "HostObservation"
+        ],
+        "DiskObservation": [
+          "backend.core.device_models",
+          "DiskObservation"
+        ],
+        "TransportObservation": [
+          "backend.core.device_models",
+          "TransportObservation"
+        ],
+        "Telemetry": [
+          "backend.core.device_models",
+          "Telemetry"
+        ],
+        "Poll": [
+          "backend.core.device_models",
+          "Poll"
+        ],
+        "WorkerCommand": [
+          "backend.core.device_models",
+          "WorkerCommand"
+        ],
+        "AgentRuntime": [
+          "backend.services.devices",
+          "AgentRuntime"
+        ],
+        "install_device_routes": [
+          "backend.api.devices",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.doctor": {
+      "default": "backend.services.doctor",
+      "symbols": {
+        "main": [
+          "backend.apps.doctor",
+          "main"
+        ]
+      }
+    },
+    "backend.errors": {
+      "default": null,
+      "symbols": {
+        "RuntimeRejected": [
+          "backend.core.errors",
+          "RuntimeRejected"
+        ]
+      }
+    },
+    "backend.experiment_view": {
+      "default": "backend.services.experiment_view",
+      "symbols": {
+        "audit_selected": [
+          "heteroes.v3.options",
+          "audit_selected"
+        ]
+      }
+    },
+    "backend.lab": {
+      "default": null,
+      "symbols": {
+        "install_lab_routes": [
+          "backend.api.lab",
+          "install_lab_routes"
+        ]
+      }
+    },
+    "backend.live": {
+      "default": "backend.api.live",
+      "symbols": {}
+    },
+    "backend.local_storage": {
+      "default": "backend.storage.local_backend",
+      "symbols": {}
+    },
+    "backend.metadata_backup": {
+      "default": null,
+      "symbols": {
+        "create_metadata_backup": [
+          "backend.services.metadata_backup",
+          "create_metadata_backup"
+        ],
+        "backup_loop": [
+          "backend.services.metadata_backup",
+          "backup_loop"
+        ],
+        "publish_new_directory": [
+          "backend.core.filesystem",
+          "publish_new_directory"
+        ]
+      }
+    },
+    "backend.migrations": {
+      "default": "backend.db.migrations",
+      "symbols": {}
+    },
+    "backend.model_qualification": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.model_qualification",
+          "install_routes"
+        ],
+        "ModelQualifications": [
+          "backend.services.model_qualification",
+          "ModelQualifications"
+        ],
+        "restore_mismatch": [
+          "backend.services.model_qualification",
+          "restore_mismatch"
+        ],
+        "checked_memory": [
+          "backend.services.model_qualification",
+          "checked_memory"
+        ],
+        "TERMINAL": [
+          "backend.services.model_qualification",
+          "TERMINAL"
+        ],
+        "ProbeRequest": [
+          "backend.core.study_models",
+          "ProbeRequest"
+        ]
+      }
+    },
+    "backend.monitor": {
+      "default": "backend.apps.monitor",
+      "symbols": {}
+    },
+    "backend.monitor_models": {
+      "default": "backend.core.monitor_models",
+      "symbols": {}
+    },
+    "backend.notifications": {
+      "default": null,
+      "symbols": {
+        "install_notification_routes": [
+          "backend.api.notifications",
+          "install_routes"
+        ],
+        "MAX_LIMIT": [
+          "backend.services.notifications",
+          "MAX_LIMIT"
+        ],
+        "MAX_IDS": [
+          "backend.services.notifications",
+          "MAX_IDS"
+        ],
+        "RUN_KINDS": [
+          "backend.services.notifications",
+          "RUN_KINDS"
+        ],
+        "ACCOUNT_KINDS": [
+          "backend.services.notifications",
+          "ACCOUNT_KINDS"
+        ],
+        "Notifications": [
+          "backend.services.notifications",
+          "Notifications"
+        ],
+        "_stamp": [
+          "backend.services.notifications",
+          "_stamp"
+        ],
+        "_epoch": [
+          "backend.services.notifications",
+          "_epoch"
+        ]
+      }
+    },
+    "backend.passwords": {
+      "default": "backend.core.passwords",
+      "symbols": {}
+    },
+    "backend.policies": {
+      "default": "backend.services.policies",
+      "symbols": {}
+    },
+    "backend.recovery_storage": {
+      "default": null,
+      "symbols": {
+        "install_storage_routes": [
+          "backend.api.recovery_storage",
+          "install_routes"
+        ],
+        "RecoveryStorage": [
+          "backend.services.recovery_storage",
+          "RecoveryStorage"
+        ],
+        "QuotaExceeded": [
+          "backend.services.recovery_storage",
+          "QuotaExceeded"
+        ],
+        "HEX": [
+          "backend.services.recovery_storage",
+          "HEX"
+        ],
+        "UUID": [
+          "backend.services.recovery_storage",
+          "UUID"
+        ]
+      }
+    },
+    "backend.request_models": {
+      "default": "backend.core.request_models",
+      "symbols": {
+        "DEFAULT_SCHEDULER_POLICY": [
+          "heteroes.catalog",
+          "DEFAULT_SCHEDULER_POLICY"
+        ],
+        "SYNC_MODES": [
+          "heteroes.catalog",
+          "SYNC_MODES"
+        ]
+      }
+    },
+    "backend.routes_accounts": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.accounts",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.routes_auth": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.auth",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.routes_experiments": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.experiments",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.routes_history": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.history",
+          "install_routes"
+        ],
+        "DEVICE_EVENTS": [
+          "backend.services.history",
+          "DEVICE_EVENTS"
+        ],
+        "message": [
+          "backend.services.history",
+          "message"
+        ],
+        "severity": [
+          "backend.services.history",
+          "severity"
+        ]
+      }
+    },
+    "backend.routes_inventory": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.inventory",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.routes_operations": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.operations",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.routes_web": {
+      "default": "backend.api.web",
+      "symbols": {}
+    },
+    "backend.routes_workspaces": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.workspaces",
+          "install_routes"
+        ]
+      }
+    },
+    "backend.runtime_sources": {
+      "default": "backend.core.runtime_sources",
+      "symbols": {
+        "Path": [
+          "pathlib",
+          "Path"
+        ]
+      }
+    },
+    "backend.server": {
+      "default": null,
+      "symbols": {
+        "Bootstrap": [
+          "backend.core.server_models",
+          "Bootstrap"
+        ],
+        "initialize": [
+          "backend.services.bootstrap",
+          "initialize"
+        ],
+        "main": [
+          "backend.apps.server",
+          "main"
+        ]
+      }
+    },
+    "backend.store": {
+      "default": null,
+      "symbols": {
+        "Store": [
+          "backend.services.store",
+          "Store"
+        ],
+        "now": [
+          "backend.services.store",
+          "now"
+        ],
+        "ACTIVE": [
+          "backend.services.store",
+          "ACTIVE"
+        ],
+        "TERMINAL": [
+          "backend.services.store",
+          "TERMINAL"
+        ]
+      }
+    },
+    "backend.study_registry": {
+      "default": null,
+      "symbols": {
+        "install_routes": [
+          "backend.api.study_registry",
+          "install_routes"
+        ],
+        "Registry": [
+          "backend.services.study_registry",
+          "Registry"
+        ],
+        "dataset_limits": [
+          "backend.services.study_registry",
+          "dataset_limits"
+        ],
+        "dataset": [
+          "backend.services.study_registry",
+          "dataset"
+        ],
+        "ImportData": [
+          "backend.core.study_models",
+          "ImportData"
+        ],
+        "DatasetUpload": [
+          "backend.core.study_models",
+          "DatasetUpload"
+        ],
+        "DatasetBuild": [
+          "backend.core.study_models",
+          "DatasetBuild"
+        ],
+        "DatasetLimits": [
+          "backend.core.study_models",
+          "DatasetLimits"
+        ],
+        "RegisterModel": [
+          "backend.core.study_models",
+          "RegisterModel"
+        ]
+      }
+    },
+    "backend.templates": {
+      "default": null,
+      "symbols": {
+        "install_template_routes": [
+          "backend.api.templates",
+          "install_routes"
+        ],
+        "clean_config": [
+          "backend.api.templates",
+          "clean_config"
+        ],
+        "MAX_PER_WORKSPACE": [
+          "backend.services.templates",
+          "MAX_PER_WORKSPACE"
+        ],
+        "INTEGERS": [
+          "backend.services.templates",
+          "INTEGERS"
+        ],
+        "FLOATS": [
+          "backend.services.templates",
+          "FLOATS"
+        ],
+        "NULLABLE": [
+          "backend.services.templates",
+          "NULLABLE"
+        ],
+        "CHOICES": [
+          "backend.services.templates",
+          "CHOICES"
+        ],
+        "SHORT_TEXT": [
+          "backend.services.templates",
+          "SHORT_TEXT"
+        ]
+      }
+    },
+    "backend.throttle": {
+      "default": "backend.core.throttle",
+      "symbols": {}
+    },
+    "backend.timeline": {
+      "default": "backend.services.timeline",
+      "symbols": {}
+    },
+    "backend.validation": {
+      "default": null,
+      "symbols": {
+        "validate_configuration": [
+          "backend.api.validation",
+          "validate_configuration"
+        ],
+        "freeze_python_code": [
+          "backend.services.validation",
+          "freeze_python_code"
+        ]
+      }
+    },
+    "backend.writer_lock": {
+      "default": "backend.core.writer_lock",
+      "symbols": {}
+    }
+  },
+  "moved": {
+    "passwords": "core.passwords",
+    "experiment_view": "services.experiment_view",
+    "runtime_sources": "core.runtime_sources"
+  },
+  "removedPhysicalAliases": [
+    "addresses.py",
+    "agent_commands.py",
+    "agent_polling.py",
+    "agent_scheduling.py",
+    "app.py",
+    "config.py",
+    "constants.py",
+    "deployment.py",
+    "device_models.py",
+    "devices.py",
+    "errors.py",
+    "lab.py",
+    "live.py",
+    "local_storage.py",
+    "metadata_backup.py",
+    "migrations.py",
+    "model_qualification.py",
+    "monitor_models.py",
+    "notifications.py",
+    "policies.py",
+    "recovery_storage.py",
+    "request_models.py",
+    "routes_accounts.py",
+    "routes_auth.py",
+    "routes_experiments.py",
+    "routes_history.py",
+    "routes_inventory.py",
+    "routes_operations.py",
+    "routes_web.py",
+    "routes_workspaces.py",
+    "store.py",
+    "study_registry.py",
+    "templates.py",
+    "throttle.py",
+    "timeline.py",
+    "validation.py",
+    "writer_lock.py"
+  ],
+  "changedFiles": [
+    "backend/api/accounts.py",
+    "backend/api/auth.py",
+    "backend/api/experiments.py",
+    "backend/api/workspaces.py",
+    "backend/apps/factory.py",
+    "backend/core/device_models.py",
+    "backend/services/accounts.py",
+    "backend/services/agent_commands.py",
+    "backend/services/agent_polling.py",
+    "backend/services/agent_scheduling.py",
+    "backend/services/devices.py",
+    "backend/services/experiment_state.py",
+    "backend/services/experiments.py",
+    "backend/services/scheduling.py",
+    "backend/services/workspaces.py",
+    "backend/tests/conftest.py",
+    "backend/tests/test_account_layers.py",
+    "backend/tests/test_agent_factory.py",
+    "backend/tests/test_api.py",
+    "backend/tests/test_cpu_coordinator.py",
+    "backend/tests/test_deployment.py",
+    "backend/tests/test_device_removal.py",
+    "backend/tests/test_devices.py",
+    "backend/tests/test_doctor.py",
+    "backend/tests/test_endpoints.py",
+    "backend/tests/test_lab.py",
+    "backend/tests/test_large_datasets.py",
+    "backend/tests/test_local_lab.py",
+    "backend/tests/test_local_storage.py",
+    "backend/tests/test_local_storage_async.py",
+    "backend/tests/test_membership.py",
+    "backend/tests/test_metadata_restore.py",
+    "backend/tests/test_model_qualification.py",
+    "backend/tests/test_noise_engines.py",
+    "backend/tests/test_notifications.py",
+    "backend/tests/test_oidc_accounts.py",
+    "backend/tests/test_operations.py",
+    "backend/tests/test_operations_layers.py",
+    "backend/tests/test_parallel_resources.py",
+    "backend/tests/test_passwords.py",
+    "backend/tests/test_pause_resume.py",
+    "backend/tests/test_policies.py",
+    "backend/tests/test_recovery_routes.py",
+    "backend/tests/test_recovery_storage.py",
+    "backend/tests/test_route_contract.py",
+    "backend/tests/test_server.py",
+    "backend/tests/test_shared_runtime.py",
+    "backend/tests/test_storage_layers.py",
+    "backend/tests/test_store_layers.py",
+    "backend/tests/test_study.py",
+    "backend/tests/test_study_layers.py",
+    "backend/tests/test_throttle.py",
+    "backend/tests/test_timeline.py",
+    "backend/tests/test_v3_study.py",
+    "backend/tests/test_web.py",
+    "backend/tests/test_writer_lock.py",
+    "scripts/build-server-profile.py",
+    "scripts/check-source-packages.py",
+    "scripts/export-demo-run.py",
+    "scripts/local-lab.py",
+    "scripts/refresh-server-runtime.py",
+    "scripts/restore-metadata.py",
+    "scripts/serve-test-lab.py"
+  ]
+}

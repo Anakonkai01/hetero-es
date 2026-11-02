@@ -1,0 +1,20 @@
+control ok    | 17 passed, 1 warning in 0.64s
+killed       private-file-wins-over-environment | 2 failed, 15 passed, 1 warning in 0.72s
+killed       secret-file-value-ignored | 1 failed, 16 passed, 1 warning in 0.70s
+killed       secret-source-conflict-accepted | 1 failed, 16 passed, 1 warning in 0.80s
+killed       empty-secret-accepted | 1 failed, 16 passed, 1 warning in 0.69s
+killed       oversized-secret-accepted | 1 failed, 16 passed, 1 warning in 1.06s
+killed       invalid-secret-message-leaks-value | 1 failed, 16 passed, 1 warning in 0.71s
+killed       quota-zero-negative-accepted | 2 failed, 15 passed, 1 warning in 0.84s
+killed       quota-huge-integer-accepted | 1 failed, 16 passed, 1 warning in 0.75s
+killed       quota-not-copied-to-s3 | 1 failed, 16 passed, 1 warning in 0.75s
+killed       s3-bucket-env-overrides-ignored | 1 failed, 16 passed, 1 warning in 0.98s
+killed       s3-endpoint-env-overrides-ignored | 1 failed, 16 passed, 1 warning in 0.68s
+killed       optional-malformed-object-not-cleared | 2 failed, 15 passed, 1 warning in 0.97s
+killed       oidc-needs-local-credentials | 1 failed, 16 passed, 1 warning in 0.87s
+killed       explicit-local-credentials-file-ignored | 1 failed, 16 passed, 1 warning in 0.68s
+killed       public-health-does-not-load-env-only-url | 1 failed, 16 passed, 1 warning in 1.13s
+killed       agent-does-not-load-env-only-public-web | 1 failed, 16 passed, 1 warning in 0.67s
+killed       env-only-installers-lose-private-transfer-policy | 1 failed, 16 passed, 1 warning in 0.66s
+
+17 of 17 mutants killed.

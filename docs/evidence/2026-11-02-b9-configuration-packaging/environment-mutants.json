@@ -1,0 +1,104 @@
+[
+  {
+    "name": "private-file-wins-over-environment",
+    "file": "backend/core/config.py",
+    "old": "config[key] = environ[name]",
+    "new": "config.setdefault(key, environ[name])"
+  },
+  {
+    "name": "secret-file-value-ignored",
+    "file": "backend/core/config.py",
+    "old": "direct = stream.read(65537)",
+    "new": "direct = \"\""
+  },
+  {
+    "name": "secret-source-conflict-accepted",
+    "file": "backend/core/config.py",
+    "old": "if direct is not None and source is not None:",
+    "new": "if False:"
+  },
+  {
+    "name": "empty-secret-accepted",
+    "file": "backend/core/config.py",
+    "old": "if not direct or len(direct) > 65536 or not direct.rstrip(\"\\r\\n\"):",
+    "new": "if len(direct) > 65536:"
+  },
+  {
+    "name": "oversized-secret-accepted",
+    "file": "backend/core/config.py",
+    "old": "if not direct or len(direct) > 65536 or not direct.rstrip(\"\\r\\n\"):",
+    "new": "if not direct or not direct.rstrip(\"\\r\\n\"):"
+  },
+  {
+    "name": "invalid-secret-message-leaks-value",
+    "file": "backend/core/config.py",
+    "old": "raise ValueError(\"Invalid secret value for \" + name)",
+    "new": "raise ValueError(\"Invalid secret value for \" + name + \": \" + str(direct))"
+  },
+  {
+    "name": "quota-zero-negative-accepted",
+    "file": "backend/core/config.py",
+    "old": "if not 0 < quota <= 2**63 - 1:",
+    "new": "if quota > 2**63 - 1:"
+  },
+  {
+    "name": "quota-huge-integer-accepted",
+    "file": "backend/core/config.py",
+    "old": "if not 0 < quota <= 2**63 - 1:",
+    "new": "if quota <= 0:"
+  },
+  {
+    "name": "quota-not-copied-to-s3",
+    "file": "backend/core/config.py",
+    "old": "s3[\"quotaBytes\"] = quota",
+    "new": "pass"
+  },
+  {
+    "name": "s3-bucket-env-overrides-ignored",
+    "file": "backend/core/config.py",
+    "old": "buckets[purpose] = environ[name]",
+    "new": "pass"
+  },
+  {
+    "name": "s3-endpoint-env-overrides-ignored",
+    "file": "backend/core/config.py",
+    "old": "s3[key] = environ[name]",
+    "new": "pass"
+  },
+  {
+    "name": "optional-malformed-object-not-cleared",
+    "file": "backend/core/config.py",
+    "old": "raise ValueError(\"Private configuration must be a readable JSON object\") from None\n            config = {}",
+    "new": "raise ValueError(\"Private configuration must be a readable JSON object\") from None\n            pass"
+  },
+  {
+    "name": "oidc-needs-local-credentials",
+    "file": "backend/apps/factory.py",
+    "old": "if auth_mode == \"local\":",
+    "new": "if True:"
+  },
+  {
+    "name": "explicit-local-credentials-file-ignored",
+    "file": "backend/apps/factory.py",
+    "old": "os.environ.get(\"HETEROES_CREDENTIALS_FILE\") or (root / \"credentials.json\" if private_root else None)",
+    "new": "root / \"credentials.json\" if private_root else None"
+  },
+  {
+    "name": "public-health-does-not-load-env-only-url",
+    "file": "backend/services/inventory.py",
+    "old": "return load_config(private_root, optional=True)",
+    "new": "return load_config(private_root, optional=True) if private_root else {}"
+  },
+  {
+    "name": "agent-does-not-load-env-only-public-web",
+    "file": "backend/services/devices.py",
+    "old": "value = load_config(root, optional=True).get(\"publicWebUrl\")",
+    "new": "value = load_config(root, optional=True).get(\"publicWebUrl\") if root else None"
+  },
+  {
+    "name": "env-only-installers-lose-private-transfer-policy",
+    "file": "backend/api/web.py",
+    "old": "if config.get(\"publicWebUrl\") and not config.get(\"publicDownloads\"):",
+    "new": "if private_root and config.get(\"publicWebUrl\") and not config.get(\"publicDownloads\"):"
+  }
+]

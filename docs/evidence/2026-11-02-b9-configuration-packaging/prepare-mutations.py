@@ -1,0 +1,33 @@
+import ast,json
+from pathlib import Path
+out=Path(__file__).parent;groups={'environment':[],'packaging-proof':[]}
+def add(group,name,file,old,new):
+ s=Path(file).read_text();assert s.count(old)==1,(name,s.count(old));ast.parse(s.replace(old,new,1));groups[group].append(dict(name=name,file=file,old=old,new=new))
+c='backend/core/config.py';f='backend/apps/factory.py';i='backend/services/inventory.py';d='backend/services/devices.py';w='backend/api/web.py';p='scripts/check-test-imports-only.py';r='backend/core/runtime_sources.py';b='backend/__init__.py'
+add('environment','private-file-wins-over-environment',c,'config[key] = environ[name]','config.setdefault(key, environ[name])')
+add('environment','secret-file-value-ignored',c,'direct = stream.read(65537)','direct = ""')
+add('environment','secret-source-conflict-accepted',c,'if direct is not None and source is not None:','if False:')
+add('environment','empty-secret-accepted',c,'if not direct or len(direct) > 65536 or not direct.rstrip("\\r\\n"):','if len(direct) > 65536:')
+add('environment','oversized-secret-accepted',c,'if not direct or len(direct) > 65536 or not direct.rstrip("\\r\\n"):','if not direct or not direct.rstrip("\\r\\n"):')
+add('environment','invalid-secret-message-leaks-value',c,'raise ValueError("Invalid secret value for " + name)','raise ValueError("Invalid secret value for " + name + ": " + str(direct))')
+add('environment','quota-zero-negative-accepted',c,'if not 0 < quota <= 2**63 - 1:','if quota > 2**63 - 1:')
+add('environment','quota-huge-integer-accepted',c,'if not 0 < quota <= 2**63 - 1:','if quota <= 0:')
+add('environment','quota-not-copied-to-s3',c,'s3["quotaBytes"] = quota','pass')
+add('environment','s3-bucket-env-overrides-ignored',c,'buckets[purpose] = environ[name]','pass')
+add('environment','s3-endpoint-env-overrides-ignored',c,'s3[key] = environ[name]','pass')
+add('environment','optional-malformed-object-not-cleared',c,'raise ValueError("Private configuration must be a readable JSON object") from None\n            config = {}','raise ValueError("Private configuration must be a readable JSON object") from None\n            pass')
+add('environment','oidc-needs-local-credentials',f,'if auth_mode == "local":','if True:')
+add('environment','explicit-local-credentials-file-ignored',f,'os.environ.get("HETEROES_CREDENTIALS_FILE") or (root / "credentials.json" if private_root else None)','root / "credentials.json" if private_root else None')
+add('environment','public-health-does-not-load-env-only-url',i,'return load_config(private_root, optional=True)','return load_config(private_root, optional=True) if private_root else {}')
+add('environment','agent-does-not-load-env-only-public-web',d,'value = load_config(root, optional=True).get("publicWebUrl")','value = load_config(root, optional=True).get("publicWebUrl") if root else None')
+add('environment','env-only-installers-lose-private-transfer-policy',w,'if config.get("publicWebUrl") and not config.get("publicDownloads"):','if private_root and config.get("publicWebUrl") and not config.get("publicDownloads"):')
+add('packaging-proof','server-source-omits-postgres-ddl',r,'*backend.rglob("*.sql")','*()')
+add('packaging-proof','server-source-uses-flat-python-glob',r,'*backend.rglob("*.py")','*backend.glob("*.py")')
+add('packaging-proof','server-source-includes-tests',r,'not {"tests", "__pycache__"} & set(path.relative_to(backend).parts)','not {"__pycache__"} & set(path.relative_to(backend).parts)')
+add('packaging-proof','proof-ignores-non-import-values',p,'elif left != right:','elif False:')
+add('packaging-proof','proof-ignores-changes-outside-import-lines',p,'if not lines <= allowed[index]:','if False:')
+add('packaging-proof','proof-does-not-verify-child-program-imports',p,'result = assert_imports_only(left.value, right.value)','result = {"embeddedPrograms": 0}')
+add('packaging-proof','public-storage-instrumentation-alias-removed',b,'"local_storage": ".storage.local_backend"','"unused_storage": ".storage.local_backend"')
+add('packaging-proof','shared-study-instrumentation-alias-removed',b,'"study_registry": ".services.study_registry"','"unused_study": ".services.study_registry"')
+for group,mutants in groups.items():(out/(group+'-mutants.json')).write_text(json.dumps(mutants,indent=2)+'\n')
+print({name:len(m) for name,m in groups.items()})

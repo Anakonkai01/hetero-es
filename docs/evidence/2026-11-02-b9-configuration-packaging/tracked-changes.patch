@@ -1,0 +1,2401 @@
+diff --git a/backend/__init__.py b/backend/__init__.py
+index 8f720288..0ed939d0 100644
+--- a/backend/__init__.py
++++ b/backend/__init__.py
+@@ -6,3 +6,16 @@ import sys
+ _source = Path(__file__).resolve().parents[1] / "runtime" / "src"
+ if _source.is_dir():
+     sys.path.insert(0, str(_source))
++
++
++def __getattr__(name):
++    # Preserve these public instrumentation attributes without keeping flat source-module shims.
++    namespaces = {"local_storage": ".storage.local_backend", "study_registry": ".services.study_registry"}
++    if name not in namespaces:
++        raise AttributeError(name)
++    from importlib import import_module
++
++    module = import_module(namespaces[name], __name__)
++    globals()[name] = module
++    sys.modules[__name__ + "." + name] = module
++    return module
+diff --git a/backend/addresses.py b/backend/addresses.py
+deleted file mode 100644
+index 62473aa2..00000000
+--- a/backend/addresses.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during core extraction."""
+-
+-import sys
+-from .core import addresses as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/agent_commands.py b/backend/agent_commands.py
+deleted file mode 100644
+index b75012a6..00000000
+--- a/backend/agent_commands.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility module retained during the business-layer extraction."""
+-
+-import sys
+-from .services import agent_commands as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/agent_polling.py b/backend/agent_polling.py
+deleted file mode 100644
+index 78e75d78..00000000
+--- a/backend/agent_polling.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility module retained during the business-layer extraction."""
+-
+-import sys
+-from .services import agent_polling as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/agent_scheduling.py b/backend/agent_scheduling.py
+deleted file mode 100644
+index ca0fe2ff..00000000
+--- a/backend/agent_scheduling.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility module retained during the business-layer extraction."""
+-
+-import sys
+-from .services import agent_scheduling as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/api/accounts.py b/backend/api/accounts.py
+index 81bb32fa..97df4d09 100644
+--- a/backend/api/accounts.py
++++ b/backend/api/accounts.py
+@@ -2,8 +2,8 @@
+ 
+ from fastapi import APIRouter, Depends, Header, Request, Response
+ 
+-from ..request_models import Registration, ProfileEdit, PasswordEdit
+-from ..throttle import client_address
++from backend.core.request_models import Registration, ProfileEdit, PasswordEdit
++from backend.core.throttle import client_address
+ from ..core.errors import ServiceError
+ 
+ 
+diff --git a/backend/api/auth.py b/backend/api/auth.py
+index 85d32643..28058976 100644
+--- a/backend/api/auth.py
++++ b/backend/api/auth.py
+@@ -2,8 +2,8 @@
+ 
+ from fastapi import APIRouter, Depends, Header, Request, Response
+ 
+-from ..request_models import Login
+-from ..throttle import client_address
++from backend.core.request_models import Login
++from backend.core.throttle import client_address
+ from ..core.errors import ServiceError
+ 
+ 
+diff --git a/backend/api/experiments.py b/backend/api/experiments.py
+index 2d24a176..6fba5db0 100644
+--- a/backend/api/experiments.py
++++ b/backend/api/experiments.py
+@@ -1,6 +1,6 @@
+ """Experiments HTTP adapters."""
+ 
+-from ..request_models import BackupPolicy, Configuration, MembershipRequest
++from backend.core.request_models import BackupPolicy, Configuration, MembershipRequest
+ from fastapi import Depends, HTTPException, Response
+ from fastapi.responses import StreamingResponse
+ from fastapi import APIRouter
+diff --git a/backend/api/web.py b/backend/api/web.py
+index 97cbb762..0256a0d2 100644
+--- a/backend/api/web.py
++++ b/backend/api/web.py
+@@ -20,17 +20,16 @@ def install_routes(app, web_directory, downloads_directory):
+             def installer_manifest():
+                 manifest = json.loads((Path(downloads_directory) / "manifest.json").read_text())
+                 private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-                if private_root:
+-                    config = load_config(private_root)
+-                    # publicDownloads: the operator serves installers on the public origin too.
+-                    if config.get("publicWebUrl") and not config.get("publicDownloads"):
+-                        bulk = config.get("bulkApiUrl", config.get("apiUrl"))
+-                        manifest["privateTransferRequired"] = True
+-                        for group in ("installers", "serverInstallers"):
+-                            for item in manifest.get(group, []):
+-                                item["url"] = bulk + "/downloads/" + Path(item["name"]).name
+-                        for item in manifest.get("linuxWorker", {}).values():
++                config = load_config(private_root, optional=not bool(private_root))
++                # publicDownloads: the operator serves installers on the public origin too.
++                if config.get("publicWebUrl") and not config.get("publicDownloads"):
++                    bulk = config.get("bulkApiUrl", config.get("apiUrl"))
++                    manifest["privateTransferRequired"] = True
++                    for group in ("installers", "serverInstallers"):
++                        for item in manifest.get(group, []):
+                             item["url"] = bulk + "/downloads/" + Path(item["name"]).name
++                    for item in manifest.get("linuxWorker", {}).values():
++                        item["url"] = bulk + "/downloads/" + Path(item["name"]).name
+                 return manifest
+ 
+             # The publisher links installers from another disk; Starlette refuses such symlinks by default.
+diff --git a/backend/api/workspaces.py b/backend/api/workspaces.py
+index d70b169c..b1ffd8a6 100644
+--- a/backend/api/workspaces.py
++++ b/backend/api/workspaces.py
+@@ -1,7 +1,7 @@
+ """Workspace HTTP adapters; operations and persistence are separate."""
+ 
+ from fastapi import APIRouter, Depends, Response
+-from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
++from backend.core.request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+ from ..services.workspaces import operations
+ 
+ 
+diff --git a/backend/app.py b/backend/app.py
+deleted file mode 100644
+index 86d18536..00000000
+--- a/backend/app.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility factory namespace retained during application extraction."""
+-
+-import sys
+-from .apps import factory as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+index a2ac59b6..caef776a 100644
+--- a/backend/apps/factory.py
++++ b/backend/apps/factory.py
+@@ -21,7 +21,7 @@ from ..api.lab import install_lab_routes
+ from ..api.live import LiveStreams
+ from ..api.templates import install_routes as install_template_routes
+ from ..api.notifications import install_routes as install_notification_routes
+-from ..throttle import Throttle
++from backend.core.throttle import Throttle
+ from ..api.security import local_user, workspace_scope
+ from ..services.access import AccessService
+ from ..core.errors import ServiceError
+@@ -215,12 +215,30 @@ def app_from_environment(*, service=None):
+     if service not in SERVICES:
+         raise ValueError("Unknown backend service")
+     private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-    if not private_root:
+-        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
+-    root = Path(private_root)
+-    credentials = json.loads((root / "credentials.json").read_text())
+-    config = load_config(root)
+-    database_url = os.environ.get("HETEROES_DATABASE_URL") or config.get("databaseUrl")
++    config = load_config(private_root)
++    root = Path(private_root) if private_root else Path(config["productStateDirectory"])
++    auth_mode = config.get("authMode", "local")
++    if auth_mode not in {"local", "oidc"}:
++        raise ValueError("Unknown authentication mode")
++    credentials = {"users": {}}
++    if auth_mode == "local":
++        source = os.environ.get("HETEROES_CREDENTIALS_FILE") or (root / "credentials.json" if private_root else None)
++        try:
++            if source is None:
++                raise ValueError
++            credentials = json.loads(Path(source).read_text())
++            if (
++                not isinstance(credentials, dict)
++                or not isinstance(credentials.get("users"), dict)
++                or any(
++                    not isinstance(name, str) or not isinstance(password, str)
++                    for name, password in credentials["users"].items()
++                )
++            ):
++                raise ValueError
++        except (OSError, ValueError):
++            raise ValueError("Local authentication requires valid bootstrap credentials") from None
++    database_url = config.get("databaseUrl")
+     postgres = False
+     path = Path(config["productStateDirectory"]) / "product.sqlite"
+     if database_url:
+@@ -264,7 +282,7 @@ def _app_from_config(root, credentials, config, writer, *, service="all", databa
+ 
+         storage_backend = LocalBackend(
+             config["storageDirectory"],
+-            root / "storage-signing.key",
++            config.get("storageSigningKeyFile", root / "storage-signing.key"),
+             config.get("bulkApiUrl", config["apiUrl"]),
+             config.get("storageVolumeUUID"),
+             config.get("metadataStorageDirectory"),
+diff --git a/backend/config.py b/backend/config.py
+deleted file mode 100644
+index fed16194..00000000
+--- a/backend/config.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during core extraction."""
+-
+-import sys
+-from .core import config as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/constants.py b/backend/constants.py
+deleted file mode 100644
+index 73274b8e..00000000
+--- a/backend/constants.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility module retained during core contract extraction."""
+-
+-import sys
+-from .core import constants as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/core/config.py b/backend/core/config.py
+index 65dca84d..cd12417d 100644
+--- a/backend/core/config.py
++++ b/backend/core/config.py
+@@ -1,19 +1,144 @@
+-"""Read private configuration on demand so rotated public URLs are observed."""
++"""Read private configuration and explicit container overrides on demand, without logging secrets."""
+ 
++from copy import deepcopy
+ import json
+ import os
+ from pathlib import Path
+ 
++_FIELDS = {
++    "HETEROES_AUTH_MODE": "authMode",
++    "HETEROES_OIDC_ISSUER": "oidcIssuer",
++    "HETEROES_OIDC_JWKS_URL": "oidcJwksUrl",
++    "HETEROES_PUBLIC_URL": "publicWebUrl",
++    "HETEROES_PUBLIC_COMPUTE_URL": "publicComputeUrl",
++    "HETEROES_BULK_API_URL": "bulkApiUrl",
++    "HETEROES_STORAGE_MODE": "storageMode",
++    "HETEROES_STORAGE_DIRECTORY": "storageDirectory",
++    "HETEROES_STORAGE_METADATA_DIRECTORY": "metadataStorageDirectory",
++    "HETEROES_STORAGE_SIGNING_KEY_FILE": "storageSigningKeyFile",
++}
++_S3_FIELDS = {
++    "HETEROES_STORAGE_INTERNAL_ENDPOINT": "endpointUrl",
++    "HETEROES_STORAGE_DEVICE_ENDPOINT": "deviceEndpointUrl",
++    "HETEROES_STORAGE_REGION": "region",
++    "HETEROES_STORAGE_STAGING_DIRECTORY": "stagingDirectory",
++    "HETEROES_STORAGE_SIGNING_KEY_FILE": "signingKeyFile",
++}
++_SECRETS = {
++    "HETEROES_DATABASE_URL": "databaseUrl",
++    "HETEROES_STORAGE_ACCESS_KEY_ID": "accessKeyId",
++    "HETEROES_STORAGE_SECRET_ACCESS_KEY": "secretAccessKey",
++}
++_BUCKETS = {
++    "HETEROES_STORAGE_" + purpose.upper() + "_BUCKET": purpose for purpose in ("recovery", "datasets", "backups")
++}
++_ENVIRONMENT = (
++    set(_FIELDS)
++    | set(_S3_FIELDS)
++    | set(_BUCKETS)
++    | set(_SECRETS)
++    | {name + "_FILE" for name in _SECRETS}
++    | {"HETEROES_STATE_DIRECTORY", "HETEROES_STORAGE_QUOTA_BYTES", "HETEROES_SERVICE", "HETEROES_CREDENTIALS_FILE"}
++)
++
++
++def _secret(environ, name):
++    direct, source = environ.get(name), environ.get(name + "_FILE")
++    if direct is not None and source is not None:
++        raise ValueError("Configure only one of " + name + " and its secret file")
++    if source is not None:
++        try:
++            with Path(source).open() as stream:
++                direct = stream.read(65537)
++        except (OSError, ValueError):
++            raise ValueError("Cannot read secret file for " + name) from None
++    if direct is not None:
++        if not direct or len(direct) > 65536 or not direct.rstrip("\r\n"):
++            raise ValueError("Invalid secret value for " + name)
++        return direct.rstrip("\r\n")
++    return None
++
++
++def _overlay(original, root, environ):
++    config = deepcopy(original)
++    state = (
++        Path(
++            environ.get("HETEROES_STATE_DIRECTORY")
++            or config.get("productStateDirectory")
++            or (Path(root) / "state" if root else Path.home() / ".local/share/heteroes-cloud")
++        )
++        .expanduser()
++        .resolve()
++    )
++    if not config:
++        config = {
++            "deploymentMode": "agent",
++            "productStateDirectory": str(state),
++            "apiUrl": "http://127.0.0.1:8000",
++            "storageMode": "local",
++            "storageDirectory": str(state / "objects"),
++            "metadataStorageDirectory": str(state / "metadata"),
++        }
++    if "HETEROES_STATE_DIRECTORY" in environ:
++        config["productStateDirectory"] = str(state)
++    for name, key in _FIELDS.items():
++        if name in environ:
++            config[key] = environ[name]
++    for name, allowed in (("HETEROES_AUTH_MODE", {"local", "oidc"}), ("HETEROES_STORAGE_MODE", {"local", "s3"})):
++        if name in environ and environ[name] not in allowed:
++            raise ValueError("Invalid " + name)
++    quota = None
++    if "HETEROES_STORAGE_QUOTA_BYTES" in environ:
++        try:
++            quota = int(environ["HETEROES_STORAGE_QUOTA_BYTES"])
++            if not 0 < quota <= 2**63 - 1:
++                raise ValueError
++        except ValueError:
++            raise ValueError("Invalid HETEROES_STORAGE_QUOTA_BYTES") from None
++        config["storageQuotaBytes"] = quota
++    s3 = config.get("s3", {})
++    if not isinstance(s3, dict):
++        raise ValueError("Invalid S3 configuration object")
++    for name, key in _S3_FIELDS.items():
++        if name in environ:
++            s3[key] = environ[name]
++    for name, key in _SECRETS.items():
++        value = _secret(environ, name)
++        if value is not None:
++            (config if key == "databaseUrl" else s3)[key] = value
++    if config.get("storageMode") == "s3":
++        s3.setdefault("stagingDirectory", str(state / "s3-staging"))
++        s3.setdefault("signingKeyFile", str(state / "storage-signing.key"))
++        s3.setdefault("region", "us-east-1")
++        buckets = s3.setdefault("buckets", {purpose: "heteroes-" + purpose for purpose in _BUCKETS.values()})
++        if not isinstance(buckets, dict):
++            raise ValueError("Invalid S3 bucket configuration")
++        for name, purpose in _BUCKETS.items():
++            if name in environ:
++                buckets[purpose] = environ[name]
++        if quota is not None:
++            s3["quotaBytes"] = quota
++    if s3:
++        config["s3"] = s3
++    return config
++
+ 
+ def load_config(root=None, *, optional=False):
+     root = root or os.environ.get("HETEROES_PRIVATE_CONFIG")
+-    if not root:
+-        if optional:
+-            return {}
+-        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
+-    try:
+-        return json.loads((Path(root) / "config.json").read_text())
+-    except (OSError, ValueError):
+-        if optional:
+-            return {}
+-        raise
++    overrides = any(name in os.environ for name in _ENVIRONMENT)
++    config = {}
++    if root:
++        try:
++            config = json.loads((Path(root) / "config.json").read_text())
++            if not isinstance(config, dict):
++                raise ValueError
++        except FileNotFoundError:
++            if not (optional or overrides):
++                raise
++        except (OSError, ValueError):
++            if not optional:
++                raise ValueError("Private configuration must be a readable JSON object") from None
++            config = {}
++    elif not (optional or overrides):
++        raise ValueError("Set HETEROES_PRIVATE_CONFIG or explicit container settings")
++    return _overlay(config, root, os.environ) if overrides else config
+diff --git a/backend/core/device_models.py b/backend/core/device_models.py
+index 23405993..efeb6813 100644
+--- a/backend/core/device_models.py
++++ b/backend/core/device_models.py
+@@ -10,8 +10,8 @@ from typing import Literal
+ 
+ from .errors import ServiceError
+ from pydantic import Field, field_validator, model_validator
+-from ..monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
+-from ..addresses import endpoint, is_private
++from backend.core.monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
++from backend.core.addresses import endpoint, is_private
+ from heteroes.product.cpu_coordinator import coordinator_only, UPDATE_EVIDENCE, UPDATE_EVIDENCE_V2
+ from heteroes.noise.contracts import CPU_NOISE_FINGERPRINTS
+ 
+diff --git a/backend/deployment.py b/backend/deployment.py
+deleted file mode 100644
+index 5cfb4034..00000000
+--- a/backend/deployment.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility deployment namespace during extraction."""
+-
+-import sys
+-from .services import deployment as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/device_models.py b/backend/device_models.py
+deleted file mode 100644
+index 8f9971c1..00000000
+--- a/backend/device_models.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility module retained during core contract extraction."""
+-
+-import sys
+-from .core import device_models as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/devices.py b/backend/devices.py
+deleted file mode 100644
+index 0b0e6b8d..00000000
+--- a/backend/devices.py
++++ /dev/null
+@@ -1,53 +0,0 @@
+-"""Compatibility exports for CPU device control during extraction."""
+-
+-from .core.device_models import (
+-    command_capabilities as command_capabilities,
+-    re_checkpoint as re_checkpoint,
+-    digest as digest,
+-    SelfTest as SelfTest,
+-    EndpointUpdate as EndpointUpdate,
+-    DeviceConfigurationUpdate as DeviceConfigurationUpdate,
+-    QualificationUpdate as QualificationUpdate,
+-    Enrollment as Enrollment,
+-    Approval as Approval,
+-    Contribution as Contribution,
+-    DeviceContribution as DeviceContribution,
+-    ContributionPreference as ContributionPreference,
+-    DeviceName as DeviceName,
+-    ProcessReport as ProcessReport,
+-    Report as Report,
+-    MonitoringEvent as MonitoringEvent,
+-    GPUObservation as GPUObservation,
+-    HostObservation as HostObservation,
+-    DiskObservation as DiskObservation,
+-    TransportObservation as TransportObservation,
+-    Telemetry as Telemetry,
+-    Poll as Poll,
+-    WorkerCommand as WorkerCommand,
+-)
+-from .services.devices import AgentRuntime as AgentRuntime
+-from .api.devices import install_routes as install_device_routes
+-
+-__all__ = [
+-    "AgentRuntime",
+-    "command_capabilities",
+-    "re_checkpoint",
+-    "digest",
+-    "SelfTest",
+-    "EndpointUpdate",
+-    "DeviceConfigurationUpdate",
+-    "QualificationUpdate",
+-    "Enrollment",
+-    "Approval",
+-    "Contribution",
+-    "ProcessReport",
+-    "Report",
+-    "MonitoringEvent",
+-    "GPUObservation",
+-    "HostObservation",
+-    "DiskObservation",
+-    "TransportObservation",
+-    "Telemetry",
+-    "Poll",
+-    "WorkerCommand",
+-]
+diff --git a/backend/doctor.py b/backend/doctor.py
+index 4d830e4e..c6ff5c01 100644
+--- a/backend/doctor.py
++++ b/backend/doctor.py
+@@ -1,11 +1,6 @@
+-"""Compatibility doctor namespace and CLI during extraction."""
++"""Stable desktop doctor command; implementation lives in apps/ and services/."""
+ 
+-import sys
+-from .services import doctor as _implementation
+-from .apps.doctor import main
++from .apps.doctor import main as main
+ 
+-_implementation.main = main
+ if __name__ == "__main__":
+     raise SystemExit(main())
+-else:
+-    sys.modules[__name__] = _implementation
+diff --git a/backend/errors.py b/backend/errors.py
+deleted file mode 100644
+index 5776c9ae..00000000
+--- a/backend/errors.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility export for runtime admission errors."""
+-
+-from .core.errors import RuntimeRejected as RuntimeRejected
+diff --git a/backend/experiment_view.py b/backend/experiment_view.py
+deleted file mode 100644
+index 28f2a17c..00000000
+--- a/backend/experiment_view.py
++++ /dev/null
+@@ -1,65 +0,0 @@
+-"""Read-only corrections to experiment monitoring; canonical run evidence is never rewritten."""
+-
+-import re
+-from heteroes.v3.options import audit_selected
+-
+-
+-def experiment_view(body, snapshot):
+-    shown = {**body}
+-    snapshot = snapshot or {}
+-    state = snapshot.get("state") or {}
+-    if state.get("status") == body.get("status") and "failureReason" in state:
+-        shown["failureReason"] = state["failureReason"]
+-    summary = body.get("auditSummary")
+-    if not summary or body.get("recipeVersion") != 3:
+-        return shown
+-
+-    # Historical managed v3 runs without auditRate retain the 1/20 default. Audit
+-    # addresses are run/gN/cN, independent of seed namespace. Count committed
+-    # addresses instead of generation_done logs, which can be lost on recovery.
+-    generations = snapshot.get("generations") or []
+-    complete = bool(generations)
+-    indices = set()
+-    selected = 0
+-    for generation in generations:
+-        match = re.fullmatch(re.escape(body["experimentId"]) + r"\.g(\d+)", generation.get("generationId", ""))
+-        count = generation.get("candidateCount")
+-        committed = generation.get("committedCandidateCount")
+-        if not match or type(count) is not int or type(committed) is not int or not 0 <= committed <= count:
+-            complete = False
+-            break
+-        index = int(match[1])
+-        indices.add(index)
+-        if committed == count:
+-            candidates = range(count)
+-        else:
+-            candidates = {
+-                int(m[1])
+-                for candidate in snapshot.get("candidates", [])
+-                if candidate.get("generationId") == generation["generationId"]
+-                and candidate.get("status") == "COMMITTED"
+-                and (
+-                    m := re.fullmatch(
+-                        re.escape(generation["generationId"]) + r"\.c(\d+)", candidate.get("candidateId", "")
+-                    )
+-                )
+-            }
+-            if len(candidates) != committed:
+-                complete = False
+-                break
+-        selected += sum(
+-            audit_selected(f"{body['experimentId']}/g{index}/c{candidate}", body.get("auditRate", 0.05))
+-            for candidate in candidates
+-        )
+-    complete = complete and indices == set(range(max(indices, default=-1) + 1))
+-    complete = complete and sum(g.get("status") == "COMPLETED" for g in generations) == snapshot.get(
+-        "completedGenerationCount", sum(g.get("status") == "COMPLETED" for g in generations)
+-    )
+-    complete = complete and selected >= summary["completed"]
+-    shown["auditSummary"] = {
+-        **summary,
+-        "selected": selected if complete else None,
+-        "selectionComplete": complete,
+-        "incomplete": selected - summary["completed"] if complete else None,
+-    }
+-    return shown
+diff --git a/backend/lab.py b/backend/lab.py
+deleted file mode 100644
+index 42921e14..00000000
+--- a/backend/lab.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility lab HTTP composition export."""
+-
+-from .api.lab import install_lab_routes as install_lab_routes
+diff --git a/backend/live.py b/backend/live.py
+deleted file mode 100644
+index 18ee10d9..00000000
+--- a/backend/live.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during application composition extraction."""
+-
+-import sys
+-from .api import live as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/local_storage.py b/backend/local_storage.py
+deleted file mode 100644
+index 5b3d7c54..00000000
+--- a/backend/local_storage.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Public compatibility namespace for filesystem storage and instrumentation."""
+-
+-import sys
+-from .storage import local_backend as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/metadata_backup.py b/backend/metadata_backup.py
+deleted file mode 100644
+index 6feb9345..00000000
+--- a/backend/metadata_backup.py
++++ /dev/null
+@@ -1,4 +0,0 @@
+-"""Compatibility exports for metadata backup and atomic publication."""
+-
+-from .services.metadata_backup import create_metadata_backup as create_metadata_backup, backup_loop as backup_loop
+-from .core.filesystem import publish_new_directory as publish_new_directory
+diff --git a/backend/migrations.py b/backend/migrations.py
+deleted file mode 100644
+index 05f878c8..00000000
+--- a/backend/migrations.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility module retained during database-layer extraction."""
+-
+-import sys
+-from .db import migrations as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/model_qualification.py b/backend/model_qualification.py
+deleted file mode 100644
+index d0859038..00000000
+--- a/backend/model_qualification.py
++++ /dev/null
+@@ -1,10 +0,0 @@
+-"""Compatibility exports during backend layer extraction."""
+-
+-from .api.model_qualification import install_routes as install_routes
+-from .services.model_qualification import (
+-    ModelQualifications as ModelQualifications,
+-    restore_mismatch as restore_mismatch,
+-    checked_memory as checked_memory,
+-    TERMINAL as TERMINAL,
+-)
+-from .core.study_models import ProbeRequest as ProbeRequest
+diff --git a/backend/monitor.py b/backend/monitor.py
+index d0393fd9..55c3584f 100644
+--- a/backend/monitor.py
++++ b/backend/monitor.py
+@@ -1,9 +1,6 @@
+-"""Compatibility namespace retained during application composition extraction."""
++"""Stable desktop monitor command and shared telemetry observation type."""
+ 
+-import sys
+-from .apps import monitor as _implementation
++from .apps.monitor import main as main, TelemetrySampler as TelemetrySampler
+ 
+ if __name__ == "__main__":
+-    raise SystemExit(_implementation.main())
+-else:
+-    sys.modules[__name__] = _implementation
++    raise SystemExit(main())
+diff --git a/backend/monitor_models.py b/backend/monitor_models.py
+deleted file mode 100644
+index cdacab97..00000000
+--- a/backend/monitor_models.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during core extraction."""
+-
+-import sys
+-from .core import monitor_models as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/notifications.py b/backend/notifications.py
+deleted file mode 100644
+index e706ca7c..00000000
+--- a/backend/notifications.py
++++ /dev/null
+@@ -1,12 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.notifications import install_routes as install_notification_routes
+-from .services.notifications import (
+-    MAX_LIMIT as MAX_LIMIT,
+-    MAX_IDS as MAX_IDS,
+-    RUN_KINDS as RUN_KINDS,
+-    ACCOUNT_KINDS as ACCOUNT_KINDS,
+-    Notifications as Notifications,
+-    _stamp as _stamp,
+-    _epoch as _epoch,
+-)
+diff --git a/backend/passwords.py b/backend/passwords.py
+deleted file mode 100644
+index 9fa7647b..00000000
+--- a/backend/passwords.py
++++ /dev/null
+@@ -1,65 +0,0 @@
+-"""Password rules for people who register themselves.
+-
+-Eight characters are enough because guessing is slowed down elsewhere (sign-in throttling, memory-hard hashing); what
+-matters more is refusing the passwords that are tried first. No composition rules: they make passwords harder to type
+-and easier to guess.
+-"""
+-
+-MIN_LENGTH = 8
+-_COMMON = frozenset(
+-    {
+-        "password",
+-        "password1",
+-        "password12",
+-        "password123",
+-        "password1234",
+-        "passw0rd",
+-        "p@ssw0rd",
+-        "p@ssword",
+-        "12345678",
+-        "123456789",
+-        "1234567890",
+-        "12341234",
+-        "87654321",
+-        "11111111",
+-        "00000000",
+-        "11223344",
+-        "123123123",
+-        "qwertyui",
+-        "qwertyuiop",
+-        "qwerty12",
+-        "qwerty123",
+-        "qwerty1234",
+-        "asdfghjk",
+-        "asdfghjkl",
+-        "zxcvbnm1",
+-        "1q2w3e4r",
+-        "1qaz2wsx",
+-        "abcd1234",
+-        "abc12345",
+-        "abcdefgh",
+-        "iloveyou",
+-        "letmein1",
+-        "welcome1",
+-        "admin123",
+-        "administrator",
+-        "changeme",
+-        "trustno1",
+-        "heteroes",
+-        "heteroes1",
+-        "heteroes123",
+-        "hetero-es",
+-    }
+-)
+-
+-
+-def password_problem(password: str, username: str = "", display_name: str = "") -> str | None:
+-    """Return a sentence for the person registering, or None when the password is acceptable."""
+-    if len(password) < MIN_LENGTH:
+-        return f"Use at least {MIN_LENGTH} characters."
+-    folded = password.casefold().strip()
+-    if not folded or folded in _COMMON or len(set(folded)) == 1:
+-        return "This password is too easy to guess. Choose another one."
+-    if any(name and folded == name.casefold().strip() for name in (username, display_name)):
+-        return "The password must not be your username or display name."
+-    return None
+diff --git a/backend/policies.py b/backend/policies.py
+deleted file mode 100644
+index 9dcf2d08..00000000
+--- a/backend/policies.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility policy namespace retained during service extraction."""
+-
+-import sys
+-from .services import policies as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/recovery_storage.py b/backend/recovery_storage.py
+deleted file mode 100644
+index 4552f345..00000000
+--- a/backend/recovery_storage.py
++++ /dev/null
+@@ -1,11 +0,0 @@
+-"""Compatibility recovery exports during backend layer extraction."""
+-
+-from .api.recovery_storage import install_routes as install_storage_routes
+-from .services.recovery_storage import (
+-    RecoveryStorage as RecoveryStorage,
+-    QuotaExceeded as QuotaExceeded,
+-    HEX as HEX,
+-    UUID as UUID,
+-)
+-
+-__all__ = ["RecoveryStorage", "QuotaExceeded", "HEX", "UUID", "install_storage_routes"]
+diff --git a/backend/request_models.py b/backend/request_models.py
+deleted file mode 100644
+index 8959a784..00000000
+--- a/backend/request_models.py
++++ /dev/null
+@@ -1,7 +0,0 @@
+-"""Compatibility namespace retained during core extraction."""
+-
+-import sys
+-from .core import request_models as _implementation
+-from heteroes.catalog import DEFAULT_SCHEDULER_POLICY as DEFAULT_SCHEDULER_POLICY, SYNC_MODES as SYNC_MODES
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/routes_accounts.py b/backend/routes_accounts.py
+deleted file mode 100644
+index fe3c278b..00000000
+--- a/backend/routes_accounts.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.accounts import install_routes as install_routes
+diff --git a/backend/routes_auth.py b/backend/routes_auth.py
+deleted file mode 100644
+index 41571c4a..00000000
+--- a/backend/routes_auth.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.auth import install_routes as install_routes
+diff --git a/backend/routes_experiments.py b/backend/routes_experiments.py
+deleted file mode 100644
+index 142264e3..00000000
+--- a/backend/routes_experiments.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.experiments import install_routes as install_routes
+diff --git a/backend/routes_history.py b/backend/routes_history.py
+deleted file mode 100644
+index 8ad1aef7..00000000
+--- a/backend/routes_history.py
++++ /dev/null
+@@ -1,4 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.history import install_routes as install_routes
+-from .services.history import DEVICE_EVENTS as DEVICE_EVENTS, message as message, severity as severity
+diff --git a/backend/routes_inventory.py b/backend/routes_inventory.py
+deleted file mode 100644
+index c111994d..00000000
+--- a/backend/routes_inventory.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.inventory import install_routes as install_routes
+diff --git a/backend/routes_operations.py b/backend/routes_operations.py
+deleted file mode 100644
+index a273260e..00000000
+--- a/backend/routes_operations.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.operations import install_routes as install_routes
+diff --git a/backend/routes_web.py b/backend/routes_web.py
+deleted file mode 100644
+index bcd99e44..00000000
+--- a/backend/routes_web.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during application composition extraction."""
+-
+-import sys
+-from .api import web as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/routes_workspaces.py b/backend/routes_workspaces.py
+deleted file mode 100644
+index 3fa458b9..00000000
+--- a/backend/routes_workspaces.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.workspaces import install_routes as install_routes
+diff --git a/backend/runtime_sources.py b/backend/runtime_sources.py
+deleted file mode 100644
+index 4f475f79..00000000
+--- a/backend/runtime_sources.py
++++ /dev/null
+@@ -1,35 +0,0 @@
+-"""Exact CPU-only runtime subset shipped with the Lab Server."""
+-
+-from pathlib import Path
+-
+-SHARED_MODULES = (
+-    "__init__.py",
+-    "catalog.py",
+-    "canonical.py",
+-    "http_safety.py",
+-    "noise/__init__.py",
+-    "noise/contracts.py",
+-    "recovery_manifest.py",
+-    "v3/__init__.py",
+-    "v3/data.py",
+-    "v3/options.py",
+-    "v3/scoring.py",
+-    "product/__init__.py",
+-    "product/chunk_memory.py",
+-    "product/cpu_coordinator.py",
+-    "product/model_qualification.py",
+-    "product/qualification_v3.py",
+-    "product/energy.py",
+-    "product/host_detail.py",
+-    "product/windows_detail.py",
+-    "product/power.py",
+-    "product/telemetry.py",
+-    "study/__init__.py",
+-    "study/data.py",
+-    "study/models.py",
+-)
+-
+-
+-def shared_sources(repo):
+-    root = Path(repo) / "runtime/src/heteroes"
+-    return [(root / name, "heteroes/" + name) for name in SHARED_MODULES]
+diff --git a/backend/server.py b/backend/server.py
+index 282ca358..485f116b 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -1,7 +1,5 @@
+-"""Compatibility packaged server exports and command entrypoint."""
++"""Stable packaged server command; application/bootstrap implementation lives in apps/ and services/."""
+ 
+-from .core.server_models import Bootstrap as Bootstrap
+-from .services.bootstrap import initialize as initialize
+ from .apps.server import main as main
+ 
+ if __name__ == "__main__":
+diff --git a/backend/services/accounts.py b/backend/services/accounts.py
+index 208bffea..4fa2ac25 100644
+--- a/backend/services/accounts.py
++++ b/backend/services/accounts.py
+@@ -9,7 +9,7 @@ import uuid
+ from argon2.exceptions import InvalidHashError, VerificationError
+ 
+ from ..core.errors import ServiceError
+-from ..passwords import password_problem
++from backend.core.passwords import password_problem
+ from ..repositories.accounts import AccountExists, AccountsRepository
+ 
+ 
+diff --git a/backend/services/agent_commands.py b/backend/services/agent_commands.py
+index 2695a10b..3de411d0 100644
+--- a/backend/services/agent_commands.py
++++ b/backend/services/agent_commands.py
+@@ -1,6 +1,6 @@
+ """CPU-only device control. Connectivity is never evidence of process death."""
+ 
+-from ..constants import (
++from backend.core.constants import (
+     CORE_COMMAND_KINDS as CORE_COMMAND_KINDS,
+     COMMAND_KINDS as COMMAND_KINDS,
+     V3_CODE_KEYS as V3_CODE_KEYS,
+diff --git a/backend/services/agent_polling.py b/backend/services/agent_polling.py
+index eabed63d..4d262bc3 100644
+--- a/backend/services/agent_polling.py
++++ b/backend/services/agent_polling.py
+@@ -1,6 +1,6 @@
+ """CPU-only device control. Connectivity is never evidence of process death."""
+ 
+-from ..constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
++from backend.core.constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
+ 
+ import re
+ import json
+@@ -9,10 +9,10 @@ import time
+ from ..core.errors import ServiceError
+ from ..repositories.agent_polling import AgentPollingRepository as repository
+ 
+-from ..constants import QUIESCENT as QUIESCENT
++from backend.core.constants import QUIESCENT as QUIESCENT
+ 
+ 
+-from ..device_models import digest as digest
++from backend.core.device_models import digest as digest
+ from heteroes.product.cpu_coordinator import coordinator_only
+ 
+ 
+diff --git a/backend/services/agent_scheduling.py b/backend/services/agent_scheduling.py
+index 21f56ecc..9e46b747 100644
+--- a/backend/services/agent_scheduling.py
++++ b/backend/services/agent_scheduling.py
+@@ -1,6 +1,6 @@
+ """CPU-only device control. Connectivity is never evidence of process death."""
+ 
+-from ..constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
++from backend.core.constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
+ 
+ from .policies import (
+     v2_qualification as v2_qualification,
+@@ -17,10 +17,10 @@ import uuid
+ from ..core.errors import ServiceError
+ from ..repositories.agent_scheduling import AgentSchedulingRepository as repository
+ from ..db.transactions import begin_write
+-from ..errors import RuntimeRejected as RuntimeRejected
++from backend.core.errors import RuntimeRejected as RuntimeRejected
+ from heteroes.study.data import sha as study_hash
+ 
+-from ..constants import QUIESCENT as QUIESCENT
++from backend.core.constants import QUIESCENT as QUIESCENT
+ from heteroes.product.cpu_coordinator import coordinator_only
+ 
+ # A worker that left and whose device has not been seen for this long counts as stopped: it cannot confirm the stop while
+diff --git a/backend/services/devices.py b/backend/services/devices.py
+index ca73fb66..f4b215ea 100644
+--- a/backend/services/devices.py
++++ b/backend/services/devices.py
+@@ -25,21 +25,21 @@ from ..core.device_models import (
+     Poll,
+     WorkerCommand,
+ )
+-from ..agent_scheduling import AgentScheduling
+-from ..agent_commands import AgentCommands
+-from ..agent_polling import AgentPolling
++from backend.services.agent_scheduling import AgentScheduling
++from backend.services.agent_commands import AgentCommands
++from backend.services.agent_polling import AgentPolling
+ from .model_qualification import ModelQualifications
+ from ..db.migrations import initialize_agent_schema
+ from .policies import has_device_reservation, processes_drained
+ from .policies import set_disabled_workers, active_profile, platform_profile
+-from ..config import load_config
++from backend.core.config import load_config
+ import hashlib
+ import json
+ import os
+ import secrets
+ import time
+ import uuid
+-from ..addresses import endpoint, is_private
++from backend.core.addresses import endpoint, is_private
+ from ..core.constants import MODEL, REVISION, QUIESCENT
+ from heteroes.product.cpu_coordinator import coordinator_only
+ from heteroes.catalog import SCHEDULER_POLICIES, SYNC_MODES, WORKLOAD_NAMES
+@@ -142,10 +142,8 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
+     def public_web_url(self):
+         """The lab's public HTTPS address (it carries small dataset files to devices without the private route)."""
+         root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-        if not root:
+-            return None
+         try:
+-            value = load_config(root).get("publicWebUrl")
++            value = load_config(root, optional=True).get("publicWebUrl")
+             return endpoint(value) if value and not is_private(value) else None
+         except (OSError, ValueError, TypeError):
+             return None
+@@ -154,10 +152,8 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
+         """The lab's public compute address, read per command so a new Quick URL is used at once.
+         Only a public HTTPS host name is passed on; anything else is ignored."""
+         root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-        if not root:
+-            return None
+         try:
+-            value = load_config(root).get("publicComputeUrl")
++            value = load_config(root, optional=True).get("publicComputeUrl")
+             return endpoint(value) if value and not is_private(value) else None
+         except (OSError, ValueError, TypeError):
+             return None
+diff --git a/backend/services/experiment_state.py b/backend/services/experiment_state.py
+index e0b97388..99eea5d7 100644
+--- a/backend/services/experiment_state.py
++++ b/backend/services/experiment_state.py
+@@ -4,8 +4,8 @@ import hashlib
+ import json
+ import uuid
+ from ..core.clock import now
+-from ..constants import TERMINAL, REVISION
+-from ..experiment_view import experiment_view
++from backend.core.constants import TERMINAL, REVISION
++from backend.services.experiment_view import experiment_view
+ from ..repositories.experiments import ExperimentsRepository as repository
+ 
+ 
+diff --git a/backend/services/experiments.py b/backend/services/experiments.py
+index ec60ec5f..feb2df9f 100644
+--- a/backend/services/experiments.py
++++ b/backend/services/experiments.py
+@@ -1,14 +1,14 @@
+ """Experiments business operations; HTTP responses stay in api/."""
+ 
+-from ..errors import RuntimeRejected
+-from ..request_models import BackupPolicy, Configuration, MembershipRequest
++from backend.core.errors import RuntimeRejected
++from backend.core.request_models import BackupPolicy, Configuration, MembershipRequest
+ from .policies import dispatch_held
+ import hashlib
+ import json
+ import secrets
+ from ..core.constants import TERMINAL
+ from ..core.clock import now
+-from ..constants import REVISION
++from backend.core.constants import REVISION
+ from .timeline import build_timeline
+ from types import SimpleNamespace
+ from ..core.errors import ServiceError
+diff --git a/backend/services/inventory.py b/backend/services/inventory.py
+index 0853ce69..3b095c88 100644
+--- a/backend/services/inventory.py
++++ b/backend/services/inventory.py
+@@ -12,10 +12,8 @@ from ..repositories.inventory import InventoryRepository as repository
+ 
+ def _private_config():
+     private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+-    if not private_root:
+-        return {}
+     try:
+-        return load_config(private_root)
++        return load_config(private_root, optional=True)
+     except (OSError, ValueError):
+         return {}
+ 
+diff --git a/backend/services/scheduling.py b/backend/services/scheduling.py
+index 803104b6..73cb8e4b 100644
+--- a/backend/services/scheduling.py
++++ b/backend/services/scheduling.py
+@@ -3,7 +3,7 @@
+ import json
+ from ..core.clock import now
+ from ..core.constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
+-from ..errors import RuntimeRejected
++from backend.core.errors import RuntimeRejected
+ from .policies import dispatch_held
+ from ..repositories.scheduling import SchedulingRepository as repository
+ from ..db.transactions import begin_write
+diff --git a/backend/services/workspaces.py b/backend/services/workspaces.py
+index 1d0e50a6..e9c958bf 100644
+--- a/backend/services/workspaces.py
++++ b/backend/services/workspaces.py
+@@ -3,7 +3,7 @@
+ import json
+ import uuid
+ from types import SimpleNamespace
+-from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
++from backend.core.request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+ from .policies import set_disabled_workers
+ from ..core.clock import now
+ from ..core.errors import ServiceError, DatabaseConflict
+diff --git a/backend/store.py b/backend/store.py
+deleted file mode 100644
+index ca464997..00000000
+--- a/backend/store.py
++++ /dev/null
+@@ -1,3 +0,0 @@
+-"""Compatibility exports for the product state facade."""
+-
+-from .services.store import Store as Store, now as now, ACTIVE as ACTIVE, TERMINAL as TERMINAL
+diff --git a/backend/study_registry.py b/backend/study_registry.py
+deleted file mode 100644
+index 83bfeb30..00000000
+--- a/backend/study_registry.py
++++ /dev/null
+@@ -1,12 +0,0 @@
+-"""Compatibility exports during backend layer extraction."""
+-
+-from .api.study_registry import install_routes as install_routes
+-from .services.study_registry import Registry as Registry, dataset_limits as dataset_limits
+-from .services.study_registry import dataset as dataset
+-from .core.study_models import (
+-    ImportData as ImportData,
+-    DatasetUpload as DatasetUpload,
+-    DatasetBuild as DatasetBuild,
+-    DatasetLimits as DatasetLimits,
+-    RegisterModel as RegisterModel,
+-)
+diff --git a/backend/templates.py b/backend/templates.py
+deleted file mode 100644
+index 477333a3..00000000
+--- a/backend/templates.py
++++ /dev/null
+@@ -1,12 +0,0 @@
+-"""Compatibility import retained during the three-layer extraction."""
+-
+-from .api.templates import install_routes as install_template_routes
+-from .api.templates import clean_config as clean_config
+-from .services.templates import (
+-    MAX_PER_WORKSPACE as MAX_PER_WORKSPACE,
+-    INTEGERS as INTEGERS,
+-    FLOATS as FLOATS,
+-    NULLABLE as NULLABLE,
+-    CHOICES as CHOICES,
+-    SHORT_TEXT as SHORT_TEXT,
+-)
+diff --git a/backend/tests/conftest.py b/backend/tests/conftest.py
+index 71e441d6..5284253b 100644
+--- a/backend/tests/conftest.py
++++ b/backend/tests/conftest.py
+@@ -9,8 +9,8 @@ from dbkit import (
+     fresh_postgres_database as fresh_postgres_database,
+ )
+ 
+-from backend.app import create_app
+-from backend.devices import AgentRuntime
++from backend.apps.factory import create_app
++from backend.services.devices import AgentRuntime
+ from labkit import USERS, enable, login, pair
+ 
+ 
+diff --git a/backend/tests/test_account_layers.py b/backend/tests/test_account_layers.py
+index e9d26cc4..11efac36 100644
+--- a/backend/tests/test_account_layers.py
++++ b/backend/tests/test_account_layers.py
+@@ -9,8 +9,8 @@ import pytest
+ 
+ from backend.core.errors import ServiceError
+ from backend.services.accounts import AccountService
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ 
+ 
+ def test_session_lookup_checks_expiry_and_revocation_from_durable_state(tmp_path):
+diff --git a/backend/tests/test_agent_factory.py b/backend/tests/test_agent_factory.py
+index fadb4340..9aa86194 100644
+--- a/backend/tests/test_agent_factory.py
++++ b/backend/tests/test_agent_factory.py
+@@ -6,10 +6,10 @@ import pytest
+ 
+ from fastapi.testclient import TestClient
+ 
+-from backend.app import app_from_environment
+-from backend.devices import AgentRuntime
+-from backend.server import initialize
+-from backend.writer_lock import acquire_writer
++from backend.apps.factory import app_from_environment
++from backend.services.devices import AgentRuntime
++from backend.services.bootstrap import initialize
++from backend.core.writer_lock import acquire_writer
+ 
+ pytestmark = pytest.mark.sqlite_file(reason="local private-config factory and SQLite writer ownership")
+ 
+diff --git a/backend/tests/test_api.py b/backend/tests/test_api.py
+index 7ed94a36..f986380e 100644
+--- a/backend/tests/test_api.py
++++ b/backend/tests/test_api.py
+@@ -2,8 +2,8 @@ from pathlib import Path
+ 
+ import pytest
+ 
+-from backend.store import Store
+-from backend.errors import RuntimeRejected
++from backend.services.store import Store
++from backend.core.errors import RuntimeRejected
+ from labkit import OMIT, draft, login, submitted
+ 
+ 
+diff --git a/backend/tests/test_cpu_coordinator.py b/backend/tests/test_cpu_coordinator.py
+index 3718c061..9addcbea 100644
+--- a/backend/tests/test_cpu_coordinator.py
++++ b/backend/tests/test_cpu_coordinator.py
+@@ -4,7 +4,7 @@ import copy
+ 
+ import pytest
+ 
+-from backend.device_models import SelfTest
++from backend.core.device_models import SelfTest
+ from heteroes.product.cpu_coordinator import PROFILE, UPDATE_EVIDENCE
+ from labkit import boot, enable, pair
+ from test_v3_study import assets, configuration, qualify_v3, v3_study as study_fixture
+diff --git a/backend/tests/test_deployment.py b/backend/tests/test_deployment.py
+index d134117d..53eee08f 100644
+--- a/backend/tests/test_deployment.py
++++ b/backend/tests/test_deployment.py
+@@ -5,8 +5,8 @@ import socket
+ import time
+ import urllib.request
+ import pytest
+-from backend.deployment import caddyfile, idle, save_private
+-from backend.server import initialize
++from backend.services.deployment import caddyfile, idle, save_private
++from backend.services.bootstrap import initialize
+ 
+ 
+ def test_entrypoints_do_not_select_private_bulk_by_host_header():
+diff --git a/backend/tests/test_device_removal.py b/backend/tests/test_device_removal.py
+index 37a36a30..c33dc96f 100644
+--- a/backend/tests/test_device_removal.py
++++ b/backend/tests/test_device_removal.py
+@@ -3,8 +3,8 @@
+ import uuid
+ import pytest
+ from fastapi.testclient import TestClient
+-from backend.app import create_app
+-from backend.devices import AgentRuntime
++from backend.apps.factory import create_app
++from backend.services.devices import AgentRuntime
+ from labkit import login
+ from test_lab import register, activate
+ from labkit import boot, enable, pair, queued
+diff --git a/backend/tests/test_devices.py b/backend/tests/test_devices.py
+index b25e6e02..bfe7882b 100644
+--- a/backend/tests/test_devices.py
++++ b/backend/tests/test_devices.py
+@@ -6,7 +6,7 @@ from pathlib import Path
+ import time
+ import uuid
+ import pytest
+-from backend.devices import AgentRuntime
++from backend.services.devices import AgentRuntime
+ from labkit import boot, draft, enable, login, pair, pending_commands, queued, submitted  # noqa: F401  (fixtures lab and setup: conftest.py)
+ 
+ 
+@@ -583,7 +583,7 @@ LEGACY_WINDOWS_REFERENCE = (
+ 
+ 
+ def test_native_windows_admission_requires_exact_reference_and_worker_only():
+-    from backend.devices import SelfTest
++    from backend.core.device_models import SelfTest
+     from pydantic import ValidationError
+     import pathlib
+ 
+@@ -625,8 +625,8 @@ def test_native_windows_v3_worker_admission_is_bound_to_the_shipped_reference():
+     import copy
+     import pathlib
+ 
+-    from backend.devices import SelfTest
+-    from backend.policies import v3_qualification
++    from backend.core.device_models import SelfTest
++    from backend.services.policies import v3_qualification
+     from pydantic import ValidationError
+ 
+     evidence = pathlib.Path(__file__).parent / "fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference"
+diff --git a/backend/tests/test_doctor.py b/backend/tests/test_doctor.py
+index b06068af..097118b0 100644
+--- a/backend/tests/test_doctor.py
++++ b/backend/tests/test_doctor.py
+@@ -4,8 +4,9 @@ import sqlite3
+ import pytest
+ 
+ 
+-from backend.doctor import FAIL, PASS, WARN, main, run_checks
+-from backend.server import initialize
++from backend.services.doctor import FAIL, PASS, WARN, run_checks
++from backend.apps.doctor import main
++from backend.services.bootstrap import initialize
+ 
+ pytestmark = pytest.mark.sqlite_file(reason="SQLite diagnostics and deliberate on-disk corruption")
+ 
+diff --git a/backend/tests/test_endpoints.py b/backend/tests/test_endpoints.py
+index 3799ca38..687f2cc0 100644
+--- a/backend/tests/test_endpoints.py
++++ b/backend/tests/test_endpoints.py
+@@ -1,7 +1,7 @@
+ import json
+ import pytest
+ from pydantic import ValidationError
+-from backend.devices import Enrollment, EndpointUpdate
++from backend.core.device_models import Enrollment, EndpointUpdate
+ from labkit import boot, enable, pair, queued
+ 
+ 
+diff --git a/backend/tests/test_lab.py b/backend/tests/test_lab.py
+index 97126b72..8fc32b12 100644
+--- a/backend/tests/test_lab.py
++++ b/backend/tests/test_lab.py
+@@ -4,7 +4,7 @@ import json
+ import sqlite3
+ import pytest
+ 
+-from backend.store import Store
++from backend.services.store import Store
+ from labkit import draft, login, pending_commands, submitted
+ 
+ 
+diff --git a/backend/tests/test_large_datasets.py b/backend/tests/test_large_datasets.py
+index 8f736fad..56d473aa 100644
+--- a/backend/tests/test_large_datasets.py
++++ b/backend/tests/test_large_datasets.py
+@@ -106,7 +106,7 @@ def test_a_device_without_the_private_route_gets_small_dataset_files_over_the_pu
+     v3_study, tmp_path, monkeypatch
+ ):
+     # GSM8K demo tier 1, 2026-10-21: with Tailscale off, 3060-thao could never fetch the dataset (private grant only)
+-    from backend import local_storage
++    from backend.storage import local_backend as local_storage
+ 
+     c, admin, _ = v3_study
+     store = c.app.state.store
+@@ -147,7 +147,7 @@ def test_a_researcher_without_the_private_route_uploads_a_small_dataset_over_the
+     v3_study, tmp_path, monkeypatch
+ ):
+     # owner 2026-10-22: no Tailscale by default; a notebook far from the lab must still be able to send its dataset
+-    from backend import local_storage
++    from backend.storage import local_backend as local_storage
+ 
+     c, admin, _ = v3_study
+     (tmp_path / "private").mkdir()
+diff --git a/backend/tests/test_local_lab.py b/backend/tests/test_local_lab.py
+index 8455549a..9bce29e4 100644
+--- a/backend/tests/test_local_lab.py
++++ b/backend/tests/test_local_lab.py
+@@ -84,7 +84,7 @@ def test_named_tunnel_needs_fixed_https_addresses_and_a_config_file(lab_script,
+ 
+ @pytest.fixture
+ def lab_db(tmp_path):
+-    from backend.server import initialize
++    from backend.services.bootstrap import initialize
+ 
+     root = tmp_path / "lab"
+     initialize(
+diff --git a/backend/tests/test_local_storage.py b/backend/tests/test_local_storage.py
+index 55987152..4da31d7b 100644
+--- a/backend/tests/test_local_storage.py
++++ b/backend/tests/test_local_storage.py
+@@ -8,10 +8,10 @@ from fastapi import FastAPI
+ from fastapi.testclient import TestClient
+ import pytest
+ 
+-from backend.local_storage import LocalBackend
+-from backend.recovery_storage import RecoveryStorage
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.storage.local_backend import LocalBackend
++from backend.services.recovery_storage import RecoveryStorage
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ from test_recovery_storage import manifest
+ 
+ 
+diff --git a/backend/tests/test_local_storage_async.py b/backend/tests/test_local_storage_async.py
+index 65e309a6..27f8e38d 100644
+--- a/backend/tests/test_local_storage_async.py
++++ b/backend/tests/test_local_storage_async.py
+@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
+ import httpx
+ import pytest
+ from fastapi import FastAPI
+-from backend.local_storage import LocalBackend
++from backend.storage.local_backend import LocalBackend
+ 
+ 
+ def setup(tmp_path):
+@@ -29,7 +29,7 @@ def test_slow_disk_operation_keeps_unrelated_health_request_responsive(tmp_path,
+     entered = threading.Event()
+     release = threading.Event()
+     finished = threading.Event()
+-    from backend.local_storage import _Upload
++    from backend.storage.local_backend import _Upload
+ 
+     original = os.fsync if operation == "fsync" else getattr(_Upload, operation)
+ 
+diff --git a/backend/tests/test_membership.py b/backend/tests/test_membership.py
+index 7e598e2e..e46ea1e2 100644
+--- a/backend/tests/test_membership.py
++++ b/backend/tests/test_membership.py
+@@ -7,7 +7,7 @@ worker's own credential, and every change is audited. The frozen configuration n
+ import json
+ import time
+ 
+-from backend.agent_scheduling import LEFT_OFFLINE_RELEASE_SECONDS
++from backend.services.agent_scheduling import LEFT_OFFLINE_RELEASE_SECONDS
+ from labkit import boot, draft, enable, pair
+ 
+ 
+diff --git a/backend/tests/test_metadata_restore.py b/backend/tests/test_metadata_restore.py
+index c755872d..8ed1f38a 100644
+--- a/backend/tests/test_metadata_restore.py
++++ b/backend/tests/test_metadata_restore.py
+@@ -7,8 +7,8 @@ from pathlib import Path
+ import sqlite3
+ import pytest
+ 
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ from backend.db.backups import backup_sqlite
+ 
+ pytestmark = pytest.mark.sqlite_file(reason="SQLite snapshot file restoration and corruption checks")
+diff --git a/backend/tests/test_model_qualification.py b/backend/tests/test_model_qualification.py
+index d4811f35..6dd79bb3 100644
+--- a/backend/tests/test_model_qualification.py
++++ b/backend/tests/test_model_qualification.py
+@@ -310,7 +310,7 @@ def test_old_and_new_references_coexist_without_cross_engine_admission(v3_study)
+     with store.db() as db:
+         row = db.execute("SELECT * FROM model_references").fetchone()
+         old_bytes = tuple(row)
+-    from backend.policies import v3_qualification
++    from backend.services.policies import v3_qualification
+ 
+     profile = runtime.devices()[0]["selfTest"]
+     assert v3_qualification(profile, model["manifestHash"], ENGINE_VERSION) is None
+@@ -350,7 +350,7 @@ def start_strict(lab, device, model):
+ 
+ 
+ def test_a_strict_qualification_is_separate_from_the_plain_one(v3_study):
+-    from backend.policies import v3_qualification
++    from backend.services.policies import v3_qualification
+ 
+     lab, device, auth, model = setup(v3_study)
+     c, store, runtime, admin = lab
+@@ -378,7 +378,7 @@ def test_a_strict_probe_rejects_a_plain_reference(v3_study):
+     reference, observations = report_inputs(model, ENGINE_V2)  # valid, but for hf_generate
+     finish(c, auth, job, model, reference=reference, observations=observations)
+     assert c.get(route(model), headers=admin).json()["jobs"][0]["errorCode"] == "MODEL_QUALIFICATION_MISMATCH"
+-    from backend.policies import v3_qualification
++    from backend.services.policies import v3_qualification
+ 
+     assert v3_qualification(runtime.devices()[0]["selfTest"], model["manifestHash"], ENGINE_V2, STRICT) == "model"
+ 
+@@ -437,7 +437,7 @@ def test_a_pending_probe_blocks_only_probes_of_the_same_reference(v3_study):
+ 
+ 
+ def test_a_profile_without_per_engine_hashes_never_qualifies_for_the_strict_decoder():
+-    from backend.policies import v3_qualification
++    from backend.services.policies import v3_qualification
+ 
+     legacy = {"recipeVersions": [3], "noiseVersion": ENGINE_V2, "qualifiedModelHashes": ["a" * 64]}
+     assert v3_qualification(legacy, "a" * 64, ENGINE_V2) is None
+@@ -524,7 +524,7 @@ def test_a_strict_run_needs_a_gpu_coordinator(v3_study):
+ 
+ 
+ def test_the_strict_layout_compares_devices_and_physical_gpus():
+-    from backend.policies import strict_layout
++    from backend.services.policies import strict_layout
+ 
+     body = {"decodeEngine": STRICT}
+     gpu = {"runtimeProfile": "native-gpu"}
+diff --git a/backend/tests/test_noise_engines.py b/backend/tests/test_noise_engines.py
+index ec31752e..f098c77b 100644
+--- a/backend/tests/test_noise_engines.py
++++ b/backend/tests/test_noise_engines.py
+@@ -3,8 +3,8 @@
+ import pytest
+ from pydantic import ValidationError
+ 
+-from backend.device_models import SelfTest
+-from backend.policies import noise_qualification
++from backend.core.device_models import SelfTest
++from backend.services.policies import noise_qualification
+ from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+ 
+ 
+@@ -32,7 +32,7 @@ def test_selftest_rejects_unknown_or_wrong_engine_fingerprint():
+ 
+ 
+ def test_model_qualification_is_bound_to_its_noise_engine():
+-    from backend.policies import v3_qualification
++    from backend.services.policies import v3_qualification
+ 
+     model = "d" * 64
+     old = {"recipeVersions": [3], "noiseVersion": ENGINE_VERSION, "qualifiedModelHashes": [model]}
+diff --git a/backend/tests/test_notifications.py b/backend/tests/test_notifications.py
+index ba4a2999..4d4ee78d 100644
+--- a/backend/tests/test_notifications.py
++++ b/backend/tests/test_notifications.py
+@@ -19,7 +19,7 @@ def kinds(client, headers):
+ def finish(store, run_id, status="COMPLETED"):
+     with store.db() as db:
+         body = json.loads(db.execute("SELECT body FROM experiments WHERE id=?", (run_id,)).fetchone()[0])
+-        from backend.store import now
++        from backend.services.store import now
+ 
+         db.execute(
+             "UPDATE experiments SET body=? WHERE id=?",
+@@ -28,7 +28,7 @@ def finish(store, run_id, status="COMPLETED"):
+ 
+ 
+ def test_history_from_before_notifications_existed_does_not_flood_the_bell(setup):
+-    from backend.notifications import Notifications
++    from backend.services.notifications import Notifications
+ 
+     client, store, _ = setup
+     admin = login(client, "admin")
+@@ -51,7 +51,7 @@ def test_history_from_before_notifications_existed_does_not_flood_the_bell(setup
+ 
+ 
+ def test_a_restart_keeps_the_starting_point_so_nothing_is_missed(setup):
+-    from backend.notifications import Notifications
++    from backend.services.notifications import Notifications
+ 
+     client, store, _ = setup
+     admin = login(client, "admin")
+@@ -164,7 +164,7 @@ def test_marking_as_read_changes_the_count_and_only_my_own_notifications(setup):
+ 
+ def test_the_list_is_capped_and_unread_counts_everything_unread(setup):
+     client, store, _ = setup
+-    from backend.throttle import Throttle
++    from backend.core.throttle import Throttle
+ 
+     client.app.state.registrations = Throttle(1000, 3600)
+     admin = login(client, "admin")
+diff --git a/backend/tests/test_oidc_accounts.py b/backend/tests/test_oidc_accounts.py
+index d55b7f8b..88afd4fe 100644
+--- a/backend/tests/test_oidc_accounts.py
++++ b/backend/tests/test_oidc_accounts.py
+@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
+ import pytest
+ 
+ from backend.apps.factory import create_app
+-from backend.devices import AgentRuntime
++from backend.services.devices import AgentRuntime
+ from test_oidc import ISSUER, CLIENT, jwks_server, signed, keys as keys
+ from test_recovery_storage import Objects, manifest
+ from labkit import pair
+diff --git a/backend/tests/test_operations.py b/backend/tests/test_operations.py
+index 7f14c78b..3afee977 100644
+--- a/backend/tests/test_operations.py
++++ b/backend/tests/test_operations.py
+@@ -2,7 +2,7 @@
+ 
+ import pytest
+ 
+-from backend.metadata_backup import publish_new_directory
++from backend.core.filesystem import publish_new_directory
+ from labkit import login
+ 
+ 
+diff --git a/backend/tests/test_operations_layers.py b/backend/tests/test_operations_layers.py
+index 73724d1f..146885fe 100644
+--- a/backend/tests/test_operations_layers.py
++++ b/backend/tests/test_operations_layers.py
+@@ -5,9 +5,9 @@ import pytest
+ from fastapi import HTTPException
+ 
+ from backend.core.errors import ServiceError
+-from backend.policies import active_profile, platform_profile
+-from backend.request_models import Configuration
+-from backend.validation import validate_configuration as legacy_validate
++from backend.services.policies import active_profile, platform_profile
++from backend.core.request_models import Configuration
++from backend.api.validation import validate_configuration as legacy_validate
+ 
+ 
+ def test_shared_authorization_uses_plain_errors_and_rechecks_durable_access(lab):
+diff --git a/backend/tests/test_parallel_resources.py b/backend/tests/test_parallel_resources.py
+index 19f291f8..a49b2b5c 100644
+--- a/backend/tests/test_parallel_resources.py
++++ b/backend/tests/test_parallel_resources.py
+@@ -5,8 +5,8 @@ import json
+ import time
+ 
+ import pytest
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ from labkit import boot, enable, pair, queued
+ 
+ 
+diff --git a/backend/tests/test_passwords.py b/backend/tests/test_passwords.py
+index be05194f..1bac8fb8 100644
+--- a/backend/tests/test_passwords.py
++++ b/backend/tests/test_passwords.py
+@@ -2,7 +2,7 @@
+ 
+ import pytest
+ 
+-from backend.passwords import MIN_LENGTH, password_problem
++from backend.core.passwords import MIN_LENGTH, password_problem
+ from labkit import login
+ 
+ 
+diff --git a/backend/tests/test_pause_resume.py b/backend/tests/test_pause_resume.py
+index 8a46b713..2fd89a3b 100644
+--- a/backend/tests/test_pause_resume.py
++++ b/backend/tests/test_pause_resume.py
+@@ -1,8 +1,8 @@
+ import copy
+ import json
+ import pytest
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ from labkit import boot, enable, pair, queued
+ 
+ 
+diff --git a/backend/tests/test_policies.py b/backend/tests/test_policies.py
+index 6f98a28d..240810e3 100644
+--- a/backend/tests/test_policies.py
++++ b/backend/tests/test_policies.py
+@@ -1,7 +1,7 @@
+ """Shared backend policies preserve strict input and durable settings behavior."""
+ 
+ import pytest
+-from backend.policies import backup_policy, dispatch_held, set_disabled_workers, read_setting
++from backend.services.policies import backup_policy, dispatch_held, set_disabled_workers, read_setting
+ 
+ 
+ @pytest.mark.parametrize(
+@@ -36,7 +36,7 @@ def test_shared_settings_preserve_hold_and_sorted_disabled_workers(lab):
+ 
+ 
+ def test_unknown_process_state_and_physical_alias_keep_device_busy(lab):
+-    from backend.policies import has_device_reservation, processes_drained
++    from backend.services.policies import has_device_reservation, processes_drained
+ 
+     _, store, _, _ = lab
+     assert processes_drained([])
+diff --git a/backend/tests/test_recovery_routes.py b/backend/tests/test_recovery_routes.py
+index f5d982fd..9175a965 100644
+--- a/backend/tests/test_recovery_routes.py
++++ b/backend/tests/test_recovery_routes.py
+@@ -2,8 +2,8 @@
+ 
+ import pytest
+ from fastapi.testclient import TestClient
+-from backend.app import create_app
+-from backend.devices import AgentRuntime
++from backend.apps.factory import create_app
++from backend.services.devices import AgentRuntime
+ from labkit import login
+ from labkit import boot, enable, pair, queued
+ from test_recovery_storage import Objects, manifest
+diff --git a/backend/tests/test_recovery_storage.py b/backend/tests/test_recovery_storage.py
+index e71e1370..24e02a23 100644
+--- a/backend/tests/test_recovery_storage.py
++++ b/backend/tests/test_recovery_storage.py
+@@ -3,9 +3,9 @@
+ import hashlib
+ import json
+ import pytest
+-from backend.recovery_storage import RecoveryStorage, QuotaExceeded
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.services.recovery_storage import RecoveryStorage, QuotaExceeded
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ 
+ 
+ class Objects:
+@@ -128,7 +128,7 @@ def test_unsafe_paths_and_changed_point_identity_are_rejected(storage):
+ 
+ @pytest.mark.sqlite_file(reason="SQLite metadata backup and integrity_check")
+ def test_metadata_backup_is_consistent_and_keeps_local_copy(storage):
+-    from backend.metadata_backup import create_metadata_backup
++    from backend.services.metadata_backup import create_metadata_backup
+     from pathlib import Path
+     import sqlite3
+ 
+diff --git a/backend/tests/test_route_contract.py b/backend/tests/test_route_contract.py
+index 4b1ef52f..31386f05 100644
+--- a/backend/tests/test_route_contract.py
++++ b/backend/tests/test_route_contract.py
+@@ -3,9 +3,9 @@
+ import json
+ from pathlib import Path
+ 
+-from backend.app import create_app
+-from backend.devices import AgentRuntime
+-from backend.local_storage import LocalBackend
++from backend.apps.factory import create_app
++from backend.services.devices import AgentRuntime
++from backend.storage.local_backend import LocalBackend
+ 
+ 
+ def test_product_route_contract_matches_archived_pre_split_inventory(tmp_path, monkeypatch):
+diff --git a/backend/tests/test_server.py b/backend/tests/test_server.py
+index b17dee4b..ddf4cccc 100644
+--- a/backend/tests/test_server.py
++++ b/backend/tests/test_server.py
+@@ -3,8 +3,8 @@ import sqlite3
+ import pytest
+ 
+ from fastapi.testclient import TestClient
+-from backend.app import app_from_environment
+-from backend.server import initialize
++from backend.apps.factory import app_from_environment
++from backend.services.bootstrap import initialize
+ 
+ pytestmark = pytest.mark.sqlite_file(reason="desktop/local SQLite bootstrap and file publication")
+ 
+diff --git a/backend/tests/test_shared_runtime.py b/backend/tests/test_shared_runtime.py
+index 35c2f36b..1ed1d715 100644
+--- a/backend/tests/test_shared_runtime.py
++++ b/backend/tests/test_shared_runtime.py
+@@ -8,7 +8,7 @@ import sys
+ 
+ def test_backend_uses_shared_runtime_without_importing_torch():
+     code = """import sys, json
+-import backend.monitor, backend.study_registry
++import backend.monitor, backend.services.study_registry
+ from heteroes.product.telemetry import TelemetrySampler
+ from heteroes.study.data import dataset
+ assert backend.monitor.TelemetrySampler is TelemetrySampler
+@@ -20,7 +20,7 @@ print(json.dumps({'torchImported': False}))
+ 
+ 
+ def test_server_packager_selects_only_cpu_shared_modules():
+-    from backend.runtime_sources import shared_sources
++    from backend.core.runtime_sources import shared_sources
+ 
+     repo = Path(__file__).resolve().parents[2]
+     sources = shared_sources(repo)
+@@ -61,7 +61,7 @@ def _runtime_imports(path, package, top_level_only=False):
+ def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs():
+     # The Lab Server ships only SHARED_MODULES: a backend import of another runtime module works in the repository and
+     # fails in the packaged server. Checked over the whole import closure (backend files and the shared modules themselves).
+-    from backend.runtime_sources import SHARED_MODULES
++    from backend.core.runtime_sources import SHARED_MODULES
+ 
+     repo = Path(__file__).resolve().parents[2]
+     root = repo / "runtime/src/heteroes"
+diff --git a/backend/tests/test_storage_layers.py b/backend/tests/test_storage_layers.py
+index 07fad0e6..10766353 100644
+--- a/backend/tests/test_storage_layers.py
++++ b/backend/tests/test_storage_layers.py
+@@ -3,7 +3,7 @@
+ import pytest
+ 
+ from backend.core.errors import ServiceError
+-from backend.local_storage import LocalBackend
++from backend.storage.local_backend import LocalBackend
+ from labkit import enable, pair, queued
+ from test_recovery_routes import lab as recovery_fixture
+ from test_recovery_storage import manifest
+diff --git a/backend/tests/test_store_layers.py b/backend/tests/test_store_layers.py
+index c5960cc6..6bbb6220 100644
+--- a/backend/tests/test_store_layers.py
++++ b/backend/tests/test_store_layers.py
+@@ -4,8 +4,8 @@ import ast
+ from pathlib import Path
+ import pytest
+ 
+-from backend.devices import AgentRuntime
+-from backend.store import Store
++from backend.services.devices import AgentRuntime
++from backend.services.store import Store
+ 
+ 
+ def test_sql_execution_is_owned_by_database_and_repositories():
+diff --git a/backend/tests/test_study.py b/backend/tests/test_study.py
+index 4ab075a3..ac3786b0 100644
+--- a/backend/tests/test_study.py
++++ b/backend/tests/test_study.py
+@@ -2,9 +2,9 @@ import hashlib
+ import json
+ import pytest
+ from fastapi.testclient import TestClient
+-from backend.app import create_app
+-from backend.devices import AgentRuntime
+-from backend.local_storage import LocalBackend
++from backend.apps.factory import create_app
++from backend.services.devices import AgentRuntime
++from backend.storage.local_backend import LocalBackend
+ from labkit import login
+ 
+ 
+diff --git a/backend/tests/test_study_layers.py b/backend/tests/test_study_layers.py
+index ecd76413..0e71e736 100644
+--- a/backend/tests/test_study_layers.py
++++ b/backend/tests/test_study_layers.py
+@@ -3,7 +3,7 @@
+ import pytest
+ 
+ from backend.core.errors import ServiceError
+-from backend.study_registry import Registry
++from backend.services.study_registry import Registry
+ 
+ 
+ def test_registry_lookup_preserves_workspace_scope_and_uses_plain_errors(lab):
+diff --git a/backend/tests/test_throttle.py b/backend/tests/test_throttle.py
+index b3117854..7724d8b0 100644
+--- a/backend/tests/test_throttle.py
++++ b/backend/tests/test_throttle.py
+@@ -3,9 +3,9 @@
+ from fastapi.testclient import TestClient
+ import pytest
+ 
+-from backend.app import create_app
+-from backend.throttle import Throttle, client_address
+-from backend.devices import AgentRuntime
++from backend.apps.factory import create_app
++from backend.core.throttle import Throttle, client_address
++from backend.services.devices import AgentRuntime
+ 
+ 
+ class Clock:
+diff --git a/backend/tests/test_timeline.py b/backend/tests/test_timeline.py
+index c8a40fcb..86438b09 100644
+--- a/backend/tests/test_timeline.py
++++ b/backend/tests/test_timeline.py
+@@ -3,7 +3,7 @@
+ import json
+ from pathlib import Path
+ 
+-from backend.timeline import build_timeline
++from backend.services.timeline import build_timeline
+ 
+ FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "run-fifo.json").read_text())
+ 
+diff --git a/backend/tests/test_v3_study.py b/backend/tests/test_v3_study.py
+index 141c7087..8f68f6f9 100644
+--- a/backend/tests/test_v3_study.py
++++ b/backend/tests/test_v3_study.py
+@@ -92,8 +92,8 @@ UPDATE_OPTIONS = {
+ 
+ @pytest.mark.parametrize("value", [0, 0.05, 1])
+ def test_audit_rate_request_and_template_contracts_accept_zero_and_bounds(value):
+-    from backend.request_models import Configuration
+-    from backend.templates import clean_config
++    from backend.core.request_models import Configuration
++    from backend.api.templates import clean_config
+ 
+     config = Configuration(name="Audit settings", modelName="fixture", workerIds=["worker"], auditRate=value)
+     assert config.auditRate == value
+@@ -102,8 +102,8 @@ def test_audit_rate_request_and_template_contracts_accept_zero_and_bounds(value)
+ 
+ @pytest.mark.parametrize("value", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+ def test_bad_audit_rate_is_rejected_by_request_and_template_contracts(value):
+-    from backend.request_models import Configuration
+-    from backend.templates import clean_config
++    from backend.core.request_models import Configuration
++    from backend.api.templates import clean_config
+     from fastapi import HTTPException
+     from pydantic import ValidationError
+ 
+@@ -115,7 +115,7 @@ def test_bad_audit_rate_is_rejected_by_request_and_template_contracts(value):
+ 
+ @pytest.mark.parametrize("rate,selected", [(0, 0), (1, 4)])
+ def test_experiment_view_uses_frozen_rate_instead_of_assuming_five_percent(rate, selected):
+-    from backend.experiment_view import experiment_view
++    from backend.services.experiment_view import experiment_view
+ 
+     run_id = "a" * 32
+     body = {"experimentId": run_id, "recipeVersion": 3, "auditRate": rate, "auditSummary": {"completed": 0}}
+@@ -333,8 +333,8 @@ def test_v3_scorer_columns_are_every_field_of_its_config(v3_study):
+ 
+ 
+ def test_v3_qualification_cannot_be_inferred_from_the_model_hash():
+-    from backend.policies import v3_qualification
+-    from backend.device_models import SelfTest
++    from backend.services.policies import v3_qualification
++    from backend.core.device_models import SelfTest
+     from pydantic import ValidationError
+ 
+     digest = "a" * 64
+@@ -371,7 +371,7 @@ def test_queued_v3_work_stops_when_a_device_loses_v3_qualification(v3_study):
+ 
+ 
+ def test_v3_templates_validate_and_keep_nullable_prompt():
+-    from backend.templates import clean_config
++    from backend.api.templates import clean_config
+     from fastapi import HTTPException
+ 
+     options = {
+diff --git a/backend/tests/test_web.py b/backend/tests/test_web.py
+index 3d8e81d5..061fd408 100644
+--- a/backend/tests/test_web.py
++++ b/backend/tests/test_web.py
+@@ -1,6 +1,6 @@
+ from fastapi.testclient import TestClient
+-from backend.app import create_app
+-from backend.devices import AgentRuntime
++from backend.apps.factory import create_app
++from backend.services.devices import AgentRuntime
+ 
+ 
+ def test_same_origin_web_keeps_api_auth_and_unknown_paths(tmp_path):
+diff --git a/backend/tests/test_writer_lock.py b/backend/tests/test_writer_lock.py
+index 3740fd5a..7338be30 100644
+--- a/backend/tests/test_writer_lock.py
++++ b/backend/tests/test_writer_lock.py
+@@ -9,9 +9,9 @@ import threading
+ import pytest
+ 
+ from fastapi.testclient import TestClient
+-from backend.app import app_from_environment
+-from backend.server import initialize
+-from backend.writer_lock import acquire_writer
++from backend.apps.factory import app_from_environment
++from backend.services.bootstrap import initialize
++from backend.core.writer_lock import acquire_writer
+ 
+ pytestmark = pytest.mark.sqlite_file(reason="local SQLite kernel writer ownership and shutdown ordering")
+ 
+@@ -69,7 +69,7 @@ def test_kernel_lock_excludes_a_second_process_and_recovers_after_close(tmp_path
+     command = [
+         sys.executable,
+         "-c",
+-        "from backend.writer_lock import acquire_writer; import sys; h=acquire_writer(sys.argv[1]); h.close()",
++        "from backend.core.writer_lock import acquire_writer; import sys; h=acquire_writer(sys.argv[1]); h.close()",
+         str(database),
+     ]
+     try:
+diff --git a/backend/throttle.py b/backend/throttle.py
+deleted file mode 100644
+index 68d6e0a8..00000000
+--- a/backend/throttle.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during core extraction."""
+-
+-import sys
+-from .core import throttle as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/timeline.py b/backend/timeline.py
+deleted file mode 100644
+index 9e4a6e44..00000000
+--- a/backend/timeline.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during application composition extraction."""
+-
+-import sys
+-from .services import timeline as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/backend/validation.py b/backend/validation.py
+deleted file mode 100644
+index 7e738b1a..00000000
+--- a/backend/validation.py
++++ /dev/null
+@@ -1,4 +0,0 @@
+-"""Compatibility validation exports."""
+-
+-from .api.validation import validate_configuration as validate_configuration
+-from .services.validation import freeze_python_code as freeze_python_code
+diff --git a/backend/writer_lock.py b/backend/writer_lock.py
+deleted file mode 100644
+index 4a88e4e6..00000000
+--- a/backend/writer_lock.py
++++ /dev/null
+@@ -1,6 +0,0 @@
+-"""Compatibility namespace retained during application composition extraction."""
+-
+-import sys
+-from .core import writer_lock as _implementation
+-
+-sys.modules[__name__] = _implementation
+diff --git a/desktop/server/resources/profile.json b/desktop/server/resources/profile.json
+index d31dfa49..29db5364 100644
+--- a/desktop/server/resources/profile.json
++++ b/desktop/server/resources/profile.json
+@@ -66,6 +66,12 @@
+           "sha256": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+           "sizeBytes": 117683
+         },
++        {
++          "name": "greenlet-3.4.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
++          "url": "https://files.pythonhosted.org/packages/36/f7/229f3aed6948faa20e0616a0b8568da22e365ede6a54d7d369058b128afd/greenlet-3.4.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
++          "sha256": "a1c4f6b453006efb8310affb2d132832e9bbb4fc01ce6df6b70d810d38f1f6dc",
++          "sizeBytes": 615062
++        },
+         {
+           "name": "h11-0.16.0-py3-none-any.whl",
+           "url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
+@@ -114,6 +120,12 @@
+           "sha256": "f187030fc3d62c668feb0f09e92852e0eb414d7fcefc4748f2e67d245aade37e",
+           "sizeBytes": 2160358
+         },
++        {
++          "name": "sqlalchemy-2.0.55-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
++          "url": "https://files.pythonhosted.org/packages/df/86/e1c1521350fba22109fb6605b2a1f3e572d8e294239bb59c575b18fe45c2/sqlalchemy-2.0.55-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
++          "sha256": "6e7694e736d63b476d81a0eae7b304d9b747a3f0a1b7dc10134655c4cccf5eb7",
++          "sizeBytes": 3473971
++        },
+         {
+           "name": "starlette-1.7.0-py3-none-any.whl",
+           "url": "https://files.pythonhosted.org/packages/4e/d6/1ec1b290f9e0fb067899b61e1d37a30c923068bad260b216dbe37a7d2967/starlette-1.7.0-py3-none-any.whl",
+@@ -209,6 +221,12 @@
+           "sha256": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+           "sizeBytes": 117683
+         },
++        {
++          "name": "greenlet-3.4.0-cp312-cp312-win_amd64.whl",
++          "url": "https://files.pythonhosted.org/packages/42/cf/bb2c32d9a100e36ee9f6e38fad6b1e082b8184010cb06259b49e1266ca01/greenlet-3.4.0-cp312-cp312-win_amd64.whl",
++          "sha256": "a0a53fb071531d003b075c444014ff8f8b1a9898d36bb88abd9ac7b3524648a2",
++          "sizeBytes": 238892
++        },
+         {
+           "name": "h11-0.16.0-py3-none-any.whl",
+           "url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
+@@ -257,6 +275,12 @@
+           "sha256": "1541c334af5d42cb9eb03862a9b4d2cfbfc670fd05172ec51f3ce02d704550f1",
+           "sizeBytes": 2171536
+         },
++        {
++          "name": "sqlalchemy-2.0.55-cp312-cp312-win_amd64.whl",
++          "url": "https://files.pythonhosted.org/packages/19/10/0ec446c9ee7467f869c298e12a3c5ec0f47a6cd64b2b59764ab6f1287017/sqlalchemy-2.0.55-cp312-cp312-win_amd64.whl",
++          "sha256": "a13820f47eda53d603f56feaadeab9787d0110b7fcbe6ab2ff2415bd3ea31c79",
++          "sizeBytes": 2177392
++        },
+         {
+           "name": "starlette-1.7.0-py3-none-any.whl",
+           "url": "https://files.pythonhosted.org/packages/4e/d6/1ec1b290f9e0fb067899b61e1d37a30c923068bad260b216dbe37a7d2967/starlette-1.7.0-py3-none-any.whl",
+@@ -285,5 +309,5 @@
+       "lockFile": "requirements-windows.txt"
+     }
+   },
+-  "runtimeSha256": "b1bd8ea7399c941a43fb645040360753e415c413b2c9bb37cd73022c3703eb16"
++  "runtimeSha256": "2eaf0b90b8d008043f814e7c22205f1a22e6fca3514e87b6b8c2095af9f5820d"
+ }
+diff --git a/desktop/server/resources/requirements-linux.txt b/desktop/server/resources/requirements-linux.txt
+index 39724510..719f3e1e 100644
+--- a/desktop/server/resources/requirements-linux.txt
++++ b/desktop/server/resources/requirements-linux.txt
+@@ -7,6 +7,7 @@ certifi==2026.7.22 --hash=sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6
+ cffi==2.1.1 --hash=sha256:c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf
+ click==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360
+ fastapi==0.136.1 --hash=sha256:a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f
++greenlet==3.4.0 --hash=sha256:a1c4f6b453006efb8310affb2d132832e9bbb4fc01ce6df6b70d810d38f1f6dc
+ h11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
+ httpcore==1.0.9 --hash=sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55
+ httpx==0.28.1 --hash=sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad
+@@ -15,6 +16,7 @@ packaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb55
+ pycparser==3.11 --hash=sha256:51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80
+ pydantic==2.14.0 --hash=sha256:15fab1bea6f1dc5003b54fc2ecab230c1fd1dbade2acd4addc52d81e32416d4b
+ pydantic_core==2.50.0 --hash=sha256:f187030fc3d62c668feb0f09e92852e0eb414d7fcefc4748f2e67d245aade37e
++SQLAlchemy==2.0.55 --hash=sha256:6e7694e736d63b476d81a0eae7b304d9b747a3f0a1b7dc10134655c4cccf5eb7
+ starlette==1.7.0 --hash=sha256:67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e
+ typing_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+ typing-inspection==0.4.4 --hash=sha256:65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147
+diff --git a/desktop/server/resources/requirements-windows.txt b/desktop/server/resources/requirements-windows.txt
+index 7d7e8652..677149a1 100644
+--- a/desktop/server/resources/requirements-windows.txt
++++ b/desktop/server/resources/requirements-windows.txt
+@@ -8,6 +8,7 @@ cffi==2.1.1 --hash=sha256:f53e442b08449d42821fa4a4fba000095af9f62742a500f978a9f5
+ click==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360
+ colorama==0.4.6 --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
+ fastapi==0.136.1 --hash=sha256:a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f
++greenlet==3.4.0 --hash=sha256:a0a53fb071531d003b075c444014ff8f8b1a9898d36bb88abd9ac7b3524648a2
+ h11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
+ httpcore==1.0.9 --hash=sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55
+ httpx==0.28.1 --hash=sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad
+@@ -16,6 +17,7 @@ packaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb55
+ pycparser==3.11 --hash=sha256:51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80
+ pydantic==2.14.0 --hash=sha256:15fab1bea6f1dc5003b54fc2ecab230c1fd1dbade2acd4addc52d81e32416d4b
+ pydantic_core==2.50.0 --hash=sha256:1541c334af5d42cb9eb03862a9b4d2cfbfc670fd05172ec51f3ce02d704550f1
++SQLAlchemy==2.0.55 --hash=sha256:a13820f47eda53d603f56feaadeab9787d0110b7fcbe6ab2ff2415bd3ea31c79
+ starlette==1.7.0 --hash=sha256:67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e
+ typing_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+ typing-inspection==0.4.4 --hash=sha256:65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147
+diff --git a/desktop/server/resources/runtime.tar.gz b/desktop/server/resources/runtime.tar.gz
+index 3bd4a5a5..3ef95faa 100644
+Binary files a/desktop/server/resources/runtime.tar.gz and b/desktop/server/resources/runtime.tar.gz differ
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index 598f16d7..55bef9e6 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -14,8 +14,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
+ - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
+   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
+-- **Phần B đã xong B1–B8:** backend chia lớp, Postgres, service riêng, OIDC, S3/MinIO, metrics/log an toàn và API đồ án.
+-  Tiếp theo là cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
++- **Phần B đã xong B1–B9:** chia lớp/service, Postgres, OIDC, S3/MinIO, metrics/log, API đồ án, cấu hình môi trường và gói desktop.
++  Tiếp theo là nghiệm thu B10 trên cùng source sạch ở cả ba môi trường, rồi triển khai phần C. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
+ - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
+   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
+@@ -35,8 +35,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+ - Strict lab form default: `strict_b22_v1`. Its GPU coordinator must differ from its workers (D1).
+   `strict_int8_lora_v1` remains standalone/SDK only.
+ - CPU check-all: all 24 steps pass, including 3 324 runtime tests (1 045 intentional CUDA-hidden skips),
+-  626 backend SQLite tests (641 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
+-  The B7 full PostgreSQL/MinIO matrix passes669 tests, zero skips; details below.
++  678 backend SQLite tests (694 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
++  The B9 full PostgreSQL/MinIO matrix passes723 tests, zero skips; details below.
+ 
+ ## Tiến độ kế hoạch 2026-11
+ 
+@@ -134,6 +134,20 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   Source-package imports and lint/format pass; default111 routes remain exact. [Course API guide](design/course-demo.md)
+   and evidence `2026-11-02-b8-course-api` record the configuration and real read-only-role proof. The last whole24-step
+   browser/Electron check is B7; B8 changes only the disabled-by-default API feature. B9–B10 and all C remain.
++  B9 complete: environment overlays private JSON and supports secret files; OIDC environment-only startup requires no
++  local credentials. URL rotation and private installer transfers work without a private config directory. See
++  [container configuration](design/container-configuration.md). Optional malformed-config fallback is corrected (B-018).
++  Both server builders include recursive Python and SQL resources (B-019), excluding tests/cache.37 physical aliases
++  are removed; password/view helpers move byte-identically and only3 stable desktop command adapters remain at root.
++  Import-only proof checks96 existing test/helper files,41 changed, including2 embedded child Python imports; all
++  non-import AST/lines are preserved. Its own negative controls reject weakened assertions/calls/strings.
++  CPU profiles add SQLAlchemy2.0.55/greenlet3.4.0 only:23 Linux/24 Windows wheels; original Python pins and43 wheels
++  unchanged. Fresh private Linux Python3.12.15 installs23 hash-checked wheels and serves6 actual HTTP checks with
++  optional cloud/GPU libraries absent. Fresh desktop-built web replaces the stale source bundle; final archive bytes
++  match current backend/shared runtime and all125 web files. Old and final private receipts are retained separately.
++  Full actual-MinIO SQLite694/PG723, zero skips; PG audit445 PG +52 explicit SQLite Stores. Mutation17+8/25 killed,
++  all24 check-all steps and Linux apps --check pass. Evidence `2026-11-02-b9-configuration-packaging`. Windows wheels
++  are hash-verified; native private interpreter execution and the clean same-source GPU matrix remain B10. All C remains.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+@@ -142,7 +156,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+ 
+ ## Remaining scope and limits
+ 
+-- B1–B8 are complete. Execute B9–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
++- B1–B9 are complete. Execute B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
+ - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
+   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index 1a0375eb..61973e58 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -3,27 +3,29 @@
+ Source: owner's colleague's notes in `~/projects/app_finding.md`, imported 2026-10-31.
+ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original concerns are preserved below.
+ 
+-| ID    | Area                                              | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                                                              | Status                                                                                                                                                                                     |
+-| ----- | ------------------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+-| B-001 | `backend/`                                        | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.                                               | Open                                                                                                                                                                                       |
+-| B-002 | `backend/routes_*.py`                             | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                                                                         | Open                                                                                                                                                                                       |
+-| B-003 | `backend/store.py`                                | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                                                                  | Open                                                                                                                                                                                       |
+-| B-004 | Experiment submission maintenance hold            | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.                                                      | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                                                      |
+-| B-005 | Independent device lifecycle guards               | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.                                                | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                                              |
+-| B-006 | Experiment-list owner privacy                     | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.                                                         | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                                                 |
+-| B-007 | Empty dynamic SQL filters on PostgreSQL           | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects.                                            | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`.                            |
+-| B-008 | Scheduler fencing transaction boundaries          | C    | P2       | Wrapping a whole scheduler tick in one transaction makes a handled job failure roll back already completed jobs and unrelated progress.                                                                                 | Bind independent business transactions to the dedicated leader session; fence connection loss while preserving each operation commit/rollback boundary.          | Fixed: independent-job regression and nine session/controller cases pass on PostgreSQL; core mutation16/16, full SQLite541/PostgreSQL559; evidence `2026-11-01-b4-service-scheduler-core`. |
+-| B-009 | Restore empty-target schema classification        | C    | P2       | SQL LIKE pg_% treats underscore as a wildcard and incorrectly ignores existing user data in a pgx schema, permitting a restore into a nonempty target.                                                                  | Use the exact reserved pg_ prefix; inspect user relations/functions/types and reject before restoration.                                                         | Fixed: real PostgreSQL pgx regression, checksum/identity guards and atomic failure rollback; backup mutation16/16.                                                                         |
+-| B-010 | Browser fixtures and full-check result accounting | T    | P1       | Additive DB columns broke old fixture INSERT statements; check-all skipped five browser contracts after startup failures and still printed ALL PASS because those failures never reached its failed list.               | Use explicit seed column lists; retain startup logs and make any fixture startup failure fail the entire command; test real seeding plus the shell failure path. | Fixed: replacement check-all passes all24 steps, SQLite548/PostgreSQL572; fixture mutation4/4. First false ALL PASS rejected; evidence `2026-11-01-b4-backup-restore`.                     |
+-| B-011 | OIDC browser refresh evidence                     | T    | P2       | An early browser probe printed PASS while its final receipt still had refreshGrants=0, so it did not prove automatic renewal.                                                                                           | Explicitly await an actual HTTP counter and assert it again in the final receipt; reject zero/missing counters independently.                                    | Fixed: final browser receipt has refreshGrants=1 and codeGrants=2 (SSO reload), six contracts; frontend/harness mutation11/11. Early counter0 receipt rejected.                            |
+-| B-012 | Local metadata payload formats                    | C    | P2       | The filesystem key whitelist accepted product.sqlite but rejected PostgreSQL product.pgdump, leaving local-mode PostgreSQL backups pending.                                                                             | Permit the PostgreSQL payload in the existing private metadata namespace and retain SQLite behavior.                                                             | Fixed: both actual local payload formats pass, and removing pgdump support is killed by the storage mutation suite.                                                                        |
+-| B-013 | Independent public-upload length guard coverage   | T    | P2       | The initial mutation removing the Content-Length guard survived because the short-body regression also failed at final byte-count validation.                                                                           | Send a complete valid body with a mismatched declared length to isolate the early header guard.                                                                  | Fixed: independent header regression; I/O mutation21/21, full SQLite627/PostgreSQL652 pass. Original 20/21 result retained; evidence `2026-11-01-b6-s3-minio`.                             |
+-| B-014 | Concurrent metrics read and scheduler shutdown    | C    | P2       | The new metrics reader can still own the PostgreSQL leader session when graceful scheduler shutdown closes it.                                                                                                          | Serialize shutdown cleanup with the shared dispatch/read operation lock; retain the exact physical session until its read finishes.                              | Fixed: actual PG red/green concurrency regression, session/loss/standby tests and31/31 mutations; full SQLite641/PG669, evidence `2026-11-02-b7-observability`.                            |
+-| B-015 | Unrepresentable observation values                | C    | P2       | A huge JSON integer in GPU telemetry raises during finite-number conversion; an unbounded completed-generation value can also break metric rendering.                                                                   | Omit unrepresentable telemetry and bound retained completed-generation integers; never replace missing readings with zero.                                       | Fixed: both red failures retained, GPU units/invalid-value tests and mutation guards pass; full SQLite641/PG669.                                                                           |
+-| B-016 | HTTP counter value coverage                       | T    | P2       | The first metrics mutation run survived a counter that always increments by zero because tests only checked series existence.                                                                                           | Require one observation per completed request and an actual increment after a repeated request.                                                                  | Fixed: initial26/27 retained, final31/31 killed on actual PG; all24 resumed check-all steps pass.                                                                                          |
+-| B-017 | Independent JSON file-size guard coverage         | T    | P2       | The first course mutation survived removing the oversize check because the bounded read produced malformed JSON and parsing still rejected it.                                                                          | Add a valid complete JSON prefix followed by excess whitespace, so the size guard is the sole rejection.                                                         | Fixed: initial14/15 retained; final15/15 killed with actual PG, focused SQLite25/PG26 pass. Full suites665/694 ran before this test-only addition; production source unchanged.            |
+-| B-Q1  | Lab Server responsibilities                       | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                                 | Answered in A5 (architecture document)                                                                                                                                                     |
+-| B-Q2  | Data and backups                                  | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                            | Answered in A5                                                                                                                                                                             |
++| ID    | Area                                              | Type | Priority | Finding / question                                                                                                                                                                                                      | Proposed resolution                                                                                                                                              | Status                                                                                                                                                                                                                  |
++| ----- | ------------------------------------------------- | ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
++| B-001 | `backend/`                                        | Q    | P2       | Lab Server is a modular monolith; flat Python modules are difficult to navigate.                                                                                                                                        | Plan B: separate API, services, repositories, DB, core and application entrypoints, then deploy multiple services.                                               | Open                                                                                                                                                                                                                    |
++| B-002 | `backend/routes_*.py`                             | Q    | P2       | Routes mix HTTP handling, business rules and SQL without a separate application-to-database layer.                                                                                                                      | Plan B2: thin routers calling services and repositories.                                                                                                         | Open                                                                                                                                                                                                                    |
++| B-003 | `backend/store.py`                                | Q    | P2       | `Store` aggregates SQL and supports SQLite only.                                                                                                                                                                        | Plan B2–B3: a thin facade and repositories over SQLite/PostgreSQL transactions.                                                                                  | Open                                                                                                                                                                                                                    |
++| B-004 | Experiment submission maintenance hold            | T    | P2       | The selected 80-test mutation control still passed when the DRAFT submission hold guard was removed; dispatcher hold tests alone did not protect this API boundary.                                                     | Add a public submission regression: held DRAFT stays DRAFT with an empty queue, then submits after release.                                                      | Fixed: direct submit regression; mutation 10/10 killed, full backend 477 passed; evidence `2026-11-01-b2-experiments`                                                                                                   |
++| B-005 | Independent device lifecycle guards               | T    | P2       | The initial 88-test control missed seven independent guard removals: pairing expiry/single use, revoked control auth, coordinator identity, checkpoint verification, event payload binding and stale process ownership. | Add nine regressions with otherwise valid inputs and successful positive controls; keep original tests unchanged.                                                | Fixed: 13/13 mutants killed, full backend 488 passed; evidence `2026-11-01-b2-devices-agents`                                                                                                                           |
++| B-006 | Experiment-list owner privacy                     | T    | P2       | The initial 56-test composition control passed when the same-workspace list owner filter was removed; cross-workspace and detail-route checks did not cover this guard independently.                                   | Add participant and administrator list assertions over two differently owned runs in the same workspace.                                                         | Fixed: 12/12 mutants killed, full backend 502 passed; evidence `2026-11-01-b2-composition`                                                                                                                              |
++| B-007 | Empty dynamic SQL filters on PostgreSQL           | C    | P2       | SQLite accepts IN (); PostgreSQL rejects it, breaking empty event/history and child-object authorization paths during the first actual full PostgreSQL run.                                                             | Emit an explicit NULL predicate for an empty positive IN list; test both empty history queries on both real dialects.                                            | Fixed: focused PostgreSQL regressions 64 passed; full SQLite 528 / PostgreSQL 538 passed. Schema/SQL mutation 12/12; evidence `2026-11-01-b3-portable-backend`.                                                         |
++| B-008 | Scheduler fencing transaction boundaries          | C    | P2       | Wrapping a whole scheduler tick in one transaction makes a handled job failure roll back already completed jobs and unrelated progress.                                                                                 | Bind independent business transactions to the dedicated leader session; fence connection loss while preserving each operation commit/rollback boundary.          | Fixed: independent-job regression and nine session/controller cases pass on PostgreSQL; core mutation16/16, full SQLite541/PostgreSQL559; evidence `2026-11-01-b4-service-scheduler-core`.                              |
++| B-009 | Restore empty-target schema classification        | C    | P2       | SQL LIKE pg_% treats underscore as a wildcard and incorrectly ignores existing user data in a pgx schema, permitting a restore into a nonempty target.                                                                  | Use the exact reserved pg_ prefix; inspect user relations/functions/types and reject before restoration.                                                         | Fixed: real PostgreSQL pgx regression, checksum/identity guards and atomic failure rollback; backup mutation16/16.                                                                                                      |
++| B-010 | Browser fixtures and full-check result accounting | T    | P1       | Additive DB columns broke old fixture INSERT statements; check-all skipped five browser contracts after startup failures and still printed ALL PASS because those failures never reached its failed list.               | Use explicit seed column lists; retain startup logs and make any fixture startup failure fail the entire command; test real seeding plus the shell failure path. | Fixed: replacement check-all passes all24 steps, SQLite548/PostgreSQL572; fixture mutation4/4. First false ALL PASS rejected; evidence `2026-11-01-b4-backup-restore`.                                                  |
++| B-011 | OIDC browser refresh evidence                     | T    | P2       | An early browser probe printed PASS while its final receipt still had refreshGrants=0, so it did not prove automatic renewal.                                                                                           | Explicitly await an actual HTTP counter and assert it again in the final receipt; reject zero/missing counters independently.                                    | Fixed: final browser receipt has refreshGrants=1 and codeGrants=2 (SSO reload), six contracts; frontend/harness mutation11/11. Early counter0 receipt rejected.                                                         |
++| B-012 | Local metadata payload formats                    | C    | P2       | The filesystem key whitelist accepted product.sqlite but rejected PostgreSQL product.pgdump, leaving local-mode PostgreSQL backups pending.                                                                             | Permit the PostgreSQL payload in the existing private metadata namespace and retain SQLite behavior.                                                             | Fixed: both actual local payload formats pass, and removing pgdump support is killed by the storage mutation suite.                                                                                                     |
++| B-013 | Independent public-upload length guard coverage   | T    | P2       | The initial mutation removing the Content-Length guard survived because the short-body regression also failed at final byte-count validation.                                                                           | Send a complete valid body with a mismatched declared length to isolate the early header guard.                                                                  | Fixed: independent header regression; I/O mutation21/21, full SQLite627/PostgreSQL652 pass. Original 20/21 result retained; evidence `2026-11-01-b6-s3-minio`.                                                          |
++| B-014 | Concurrent metrics read and scheduler shutdown    | C    | P2       | The new metrics reader can still own the PostgreSQL leader session when graceful scheduler shutdown closes it.                                                                                                          | Serialize shutdown cleanup with the shared dispatch/read operation lock; retain the exact physical session until its read finishes.                              | Fixed: actual PG red/green concurrency regression, session/loss/standby tests and31/31 mutations; full SQLite641/PG669, evidence `2026-11-02-b7-observability`.                                                         |
++| B-015 | Unrepresentable observation values                | C    | P2       | A huge JSON integer in GPU telemetry raises during finite-number conversion; an unbounded completed-generation value can also break metric rendering.                                                                   | Omit unrepresentable telemetry and bound retained completed-generation integers; never replace missing readings with zero.                                       | Fixed: both red failures retained, GPU units/invalid-value tests and mutation guards pass; full SQLite641/PG669.                                                                                                        |
++| B-016 | HTTP counter value coverage                       | T    | P2       | The first metrics mutation run survived a counter that always increments by zero because tests only checked series existence.                                                                                           | Require one observation per completed request and an actual increment after a repeated request.                                                                  | Fixed: initial26/27 retained, final31/31 killed on actual PG; all24 resumed check-all steps pass.                                                                                                                       |
++| B-017 | Independent JSON file-size guard coverage         | T    | P2       | The first course mutation survived removing the oversize check because the bounded read produced malformed JSON and parsing still rejected it.                                                                          | Add a valid complete JSON prefix followed by excess whitespace, so the size guard is the sole rejection.                                                         | Fixed: initial14/15 retained; final15/15 killed with actual PG, focused SQLite25/PG26 pass. Full suites665/694 ran before this test-only addition; production source unchanged.                                         |
++| B-018 | Optional malformed configuration fallback         | C    | P2       | During the new overlay implementation, an optional read rejected a non-object JSON value but retained it, causing later overlay access to fail.                                                                         | Reset optional failed reads to an empty object; retain safe required-read errors and overlay valid explicit values.                                              | Fixed: two actual red failures retained, optional object regressions and environment mutation17/17 pass; full SQLite694/PG723.                                                                                          |
++| B-019 | Packaged backend layers and SQL resources         | C    | P2       | The old profile builder selected flat Python only; the later refresh builder selected recursive Python but omitted PostgreSQL DDL.                                                                                      | Share one recursive Python/SQL source owner, exclude tests/cache, and validate extracted archives and installed private Python HTTP behavior.                    | Fixed: archive red/green and8/8 packaging/proof mutations; final archive matches current source and fresh web. Private Linux23-wheel installation passes6 actual HTTP checks; all24 checks and Linux apps --check pass. |
++| B-Q1  | Lab Server responsibilities                       | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                                 | Answered in A5 (architecture document)                                                                                                                                                                                  |
++| B-Q2  | Data and backups                                  | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                            | Answered in A5                                                                                                                                                                                                          |
+ 
+ The colleague's parenthetical text denotes examples, English explanations or personal comments. These notes do not claim
+ that the existing modular monolith is a correctness defect; the approved multi-service work is tracked as architecture.
+diff --git a/scripts/build-server-profile.py b/scripts/build-server-profile.py
+index 1509b263..d80d27b4 100644
+--- a/scripts/build-server-profile.py
++++ b/scripts/build-server-profile.py
+@@ -46,13 +46,12 @@ def main():
+         lock_file = f"requirements-{platform}.txt"
+         (out / lock_file).write_text("\n".join(lock) + "\n")
+         platforms[platform] = {"python": base["platforms"][platform]["python"], "wheels": wheels, "lockFile": lock_file}
+-    files = [(file, str(file.relative_to(repo))) for file in sorted((repo / "backend").glob("*.py"))]
+     import sys
+ 
+     sys.path.insert(0, str(repo))
+-    from backend.runtime_sources import shared_sources
++    from backend.core.runtime_sources import server_sources
+ 
+-    files += shared_sources(repo)
++    files = server_sources(repo)
+     files += [
+         (file, "web/" + file.relative_to(repo / "frontend/dist").as_posix())
+         for file in sorted((repo / "frontend/dist").rglob("*"))
+diff --git a/scripts/check-source-packages.py b/scripts/check-source-packages.py
+index c00da870..3faecd0e 100644
+--- a/scripts/check-source-packages.py
++++ b/scripts/check-source-packages.py
+@@ -39,7 +39,7 @@ with tempfile.TemporaryDirectory(prefix="heteroes-source-packaging-") as tempora
+             names = archive.getnames()
+             for retired in ["backend/runtime.py", "src/heteroes/product/gateway.py", "src/heteroes/product/backup.py"]:
+                 assert retired not in names
+-            assert ("src/heteroes/product/run_supervisor.py" if app == "worker" else "backend/errors.py") in names
++            assert ("src/heteroes/product/run_supervisor.py" if app == "worker" else "backend/core/errors.py") in names
+             extracted = scratch / f"extracted-{app}"
+             archive.extractall(extracted, filter="data")
+         if app == "worker":
+@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory(prefix="heteroes-source-packaging-") as tempora
+             source = extracted / "src"
+             python = RUNTIME_PYTHON
+         else:
+-            code = "from backend.app import create_app; from backend.errors import RuntimeRejected"
++            code = "from backend.apps.factory import create_app; from backend.core.errors import RuntimeRejected"
+             source = extracted
+             python = sys.executable
+         # Isolated interpreters cannot fall back to the working tree or user site.
+diff --git a/scripts/export-demo-run.py b/scripts/export-demo-run.py
+index 27de2388..bf436857 100644
+--- a/scripts/export-demo-run.py
++++ b/scripts/export-demo-run.py
+@@ -16,7 +16,7 @@ import sys
+ ROOT = Path(__file__).resolve().parents[1]
+ sys.path.insert(0, str(ROOT))
+ 
+-from backend.timeline import build_timeline  # noqa: E402
++from backend.services.timeline import build_timeline  # noqa: E402
+ 
+ KEEP_MARKS = {"worker_start", "executor_ready", "replay", "worker_unavailable", "recovered"}
+ 
+diff --git a/scripts/local-lab.py b/scripts/local-lab.py
+index 50df2e7f..6f9d0b8e 100644
+--- a/scripts/local-lab.py
++++ b/scripts/local-lab.py
+@@ -26,8 +26,8 @@ from urllib.parse import urlsplit
+ 
+ REPO = Path(__file__).resolve().parents[1]
+ sys.path.insert(0, str(REPO))
+-from backend.deployment import caddyfile, idle, save_private
+-from backend.addresses import endpoint, is_private
++from backend.services.deployment import caddyfile, idle, save_private
++from backend.core.addresses import endpoint, is_private
+ 
+ REGISTRATION_SECONDS = 45
+ 
+diff --git a/scripts/refresh-server-runtime.py b/scripts/refresh-server-runtime.py
+index 14aa41a3..992a6f8d 100644
+--- a/scripts/refresh-server-runtime.py
++++ b/scripts/refresh-server-runtime.py
+@@ -21,17 +21,12 @@ def main():
+     profile = json.loads(profile_path.read_text())
+     assert profile["profile"] == "server-cpu-v1"
+     assert (web / "index.html").is_file(), "Build the Web UI first"
+-    sources = [
+-        (p, str(p.relative_to(repo)))
+-        for p in sorted((repo / "backend").rglob("*.py"))
+-        if "tests" not in p.relative_to(repo / "backend").parts
+-    ]
+     import sys
+ 
+     sys.path.insert(0, str(repo))
+-    from backend.runtime_sources import shared_sources
++    from backend.core.runtime_sources import server_sources
+ 
+-    sources += shared_sources(repo)
++    sources = server_sources(repo)
+     sources += [
+         (p, "web/" + p.relative_to(web).as_posix())
+         for p in sorted(web.rglob("*"))
+diff --git a/scripts/restore-metadata.py b/scripts/restore-metadata.py
+index 3bfa546c..f2523985 100644
+--- a/scripts/restore-metadata.py
++++ b/scripts/restore-metadata.py
+@@ -60,7 +60,7 @@ def restore(source, manifest, destination, admin_id="admin"):
+         import sys
+ 
+         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+-        from backend.metadata_backup import publish_new_directory
++        from backend.core.filesystem import publish_new_directory
+ 
+         publish_new_directory(temporary, destination)
+     except BaseException:
+diff --git a/scripts/serve-test-lab.py b/scripts/serve-test-lab.py
+index 65be920d..a24d6866 100644
+--- a/scripts/serve-test-lab.py
++++ b/scripts/serve-test-lab.py
+@@ -20,9 +20,9 @@ sys.path[:0] = [str(ROOT)]
+ 
+ from fastapi.testclient import TestClient  # noqa: E402
+ import uvicorn  # noqa: E402
+-from backend.app import create_app  # noqa: E402
+-from backend.devices import AgentRuntime  # noqa: E402
+-from backend.local_storage import LocalBackend  # noqa: E402
++from backend.apps.factory import create_app  # noqa: E402
++from backend.services.devices import AgentRuntime  # noqa: E402
++from backend.storage.local_backend import LocalBackend  # noqa: E402
+ 
+ USERS = {"admin": "test-admin-pass", "participant": "test-user-pass"}
+ 

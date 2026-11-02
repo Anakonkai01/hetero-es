@@ -1,0 +1,38 @@
+[
+  {
+    "file": "server-wheelhouse/linux/sqlalchemy-2.0.55-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+    "url": "https://files.pythonhosted.org/packages/df/86/e1c1521350fba22109fb6605b2a1f3e572d8e294239bb59c575b18fe45c2/sqlalchemy-2.0.55-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+    "sha256": "6e7694e736d63b476d81a0eae7b304d9b747a3f0a1b7dc10134655c4cccf5eb7",
+    "sizeBytes": 3473971
+  },
+  {
+    "file": "server-wheelhouse/windows/sqlalchemy-2.0.55-cp312-cp312-win_amd64.whl",
+    "url": "https://files.pythonhosted.org/packages/19/10/0ec446c9ee7467f869c298e12a3c5ec0f47a6cd64b2b59764ab6f1287017/sqlalchemy-2.0.55-cp312-cp312-win_amd64.whl",
+    "sha256": "a13820f47eda53d603f56feaadeab9787d0110b7fcbe6ab2ff2415bd3ea31c79",
+    "sizeBytes": 2177392
+  },
+  {
+    "file": "server-wheelhouse/linux/greenlet-3.4.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+    "url": "https://files.pythonhosted.org/packages/36/f7/229f3aed6948faa20e0616a0b8568da22e365ede6a54d7d369058b128afd/greenlet-3.4.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+    "sha256": "a1c4f6b453006efb8310affb2d132832e9bbb4fc01ce6df6b70d810d38f1f6dc",
+    "sizeBytes": 615062
+  },
+  {
+    "file": "server-wheelhouse/windows/greenlet-3.4.0-cp312-cp312-win_amd64.whl",
+    "url": "https://files.pythonhosted.org/packages/42/cf/bb2c32d9a100e36ee9f6e38fad6b1e082b8184010cb06259b49e1266ca01/greenlet-3.4.0-cp312-cp312-win_amd64.whl",
+    "sha256": "a0a53fb071531d003b075c444014ff8f8b1a9898d36bb88abd9ac7b3524648a2",
+    "sizeBytes": 238892
+  },
+  {
+    "file": "python-inputs/cpython-3.12.15+20261009-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261009/cpython-3.12.15%2B20261009-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz",
+    "sha256": "ffa8f85f1b56e88b687f08d743d817015524b86a9365fd921243132b80f1a36d",
+    "sizeBytes": 34304557
+  },
+  {
+    "file": "python-inputs/cpython-3.12.15+20261009-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261009/cpython-3.12.15%2B20261009-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "sha256": "11ed9f8a6ac64fb1b5a55e40e305a6744a3f77a70863c8f8197a6e4349abc64a",
+    "sizeBytes": 22011208
+  }
+]

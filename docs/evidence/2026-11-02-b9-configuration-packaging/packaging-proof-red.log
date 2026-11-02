@@ -1,0 +1,145 @@
+FFFFFFFFFF                                                               [100%]
+=================================== FAILURES ===================================
+____ test_direct_and_multiline_imports_can_move_without_changing_assertions ____
+backend/tests/test_import_only_proof.py:20: in test_direct_and_multiline_imports_can_move_without_changing_assertions
+    proof()(before, after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+________ test_child_python_command_can_change_only_its_embedded_imports ________
+backend/tests/test_import_only_proof.py:26: in test_child_python_command_can_change_only_its_embedded_imports
+    proof()(before, after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+_ test_proof_rejects_any_non_import_behavior_change[from new import first\nassert first() != 1\n] _
+backend/tests/test_import_only_proof.py:41: in test_proof_rejects_any_non_import_behavior_change
+    proof()("from old import first\nassert first() == 1\n", after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+_ test_proof_rejects_any_non_import_behavior_change[from new import first\nassert first() == 2\n] _
+backend/tests/test_import_only_proof.py:41: in test_proof_rejects_any_non_import_behavior_change
+    proof()("from old import first\nassert first() == 1\n", after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+_ test_proof_rejects_any_non_import_behavior_change[from new import first\nassert other() == 1\n] _
+backend/tests/test_import_only_proof.py:41: in test_proof_rejects_any_non_import_behavior_change
+    proof()("from old import first\nassert first() == 1\n", after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+__ test_proof_rejects_any_non_import_behavior_change[from new import first\n] __
+backend/tests/test_import_only_proof.py:41: in test_proof_rejects_any_non_import_behavior_change
+    proof()("from old import first\nassert first() == 1\n", after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+_ test_proof_rejects_any_non_import_behavior_change[from new import first\nassert first() == 1\nprint('extra')\n] _
+backend/tests/test_import_only_proof.py:41: in test_proof_rejects_any_non_import_behavior_change
+    proof()("from old import first\nassert first() == 1\n", after)
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+__ test_proof_rejects_changes_inside_embedded_assertions_or_ordinary_strings ___
+backend/tests/test_import_only_proof.py:46: in test_proof_rejects_changes_inside_embedded_assertions_or_ordinary_strings
+    proof()(
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+__ test_proof_rejects_changes_on_non_import_lines_even_when_ast_is_unchanged ___
+backend/tests/test_import_only_proof.py:56: in test_proof_rejects_changes_on_non_import_lines_even_when_ast_is_unchanged
+    proof()("from old import first\nassert first() == 1\n", "from new import first\nassert first() == 0x1\n")
+    ^^^^^^^
+backend/tests/test_import_only_proof.py:13: in proof
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+<frozen importlib._bootstrap_external>:1190: in get_data
+    ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/scripts/check-test-imports-only.py'
+_ test_refreshed_server_archive_contains_recursive_code_and_database_resources _
+backend/tests/test_server_packaging.py:31: in test_refreshed_server_archive_contains_recursive_code_and_database_resources
+    assert {
+E   AssertionError: assert {'backend/app...b/index.html'} <= {'backend/__i...it__.py', ...}
+E     
+E     Extra items in the left set:
+E     'backend/db/postgres_schema.sql'
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 0; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_import_only_proof.py::test_direct_and_multiline_imports_can_move_without_changing_assertions
+FAILED backend/tests/test_import_only_proof.py::test_child_python_command_can_change_only_its_embedded_imports
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_any_non_import_behavior_change[from new import first\nassert first() != 1\n]
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_any_non_import_behavior_change[from new import first\nassert first() == 2\n]
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_any_non_import_behavior_change[from new import first\nassert other() == 1\n]
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_any_non_import_behavior_change[from new import first\n]
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_any_non_import_behavior_change[from new import first\nassert first() == 1\nprint('extra')\n]
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_changes_inside_embedded_assertions_or_ordinary_strings
+FAILED backend/tests/test_import_only_proof.py::test_proof_rejects_changes_on_non_import_lines_even_when_ast_is_unchanged
+FAILED backend/tests/test_server_packaging.py::test_refreshed_server_archive_contains_recursive_code_and_database_resources
+10 failed, 1 warning in 0.17s

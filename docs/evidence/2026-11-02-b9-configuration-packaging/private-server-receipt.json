@@ -1,0 +1,44 @@
+{
+  "platform": "linux",
+  "profileSha256": "7dd04b62e481df3067057afaecc295a11646b4c0c4987e7584107eda545ecce6",
+  "runtimeSha256": "0f73e2b596b282a2c5bffd13cf184207289cd635c54b753d6bf1e242c1e9b043",
+  "pythonArchiveSha256": "ffa8f85f1b56e88b687f08d743d817015524b86a9365fd921243132b80f1a36d",
+  "metadata": {
+    "python": "3.12.15",
+    "prefix": "/home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B9/private-server-linux/interpreter/python",
+    "sqlalchemy": "2.0.55",
+    "greenlet": "3.4.0",
+    "optionalCloudAndGPUAbsent": true
+  },
+  "requests": [
+    {
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "path": "/readyz",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/health",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "path": "/metrics",
+      "status": 200
+    }
+  ],
+  "installedPinnedCPUWheels": 23,
+  "privateInterpreterHttpPassed": true,
+  "credentialLeak": false,
+  "cleanedUpProcess": true,
+  "testStatePreservedLocallyOnly": true
+}
