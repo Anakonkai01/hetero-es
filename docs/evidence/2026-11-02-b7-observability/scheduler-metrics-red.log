@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_scheduler_role_suppresses_business_series_when_standby_and_exposes_them_when_active _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-1/test_scheduler_role_suppresses0')
+
+    def test_scheduler_role_suppresses_business_series_when_standby_and_exposes_them_when_active(tmp_path):
+        app=create_app(tmp_path/'role.sqlite',{},AgentRuntime(),dispatch=False,service='scheduler')
+        with ExitStack() as cleanup:
+            client=cleanup.enter_context(TestClient(app));controller=app.state.scheduler
+            text=client.get('/metrics').text
+            assert not samples(text,'heteroes_runs')
+>           assert samples(text,'heteroes_scheduler_leader')[0].value==0
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           IndexError: list index out of range
+
+backend/tests/test_scheduler_metrics.py:21: IndexError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 1; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_scheduler_metrics.py::test_scheduler_role_suppresses_business_series_when_standby_and_exposes_them_when_active
+1 failed, 1 warning in 0.18s

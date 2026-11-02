@@ -1,0 +1,30 @@
+control ok    | 17 passed, 1 warning in 3.30s
+killed       http-raw-path-label | 3 failed, 14 passed, 1 warning in 3.25s
+killed       http-query-in-log | 3 failed, 14 passed, 1 warning in 3.35s
+killed       http-trusted-external-request-id | 1 failed, 16 passed, 1 warning in 3.38s
+killed       http-unbounded-method-label | 1 failed, 16 passed, 1 warning in 3.37s
+SURVIVED     http-counter-not-incremented | 17 passed, 1 warning in 3.38s
+killed       http-histogram-not-observed | 1 failed, 16 passed, 1 warning in 3.31s
+killed       http-response-request-id-omitted | 1 failed, 16 passed, 1 warning in 3.35s
+killed       http-duplicate-json-log | 3 failed, 14 passed, 1 warning in 3.40s
+killed       http-server-reraises-secret-exception | 1 failed, 16 passed, 1 warning in 3.37s
+killed       collector-installed-on-every-role | 4 failed, 13 passed, 1 warning in 3.33s
+killed       collector-standby-emits-business-data | 1 failed, 16 passed, 1 warning in 3.28s
+killed       collector-does-not-bind-owning-session | 3 failed, 14 passed, 1 warning in 3.47s
+killed       collector-closes-session-during-owned-read | 1 failed, 16 passed, 1 warning in 3.21s
+killed       snapshot-online-clock-inverted | 2 failed, 15 passed, 1 warning in 3.29s
+killed       snapshot-queue-always-zero | 1 failed, 16 passed, 1 warning in 3.35s
+killed       snapshot-completed-generations-zero | 1 failed, 16 passed, 1 warning in 3.20s
+killed       snapshot-unbounded-completed-generations | 1 failed, 16 passed, 1 warning in 3.41s
+killed       snapshot-raw-candidate-error-label | 1 failed, 16 passed, 1 warning in 3.40s
+killed       snapshot-ready-bytes-zero | 1 failed, 16 passed, 1 warning in 3.51s
+killed       gpu-megabytes-not-converted | 1 failed, 16 passed, 1 warning in 3.45s
+killed       gpu-missing-is-reported-as-zero | 1 failed, 16 passed, 1 warning in 3.28s
+killed       gpu-out-of-range-utilization-accepted | 1 failed, 16 passed, 1 warning in 3.65s
+killed       gpu-bool-is-number | 1 failed, 16 passed, 1 warning in 3.64s
+killed       gpu-huge-int-crashes-scrape | 1 failed, 16 passed, 1 warning in 3.49s
+killed       readiness-skips-db | 1 failed, 16 passed, 1 warning in 3.37s
+killed       readiness-skips-storage | 2 failed, 15 passed, 1 warning in 3.52s
+killed       readiness-exposes-exception-message | 2 failed, 15 passed, 1 warning in 4.38s
+
+26 of 27 mutants killed.

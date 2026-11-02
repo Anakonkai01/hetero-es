@@ -1,0 +1,17 @@
+{
+  "baseline": "ea365bfe",
+  "files": {
+    "backend/api/observability.py": "ce050d7a3071e468b008567c51cfee33d43354f0c38107ff39879f295123ca69",
+    "backend/api/operational.py": "6a2f292339ce418236024602cb15b6734078f190bb10c1f51a920852e5377771",
+    "backend/apps/factory.py": "8cf6306cc5663ce34ec2c399a46264686b7f29733de1f4b1fcdb5e60efbc3837",
+    "backend/repositories/observability.py": "fdc3c90798079f1fd96d432b60e18eff21759841f2c63e884c6f64c3518eba2a",
+    "backend/requirements-cloud.lock.txt": "2857972012f428fbdc205d693e15511ccf890cc99d46a0778dd3f7659e12ca9b",
+    "backend/requirements-cloud.txt": "81373d4af57a4c58c9c0062a4499c111f4e24e4968cf60b83b5f903e423e8044",
+    "backend/services/observability.py": "449948646df1daa26d44261aecf3eef34d50a399d0de75a544c03f69e96d459f",
+    "backend/services/scheduler_controller.py": "df914a2cf4728fdd45e874330cc60d3a8039827e53370010e7d6d6ecb93099eb",
+    "backend/storage/local_backend.py": "89cc37ab02a17143737719c6da3ae4fdc379adaa610f14a7e1cb633701603576",
+    "backend/tests/test_observability.py": "a0e274d19357bdbc0a5888450717947dce3c5cf74becca3ea2cfd22ce50bda62",
+    "backend/tests/test_scheduler_metrics.py": "98a2c9dcc7243318308229c21cb6f2d987a8c6fe1743c3cc209f61f6fd35b356",
+    "docs/design/observability.md": "761a23311e2cf5d1914e4e6ebe409f6748f2392974245e37a6fc19345daa93fb"
+  }
+}

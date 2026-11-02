@@ -1,0 +1,165 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values ____
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-6/test_scheduler_business_snapsh0')
+
+    def test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values(tmp_path):
+        app = create_app(tmp_path / "scheduler.sqlite", {}, AgentRuntime(), dispatch=False, service="scheduler")
+        store = app.state.store
+        from backend.services.observability import BusinessSnapshot
+    
+        clock = time.time()
+        device = "a" * 32
+        telemetry = {
+            "sampledAt": clock,
+            "gpu": {
+                "utilizationPercent": 37.5,
+                "temperatureC": 62,
+                "vramUsedMb": 12.5,
+                "vramTotalMb": 24,
+                "powerDrawW": None,
+            },
+        }
+        body = {
+            "experimentId": "b" * 32,
+            "workspaceId": "lab",
+            "ownerUserId": "owner",
+            "status": "COMPLETED",
+            "completedGenerations": 3,
+        }
+        snapshot = {
+            "attempts": [
+                {"status": "FAILED", "errorType": "RESTORE_MISMATCH"},
+                {"status": "FAILED", "errorType": "never-publish-error-type"},
+            ]
+        }
+        with store.db() as db:
+            db.execute(
+                "INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,self_test,seen,telemetry) VALUES (:p0,:p1,:p2,:p3,:p4,:p5,:p6,:p7,:p8,:p9)",
+                (
+                    device,
+                    "worker",
+                    "owner",
+                    "never-publish-device-name",
+                    "digest",
+                    "APPROVED",
+                    "http://127.0.0.1:18053",
+                    "{}",
+                    clock,
+                    json.dumps(telemetry),
+                ),
+            )
+            db.execute(
+                "INSERT INTO experiments(id,owner,body,snapshot) VALUES (:p0,:p1,:p2,:p3)",
+                (body["experimentId"], "owner", json.dumps(body), json.dumps(snapshot)),
+            )
+            db.execute("INSERT INTO queue(run_id) VALUES (:p0)", (body["experimentId"],))
+            db.execute("INSERT INTO cloud_objects(sha,size,status) VALUES (:p0,128,:p1)", ("c" * 64, "READY"))
+        first = BusinessSnapshot(store).capture()
+        assert first["devices"]["APPROVED"] == 1 and first["online"] == 1 and first["queue"] == 1
+        assert first["runs"]["COMPLETED"] == 1 and first["generations"] == 3
+        assert first["errors"] == {"RESTORE_MISMATCH": 1, "OTHER": 1}
+        assert first["storage_bytes"] == 128 and first["reserved_bytes"] == 0
+        with store.db() as db:
+            db.execute("DELETE FROM queue")
+        assert BusinessSnapshot(store).capture()["queue"] == 0
+        body["completedGenerations"] = 10**400
+        with store.db() as db:
+            db.execute("UPDATE experiments SET body=:p0", (json.dumps(body),))
+>       assert BusinessSnapshot(store).capture()["generations"] == 0
+E       assert 100000000000000000...0000000000000000000 == 0
+
+backend/tests/test_observability.py:160: AssertionError
+_________ test_gpu_metric_units_and_missing_observations_are_preserved _________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-6/test_gpu_metric_units_and_miss0')
+
+    def test_gpu_metric_units_and_missing_observations_are_preserved(tmp_path):
+        from contextlib import ExitStack
+        from backend.db.leadership import SchedulerLeader
+    
+        app = create_app(tmp_path / "gpu.sqlite", {}, AgentRuntime(), dispatch=False, service="scheduler")
+        store = app.state.store
+        device = "d" * 32
+        clock = time.time()
+        telemetry = {
+            "sampledAt": clock,
+            "gpu": {
+                "utilizationPercent": 37.5,
+                "temperatureC": 62,
+                "vramUsedMb": 12.5,
+                "vramTotalMb": 24,
+                "powerDrawW": None,
+                "name": "never-publish-gpu-name",
+            },
+        }
+        with store.db() as db:
+            db.execute(
+                "INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,self_test,seen,telemetry) VALUES (:p0,:p1,:p2,:p3,:p4,:p5,:p6,:p7,:p8,:p9)",
+                (
+                    device,
+                    "worker",
+                    "owner",
+                    "never-publish-name",
+                    "digest",
+                    "APPROVED",
+                    "http://127.0.0.1:18053",
+                    "{}",
+                    clock,
+                    json.dumps(telemetry),
+                ),
+            )
+        with ExitStack() as cleanup:
+            client = cleanup.enter_context(TestClient(app))
+            if store.database.dialect == "postgresql":
+                leader = cleanup.enter_context(SchedulerLeader(store.database))
+                assert leader.try_acquire()
+                app.state.scheduler._leader = leader
+            app.state.scheduler.active = True
+            text = client.get("/metrics").text
+            assert "never-publish" not in text
+            for name, value in [
+                ("heteroes_gpu_utilization_percent", 37.5),
+                ("heteroes_gpu_temperature_celsius", 62),
+                ("heteroes_gpu_vram_used_bytes", 12.5 * 1024**2),
+                ("heteroes_gpu_vram_total_bytes", 24 * 1024**2),
+            ]:
+                row = samples(text, name)
+                assert (
+                    len(row) == 1
+                    and row[0].value == value
+                    and row[0].labels == {"service": "scheduler", "device_id": device}
+                )
+            assert samples(text, "heteroes_device_online")[0].value == 1
+            assert samples(text, "heteroes_gpu_sample_timestamp_seconds")[0].value == clock
+            assert not samples(text, "heteroes_gpu_power_watts")
+            for invalid in (None, True, -1, float("nan"), float("inf"), 10**400):
+                telemetry["gpu"]["utilizationPercent"] = invalid
+                with store.db() as db:
+                    db.execute("UPDATE devices SET telemetry=:p0 WHERE id=:p1", (json.dumps(telemetry), device))
+                response = client.get("/metrics")
+>               assert response.status_code == 200
+E               assert 500 == 200
+E                +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+backend/tests/test_observability.py:254: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-01T17:53:13.998+00:00","level":"INFO","service":"scheduler","method":"GET","route":"/metrics","status":200,"duration_ms":2.1459220001815993,"request_id":"c3c77ab85c19410faa6124d65bead85e"}
+{"ts":"2026-11-01T17:53:14.003+00:00","level":"INFO","service":"scheduler","method":"GET","route":"/metrics","status":200,"duration_ms":1.6316139999617008,"request_id":"de0ec938de404c27817fe899b044be47"}
+{"ts":"2026-11-01T17:53:14.018+00:00","level":"INFO","service":"scheduler","method":"GET","route":"/metrics","status":200,"duration_ms":14.022281000052317,"request_id":"fb747d1e257d4cd286889100024d1caf"}
+{"ts":"2026-11-01T17:53:14.021+00:00","level":"INFO","service":"scheduler","method":"GET","route":"/metrics","status":200,"duration_ms":1.0069330000987975,"request_id":"87670656d256498a97f1d53b84318daf"}
+{"ts":"2026-11-01T17:53:14.023+00:00","level":"INFO","service":"scheduler","method":"GET","route":"/metrics","status":200,"duration_ms":0.9580640000876883,"request_id":"9920f0ad67b04a99b08a2858010af728"}
+{"ts":"2026-11-01T17:53:14.025+00:00","level":"INFO","service":"scheduler","method":"GET","route":"/metrics","status":200,"duration_ms":0.980681000100958,"request_id":"4cf3170989954da1afb0a3e633805b4e"}
+{"ts":"2026-11-01T17:53:14.027+00:00","level":"ERROR","service":"scheduler","method":"GET","route":"/metrics","status":500,"duration_ms":1.0255560000587138,"request_id":"389949dd3d874e0f8a42a0e3c32e3fbf"}
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 2; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_observability.py::test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values
+FAILED backend/tests/test_observability.py::test_gpu_metric_units_and_missing_observations_are_preserved
+2 failed, 7 deselected, 1 warning in 0.19s

@@ -1,0 +1,12 @@
+{
+  "scope": "production S3Backend PostgreSQL dump -> actual MinIO backup bucket -> fresh PG restore",
+  "databaseDriver": "postgresql",
+  "bucket": "heteroes-test-backups-f4a56484ae5148c593d97ebdc16d5e76",
+  "sha256": "4d9fedd610c16aa3d28c04ad0755cd9d71c7dbfe562ff97832f97cd2da30d5bd",
+  "sizeBytes": 54211,
+  "restored": true,
+  "dispatchHeld": true,
+  "sessionsRevoked": true,
+  "reservationsPreserved": true,
+  "schemaName": "public"
+}

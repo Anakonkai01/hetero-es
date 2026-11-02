@@ -1,0 +1,247 @@
+diff --git a/backend/api/operational.py b/backend/api/operational.py
+index 1562b74b..a7f45a99 100644
+--- a/backend/api/operational.py
++++ b/backend/api/operational.py
+@@ -12,6 +12,12 @@ def install_routes(app, store, service):
+     def ready():
+         try:
+             store.database.ping()
++            backend = getattr(store.runtime, "storage_backend", None)
++            if backend is not None:
++                if hasattr(backend, "ready"):
++                    backend.ready()
++                else:
++                    backend.inventory()
+         except Exception as error:
+             return JSONResponse(
+                 {"ready": False, "service": service, "errorType": type(error).__name__}, status_code=503
+@@ -20,4 +26,5 @@ def install_routes(app, store, service):
+ 
+     @app.get("/metrics", include_in_schema=False)
+     def metrics():
+-        return Response(f'heteroes_service_up{{service="{service}"}} 1\n', media_type="text/plain; version=0.0.4")
++        body, content_type = app.state.metrics.render()
++        return Response(body, headers={"Content-Type": content_type})
+diff --git a/backend/apps/factory.py b/backend/apps/factory.py
+index a91d076a..6244b1ae 100644
+--- a/backend/apps/factory.py
++++ b/backend/apps/factory.py
+@@ -180,6 +180,19 @@ def create_app(
+             runtime.storage_backend.install_routes(registration)
+ 
+     install_web_routes(registration, web_directory, downloads_directory)
++    from ..services.observability import BusinessSnapshot, Metrics
++    from ..api.observability import RequestObservability
++
++    legacy = (
++        service == "all"
++        and store.database.dialect == "sqlite"
++        and auth_mode == "local"
++        and getattr(runtime.storage_backend, "mode", "local") != "s3"
++    )
++    app.state.metrics = Metrics(
++        service, scheduler, BusinessSnapshot(store, getattr(app.state, "storage", None)), allow_legacy=legacy
++    )
++    app.add_middleware(RequestObservability, metrics=app.state.metrics, service=service)
+     return app
+ 
+ 
+diff --git a/backend/requirements-cloud.lock.txt b/backend/requirements-cloud.lock.txt
+index 773db998..4fcf1b3f 100644
+--- a/backend/requirements-cloud.lock.txt
++++ b/backend/requirements-cloud.lock.txt
+@@ -6,6 +6,7 @@ cryptography==50.0.2
+ jmespath==1.1.0
+ psycopg==3.3.6
+ psycopg-binary==3.3.6
++prometheus_client==0.26.0
+ python-dateutil==2.9.0.post0
+ s3transfer==0.19.2
+ six==1.17.0
+diff --git a/backend/requirements-cloud.txt b/backend/requirements-cloud.txt
+index 6b02c845..ddda7e56 100644
+--- a/backend/requirements-cloud.txt
++++ b/backend/requirements-cloud.txt
+@@ -3,3 +3,4 @@ psycopg[binary]==3.3.6
+ boto3==1.43.111
+ PyJWT[crypto]==2.15.1
+ cryptography==50.0.2
++prometheus-client==0.26.0
+diff --git a/backend/services/scheduler_controller.py b/backend/services/scheduler_controller.py
+index 0b11fdd7..fe1fa3d5 100644
+--- a/backend/services/scheduler_controller.py
++++ b/backend/services/scheduler_controller.py
+@@ -1,6 +1,7 @@
+ """Run the local dispatcher or a PostgreSQL active/standby scheduler whose ticks use its owning session."""
+ 
+ import logging
++import threading
+ 
+ from ..db.leadership import SchedulerLeader
+ 
+@@ -10,6 +11,7 @@ class SchedulerController:
+         if not 0 < interval <= 60:
+             raise ValueError("Scheduler interval must be between zero and sixty seconds")
+         self.store, self.interval = store, interval
++        self._operation_lock = getattr(store, "operation_lock", threading.RLock())
+         self.active, self._leader = False, None
+ 
+     @property
+@@ -18,26 +20,51 @@ class SchedulerController:
+ 
+     def run(self, stop):
+         if self.store.database.dialect == "sqlite":
+-            self.store.dispatch(stop)
++            self.active = True
++            try:
++                self.store.dispatch(stop)
++            finally:
++                with self._operation_lock:
++                    self.active = False
+             return
++        leader = SchedulerLeader(self.store.database)
++        self._leader = leader
+         try:
+-            with SchedulerLeader(self.store.database) as leader:
+-                self._leader = leader
+-                while not stop.wait(self.interval):
+-                    try:
++            while not stop.wait(self.interval):
++                try:
++                    # Keep the same operation-lock -> DB-lock ordering as an ordinary Store.dispatch_once.
++                    with self._operation_lock:
+                         if not leader.try_acquire():
+                             self.active = False
+                             continue
+                         self.active = True
+-                        # Keep the same operation-lock -> DB-lock ordering as an ordinary Store.dispatch_once.
+-                        with self.store.operation_lock, leader.session():
++                        with leader.session():
+                             self.store.dispatch_once()
+-                    except Exception as error:
+-                        self.active = False
+-                        try:
+-                            self.store.last_error = type(error).__name__
+-                        except Exception:
+-                            logging.getLogger(__name__).warning("Scheduler diagnostic persistence unavailable")
+-                        logging.getLogger(__name__).warning("Scheduler tick failed: %s", type(error).__name__)
++                except Exception as error:
++                    self.active = False
++                    try:
++                        self.store.last_error = type(error).__name__
++                    except Exception:
++                        logging.getLogger(__name__).warning("Scheduler diagnostic persistence unavailable")
++                    logging.getLogger(__name__).warning("Scheduler tick failed: %s", type(error).__name__)
+         finally:
+-            self.active, self._leader = False, None
++            with self._operation_lock:
++                self.active, self._leader = False, None
++                leader.close()
++
++    def read_metrics(self, read):
++        """A scrape cannot acquire leadership, reconnect as an old leader or race its owning session's tick."""
++        with self._operation_lock:
++            if not self.active:
++                return None
++            if self.store.database.dialect == "sqlite":
++                return read()
++            if self._leader is None:
++                self.active = False
++                return None
++            try:
++                with self._leader.session():
++                    return read()
++            except Exception:
++                self.active = False
++                return None
+diff --git a/backend/storage/local_backend.py b/backend/storage/local_backend.py
+index 3a53fce3..f3403674 100644
+--- a/backend/storage/local_backend.py
++++ b/backend/storage/local_backend.py
+@@ -148,6 +148,12 @@ class LocalBackend:
+         if not device.exists() or Path(source).resolve() != device.resolve():
+             raise ValueError("Selected storage volume is not mounted")
+ 
++    def ready(self):
++        self.check_volume()
++        for root in (self.root, self.metadata_root):
++            if root is not None and (not root.is_dir() or not os.access(root, os.R_OK | os.W_OK)):
++                raise OSError("Storage directory unavailable")
++
+     def path(self, key):
+         self.check_volume()
+         if not isinstance(key, str) or not KEY.fullmatch(key):
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index d4de635a..54bbbef7 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -4,7 +4,7 @@ One page, kept current. Start with [REVIEW-GUIDE.md](REVIEW-GUIDE.md), then the
+ [approved A → B → C plan](plans/codex-2026-11-review-fixes-and-minicloud.md).
+ Historical handoffs and immutable evidence live on `evidence-archive` ([index](EVIDENCE-INDEX.md)).
+ 
+-## Tóm tắt cho chủ dự án (2026-11-01)
++## Tóm tắt cho chủ dự án (2026-11-02)
+ 
+ - **Phần A hoàn tất:** đã sửa các finding review, gồm bảo mật HTTP, coordinator/restore, vùng số học đóng băng,
+   ledger và khung nghiệm thu. [FINDINGS-A](review/FINDINGS-A.md) ghi từng sửa và bằng chứng.
+@@ -14,8 +14,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
+ - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
+   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
+-- **Phần B đã xong B1–B6:** backend chia lớp, Postgres, service riêng, OIDC và S3/MinIO. Tiếp theo là metrics/log,
+-  router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
++- **Phần B đã xong B1–B7:** backend chia lớp, Postgres, service riêng, OIDC, S3/MinIO và metrics/log an toàn.
++  Tiếp theo là router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
+ - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
+   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
+@@ -35,7 +35,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+ - Strict lab form default: `strict_b22_v1`. Its GPU coordinator must differ from its workers (D1).
+   `strict_int8_lora_v1` remains standalone/SDK only.
+ - CPU check-all: all 24 steps pass, including 3 324 runtime tests (1 045 intentional CUDA-hidden skips),
+-  464 backend SQLite tests, browser/Electron fixtures, lint/type/i18n and source-package imports.
++  626 backend SQLite tests (641 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
++  The B7 full PostgreSQL/MinIO matrix passes669 tests, zero skips; details below.
+ 
+ ## Tiến độ kế hoạch 2026-11
+ 
+@@ -115,6 +116,16 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+   signer independently enforces the same rule (separate probe retained). B-012/013 format/header-coverage issues fixed.
+   Evidence `2026-11-01-b6-s3-minio`; source-package imports and lint/format pass. B7–B10 and all C remain, including the
+   environment-only overlay, packaged Python dependencies and real Keycloak/GPU/deployment acceptance.
++  B7 complete: every role has DB/storage readiness and private-registry HTTP counters/histograms by route pattern;
++  only the live scheduler leader exports fresh DB business gauges. GPU labels/units and retained-snapshot/storage limits
++  are defined in [observability](design/observability.md). JSON stdout has exactly nine safe request fields; a real
++  Uvicorn transport test rules out bearer-bearing traceback leaks. Concurrent owned reads survive graceful scheduler
++  shutdown; invalid/unrepresentable telemetry and generation values cannot break scrapes (B-014/015).
++  Final actual-MinIO SQLite641/PostgreSQL669, zero skips; PG audit418 PG +50 explicit SQLite Stores. All24 resumed
++  check-all steps pass, including browser/Electron fixtures; the interrupted first run is rejected. Mutation31/31 killed
++  on actual PG after fixing the counter-value test gap (B-016); initial26/27 retained. Evidence
++  `2026-11-02-b7-observability`. Desktop without optional Prometheus keeps basic service_up only; split/cloud requires it.
++  B8–B10 and all C remain; no live monitoring/GPU/Keycloak/deployment acceptance is claimed by these CPU fixtures.
+ - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
+   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
+@@ -123,7 +134,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
+ 
+ ## Remaining scope and limits
+ 
+-- B1–B6 are complete. Execute B7–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
++- B1–B7 are complete. Execute B8–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
+ - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
+   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.
+diff --git a/docs/review/FINDINGS-B.md b/docs/review/FINDINGS-B.md
+index 6e2c943d..11cb47e1 100644
+--- a/docs/review/FINDINGS-B.md
++++ b/docs/review/FINDINGS-B.md
+@@ -18,6 +18,9 @@ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original conce
+ | B-011 | OIDC browser refresh evidence                     | T    | P2       | An early browser probe printed PASS while its final receipt still had refreshGrants=0, so it did not prove automatic renewal.                                                                                           | Explicitly await an actual HTTP counter and assert it again in the final receipt; reject zero/missing counters independently.                                    | Fixed: final browser receipt has refreshGrants=1 and codeGrants=2 (SSO reload), six contracts; frontend/harness mutation11/11. Early counter0 receipt rejected.                            |
+ | B-012 | Local metadata payload formats                    | C    | P2       | The filesystem key whitelist accepted product.sqlite but rejected PostgreSQL product.pgdump, leaving local-mode PostgreSQL backups pending.                                                                             | Permit the PostgreSQL payload in the existing private metadata namespace and retain SQLite behavior.                                                             | Fixed: both actual local payload formats pass, and removing pgdump support is killed by the storage mutation suite.                                                                        |
+ | B-013 | Independent public-upload length guard coverage   | T    | P2       | The initial mutation removing the Content-Length guard survived because the short-body regression also failed at final byte-count validation.                                                                           | Send a complete valid body with a mismatched declared length to isolate the early header guard.                                                                  | Fixed: independent header regression; I/O mutation21/21, full SQLite627/PostgreSQL652 pass. Original 20/21 result retained; evidence `2026-11-01-b6-s3-minio`.                             |
++| B-014 | Concurrent metrics read and scheduler shutdown    | C    | P2       | The new metrics reader can still own the PostgreSQL leader session when graceful scheduler shutdown closes it.                                                                                                          | Serialize shutdown cleanup with the shared dispatch/read operation lock; retain the exact physical session until its read finishes.                              | Fixed: actual PG red/green concurrency regression, session/loss/standby tests and31/31 mutations; full SQLite641/PG669, evidence `2026-11-02-b7-observability`.                            |
++| B-015 | Unrepresentable observation values                | C    | P2       | A huge JSON integer in GPU telemetry raises during finite-number conversion; an unbounded completed-generation value can also break metric rendering.                                                                   | Omit unrepresentable telemetry and bound retained completed-generation integers; never replace missing readings with zero.                                       | Fixed: both red failures retained, GPU units/invalid-value tests and mutation guards pass; full SQLite641/PG669.                                                                           |
++| B-016 | HTTP counter value coverage                       | T    | P2       | The first metrics mutation run survived a counter that always increments by zero because tests only checked series existence.                                                                                           | Require one observation per completed request and an actual increment after a repeated request.                                                                  | Fixed: initial26/27 retained, final31/31 killed on actual PG; all24 resumed check-all steps pass.                                                                                          |
+ | B-Q1  | Lab Server responsibilities                       | D    | —        | How many server roles does Lab Server currently perform?                                                                                                                                                                | Document the current process and target service boundaries in `docs/design/lab-server-architecture.md` (A5, B1).                                                 | Answered in A5 (architecture document)                                                                                                                                                     |
+ | B-Q2  | Data and backups                                  | D    | —        | Where are experiment results and component backups stored?                                                                                                                                                              | Documented in `docs/design/lab-server-architecture.md` with source/config references.                                                                            | Answered in A5                                                                                                                                                                             |
+ 

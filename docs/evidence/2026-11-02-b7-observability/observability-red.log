@@ -1,0 +1,91 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_http_metrics_and_json_logs_use_only_route_patterns_and_generated_request_ids _
+
+observed = (<starlette.testclient.TestClient object at 0x728ae169b0e0>, <fastapi.applications.FastAPI object at 0x728ae19403b0>)
+capsys = <_pytest.capture.CaptureFixture object at 0x728ae172ee40>
+
+    def test_http_metrics_and_json_logs_use_only_route_patterns_and_generated_request_ids(observed,capsys):
+        client,app=observed;secret='never-publish-credential-marker'
+        assert client.get('/healthz?access_token='+secret,headers={'Authorization':'Bearer '+secret,'X-Request-Id':secret}).status_code==200
+        response=client.get('/api/v1/local-storage/'+secret)
+        assert response.status_code==403
+        assert client.post('/api/v1/auth/login',json={'username':'missing','password':secret}).status_code==401
+        assert client.get('/unmatched/'+secret).status_code==404
+        response=client.get('/metrics');assert response.status_code==200
+        assert secret not in response.text
+        requests=samples(response.text,'heteroes_http_requests_total')
+        routes={row.labels['route'] for row in requests}
+>       assert '/healthz' in routes and '/api/v1/local-storage/{token}' in routes and '/api/v1/auth/login' in routes
+E       AssertionError: assert ('/healthz' in set())
+
+backend/tests/test_observability.py:39: AssertionError
+____________ test_ready_checks_storage_and_hides_exception_details _____________
+
+observed = (<starlette.testclient.TestClient object at 0x728ae0337d10>, <fastapi.applications.FastAPI object at 0x728ae16b21e0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x728ae169b9b0>
+capsys = <_pytest.capture.CaptureFixture object at 0x728ae036d850>
+
+    def test_ready_checks_storage_and_hides_exception_details(observed,monkeypatch,capsys):
+        client,app=observed
+        assert client.get('/readyz').status_code==200
+        def unavailable():raise RuntimeError('never-publish-storage-detail')
+>       monkeypatch.setattr(app.state.storage.backend,'ready',unavailable)
+E       AttributeError: <backend.storage.local_backend.LocalBackend object at 0x728ae16b3770> has no attribute 'ready'
+
+backend/tests/test_observability.py:56: AttributeError
+_ test_unhandled_error_is_logged_once_as_safe_json_without_raw_error_or_request_data _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-0/test_unhandled_error_is_logged0')
+capsys = <_pytest.capture.CaptureFixture object at 0x728ae170be60>
+
+    def test_unhandled_error_is_logged_once_as_safe_json_without_raw_error_or_request_data(tmp_path,capsys):
+        app=create_app(tmp_path/'error.sqlite',{},AgentRuntime(),dispatch=False)
+        @app.get('/fixture-error/{identifier}')
+        def fail(identifier:str):raise RuntimeError('never-publish-exception-detail')
+        with TestClient(app,raise_server_exceptions=False) as client:
+            response=client.get('/fixture-error/never-publish-path?password=never-publish-query')
+            assert response.status_code==500
+        captured=capsys.readouterr();assert 'never-publish' not in captured.out+captured.err+response.text
+        lines=[json.loads(line) for line in captured.out.splitlines() if line]
+>       assert len(lines)==1 and lines[0]['route']=='/fixture-error/{identifier}' and lines[0]['status']==500
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+backend/tests/test_observability.py:72: AssertionError
+____ test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values ____
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-0/test_scheduler_business_snapsh0')
+
+    def test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values(tmp_path):
+        app=create_app(tmp_path/'scheduler.sqlite',{},AgentRuntime(),dispatch=False,service='scheduler')
+        store=app.state.store
+>       from backend.services.observability import BusinessSnapshot
+E       ModuleNotFoundError: No module named 'backend.services.observability'
+
+backend/tests/test_observability.py:79: ModuleNotFoundError
+_______________ test_non_scheduler_never_collects_business_state _______________
+
+observed = (<starlette.testclient.TestClient object at 0x728adae77530>, <fastapi.applications.FastAPI object at 0x728ae01ffc20>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x728ae01ff2c0>
+
+    def test_non_scheduler_never_collects_business_state(observed,monkeypatch):
+        client,app=observed
+>       from backend.services.observability import BusinessSnapshot
+E       ModuleNotFoundError: No module named 'backend.services.observability'
+
+backend/tests/test_observability.py:102: ModuleNotFoundError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 5; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_observability.py::test_http_metrics_and_json_logs_use_only_route_patterns_and_generated_request_ids
+FAILED backend/tests/test_observability.py::test_ready_checks_storage_and_hides_exception_details
+FAILED backend/tests/test_observability.py::test_unhandled_error_is_logged_once_as_safe_json_without_raw_error_or_request_data
+FAILED backend/tests/test_observability.py::test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values
+FAILED backend/tests/test_observability.py::test_non_scheduler_never_collects_business_state
+5 failed, 1 warning in 0.57s

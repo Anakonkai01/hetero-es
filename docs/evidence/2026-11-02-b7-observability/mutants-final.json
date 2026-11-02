@@ -1,0 +1,188 @@
+[
+  {
+    "name": "http-raw-path-label",
+    "file": "backend/api/observability.py",
+    "old": "route = getattr(scope.get(\"route\"), \"path\", None)",
+    "new": "route = scope.get(\"path\")"
+  },
+  {
+    "name": "http-query-in-log",
+    "file": "backend/api/observability.py",
+    "old": "emit_request(self.service, method, route, status, duration, request_id, failed=failed)",
+    "new": "emit_request(self.service, method, route + \"?\" + scope.get(\"query_string\", b\"\").decode(), status, duration, request_id, failed=failed)"
+  },
+  {
+    "name": "http-trusted-external-request-id",
+    "file": "backend/api/observability.py",
+    "old": "begin = time.perf_counter()",
+    "new": "request_id = dict(scope.get(\"headers\", [])).get(b\"x-request-id\", request_id.encode()).decode()\n        begin = time.perf_counter()"
+  },
+  {
+    "name": "http-unbounded-method-label",
+    "file": "backend/api/observability.py",
+    "old": "method = raw_method if raw_method in _METHODS else \"OTHER\"",
+    "new": "method = raw_method"
+  },
+  {
+    "name": "http-counter-not-incremented",
+    "file": "backend/services/observability.py",
+    "old": "self.requests.labels(*labels).inc()",
+    "new": "self.requests.labels(*labels).inc(0)"
+  },
+  {
+    "name": "http-histogram-not-observed",
+    "file": "backend/services/observability.py",
+    "old": "self.duration.labels(*labels).observe(seconds)",
+    "new": "pass"
+  },
+  {
+    "name": "http-response-request-id-omitted",
+    "file": "backend/api/observability.py",
+    "old": "message = {**message, \"headers\": [*message.get(\"headers\", []), (b\"x-request-id\", request_id.encode())]}",
+    "new": "message = message"
+  },
+  {
+    "name": "http-duplicate-json-log",
+    "file": "backend/services/observability.py",
+    "old": "sys.stdout.write(json.dumps(record, separators=(\",\", \":\")) + \"\\n\")",
+    "new": "sys.stdout.write((json.dumps(record, separators=(\",\", \":\")) + \"\\n\") * 2)"
+  },
+  {
+    "name": "http-server-reraises-secret-exception",
+    "file": "backend/api/observability.py",
+    "old": "except Exception:\n            failed = True",
+    "new": "except Exception:\n            raise\n            failed = True"
+  },
+  {
+    "name": "collector-installed-on-every-role",
+    "file": "backend/services/observability.py",
+    "old": "if service == \"scheduler\":",
+    "new": "if True:"
+  },
+  {
+    "name": "collector-standby-emits-business-data",
+    "file": "backend/services/scheduler_controller.py",
+    "old": "if not self.active:\n                return None",
+    "new": "if False:\n                return None"
+  },
+  {
+    "name": "collector-does-not-bind-owning-session",
+    "file": "backend/services/scheduler_controller.py",
+    "old": "with self._leader.session():\n                    return read()",
+    "new": "return read()"
+  },
+  {
+    "name": "collector-closes-session-during-owned-read",
+    "file": "backend/services/scheduler_controller.py",
+    "old": "with self._operation_lock:\n                self.active, self._leader = False, None\n                leader.close()",
+    "new": "self.active, self._leader = False, None\n            leader.close()"
+  },
+  {
+    "name": "snapshot-online-clock-inverted",
+    "file": "backend/services/observability.py",
+    "old": "seen > now - 30",
+    "new": "seen < now - 30"
+  },
+  {
+    "name": "snapshot-queue-always-zero",
+    "file": "backend/repositories/observability.py",
+    "old": "\"queue\": db.execute(\"SELECT count(*) FROM queue\").fetchone()[0]",
+    "new": "\"queue\": 0"
+  },
+  {
+    "name": "snapshot-completed-generations-zero",
+    "file": "backend/services/observability.py",
+    "old": "generations += completed",
+    "new": "generations += 0"
+  },
+  {
+    "name": "snapshot-unbounded-completed-generations",
+    "file": "backend/services/observability.py",
+    "old": "if type(completed) is int and 0 <= completed <= 2**63 - 1:",
+    "new": "if type(completed) is int and completed >= 0:"
+  },
+  {
+    "name": "snapshot-raw-candidate-error-label",
+    "file": "backend/services/observability.py",
+    "old": "kind if isinstance(kind, str) and kind in ERROR_TYPES else \"OTHER\"",
+    "new": "kind if isinstance(kind, str) else \"OTHER\""
+  },
+  {
+    "name": "snapshot-ready-bytes-zero",
+    "file": "backend/repositories/observability.py",
+    "old": "CASE WHEN status='READY' THEN size ELSE 0 END",
+    "new": "CASE WHEN status='READY' THEN 0 ELSE 0 END"
+  },
+  {
+    "name": "gpu-megabytes-not-converted",
+    "file": "backend/services/observability.py",
+    "old": "(\"heteroes_gpu_vram_used_bytes\", \"vramUsedMb\", 1024**2, 1_000_000)",
+    "new": "(\"heteroes_gpu_vram_used_bytes\", \"vramUsedMb\", 1, 1_000_000)"
+  },
+  {
+    "name": "gpu-missing-is-reported-as-zero",
+    "file": "backend/services/observability.py",
+    "old": "value = _number(device[\"observation\"].get(field), maximum)",
+    "new": "value = _number(device[\"observation\"].get(field, 0), maximum)\n                value = 0 if value is None else value"
+  },
+  {
+    "name": "gpu-out-of-range-utilization-accepted",
+    "file": "backend/services/observability.py",
+    "old": "(\"heteroes_gpu_utilization_percent\", \"utilizationPercent\", 1, 100)",
+    "new": "(\"heteroes_gpu_utilization_percent\", \"utilizationPercent\", 1, 1000)"
+  },
+  {
+    "name": "gpu-bool-is-number",
+    "file": "backend/services/observability.py",
+    "old": "if type(value) not in {int, float}:",
+    "new": "if not isinstance(value, (int, float)):"
+  },
+  {
+    "name": "gpu-huge-int-crashes-scrape",
+    "file": "backend/services/observability.py",
+    "old": "except OverflowError:\n        return None",
+    "new": "except OverflowError:\n        raise"
+  },
+  {
+    "name": "readiness-skips-db",
+    "file": "backend/api/operational.py",
+    "old": "store.database.ping()",
+    "new": "pass"
+  },
+  {
+    "name": "readiness-skips-storage",
+    "file": "backend/api/operational.py",
+    "old": "backend.ready()",
+    "new": "pass"
+  },
+  {
+    "name": "readiness-exposes-exception-message",
+    "file": "backend/api/operational.py",
+    "old": "\"errorType\": type(error).__name__",
+    "new": "\"errorType\": str(error)"
+  },
+  {
+    "name": "snapshot-ready-filter-missing",
+    "file": "backend/repositories/observability.py",
+    "old": "CASE WHEN status='READY' THEN size ELSE 0 END",
+    "new": "size"
+  },
+  {
+    "name": "snapshot-reservation-multiplier-missing",
+    "file": "backend/services/observability.py",
+    "old": "\"reserved_bytes\": 2 * rows[\"storage\"][1]",
+    "new": "\"reserved_bytes\": rows[\"storage\"][1]"
+  },
+  {
+    "name": "snapshot-reservation-includes-ready-objects",
+    "file": "backend/repositories/observability.py",
+    "old": "CASE WHEN status<>'READY' THEN size ELSE 0 END",
+    "new": "size"
+  },
+  {
+    "name": "snapshot-configured-quota-missing",
+    "file": "backend/services/observability.py",
+    "old": "\"quota_bytes\": self.storage.quota if self.storage else None",
+    "new": "\"quota_bytes\": None"
+  }
+]

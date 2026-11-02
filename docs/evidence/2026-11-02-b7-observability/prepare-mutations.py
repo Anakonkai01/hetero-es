@@ -1,0 +1,37 @@
+import ast,json
+from pathlib import Path
+root=Path('/home/pc5070ti/projects/heteroes'); out=Path(__file__).parent
+mutants=[]
+def add(name,file,old,new):
+ s=(root/file).read_text(); assert s.count(old)==1,(name,s.count(old)); ast.parse(s.replace(old,new,1))
+ mutants.append(dict(name=name,file=file,old=old,new=new))
+a='backend/api/observability.py';s='backend/services/observability.py';r='backend/repositories/observability.py';o='backend/api/operational.py';c='backend/services/scheduler_controller.py'
+add('http-raw-path-label',a,'route = getattr(scope.get("route"), "path", None)','route = scope.get("path")')
+add('http-query-in-log',a,'emit_request(self.service, method, route, status, duration, request_id, failed=failed)','emit_request(self.service, method, route + "?" + scope.get("query_string", b"").decode(), status, duration, request_id, failed=failed)')
+add('http-trusted-external-request-id',a,'begin = time.perf_counter()','request_id = dict(scope.get("headers", [])).get(b"x-request-id", request_id.encode()).decode()\n        begin = time.perf_counter()')
+add('http-unbounded-method-label',a,'method = raw_method if raw_method in _METHODS else "OTHER"','method = raw_method')
+add('http-counter-not-incremented',s,'self.requests.labels(*labels).inc()','self.requests.labels(*labels).inc(0)')
+add('http-histogram-not-observed',s,'self.duration.labels(*labels).observe(seconds)','pass')
+add('http-response-request-id-omitted',a,'message = {**message, "headers": [*message.get("headers", []), (b"x-request-id", request_id.encode())]}','message = message')
+add('http-duplicate-json-log',s,'sys.stdout.write(json.dumps(record, separators=(",", ":")) + "\\n")','sys.stdout.write((json.dumps(record, separators=(",", ":")) + "\\n") * 2)')
+add('http-server-reraises-secret-exception',a,'except Exception:\n            failed = True','except Exception:\n            raise\n            failed = True')
+add('collector-installed-on-every-role',s,'if service == "scheduler":','if True:')
+add('collector-standby-emits-business-data',c,'if not self.active:\n                return None','if False:\n                return None')
+add('collector-does-not-bind-owning-session',c,'with self._leader.session():\n                    return read()','return read()')
+add('collector-closes-session-during-owned-read',c,'with self._operation_lock:\n                self.active, self._leader = False, None\n                leader.close()','self.active, self._leader = False, None\n            leader.close()')
+add('snapshot-online-clock-inverted',s,'seen > now - 30','seen < now - 30')
+add('snapshot-queue-always-zero',r,'"queue": db.execute("SELECT count(*) FROM queue").fetchone()[0]','"queue": 0')
+add('snapshot-completed-generations-zero',s,'generations += completed','generations += 0')
+add('snapshot-unbounded-completed-generations',s,'if type(completed) is int and 0 <= completed <= 2**63 - 1:','if type(completed) is int and completed >= 0:')
+add('snapshot-raw-candidate-error-label',s,'kind if isinstance(kind, str) and kind in ERROR_TYPES else "OTHER"','kind if isinstance(kind, str) else "OTHER"')
+add('snapshot-ready-bytes-zero',r,"CASE WHEN status='READY' THEN size ELSE 0 END","CASE WHEN status='READY' THEN 0 ELSE 0 END")
+add('gpu-megabytes-not-converted',s,'("heteroes_gpu_vram_used_bytes", "vramUsedMb", 1024**2, 1_000_000)','("heteroes_gpu_vram_used_bytes", "vramUsedMb", 1, 1_000_000)')
+add('gpu-missing-is-reported-as-zero',s,'value = _number(device["observation"].get(field), maximum)','value = _number(device["observation"].get(field, 0), maximum)\n                value = 0 if value is None else value')
+add('gpu-out-of-range-utilization-accepted',s,'("heteroes_gpu_utilization_percent", "utilizationPercent", 1, 100)','("heteroes_gpu_utilization_percent", "utilizationPercent", 1, 1000)')
+add('gpu-bool-is-number',s,'if type(value) not in {int, float}:','if not isinstance(value, (int, float)):')
+add('gpu-huge-int-crashes-scrape',s,'except OverflowError:\n        return None','except OverflowError:\n        raise')
+add('readiness-skips-db',o,'store.database.ping()','pass')
+add('readiness-skips-storage',o,'backend.ready()','pass')
+add('readiness-exposes-exception-message',o,'"errorType": type(error).__name__','"errorType": str(error)')
+(out/'mutants-initial.json').write_text(json.dumps(mutants,indent=2)+'\n')
+print('Prepared',len(mutants),'syntactically valid mutations')

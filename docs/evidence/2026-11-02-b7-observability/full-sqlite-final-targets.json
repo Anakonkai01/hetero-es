@@ -1,0 +1,1319 @@
+{
+  "productStores": {
+    "sqlite": 452,
+    "postgresql": 0
+  },
+  "tests": {
+    "backend/tests/test_account_layers.py::test_session_lookup_checks_expiry_and_revocation_from_durable_state": [
+      "sqlite"
+    ],
+    "backend/tests/test_admission_hold.py::test_held_queue_stays_queued_without_creating_an_assignment": [
+      "sqlite"
+    ],
+    "backend/tests/test_admission_hold.py::test_held_queue_still_reconciles_completion_and_releases_only_on_drain": [
+      "sqlite"
+    ],
+    "backend/tests/test_admission_hold.py::test_held_queue_still_forwards_durable_cancel_after_a_lost_request": [
+      "sqlite"
+    ],
+    "backend/tests/test_admission_hold.py::test_held_queue_still_reconciles_pause": [
+      "sqlite"
+    ],
+    "backend/tests/test_admission_hold.py::test_hold_during_reconcile_blocks_new_admission_in_the_same_tick": [
+      "sqlite"
+    ],
+    "backend/tests/test_admission_hold.py::test_reconcile_errors_are_reported_while_held_and_do_not_skip_other_runs": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_factory.py::test_non_agent_configuration_is_rejected_and_releases_writer[legacy]": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_factory.py::test_non_agent_configuration_is_rejected_and_releases_writer[None]": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_factory.py::test_agent_factory_keeps_r10_health_and_installs_device_routes": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_agent_factory.py::test_cloud_configuration_cannot_silently_disable_recovery": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_server_sends_only_declared_command_kinds_without_dropping_pending_commands": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_no_header_uses_conservative_core_floor_and_empty_header_understands_nothing": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_headerless_agent_is_not_sent_pause_or_policy_commands": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_agent_missing_core_lifecycle_commands_is_not_admitted_to_new_work": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_malformed_capabilities_are_rejected_before_any_boot_or_report_change[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_malformed_capabilities_are_rejected_before_any_boot_or_report_change[CANCEL_ASSIGNMENT\\nEVIL]": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_malformed_capabilities_are_rejected_before_any_boot_or_report_change[CANCEL-ASSIGNMENT]": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_malformed_capabilities_are_rejected_before_any_boot_or_report_change[CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT,CANCEL_ASSIGNMENT]": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_declared_capabilities_preserve_core_cancel_and_enable": [
+      "sqlite"
+    ],
+    "backend/tests/test_agent_protocol.py::test_optional_pause_and_policy_require_support_without_changing_frozen_run": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_real_session_revocation_and_workspace_enforcement": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_participant_cannot_read_or_cancel_admin_run": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_runs_on_the_same_gpu_wait_in_order_and_submit_is_idempotent": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_queued_cancel_never_contacts_runtime": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes0]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes1]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes2]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes3]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes4]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes5]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_invalid_or_unsupported_config_rejected[changes6]": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_new_experiments_default_to_tail_aware_scheduling_and_greedy_stays_available": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_config_is_immutable_after_submission": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_credentials_are_hashed_and_no_lease_secrets_in_product": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_restart_after_lost_start_response_uses_same_run_and_queue": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_child_objects_and_downloads_share_experiment_authorization": [
+      "sqlite"
+    ],
+    "backend/tests/test_api.py::test_rejected_start_fails_truthfully_and_releases_queue_claim": [
+      "sqlite"
+    ],
+    "backend/tests/test_cluster_state.py::test_replicas_publish_the_same_identity_and_durable_scheduler_failure": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_cluster_state.py::test_cloud_replicas_reject_conflicting_configured_identity": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_cpu_coordinator.py::test_cpu_is_a_coordinator_but_never_a_worker": [
+      "sqlite"
+    ],
+    "backend/tests/test_cpu_coordinator.py::test_v3_cpu_coordinator_skips_text_qualification_and_keeps_ownership": [
+      "sqlite"
+    ],
+    "backend/tests/test_cpu_coordinator.py::test_cpu_profile_cannot_replace_a_reserved_legacy_gpu": [
+      "sqlite"
+    ],
+    "backend/tests/test_cpu_coordinator.py::test_role_configuration_accepts_a_small_gpu_coordinator": [
+      "sqlite"
+    ],
+    "backend/tests/test_database_race.py::test_two_processes_competing_for_a_device_grant_exactly_one_assignment": [
+      "sqlite"
+    ],
+    "backend/tests/test_deployment.py::test_private_config_and_idle_guard": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_approval_workspaces.py::test_the_device_list_names_the_owners_workspaces_and_approval_uses_one": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_approval_workspaces.py::test_the_owners_view_does_not_list_workspaces_of_other_people": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_approval_workspaces.py::test_the_coordinator_choice_shows_the_name_the_owner_gave": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_approval_workspaces.py::test_a_workspace_default_coordinator_is_offered_first_and_must_qualify": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_approval_workspaces.py::test_a_revoked_default_coordinator_is_no_longer_offered": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_updates_role_and_endpoints_atomically": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_invalid_role_or_identity_cannot_partially_change_endpoint[passed-False]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_invalid_role_or_identity_cannot_partially_change_endpoint[gpuUUID-GPU-00000000-0000-0000-0000-000000000000]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_invalid_role_or_identity_cannot_partially_change_endpoint[platform-windows]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_invalid_role_or_identity_cannot_partially_change_endpoint[vramTotalMb-0]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_refuses_live_or_uncertain_ownership[enabled]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_refuses_live_or_uncertain_ownership[desired]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_refuses_live_or_uncertain_ownership[reserved]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_refuses_live_or_uncertain_ownership[physical]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_refuses_live_or_uncertain_ownership[unknown]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_refuses_live_or_uncertain_ownership[alive]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_configuration.py::test_configuration_requires_owner_session_and_health_advertises_it": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_expired_unused_pairing_code_cannot_enroll_a_new_alias": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_consumed_pairing_code_cannot_enroll_a_different_alias": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_restricted_device_may_drain_but_cannot_read_or_change_its_control_state[REVOKED]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_restricted_device_may_drain_but_cannot_read_or_change_its_control_state[QUARANTINED]": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_another_approved_coordinator_cannot_command_a_selected_worker": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_well_formed_but_unverified_pause_checkpoint_cannot_release_ownership": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_monitoring_event_hash_binds_the_exact_payload": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_old_stopped_process_report_does_not_release_a_newly_completed_assignment": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_layers.py::test_device_service_authentication_failure_is_independent_of_http": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_a_revoked_device_can_be_removed_and_disappears": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_the_device_credential_stops_working_after_removal": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_a_pending_device_can_be_declined_and_removed": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_an_approved_device_cannot_be_removed_until_it_is_revoked": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_a_quarantined_device_cannot_be_removed": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_a_device_that_still_holds_a_reservation_cannot_be_removed": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_only_an_administrator_can_remove": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_removal_is_written_to_the_audit_log_and_frees_the_worker_alias": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_an_unknown_device_is_not_found": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_an_approved_device_is_revoked_and_removed_in_one_step": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_one_step_delete_never_cancels_a_run_nor_removes_a_quarantined_device": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_removal.py::test_the_owner_renames_and_deletes_its_device_and_nobody_else_can": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_self_control.py::test_an_approved_device_turns_itself_on_and_off_and_the_audit_names_it": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_self_control.py::test_a_device_that_is_not_approved_or_unknown_cannot_turn_itself_on": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_self_control.py::test_every_boot_starts_off_unless_the_owner_chose_to_keep_it_on": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_self_control.py::test_the_device_reads_its_own_summary": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_self_control.py::test_the_owner_sets_keep_on_without_touching_the_current_boot": [
+      "sqlite"
+    ],
+    "backend/tests/test_device_self_control.py::test_the_device_renames_itself_and_leaves_the_lab_only_when_idle": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_poll_returns_the_current_boot_owner_contribution_choice": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_offline_queue_and_boot_activation_are_independent": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_assignment_is_idempotent_and_outage_never_releases": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_terminal_snapshot_needs_all_process_death_and_fresh_epoch": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_pairing_expiry_alias_collision_and_revocation": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_revoked_coordinator_can_finish_drain_but_cannot_start_workers": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_reports_deduplicate_and_reject_worker_fabricated_snapshot": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_coordinator_reserved_even_when_not_candidate_worker": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_device_owner_cannot_execute_shell_or_impersonate_coordinator": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_is_durable_before_first_worker_ack": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_an_app_started_again_during_a_run_may_send_the_same_qualification": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_carries_the_labs_public_compute_address": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_omits_a_missing_or_unusable_public_address[None]": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_omits_a_missing_or_unusable_public_address[config1]": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_omits_a_missing_or_unusable_public_address[config2]": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_omits_a_missing_or_unusable_public_address[config3]": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_omits_a_missing_or_unusable_public_address[config4]": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_start_worker_omits_a_missing_or_unusable_public_address[config5]": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_the_public_compute_address_is_read_again_each_time": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_restore_mismatch_quarantine_survives_restart": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_monitoring_events_deduplicate_independently_of_snapshot_sequence": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_a_device_that_cannot_start_the_run_says_why_in_the_event_list": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_event_severity_follows_the_event_name_and_a_missing_reason_falls_back_to_it": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_backup_policy_change_does_not_mutate_frozen_assignment": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_turning_a_device_off_drains_running_jobs_and_preserves_its_queue": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_an_offline_queue_waits_then_dispatches_when_contribution_returns": [
+      "sqlite"
+    ],
+    "backend/tests/test_devices.py::test_resource_revocation_still_cancels_queued_jobs_and_explicit_cancel_still_works": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_fresh_lab_has_no_failure_but_reports_the_held_queue_and_plain_http": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_only_agent_mode_is_supported": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_private_address_must_be_numeric_and_private": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_https_private_address_has_no_transport_warning": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_public_addresses_are_checked_and_temporary_ones_are_flagged": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_public_installer_downloads_are_reported": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_damaged_or_newer_database_fails": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_storage_directory_is_required_and_free_space_is_judged": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_a_lab_without_online_devices_is_a_warning_not_a_failure": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_command_line_exits_nonzero_only_on_failure": [
+      "sqlite"
+    ],
+    "backend/tests/test_doctor.py::test_doctor_never_changes_a_lab_file": [
+      "sqlite"
+    ],
+    "backend/tests/test_endpoints.py::test_idle_address_change_preserves_identity_and_freezes_assignment": [
+      "sqlite"
+    ],
+    "backend/tests/test_events_list.py::test_the_event_list_reads_in_one_session_and_can_be_narrowed": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_layers.py::test_queued_cancel_removes_the_entry_and_updates_remaining_fifo_position": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_layers.py::test_queue_is_scoped_to_the_owner_unless_the_caller_is_an_administrator": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_layers.py::test_recorded_candidate_is_readable_by_owner_but_not_another_participant": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_layers.py::test_store_config_identity_is_order_independent_and_nonfinite_save_writes_nothing": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_layers.py::test_empty_event_view_and_unknown_run_are_distinct": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_layers.py::test_held_submission_preserves_draft_and_queue_then_resumes_after_release": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_view.py::test_completed_run_clears_stale_shutdown_notice_and_counts_audits_after_recovery": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_view.py::test_real_failure_and_unknown_audit_coverage_are_preserved": [
+      "sqlite"
+    ],
+    "backend/tests/test_experiment_view.py::test_detailed_audit_outcomes_and_a_strict_stop_reach_the_client_unchanged": [
+      "sqlite"
+    ],
+    "backend/tests/test_fixture_lab_seed.py::test_browser_fixture_finished_and_stuck_seeders_use_the_current_schema": [
+      "sqlite"
+    ],
+    "backend/tests/test_join_requests.py::test_join_a_listed_workspace_after_its_administrator_approves": [
+      "sqlite"
+    ],
+    "backend/tests/test_join_requests.py::test_a_rejected_request_adds_no_member_and_may_be_asked_again": [
+      "sqlite"
+    ],
+    "backend/tests/test_join_requests.py::test_only_a_workspace_administrator_lists_it": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_pending_registration_requires_approval_and_creation_permission": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_workspace_and_every_child_route_are_isolated_even_for_platform_admin": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_invitation_acceptance_last_admin_and_membership_revocation": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_suspension_revokes_sessions_cancels_queue_and_preserves_evidence": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_password_change_revokes_other_sessions_and_does_not_allow_privilege_edits": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_migration_preserves_legacy_bytes_queue_and_ids": [
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_dispatch_revalidates_assignment_before_launch": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab.py::test_platform_privilege_is_persisted_independently_of_username": [
+      "sqlite"
+    ],
+    "backend/tests/test_lab_cli.py::test_offer_uploads_pinned_inputs_freezes_code_and_is_idempotent": [
+      "sqlite"
+    ],
+    "backend/tests/test_large_datasets.py::test_a_large_dataset_is_uploaded_built_from_files_and_reaches_the_devices": [
+      "sqlite"
+    ],
+    "backend/tests/test_large_datasets.py::test_the_administrator_sets_the_limits_and_bad_files_are_refused": [
+      "sqlite"
+    ],
+    "backend/tests/test_large_datasets.py::test_only_a_platform_administrator_changes_the_dataset_limits": [
+      "sqlite"
+    ],
+    "backend/tests/test_large_datasets.py::test_a_device_without_the_private_route_gets_small_dataset_files_over_the_public_address": [
+      "sqlite"
+    ],
+    "backend/tests/test_large_datasets.py::test_a_researcher_without_the_private_route_uploads_a_small_dataset_over_the_public_address": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_lab_state_reports_the_hold_and_whether_a_run_or_reservation_is_live": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[STARTING]": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[RUNNING]": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[CANCELLING]": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[RECOVERING]": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[DRAINING]": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[PAUSING]": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_a_physical_reservation_counts_as_busy": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_an_open_idle_queue_is_held_during_the_action_and_reopened_after": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_an_already_held_queue_stays_held": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_a_failing_action_still_restores_the_queue": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_a_busy_lab_refuses_a_restart_and_stays_as_it_was": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_lab.py::test_booting_a_busy_lab_leaves_the_queue_held_for_an_administrator": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_storage.py::test_real_upload_verify_download_and_no_cloud_request_caps": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_storage.py::test_scoped_url_rejects_tampering_wrong_method_and_expiry": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_storage.py::test_wrong_bytes_cannot_publish_and_upload_cannot_be_overwritten": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_storage.py::test_retry_is_identical_and_signing_key_survives_restart": [
+      "sqlite"
+    ],
+    "backend/tests/test_local_storage.py::test_path_traversal_and_symlinks_are_rejected": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_blocked_member_can_only_retry_explicitly_with_capable_coordinator": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_worker_joins_a_running_experiment_with_its_own_credential_and_reservation": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_dispatch_and_join_capture_display_identity_without_changing_config": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_worker_leaves_but_the_last_one_cannot": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_joining_follows_the_rules_of_submission": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_device_busy_in_another_experiment_cannot_join": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_only_the_owner_or_an_administrator_changes_members_and_only_while_it_runs": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_coordinator_without_membership_support_is_told_to_update": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_left_worker_releases_its_gpu_once_the_coordinator_confirms_it_stopped": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_left_worker_that_went_offline_releases_its_gpu_after_a_grace_period": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_finished_run_is_released_when_a_member_machine_died_without_leaving": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_finished_run_waits_for_a_member_that_is_only_briefly_offline": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_an_offline_worker_that_did_not_leave_keeps_its_reservation": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_turning_a_member_off_makes_it_leave_instead_of_cancelling_the_experiment": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_turning_a_member_off_sends_no_cancellation_to_anyone": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_turning_the_last_member_off_still_cancels": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_an_experiment_that_allows_joining_takes_an_idle_eligible_worker_by_itself": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_worker_its_owner_removed_is_not_taken_back_by_itself": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_without_allow_join_nothing_joins_by_itself": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_resumed_experiment_keeps_the_workers_that_joined": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_worker_added_back_while_still_leaving_this_run_rejoins_at_once": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_the_coordinator_hears_stopped_for_a_left_worker_the_lab_already_released": [
+      "sqlite"
+    ],
+    "backend/tests/test_membership.py::test_a_worker_turned_on_can_be_added_back_before_its_agent_confirms_the_on": [
+      "sqlite"
+    ],
+    "backend/tests/test_metadata_restore.py::test_metadata_restore_preserves_unknown_ownership_and_rejects_corruption": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_first_reference_then_second_device_reproduces_it": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_completion_does_not_release_an_unknown_or_living_process[None]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_completion_does_not_release_an_unknown_or_living_process[True]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[repeat]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[restore]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[config]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[manifest]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_lab_independently_rejects_corrupted_reports[negative]": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_restore_failure_from_the_child_quarantines_the_device": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_cancel_is_fenced_and_other_devices_cannot_release_the_gpu": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_qualification_invalidates_when_the_native_profile_changes": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_probe_requires_current_capabilities_workspace_and_contribution": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_upload_grants_are_limited_to_the_active_probe_and_exact_manifest": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_stopped_contribution_cannot_change_endpoints_while_the_probe_is_still_unknown": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_qualification_keeps_what_the_gpu_measured_per_chunk_and_drops_anything_else": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_old_and_new_references_coexist_without_cross_engine_admission": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_new_engine_probe_rejects_a_valid_old_engine_reference": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_strict_qualification_is_separate_from_the_plain_one": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_strict_probe_rejects_a_plain_reference": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_plain_probe_rejects_a_strict_reference": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_an_unknown_probe_decoder_is_refused": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_strict_experiment_needs_the_strict_qualification_of_every_device": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_pending_probe_blocks_only_probes_of_the_same_reference": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_plain_experiment_keeps_its_document_and_a_strict_one_submits_fp16": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_strict_run_never_shares_its_coordinators_gpu_with_a_worker": [
+      "sqlite"
+    ],
+    "backend/tests/test_model_qualification.py::test_a_strict_run_needs_a_gpu_coordinator": [
+      "sqlite"
+    ],
+    "backend/tests/test_notification_layers.py::test_finished_run_notification_keeps_identity_and_read_state_on_refresh": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_history_from_before_notifications_existed_does_not_flood_the_bell": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_a_restart_keeps_the_starting_point_so_nothing_is_missed": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_a_new_account_request_reaches_administrators_only_and_only_once": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_the_person_is_told_when_their_account_is_approved_declined_or_suspended": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_a_run_that_ends_notifies_its_owner_with_the_outcome_and_a_link": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_marking_as_read_changes_the_count_and_only_my_own_notifications": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_the_list_is_capped_and_unread_counts_everything_unread": [
+      "sqlite"
+    ],
+    "backend/tests/test_notifications.py::test_a_device_waiting_for_approval_is_announced_to_administrators_while_it_is_still_waiting": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_http_metrics_and_json_logs_use_only_route_patterns_and_generated_request_ids": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_ready_checks_storage_and_hides_exception_details": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_unhandled_error_is_logged_once_as_safe_json_without_raw_error_or_request_data": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_scheduler_business_snapshot_is_fresh_and_omits_unknown_gpu_values": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_non_scheduler_never_collects_business_state[all]": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_non_scheduler_never_collects_business_state[api]": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_non_scheduler_never_collects_business_state[devices]": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_non_scheduler_never_collects_business_state[storage]": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_desktop_local_mode_keeps_basic_metrics_without_optional_cloud_library": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_gpu_metric_units_and_missing_observations_are_preserved": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_readiness_checks_db_and_local_directory_without_exposing_private_errors": [
+      "sqlite"
+    ],
+    "backend/tests/test_observability.py::test_untrusted_http_method_is_normalized_in_metrics_and_logs": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_first_identity_is_pending_without_local_session_or_password": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_realm_admin_bootstrap_and_durable_approval_restrictions": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_username_collision_cannot_link_or_take_over_any_identity": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_approved_account_and_identity_survive_new_requests_without_role_escalation": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_local_auth_endpoints_are_guided_404_even_without_auth_or_valid_body[login]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_local_auth_endpoints_are_guided_404_even_without_auth_or_valid_body[register]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_local_auth_endpoints_are_guided_404_even_without_auth_or_valid_body[password]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_local_auth_endpoints_are_guided_404_even_without_auth_or_valid_body[revoke-other-sessions]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_role_removal_drops_platform_permission_and_device_token_protocol_is_unchanged": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_oidc_download_ticket_needs_no_local_session_and_remains_single_use": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_oidc_download_ticket_rechecks_expiry_account_membership_and_logout[expiry]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_oidc_download_ticket_rechecks_expiry_account_membership_and_logout[suspended]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_oidc_download_ticket_rechecks_expiry_account_membership_and_logout[membership]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_oidc_download_ticket_rechecks_expiry_account_membership_and_logout[logout]": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_external_session_revocation_points_to_identity_provider_instead_of_false_success": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_cloud_factory_does_not_seed_legacy_password_accounts": [
+      "sqlite"
+    ],
+    "backend/tests/test_oidc_accounts.py::test_external_password_sentinel_cannot_authenticate_through_local_service": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations.py::test_platform_operations_are_denied_to_workspace_participant": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations.py::test_newly_configured_gpu_starts_unassigned_and_disabled": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations_layers.py::test_shared_authorization_uses_plain_errors_and_rechecks_durable_access": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations_layers.py::test_explicit_resume_clears_the_hold_and_old_maintenance_flags": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations_layers.py::test_resume_keeps_hold_when_imported_queued_workers_are_not_configured": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations_layers.py::test_workspace_scope_rechecks_stored_status_when_the_supplied_profile_is_stale": [
+      "sqlite"
+    ],
+    "backend/tests/test_operations_layers.py::test_participant_list_hides_other_owners_runs_in_the_same_workspace": [
+      "sqlite"
+    ],
+    "backend/tests/test_parallel_resources.py::test_blocked_head_does_not_stall_disjoint_jobs": [
+      "sqlite"
+    ],
+    "backend/tests/test_parallel_resources.py::test_native_and_wsl_aliases_cannot_allocate_same_physical_gpu": [
+      "sqlite"
+    ],
+    "backend/tests/test_parallel_resources.py::test_coordinator_and_worker_share_one_physical_reservation": [
+      "sqlite"
+    ],
+    "backend/tests/test_parallel_resources.py::test_concurrent_reservation_is_atomic_across_store_connections": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_parallel_resources.py::test_missing_profile_waits_and_reserved_uuid_cannot_change": [
+      "sqlite"
+    ],
+    "backend/tests/test_parallel_resources.py::test_monitoring_failure_on_one_job_does_not_hide_another": [
+      "sqlite"
+    ],
+    "backend/tests/test_passwords.py::test_registration_accepts_a_short_but_unusual_password": [
+      "sqlite"
+    ],
+    "backend/tests/test_passwords.py::test_registration_explains_why_a_password_was_refused": [
+      "sqlite"
+    ],
+    "backend/tests/test_passwords.py::test_password_change_follows_the_same_rules": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_pause_keeps_reservation_until_checkpoint_and_every_process_stops": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_resume_has_new_epoch_and_credentials_same_config_and_fences_old_reports": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_pause_without_verified_checkpoint_is_rejected_and_does_not_release": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_paused_run_survives_contribution_off_and_resume_waits_for_owner_on": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_cancellation_of_paused_or_pausing_run_never_requeues[False]": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_cancellation_of_paused_or_pausing_run_never_requeues[True]": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_a_run_cancelled_before_its_coordinator_accepted_it_is_released[True]": [
+      "sqlite"
+    ],
+    "backend/tests/test_pause_resume.py::test_a_run_cancelled_before_its_coordinator_accepted_it_is_released[False]": [
+      "sqlite"
+    ],
+    "backend/tests/test_policies.py::test_shared_settings_preserve_hold_and_sorted_disabled_workers": [
+      "sqlite"
+    ],
+    "backend/tests/test_policies.py::test_unknown_process_state_and_physical_alias_keep_device_busy": [
+      "sqlite"
+    ],
+    "backend/tests/test_postgres_backup.py::test_backup_retention_deletes_the_manifest_payload_key_even_across_database_formats": [
+      "sqlite"
+    ],
+    "backend/tests/test_private_address.py::test_health_hides_the_private_address_and_members_still_get_it": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_routes.py::test_upload_scope_and_native_download_ticket_revocation": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_routes.py::test_worker_device_cannot_upload_coordinator_snapshot": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_routes.py::test_abandoned_upload_cleanup_preserves_verified_point": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_routes.py::test_historical_import_requires_final_lineage_and_scoped_admin": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_manifest_published_last_and_contents_deduplicated": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_bad_content_never_becomes_ready": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_inflight_reservations_count_and_shared_objects_are_not_deleted": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_unsafe_paths_and_changed_point_identity_are_rejected": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_metadata_backup_is_consistent_and_keeps_local_copy": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_uploaded_object_completion_is_idempotent_and_temp_keys_do_not_change_ready": [
+      "sqlite"
+    ],
+    "backend/tests/test_recovery_storage.py::test_v3_manifest_objects_roundtrip_and_reject_unlisted_paths": [
+      "sqlite"
+    ],
+    "backend/tests/test_research_options.py::test_raw_prompt_and_boxed_reward_reach_the_assignment": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/workspaces]": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/worker-registry]": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/my-workers]": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/my-resource-submissions]": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/experiments/unknown/monitoring-events]": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[PATCH-/api/v1/device/endpoints]": [
+      "sqlite"
+    ],
+    "backend/tests/test_retired_routes.py::test_retired_operations_are_absent[POST-/api/v1/no-such-operation]": [
+      "sqlite"
+    ],
+    "backend/tests/test_route_contract.py::test_product_route_contract_matches_archived_pre_split_inventory": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_the_timeline_endpoint_describes_a_recorded_run": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_a_member_of_another_workspace_cannot_see_the_timeline_or_the_stream": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_a_finished_run_streams_once_and_ends_over_http": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_a_running_run_pushes_changes_and_heartbeats_but_never_repeats_itself": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_a_run_that_finishes_while_watched_ends_the_stream": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_too_many_viewers_are_refused_and_the_slot_is_freed_when_one_leaves": [
+      "sqlite"
+    ],
+    "backend/tests/test_run_stream.py::test_a_stream_that_runs_too_long_is_ended_politely": [
+      "sqlite"
+    ],
+    "backend/tests/test_s3_public_storage.py::test_s3_factory_selects_cloud_backend_and_closes_it_after_background_threads": [
+      "sqlite"
+    ],
+    "backend/tests/test_s3_public_storage.py::test_s3_roles_preserve_the_exact_product_route_partition": [
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_s3_study.py::test_inline_dataset_object_is_in_datasets_bucket_only": [
+      "sqlite"
+    ],
+    "backend/tests/test_s3_study.py::test_dataset_upload_build_and_split_publication_use_dataset_bucket": [
+      "sqlite"
+    ],
+    "backend/tests/test_s3_study.py::test_model_files_stay_in_recovery_bucket_with_private_uploads": [
+      "sqlite"
+    ],
+    "backend/tests/test_s3_study.py::test_frozen_device_transfer_selects_dataset_or_model_bucket_and_public_dataset_only": [
+      "sqlite"
+    ],
+    "backend/tests/test_scheduler_metrics.py::test_scheduler_role_suppresses_business_series_when_standby_and_exposes_them_when_active": [
+      "sqlite"
+    ],
+    "backend/tests/test_sdk_lab.py::test_a_notebook_submits_a_hub_model_its_own_rows_reward_and_sampler": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes0]": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes1]": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes2]": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_admin_cannot_remove_own_access_or_permissions[changes3]": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_admin_uses_personal_security_api_instead_of_self_revoke": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_workspace_admin_cannot_remove_own_membership_or_role[PATCH]": [
+      "sqlite"
+    ],
+    "backend/tests/test_self_administration.py::test_workspace_admin_cannot_remove_own_membership_or_role[DELETE]": [
+      "sqlite"
+    ],
+    "backend/tests/test_server.py::test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_service_routes.py::test_route_partition_is_exact_and_nonoverlapping_for_matching_features[True-True]": [
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_service_routes.py::test_route_partition_is_exact_and_nonoverlapping_for_matching_features[True-False]": [
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_service_routes.py::test_route_partition_is_exact_and_nonoverlapping_for_matching_features[False-True]": [
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_service_routes.py::test_route_partition_is_exact_and_nonoverlapping_for_matching_features[False-False]": [
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_service_routes.py::test_diagnostics_precede_the_spa_and_unowned_routes_remain_absent": [
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_service_routes.py::test_api_and_device_processes_start_no_dispatch_or_backup_loops": [
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_storage_backends.py::test_manifest_commit_deduplication_download_and_byte_quota_are_portable[local]": [
+      "sqlite"
+    ],
+    "backend/tests/test_storage_backends.py::test_manifest_commit_deduplication_download_and_byte_quota_are_portable[s3]": [
+      "sqlite"
+    ],
+    "backend/tests/test_storage_backends.py::test_wrong_uploaded_content_never_publishes_a_manifest_on_either_backend[local]": [
+      "sqlite"
+    ],
+    "backend/tests/test_storage_backends.py::test_wrong_uploaded_content_never_publishes_a_manifest_on_either_backend[s3]": [
+      "sqlite"
+    ],
+    "backend/tests/test_storage_layers.py::test_download_ticket_requires_its_cookie_and_remains_available_after_a_bad_cookie": [
+      "sqlite"
+    ],
+    "backend/tests/test_storage_layers.py::test_expired_download_ticket_is_rejected_even_with_the_correct_cookie": [
+      "sqlite"
+    ],
+    "backend/tests/test_store_layers.py::test_store_context_commits_and_rolls_back_with_the_same_audit_boundary": [
+      "sqlite"
+    ],
+    "backend/tests/test_store_layers.py::test_borrowed_connection_is_unusable_after_its_transaction_scope": [
+      "sqlite"
+    ],
+    "backend/tests/test_store_layers.py::test_store_uses_the_core_owner_and_nested_reads_share_uncommitted_state": [
+      "sqlite"
+    ],
+    "backend/tests/test_study.py::test_dataset_import_frozen_counts_duplicate_leakage_and_auth": [
+      "sqlite"
+    ],
+    "backend/tests/test_study.py::test_model_upload_hash_verification_and_assignment_scoping": [
+      "sqlite"
+    ],
+    "backend/tests/test_study.py::test_registry_refuses_executable_files_and_unpinned_models": [
+      "sqlite"
+    ],
+    "backend/tests/test_study.py::test_v2_admission_and_private_transfer_are_bound_to_frozen_epoch": [
+      "sqlite"
+    ],
+    "backend/tests/test_study_layers.py::test_registry_lookup_preserves_workspace_scope_and_uses_plain_errors": [
+      "sqlite"
+    ],
+    "backend/tests/test_telemetry.py::test_availability_metadata_negotiates_and_round_trips": [
+      "sqlite"
+    ],
+    "backend/tests/test_telemetry.py::test_telemetry_round_trip_and_boot_reset_preserve_contribution": [
+      "sqlite"
+    ],
+    "backend/tests/test_telemetry.py::test_telemetry_rejects_wrong_gpu_and_invalid_measurements": [
+      "sqlite"
+    ],
+    "backend/tests/test_telemetry.py::test_history_is_bounded_and_identical_samples_are_deduplicated": [
+      "sqlite"
+    ],
+    "backend/tests/test_telemetry.py::test_detail_round_trip_bounds_and_power_history": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_a_template_is_saved_listed_and_returned_with_its_settings": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_v3_cpu_reference_decoder_survives_template_roundtrip": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_templates_are_private_to_their_workspace": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_only_known_settings_with_plain_values_are_accepted": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_names_are_trimmed_unique_per_workspace_and_limited": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_the_owner_and_workspace_administrators_may_delete_others_may_not": [
+      "sqlite"
+    ],
+    "backend/tests/test_templates.py::test_a_template_of_another_workspace_cannot_be_deleted_by_id": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_five_wrong_passwords_lock_that_caller_out_even_for_the_right_password": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_a_successful_sign_in_forgets_earlier_mistakes": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_unknown_users_are_throttled_like_known_ones": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_one_address_trying_many_usernames_is_stopped_as_a_whole": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_an_attacker_cannot_lock_the_owner_out_from_another_address": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_registration_is_limited_per_address": [
+      "sqlite"
+    ],
+    "backend/tests/test_throttle.py::test_interactive_api_documentation_is_not_public_when_the_web_app_is_served": [
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_usage.py::test_reported_usage_reaches_the_experiment_without_cpu_runtime_imports": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_import_keeps_columns_and_rejects_leakage": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_config_and_worker_command_preserve_the_frozen_options": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change0]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change1]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change2]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change3]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change4]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change5]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change6]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change7]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change8]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change9]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change10]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change11]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change12]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change13]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change14]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change15]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change16]": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_scorer_columns_are_every_field_of_its_config": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_queued_v3_work_stops_when_a_device_loses_v3_qualification": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_editing_a_v3_draft_replaces_its_old_recipe_fields": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_only_current_v3_coordinator_can_quarantine_its_selected_worker": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_v3_python_code_is_frozen_and_reaches_only_the_coordinator": [
+      "sqlite"
+    ],
+    "backend/tests/test_v3_study.py::test_a_windows_coordinator_is_admitted_but_never_creates_a_lora_adapter": [
+      "sqlite"
+    ],
+    "backend/tests/test_web.py::test_same_origin_web_keeps_api_auth_and_unknown_paths": [
+      "sqlite"
+    ],
+    "backend/tests/test_web.py::test_installer_links_stay_private_behind_a_public_web_address_by_default": [
+      "sqlite"
+    ],
+    "backend/tests/test_web.py::test_installer_links_use_the_public_origin_when_public_downloads_are_enabled": [
+      "sqlite"
+    ],
+    "backend/tests/test_web.py::test_installers_published_as_symlinks_into_another_disk_are_served_with_ranges": [
+      "sqlite"
+    ],
+    "backend/tests/test_worker_cli_lab.py::test_a_cli_worker_pairs_is_approved_boots_and_binds_its_admission_through_the_lab": [
+      "sqlite"
+    ],
+    "backend/tests/test_writer_lock.py::test_second_factory_for_same_database_is_rejected_and_shutdown_releases_it": [
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_writer_lock.py::test_factory_failure_releases_lock_before_retry": [
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ],
+    "backend/tests/test_writer_lock.py::test_shutdown_keeps_lock_until_dispatcher_thread_finishes": [
+      "sqlite",
+      "sqlite",
+      "sqlite"
+    ]
+  },
+  "explicitSQLiteContracts": [
+    "backend/tests/test_agent_factory.py::test_non_agent_configuration_is_rejected_and_releases_writer[legacy]",
+    "backend/tests/test_agent_factory.py::test_non_agent_configuration_is_rejected_and_releases_writer[None]",
+    "backend/tests/test_agent_factory.py::test_agent_factory_keeps_r10_health_and_installs_device_routes",
+    "backend/tests/test_agent_factory.py::test_cloud_configuration_cannot_silently_disable_recovery",
+    "backend/tests/test_api.py::test_credentials_are_hashed_and_no_lease_secrets_in_product",
+    "backend/tests/test_deployment.py::test_private_config_and_idle_guard",
+    "backend/tests/test_doctor.py::test_fresh_lab_has_no_failure_but_reports_the_held_queue_and_plain_http",
+    "backend/tests/test_doctor.py::test_only_agent_mode_is_supported",
+    "backend/tests/test_doctor.py::test_private_address_must_be_numeric_and_private",
+    "backend/tests/test_doctor.py::test_https_private_address_has_no_transport_warning",
+    "backend/tests/test_doctor.py::test_public_addresses_are_checked_and_temporary_ones_are_flagged",
+    "backend/tests/test_doctor.py::test_public_installer_downloads_are_reported",
+    "backend/tests/test_doctor.py::test_damaged_or_newer_database_fails",
+    "backend/tests/test_doctor.py::test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check",
+    "backend/tests/test_doctor.py::test_storage_directory_is_required_and_free_space_is_judged",
+    "backend/tests/test_doctor.py::test_a_lab_without_online_devices_is_a_warning_not_a_failure",
+    "backend/tests/test_doctor.py::test_command_line_exits_nonzero_only_on_failure",
+    "backend/tests/test_doctor.py::test_doctor_never_changes_a_lab_file",
+    "backend/tests/test_lab.py::test_migration_preserves_legacy_bytes_queue_and_ids",
+    "backend/tests/test_local_lab.py::test_lab_state_reports_the_hold_and_whether_a_run_or_reservation_is_live",
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[STARTING]",
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[RUNNING]",
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[CANCELLING]",
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[RECOVERING]",
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[DRAINING]",
+    "backend/tests/test_local_lab.py::test_every_executing_status_counts_as_busy[PAUSING]",
+    "backend/tests/test_local_lab.py::test_a_physical_reservation_counts_as_busy",
+    "backend/tests/test_local_lab.py::test_an_open_idle_queue_is_held_during_the_action_and_reopened_after",
+    "backend/tests/test_local_lab.py::test_an_already_held_queue_stays_held",
+    "backend/tests/test_local_lab.py::test_a_failing_action_still_restores_the_queue",
+    "backend/tests/test_local_lab.py::test_a_busy_lab_refuses_a_restart_and_stays_as_it_was",
+    "backend/tests/test_local_lab.py::test_booting_a_busy_lab_leaves_the_queue_held_for_an_administrator",
+    "backend/tests/test_metadata_restore.py::test_metadata_restore_preserves_unknown_ownership_and_rejects_corruption",
+    "backend/tests/test_observability.py::test_desktop_local_mode_keeps_basic_metrics_without_optional_cloud_library",
+    "backend/tests/test_recovery_storage.py::test_metadata_backup_is_consistent_and_keeps_local_copy",
+    "backend/tests/test_server.py::test_fresh_bootstrap_holds_queue_and_keeps_only_password_hash",
+    "backend/tests/test_writer_lock.py::test_second_factory_for_same_database_is_rejected_and_shutdown_releases_it",
+    "backend/tests/test_writer_lock.py::test_factory_failure_releases_lock_before_retry",
+    "backend/tests/test_writer_lock.py::test_shutdown_keeps_lock_until_dispatcher_thread_finishes"
+  ]
+}
