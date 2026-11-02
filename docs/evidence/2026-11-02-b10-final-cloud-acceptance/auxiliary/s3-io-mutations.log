@@ -1,0 +1,24 @@
+control ok    | 31 passed, 1 warning in 5.10s
+killed       device URLs signed for internal hostname | 3 failed, 28 passed, 1 warning in 5.10s
+killed       incomplete multipart bytes excluded from quota | 1 failed, 30 passed, 1 warning in 5.36s
+killed       dataset and backup bytes excluded from shared quota | 1 failed, 30 passed, 1 warning in 7.61s
+killed       changed upload may publish after verification | 1 failed, 30 passed, 1 warning in 5.69s
+killed       published staging upload remains visible | 1 failed, 30 passed, 1 warning in 5.31s
+killed       file publication ignores expected checksum | 1 failed, 30 passed, 1 warning in 5.10s
+killed       metadata dumps go to recovery bucket | 1 failed, 30 passed, 1 warning in 8.25s
+killed       dataset view becomes recovery storage | 9 failed, 22 passed, 1 warning in 6.49s
+killed       public capabilities lose bucket binding | 1 failed, 30 passed, 1 warning in 6.60s
+killed       public upload length header ignored | 1 failed, 30 passed, 1 warning in 6.42s
+killed       public upload size cap ignored at consumption | 1 failed, 30 passed, 1 warning in 6.20s
+killed       oversized dataset public URLs minted | 1 failed, 30 passed, 1 warning in 6.14s
+killed       oversized public download is relayed | 1 failed, 30 passed, 1 warning in 6.57s
+killed       public proxy temporary files retained | 1 failed, 30 passed, 1 warning in 6.95s
+killed       reserved bulk API relays are exposed | 1 failed, 30 passed, 1 warning in 6.83s
+killed       S3 clients left open on app shutdown | 1 failed, 30 passed, 1 warning in 6.54s
+killed       inline dataset goes to model bucket | 2 failed, 29 passed, 1 warning in 6.79s
+killed       dataset upload plan goes to model bucket | 1 failed, 30 passed, 1 warning in 6.00s
+killed       built dataset goes to model bucket | 1 failed, 30 passed, 1 warning in 8.78s
+killed       frozen dataset transfers use recovery bucket | 1 failed, 30 passed, 1 warning in 6.89s
+killed       local storage rejects PostgreSQL metadata | 2 failed, 29 passed, 1 warning in 6.73s
+
+21 of 21 mutants killed.

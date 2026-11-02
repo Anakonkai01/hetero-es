@@ -1,0 +1,14 @@
+$ python3 scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy scripts --copy tests/v3 --env PYTHONPATH=src:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-gpu/mutation-audit-outcomes --mutants acceptance/mutants/audit-outcomes.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_outcomes.py tests/v3/test_v3_audit.py tests/v3/test_audit_states.py'
+control ok    | 29 passed in 9.00s
+killed       open drain of an active run is unknown | 1 failed, 5 passed in 3.49s
+killed       open drain of an ended run is pending | 1 failed, 6 passed in 3.68s
+killed       recorded generation without sidecar is open | 1 failed, 1 passed in 2.40s
+killed       frozen rate ignored | 1 failed in 2.35s
+killed       conflicting sidecar trusted | 1 failed, 2 passed in 2.38s
+killed       timed out not counted | 1 failed, 9 passed in 8.98s
+killed       skipped not counted | 1 failed, 3 passed in 2.80s
+killed       stop names the auditor as original | 1 failed, 5 passed in 3.35s
+killed       strict policy not shown | 1 failed, 7 passed in 3.63s
+killed       supervisor inverts run activity | 1 failed, 8 passed in 8.73s
+
+10 of 10 mutants killed.

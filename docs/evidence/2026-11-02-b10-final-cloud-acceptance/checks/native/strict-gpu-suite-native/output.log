@@ -1,0 +1,16 @@
+$ 'C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Scripts\python.exe' 'C:\Users\Thao Nguyen\.cache\heteroes-accept\heteroes-accept-aed2a90eb9b7-20261102-131414/acceptance/native_python.py' 'C:\Users\Thao Nguyen\.cache\heteroes-accept\heteroes-accept-aed2a90eb9b7-20261102-131414/acceptance/probes/pytest_gpu_suite.py' --models 'C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\models-prefetch-01' --out 'C:\Users\Thao Nguyen\.cache\heteroes-accept\heteroes-accept-aed2a90eb9b7-20261102-131414\results\strict-gpu-suite-native/pinned-model' -- -q -rs -p no:cacheprovider tests/eval/test_integer_lm_head.py tests/eval/test_integer_weights_batched.py tests/eval/test_integer_balanced_plan.py tests/eval/test_integer_nonpower_split.py tests/eval/test_strict_graph_host.py tests/eval/test_integer_stream.py tests/eval/test_strict_decode_pipeline.py tests/eval/test_integer_decoder.py tests/eval/test_integer_group.py tests/eval/test_integer_packed_input.py tests/eval/test_integer_cuda.py tests/eval/test_strict_decode_graph.py tests/eval/test_strict_cuda.py tests/eval/test_strict_packed.py tests/eval/test_strict_attention_split.py tests/eval/test_strict_attention_prefill.py tests/eval/test_integer_fused_finish.py tests/eval/test_qwen2_strict_cuda.py tests/eval/test_integer_tma.py tests/eval/test_attention_key_stages.py tests/eval/test_request_context.py tests/v3/test_v3_strict_decoder.py -m 'not sm120'
+........................................................................ [  7%]
+........................................................................ [ 15%]
+........................................................................ [ 22%]
+........................................................................ [ 30%]
+........................................................................ [ 37%]
+........................................................................ [ 45%]
+........................................................................ [ 52%]
+........................................................................ [ 60%]
+........................................................................ [ 67%]
+........................................................................ [ 75%]
+........................................................................ [ 82%]
+........................................................................ [ 90%]
+........................................................................ [ 97%]
+....................                                                     [100%]
+956 passed, 79 deselected in 1211.83s (0:20:11)

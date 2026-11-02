@@ -1,0 +1,3 @@
+723 passed, 2 warnings in 186.98s (0:03:06)
+Product database targets: {"postgresql": 445, "sqlite": 52}
+PostgreSQL matrix receipt: /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/fresh-postgres-final/receipt.json

@@ -1,0 +1,98 @@
+[
+  {
+    "name": "all service processes register every product route",
+    "file": "backend/apps/routing.py",
+    "old": "return self.service == \"all\" or owner(method, path) == self.service",
+    "new": "return True"
+  },
+  {
+    "name": "storage routes are assigned to the API",
+    "file": "backend/apps/routing.py",
+    "old": "if pair in _STORAGE:",
+    "new": "if False:"
+  },
+  {
+    "name": "device routes are assigned to the API",
+    "file": "backend/apps/routing.py",
+    "old": "if pair in _DEVICES:",
+    "new": "if False:"
+  },
+  {
+    "name": "included routers bypass service ownership",
+    "file": "backend/apps/routing.py",
+    "old": "return self.app.include_router(filtered, **options)",
+    "new": "return self.app.include_router(router, **options)"
+  },
+  {
+    "name": "API processes start a scheduler loop",
+    "file": "backend/apps/factory.py",
+    "old": "if dispatch and service in {\"all\", \"scheduler\"}:",
+    "new": "if dispatch:"
+  },
+  {
+    "name": "API processes start metadata backup loops",
+    "file": "backend/apps/factory.py",
+    "old": "if service in {\"all\", \"storage\"} and getattr(runtime, \"storage_backend\", None) is not None:",
+    "new": "if getattr(runtime, \"storage_backend\", None) is not None:"
+  },
+  {
+    "name": "scheduler sessions return to a connection pool",
+    "file": "backend/db/leadership.py",
+    "old": "connection.detach()",
+    "new": "pass"
+  },
+  {
+    "name": "heartbeats reacquire a recursive session lock",
+    "file": "backend/db/leadership.py",
+    "old": "if self._held:\n            return self.heartbeat()",
+    "new": "if self._held:\n            self._connection.scalar(text(\"SELECT pg_try_advisory_lock(:key)\"), {\"key\": SCHEDULER_LOCK})\n            self._connection.commit()\n            return self.heartbeat()"
+  },
+  {
+    "name": "graceful shutdown omits explicit unlock",
+    "file": "backend/db/leadership.py",
+    "old": "text(\"SELECT pg_advisory_unlock(:key)\")",
+    "new": "text(\"SELECT :key\")"
+  },
+  {
+    "name": "scheduler and write locks collide",
+    "file": "backend/db/leadership.py",
+    "old": "SCHEDULER_LOCK = 0x4845534348454431",
+    "new": "SCHEDULER_LOCK = 0x48455445524F4553"
+  },
+  {
+    "name": "bound business operations use a fresh pooled session",
+    "file": "backend/db/engine.py",
+    "old": "physical = getattr(self._local, \"session\", None)",
+    "new": "physical = None"
+  },
+  {
+    "name": "one failed job rolls back the whole scheduler tick",
+    "file": "backend/services/scheduler_controller.py",
+    "old": "with leader.session():",
+    "new": "with leader.transaction():"
+  },
+  {
+    "name": "cloud scheduler diagnostics become local memory",
+    "file": "backend/services/cluster_state.py",
+    "old": "return self.store.database.dialect == \"postgresql\"",
+    "new": "return False"
+  },
+  {
+    "name": "conflicting configured cluster identities are accepted",
+    "file": "backend/services/cluster_state.py",
+    "old": "if configured is not None and configured != identifier:",
+    "new": "if False:"
+  },
+  {
+    "name": "scheduler failure is immediately erased",
+    "file": "backend/services/cluster_state.py",
+    "old": "repository.write(db, \"schedulerLastError\", json.dumps(value))",
+    "new": "repository.write(db, \"schedulerLastError\", json.dumps(None))"
+  },
+  {
+    "name": "standby session reports leadership without acquiring",
+    "file": "backend/db/leadership.py",
+    "old": "self._held, self.backend_pid = bool(held), identity",
+    "new": "self._held, self.backend_pid = True, identity"
+  }
+]

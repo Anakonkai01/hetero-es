@@ -1,0 +1,49 @@
+{
+  "engine": {
+    "sourceConfig": "B3/engine-mutants.json",
+    "sourceSha256": "6488dca1ec4dded1b0655e122f7ee5a349bee0ee274388e541ea4719f6d873ec",
+    "count": 6,
+    "adaptations": []
+  },
+  "services": {
+    "sourceConfig": "B4/core-mutants.json",
+    "sourceSha256": "6fa60acbe7941e9290df033b2154bcbcc1ccdd23394583c75b75c8a7366cca0f",
+    "count": 16,
+    "adaptations": [
+      {
+        "name": "one failed job rolls back the whole scheduler tick",
+        "reason": "B7 added a second _leader.session substring; bind this original tick mutation to the full owning leader statement",
+        "before": {
+          "name": "one failed job rolls back the whole scheduler tick",
+          "file": "backend/services/scheduler_controller.py",
+          "old": "leader.session()",
+          "new": "leader.transaction()"
+        },
+        "after": {
+          "name": "one failed job rolls back the whole scheduler tick",
+          "file": "backend/services/scheduler_controller.py",
+          "old": "with leader.session():",
+          "new": "with leader.transaction():"
+        }
+      }
+    ]
+  },
+  "oidc": {
+    "sourceConfig": "B5/mutants.json",
+    "sourceSha256": "b1a9d85d10f288b4557e298aaad3f2170b0d8913724a612166b673dcdfa59e45",
+    "count": 25,
+    "adaptations": []
+  },
+  "s3-config": {
+    "sourceConfig": "B6/config-mutants.json",
+    "sourceSha256": "32195b1585de11880007621f90ac446709bc38688493ab177872851b7999d36d",
+    "count": 8,
+    "adaptations": []
+  },
+  "s3-io": {
+    "sourceConfig": "B6/io-mutants.json",
+    "sourceSha256": "62fe4b97a56e9b9c39957c0f8a044c692a702a4f3f008ef63f29e4b1186c1b04",
+    "count": 21,
+    "adaptations": []
+  }
+}

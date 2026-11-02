@@ -1,0 +1,44 @@
+{
+  "platform": "windows",
+  "profileSha256": "c7202df62cd4508a8c168433bf0e738c67587cd779e230b804d5526ffda00cd7",
+  "runtimeSha256": "2eaf0b90b8d008043f814e7c22205f1a22e6fca3514e87b6b8c2095af9f5820d",
+  "pythonArchiveSha256": "11ed9f8a6ac64fb1b5a55e40e305a6744a3f77a70863c8f8197a6e4349abc64a",
+  "metadata": {
+    "python": "3.12.15",
+    "prefix": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\private-server-b10-20261102-122723\\private-server-windows\\interpreter\\python",
+    "sqlalchemy": "2.0.55",
+    "greenlet": "3.4.0",
+    "optionalCloudAndGPUAbsent": true
+  },
+  "requests": [
+    {
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "path": "/readyz",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/health",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 200
+    },
+    {
+      "path": "/metrics",
+      "status": 200
+    }
+  ],
+  "installedPinnedCPUWheels": 24,
+  "privateInterpreterHttpPassed": true,
+  "credentialLeak": false,
+  "cleanedUpProcess": true,
+  "testStatePreservedLocallyOnly": true
+}

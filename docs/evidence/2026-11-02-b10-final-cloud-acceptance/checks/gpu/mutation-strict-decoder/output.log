@@ -1,0 +1,15 @@
+$ python3 scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-gpu/mutation-strict-decoder --mutants acceptance/mutants/strict-decoder.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_strict_decoder.py'
+control ok    | 19 passed in 22.88s
+killed       budget refusal is not OUT_OF_MEMORY | 1 failed, 11 passed in 1.91s
+killed       transport error is not mapped | 1 failed, 12 passed in 1.97s
+killed       options accept strict FP32 | 1 failed, 2 passed in 1.84s
+killed       documents accept strict FP32 | 1 failed, 1 passed in 0.80s
+killed       strict chunks are the FP16 chunks | 1 failed, 1 passed in 0.80s
+killed       strict decoder routed to library generate | 1 failed, 10 passed in 1.91s
+killed       repetition penalty dropped | 1 failed, 16 passed in 16.35s
+killed       engine rebuilt every call | 1 failed, 16 passed in 37.45s
+killed       product run keeps FP32 | 1 failed, 14 passed in 2.11s
+killed       managed opt-in ignored | 1 failed, 14 passed in 2.08s
+killed       unsupported graph not checked at load | 1 failed, 17 passed in 16.34s
+
+11 of 11 mutants killed.

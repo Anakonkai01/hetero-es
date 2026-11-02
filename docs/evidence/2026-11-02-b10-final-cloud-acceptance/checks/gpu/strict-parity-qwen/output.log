@@ -1,0 +1,6 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_parity.py --gpu --model qwen --models /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-gpu/strict-parity-qwen/parity.json
+
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7014.53it/s]
+{"status": "ok", "model": "qwen", "mismatches": [], "error": null, "wallSeconds": 34.63124530299683}
+PARITY OK

@@ -1,0 +1,837 @@
+{
+ "candidates": {
+  "executorTiming": {
+   "00000000000000000000000000000000/g0/c0": {
+    "generatedTokens": 189,
+    "perturb": 0.8500743870099541,
+    "restore": 0.21341744100209326,
+    "rollout": 4.780197338986909,
+    "total": 5.843689166998956
+   },
+   "00000000000000000000000000000000/g0/c1": {
+    "generatedTokens": 101,
+    "perturb": 0.8384349659900181,
+    "restore": 0.2646340609935578,
+    "rollout": 0.4723966350138653,
+    "total": 1.5754656619974412
+   },
+   "00000000000000000000000000000000/g0/c10": {
+    "generatedTokens": 154,
+    "perturb": 0.8444718010141514,
+    "restore": 0.29794359000516124,
+    "rollout": 0.5637587319943123,
+    "total": 1.706174123013625
+   },
+   "00000000000000000000000000000000/g0/c11": {
+    "generatedTokens": 122,
+    "perturb": 0.8493517529859673,
+    "restore": 0.29429982299916446,
+    "rollout": 0.5843165380065329,
+    "total": 1.7279681139916647
+   },
+   "00000000000000000000000000000000/g0/c2": {
+    "generatedTokens": 149,
+    "perturb": 0.8478424409986474,
+    "restore": 0.2835676829854492,
+    "rollout": 2.6755244160012808,
+    "total": 3.8069345399853773
+   },
+   "00000000000000000000000000000000/g0/c3": {
+    "generatedTokens": 105,
+    "perturb": 0.8407152279978618,
+    "restore": 0.30410599999595433,
+    "rollout": 0.4757912620261777,
+    "total": 1.6206124900199939
+   },
+   "00000000000000000000000000000000/g0/c4": {
+    "generatedTokens": 129,
+    "perturb": 0.8393174099910539,
+    "restore": 0.2856927159882616,
+    "rollout": 0.534012257005088,
+    "total": 1.6590223829844035
+   },
+   "00000000000000000000000000000000/g0/c5": {
+    "generatedTokens": 101,
+    "perturb": 0.8441860240127426,
+    "restore": 0.2916917259863112,
+    "rollout": 0.340289012005087,
+    "total": 1.4761667620041408
+   },
+   "00000000000000000000000000000000/g0/c6": {
+    "generatedTokens": 109,
+    "perturb": 0.8375767870165873,
+    "restore": 0.30215222999686375,
+    "rollout": 0.5271818559849635,
+    "total": 1.6669108729984146
+   },
+   "00000000000000000000000000000000/g0/c7": {
+    "generatedTokens": 207,
+    "perturb": 0.849406421999447,
+    "restore": 0.3052600169903599,
+    "rollout": 0.9652539620001335,
+    "total": 2.1199204009899404
+   },
+   "00000000000000000000000000000000/g0/c8": {
+    "generatedTokens": 94,
+    "perturb": 0.8521228099998552,
+    "restore": 0.32017891498981044,
+    "rollout": 0.44959809401188977,
+    "total": 1.6218998190015554
+   },
+   "00000000000000000000000000000000/g0/c9": {
+    "generatedTokens": 328,
+    "perturb": 0.8502638339996338,
+    "restore": 0.2917597829946317,
+    "rollout": 0.6440895400010049,
+    "total": 1.7861131569952704
+   }
+  },
+  "textSha256": {
+   "00000000000000000000000000000000/g0/c0": "5a5eb6878e84e8e07be171dcbd7a6d0a273590c94d167754e3ba0246b6715711",
+   "00000000000000000000000000000000/g0/c1": "ed3940d2db0f4d998fd73c2f369f0c2b0fecf8d67433c28f049df52970aeba21",
+   "00000000000000000000000000000000/g0/c10": "e0dc73597dc7f9a39bfb706c242bf9a44cb4333d82b748698a462140b97e99a8",
+   "00000000000000000000000000000000/g0/c11": "b17d79d294a24b494b691d92447d23658b734f0e3c3940b69240f055b67f0d54",
+   "00000000000000000000000000000000/g0/c2": "72deb17da7bbf35d0dfed687cc2e1b90751dcc05a721d9436bf1152542dad600",
+   "00000000000000000000000000000000/g0/c3": "f817d0e5f82d0f61def8225b31fe3b31af84ecb6ffdd0f6cb2854d891c776486",
+   "00000000000000000000000000000000/g0/c4": "28a5ad5ecbbac8780e5515f2f3d3ff5be930f4a90b0a5645b23ca9e9a7f5849c",
+   "00000000000000000000000000000000/g0/c5": "349039b112d2e9287aaa9671b38906a88ddd99d06126e3b71763cffb33b86a04",
+   "00000000000000000000000000000000/g0/c6": "51204091a1235dfcc8f0dbc4969aba33f746609d13529fec38bfa0b98b9d2ac9",
+   "00000000000000000000000000000000/g0/c7": "b8870abb962b1bf18716f98144bc42af6a22df7480e91b71fe34df2d34ffaeb2",
+   "00000000000000000000000000000000/g0/c8": "df8105d3a147e0fa3155a7b38dfb5893eed60fb429094339ff403f54dfb6df5f",
+   "00000000000000000000000000000000/g0/c9": "702e514a4566242746610a0423f0a8047dfa6b29a08bd66a7ed3d700a5d44610"
+  }
+ },
+ "decoder": "strict_b22_v1",
+ "environment": {
+  "computeCapability": [
+   8,
+   6
+  ],
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "gpuTotalBytes": 12884377600,
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.12.15",
+  "torch": "2.13.0+cu132",
+  "transformers": "5.17.0"
+ },
+ "memoryMap": {
+  "cpuRestoreSnapshotBytes": 988065536,
+  "cudaAllocatedAtEndBytes": 1152519168,
+  "cudaReservedAtEndBytes": 1262485504,
+  "fp32ParametersOnGpu": false,
+  "hostPeakBytes": 2852896768,
+  "liveStorage": {
+   "formatVersion": 1,
+   "roles": {
+    "liveFp16Weights": {
+     "cuda:0": {
+      "storageBytes": 988065792,
+      "storages": 292
+     }
+    }
+   },
+   "unique": {
+    "cuda:0": {
+     "storageBytes": 988065792,
+     "storages": 292
+    }
+   }
+  },
+  "strictEngineBufferBytes": 145968944
+ },
+ "model": {
+  "id": "qwen",
+  "revision": "74bf6dd08049d862b3bd56ac2a84a8e1980ae93a"
+ },
+ "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+ "phases": [
+  {
+   "allocatedAfterBytes": 996322304,
+   "allocatedBeforeBytes": 0,
+   "hostPeakBytes": 2852896768,
+   "peakAllocatedBytes": 996322304,
+   "peakReservedBytes": 1040187392,
+   "phase": "load",
+   "status": "ok",
+   "wallSeconds": 1.8688977190176956
+  },
+  {
+   "allocatedAfterBytes": 996584960,
+   "allocatedBeforeBytes": 996322304,
+   "hostPeakBytes": 2852896768,
+   "peakAllocatedBytes": 997291520,
+   "peakReservedBytes": 1040187392,
+   "phase": "engine",
+   "status": "ok",
+   "wallSeconds": 0.9375999550102279
+  },
+  {
+   "allocatedAfterBytes": 996584960,
+   "allocatedBeforeBytes": 996584960,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1055305216,
+   "peakReservedBytes": 1113587712,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8497393690049648
+  },
+  {
+   "allocatedAfterBytes": 996584960,
+   "allocatedBeforeBytes": 996584960,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 996584960,
+   "peakReservedBytes": 1113587712,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.639988325536251e-06
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 996584960,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1315351040,
+   "peakReservedBytes": 1382023168,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 4.779488836997189
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1220843520,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2130258760007564
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1212454912,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.838008313003229
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1153734656,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.944006938487291e-06
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.47168110698112287
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2852896768,
+   "pass": "cold",
+   "peakAllocatedBytes": 1225097728,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2641668540018145
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1216709120,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8473511959891766
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1157988864,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.094989996403456e-06
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 2.6746952309913468
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2830175110138953
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211239424,
+   "peakReservedBytes": 1264582656,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8401405249896925
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1152519168,
+   "peakReservedBytes": 1264582656,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.094000466167927e-06
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1392508928,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.4748272259894293
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1226313216,
+   "peakReservedBytes": 1285554176,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.30352896300610155
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1217924608,
+   "peakReservedBytes": 1287651328,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8387087880109902
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1159204352,
+   "peakReservedBytes": 1287651328,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.243012078106403e-06
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1415577600,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.5330144950130489
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1221451264,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.28503121799440123
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1213062656,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8435139689827338
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1154342400,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.377995643764734e-06
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.3391968010109849
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1223882240,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2910005519806873
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1215493632,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8368259190174285
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1156773376,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.394992280751467e-06
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.5256792370055337
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1220235776,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.3013325869978871
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211847168,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8485750919790007
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1153126912,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 1.0489980923011899e-05
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.9636846460052766
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.304377096996177
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211239424,
+   "peakReservedBytes": 1264582656,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8511773310019635
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1152519168,
+   "peakReservedBytes": 1264582656,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 1.1855998309329152e-05
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1392508928,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.4478755500167608
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.3192585120268632
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211239424,
+   "peakReservedBytes": 1264582656,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8493057940213475
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1152519168,
+   "peakReservedBytes": 1264582656,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 9.723997209221125e-06
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1392508928,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.6423400139901787
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1236037120,
+   "peakReservedBytes": 1285554176,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2907869039918296
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1227648512,
+   "peakReservedBytes": 1287651328,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.8434009439952206
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1168928256,
+   "peakReservedBytes": 1287651328,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 9.426003089174628e-06
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1415577600,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.5619368000188842
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1223882240,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2968899359984789
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1215493632,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.848286074004136
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1156773376,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.84502481110394e-06
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.5823793520103209
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2852896768,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.2932092109986115
+  }
+ ],
+ "probeSha256": "66a5d728758127961dc9ae0cd08135486dd232c74014276c549b4a5873949a96",
+ "recipeHash": "803ae2ced6a2abb748b31d646b952354c998155143f0c27ee02b5c73970b0f54",
+ "settings": {
+  "chunk": 32,
+  "maxNewTokens": 128,
+  "pairs": 6,
+  "rows": 32
+ },
+ "status": "PASS",
+ "summary": {
+  "cold:perturb": {
+   "count": 2,
+   "meanWallSeconds": 0.8438738410040969,
+   "peakAllocatedBytes": 1212454912,
+   "peakAllocatedGiB": 1.129,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 1.6877476820081938
+  },
+  "cold:refresh": {
+   "count": 2,
+   "meanWallSeconds": 7.791997632011771e-06,
+   "peakAllocatedBytes": 1153734656,
+   "peakAllocatedGiB": 1.074,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 1.5583995264023542e-05
+  },
+  "cold:restore": {
+   "count": 2,
+   "meanWallSeconds": 0.23859636500128545,
+   "peakAllocatedBytes": 1225097728,
+   "peakAllocatedGiB": 1.141,
+   "peakReservedBytes": 1283457024,
+   "wallSeconds": 0.4771927300025709
+  },
+  "cold:rollout": {
+   "count": 2,
+   "meanWallSeconds": 2.6255849719891557,
+   "peakAllocatedBytes": 1315351040,
+   "peakAllocatedGiB": 1.225,
+   "peakReservedBytes": 1413480448,
+   "wallSeconds": 5.2511699439783115
+  },
+  "engine": {
+   "count": 1,
+   "meanWallSeconds": 0.9375999550102279,
+   "peakAllocatedBytes": 997291520,
+   "peakAllocatedGiB": 0.929,
+   "peakReservedBytes": 1040187392,
+   "wallSeconds": 0.9375999550102279
+  },
+  "load": {
+   "count": 1,
+   "meanWallSeconds": 1.8688977190176956,
+   "peakAllocatedBytes": 996322304,
+   "peakAllocatedGiB": 0.928,
+   "peakReservedBytes": 1040187392,
+   "wallSeconds": 1.8688977190176956
+  },
+  "warm:perturb": {
+   "count": 10,
+   "meanWallSeconds": 0.844728563199169,
+   "peakAllocatedBytes": 1227648512,
+   "peakAllocatedGiB": 1.143,
+   "peakReservedBytes": 1287651328,
+   "wallSeconds": 8.44728563199169
+  },
+  "warm:refresh": {
+   "count": 10,
+   "meanWallSeconds": 8.554599480703473e-06,
+   "peakAllocatedBytes": 1168928256,
+   "peakAllocatedGiB": 1.089,
+   "peakReservedBytes": 1287651328,
+   "wallSeconds": 8.554599480703473e-05
+  },
+  "warm:restore": {
+   "count": 10,
+   "meanWallSeconds": 0.29684324910049326,
+   "peakAllocatedBytes": 1236037120,
+   "peakAllocatedGiB": 1.151,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 2.9684324910049327
+  },
+  "warm:rollout": {
+   "count": 10,
+   "meanWallSeconds": 0.7745629352051765,
+   "peakAllocatedBytes": 1314251264,
+   "peakAllocatedGiB": 1.224,
+   "peakReservedBytes": 1415577600,
+   "wallSeconds": 7.745629352051765
+  }
+ },
+ "timingKind": "host_wall_synchronized_per_phase"
+}

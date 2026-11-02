@@ -1,0 +1,110 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-aed2a90eb9b727bee281c5540fcfbdba5395ccb7e13dee69a9ad8d04c914a3c2",
+  "dirty": false,
+  "commit": "8da9df22d661e73c22a9b655c3bf2748001964fc",
+  "host": "local",
+  "profiles": [
+    "perf"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-11-02T13:47:12+0700",
+  "finished": "2026-11-02T13:48:24+0700",
+  "results": [
+    {
+      "name": "strict-throughput",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 25.986,
+      "log": ".scratch/review-2026-11/B10/accept-perf/strict-throughput/output.log",
+      "log_sha256": "ad968a339018d2641497fcfb7898013a1d89bdfe55690af6f8c1ae62bb9aaa88",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_throughput.py --gpu --models /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-perf/strict-throughput/throughput.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 6351.06it/s]",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 7055.34it/s]",
+        "short32 10087.3 token/s floor 9873.1",
+        "chat128 9899.5 token/s floor 9753.0",
+        "THROUGHPUT OK"
+      ]
+    },
+    {
+      "name": "int8-memory",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 13.44,
+      "log": ".scratch/review-2026-11/B10/accept-perf/int8-memory/output.log",
+      "log_sha256": "6aef6c53028ff63789803b96bb0e473e113a6754a7f8989ae5d869688b3ee49f",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/int8_memory.py --gpu --model /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models/qwen --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-perf/int8-memory",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 6669.71it/s]",
+        "{",
+        " \"gpu\": \"NVIDIA GeForce RTX 5070 Ti\",",
+        " \"fp16ParameterMiBAfterFreeze\": 268.130615234375,",
+        " \"frozenProjectionFp16Parameters\": [],",
+        " \"load\": {",
+        "  \"allocatedMiB\": 610.9677734375,",
+        "  \"peakMiB\": 952.7734375",
+        " },",
+        " \"candidate\": {",
+        "  \"peakMiB\": 711.34912109375,",
+        "  \"allocatedMiB\": 650.9677734375",
+        " },",
+        " \"restoredExactly\": true,",
+        " \"frozenBaseSha256\": \"6e2ae8e99519d23dbf05fc143d127505c44051cf59c6e5cbdf38eeca8587097b\",",
+        " \"reward\": 0.0",
+        "}",
+        "INT8 MEMORY OK"
+      ]
+    },
+    {
+      "name": "strict-phase-trace",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 32.138,
+      "log": ".scratch/review-2026-11/B10/accept-perf/strict-phase-trace/output.log",
+      "log_sha256": "7df64f3e6fd1b70b7074d970cb5842323ccc5ecfdf867b6f98da9606d4725b4a",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_phase_trace.py --gpu --model /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models/qwen --pairs 6 --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-perf/strict-phase-trace/phase-trace.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 6509.62it/s]",
+        "STRICT PHASE TRACE PASS",
+        "  load             n= 1 mean=   1.476s peak= 0.928 GiB",
+        "  engine           n= 1 mean=   0.713s peak= 0.929 GiB",
+        "  cold:perturb     n= 2 mean=   0.733s peak= 1.129 GiB",
+        "  cold:refresh     n= 2 mean=   0.000s peak= 1.074 GiB",
+        "  cold:rollout     n= 2 mean=   4.245s peak= 1.225 GiB",
+        "  cold:restore     n= 2 mean=   0.141s peak= 1.141 GiB",
+        "  warm:perturb     n=10 mean=   0.722s peak= 1.143 GiB",
+        "  warm:refresh     n=10 mean=   0.000s peak= 1.089 GiB",
+        "  warm:rollout     n=10 mean=   0.267s peak= 1.224 GiB",
+        "  warm:restore     n=10 mean=   0.140s peak= 1.151 GiB"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_parity.py --gpu --model smol --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-aed2a90eb9b7-20261102-123253/results/strict-parity-smol/parity.json
+
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3197.59it/s]
+{"status": "ok", "model": "smol", "mismatches": [], "error": null, "wallSeconds": 24.60200607299339}
+PARITY OK

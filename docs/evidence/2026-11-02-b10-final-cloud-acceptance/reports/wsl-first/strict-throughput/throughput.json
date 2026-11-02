@@ -1,0 +1,75 @@
+{
+ "gpu": "NVIDIA GeForce RTX 3060",
+ "processes": [
+  {
+   "gpu": "NVIDIA GeForce RTX 3060",
+   "fingerprint": "74bf89e7a89e41601ebd1e90fde91de7a0eb859004b762e7ee8346cfc509c6ea",
+   "cases": {
+    "short32": {
+     "secondsSamples": [
+      0.5704424009891227,
+      0.6280097319977358,
+      0.7181770919996779,
+      0.5384553470066749,
+      0.6749557839939371
+     ],
+     "medianTokensPerSecond": 1630.5479801126583,
+     "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+    },
+    "chat128": {
+     "secondsSamples": [
+      2.643098326981999,
+      2.68003001602483,
+      2.724856765009463,
+      2.6592317519825883,
+      2.8146163320052437
+     ],
+     "medianTokensPerSecond": 1528.341091520839,
+     "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+    }
+   }
+  },
+  {
+   "gpu": "NVIDIA GeForce RTX 3060",
+   "fingerprint": "74bf89e7a89e41601ebd1e90fde91de7a0eb859004b762e7ee8346cfc509c6ea",
+   "cases": {
+    "short32": {
+     "secondsSamples": [
+      0.6668539889797103,
+      0.4825840379926376,
+      0.47353262300021015,
+      0.6110441900091246,
+      0.6143239500233904
+     ],
+     "medianTokensPerSecond": 1675.819878075772,
+     "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+    },
+    "chat128": {
+     "secondsSamples": [
+      2.7616683290107176,
+      2.673590518999845,
+      2.526053700974444,
+      2.6560903679928742,
+      2.7243914820137434
+     ],
+     "medianTokensPerSecond": 1532.0221892215043,
+     "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+    }
+   }
+  }
+ ],
+ "cases": {
+  "short32": {
+   "meanOfMedians": 1653.1839290942153,
+   "floor": 3041.6
+  },
+  "chat128": {
+   "meanOfMedians": 1530.1816403711716,
+   "floor": 2867.2
+  }
+ },
+ "failures": [
+  "short32: 1653.2 token/s is below the floor 3041.6",
+  "chat128: 1530.2 token/s is below the floor 2867.2"
+ ]
+}

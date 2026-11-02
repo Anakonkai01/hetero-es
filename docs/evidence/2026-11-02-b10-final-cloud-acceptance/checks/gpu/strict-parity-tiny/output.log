@@ -1,0 +1,6 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_parity.py --gpu --model tiny --models /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-gpu/strict-parity-tiny/parity.json
+
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2360.07it/s]
+{"status": "ok", "model": "tiny", "mismatches": [], "error": null, "wallSeconds": 35.79204981899966}
+PARITY OK
