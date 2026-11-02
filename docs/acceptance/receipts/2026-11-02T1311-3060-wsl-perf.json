@@ -1,0 +1,44 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-aed2a90eb9b727bee281c5540fcfbdba5395ccb7e13dee69a9ad8d04c914a3c2",
+  "dirty": false,
+  "commit": "8da9df22d661e73c22a9b655c3bf2748001964fc",
+  "host": "3060-wsl",
+  "profiles": [
+    "perf"
+  ],
+  "machine": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": []
+  },
+  "started": "2026-11-02T13:10:42+0700",
+  "finished": "2026-11-02T13:11:26+0700",
+  "results": [
+    {
+      "name": "strict-throughput",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 43.615,
+      "log": "results/strict-throughput/output.log",
+      "log_sha256": "0be85c44bb2925c6581f4b68741bad94297f0f79cf5d6515e243a010e55dca9e",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_throughput.py --gpu --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-aed2a90eb9b7-20261102-131041/results/strict-throughput/throughput.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3263.24it/s]",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3264.72it/s]",
+        "short32 3085.9 token/s floor 3041.6",
+        "chat128 2915.9 token/s floor 2867.2",
+        "THROUGHPUT OK"
+      ]
+    }
+  ]
+}

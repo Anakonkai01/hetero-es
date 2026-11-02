@@ -1,73 +1,106 @@
 # Lab Server responsibilities and data ownership
 
-Baseline: the modular monolith at `6ee47147`, before plan B's service split. This describes checked source code;
-it is not an inspection of the live lab database. See the approved
-[implementation plan](../plans/codex-2026-11-review-fixes-and-minicloud.md) for the target architecture.
+Current implementation: B1–B10, accepted at source8da9df22/src-aed2a90e (37/37 required checks). The dated B2/B3/B4 and pre-split inventory
+sections below retain their historical measurements at the stated baselines, including the original modular monolith
+`6ee47147`. This describes source and isolated acceptance, not the live lab database or a deployed MiniCloud cluster.
+See the approved [implementation plan](../plans/codex-2026-11-review-fixes-and-minicloud.md).
 
 ## Tóm tắt tiếng Việt
 
-Lab Server hiện là một tiến trình CPU đảm nhiệm nhiều vai trò: phục vụ web, API người dùng, cổng thiết bị, điều phối
-hàng đợi, cấp quyền lưu trữ, sao lưu metadata, phát sự kiện SSE và thông báo. Việc chạy ES, sổ cái từng run và checkpoint
-thuộc máy coordinator/worker. SQLite của Lab Server lưu trạng thái quản lý; các file lớn và bản sao lưu có nơi lưu riêng.
-Phần B sẽ chia các vai trò thành service và bổ sung PostgreSQL, Keycloak, MinIO; bản desktop vẫn dùng chế độ gộp.
+Mã nguồn đã có năm chế độ CPU: `all` cho desktop/SQLite, cùng `api`, `devices`, `storage`, `scheduler` cho cloud/Postgres.
+API chia HTTP, nghiệp vụ và SQL thành các lớp riêng. Cloud hỗ trợ Keycloak/OIDC, S3/MinIO, metrics và log JSON an toàn;
+scheduler có một bản giữ khóa session và một bản chờ. Máy coordinator/worker vẫn sở hữu việc chạy ES, sổ cái và checkpoint.
+Lab thật vẫn chạy bản đã deploy riêng; việc cập nhật source/main không triển khai lại lab. Repo MiniCloud thuộc phần C.
 
 ## B-Q1: current server roles
 
-`python -m backend.server` boots a CPU-only FastAPI application. `backend/app.py:create_app` wires routes, local state
-and background work into one process. A role here means a responsibility, not a separate deployed server.
+`backend.apps.factory.create_app` composes one role. `python -m backend.apps.<role>` starts a split service;
+`python -m backend.server` remains the stable packaged desktop command and selects the combined role. Every HTTP process
+runs without CUDA. GPU/coordinator agents own numerical execution separately.
 
-| Responsibility                   | Current implementation                                                              | State / ownership                                                   |
-| -------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Static web and downloads         | `backend/app.py`, `backend/routes_web.py`, configured web/download directories      | Web build and installer files                                       |
-| User REST API and local identity | `backend/routes_*.py`, `backend/app.py`, `backend/passwords.py`, `backend/store.py` | Users, hashed passwords, sessions, workspaces, experiments          |
-| Device control plane             | `backend/devices.py`, `backend/agent_*.py`, device routes                           | Enrollment, polling, telemetry, commands, contribution, assignments |
-| Scheduling                       | `Store.dispatch`, started by the application lifespan                               | Queue, reservations and assignment decisions in product metadata    |
-| Recovery and transfer control    | `backend/recovery_storage.py`, `backend/local_storage.py`, transfer routes          | Recovery inventory, signed transfer capabilities and verification   |
-| Metadata backups                 | `backend/metadata_backup.py:backup_loop`                                            | SQLite backup snapshots and their uploaded metadata objects         |
-| Event streaming                  | `backend/live.py:LiveStreams`, SSE routes                                           | In-memory connections, snapshots read from metadata                 |
-| Notifications and operations     | Notification and platform routes, store helpers                                     | Notification records, administrative policy and audit data          |
+| Responsibility                                              | Implementation / HTTP owner                                                                         | Authoritative state                                                                                    |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Web and installer delivery                                  | `api/web.py`; optional on `api` and `all`; separate web replicas are a MiniCloud deployment concern | Built files and installer manifest; private bulk policy retained                                       |
+| User REST API, identity and workspace/run policy            | `api/`, `services/`, `repositories/`; `api`                                                         | Product DB; local password/session records or verified external OIDC identity                          |
+| Device enrollment, polling, telemetry and commands          | `api/devices.py`, `services/devices.py`, `services/agent_*`; `devices`                              | Durable device tokens, approval, assignments, process ownership and latest telemetry in the product DB |
+| Scheduling and background dispatch                          | `services/scheduler_controller.py`; `scheduler`, or locally `all`                                   | Dedicated PostgreSQL leader session, queue/reservations/diagnostics in the product DB                  |
+| Recovery objects, dataset/model upload and download control | Storage HTTP adapters and `services/recovery_storage.py`; `storage`                                 | Product authorization/inventory plus local or S3 object bytes                                          |
+| Metadata backups                                            | `services/metadata_backup.py`; `storage`, or locally `all`                                          | SQLite snapshots or PostgreSQL 17 custom dumps, checksummed manifests and retained backup records      |
+| Live event streaming                                        | `api/live.py` and history routes; `api`                                                             | Per-process HTTP/SSE connections; shared DB observations rather than authoritative process memory      |
+| Notifications and platform operations                       | API adapters and domain services; `api`                                                             | DB notification/audit/maintenance and account-approval decisions                                       |
+| Course exercise APIs                                        | `api/course.py`, `services/course.py`, `repositories/course.py`; opt-in `api` only                  | Mounted bounded JSON and a separate SELECT-only student database                                       |
+| HTTP/business observations                                  | Operational/ASGI adapters and observability service/repository                                      | Per-process HTTP counters; only a live scheduler leader reads business snapshots from DB               |
 
-The packaged entrypoint hides CUDA through `CUDA_VISIBLE_DEVICES=''`. GPU execution is performed by device agents,
-not by this HTTP process. A coordinator on a device owns its runtime ledger, applies the generation record and publishes
-weights; workers evaluate candidates and restore their snapshots. The strict GPU product requires the coordinator's GPU
-to be distinct from its workers' GPUs.
+The default product route contract remains 111 method/path pairs: API67, devices21, storage23, with no overlap. Web/API
+may mount two static file trees. Every role separately owns the three operational GET routes `/healthz`, `/readyz`,
+`/metrics`. Enabling course mode adds four API-only routes; those deliberately do not enter the default combined-role
+contract. Export it with `python -m backend.apps.routes --json`.
 
-The local deployment has Caddy in front of the CPU application and a Cloudflare tunnel in front of public entrypoints
-(`backend/deployment.py:caddyfile`, `scripts/local-lab.py`). Caddy limits public request bodies and denies bulk routes
-that require LAN/Tailscale. Small, scoped public dataset uploads have their own size bound. Compute control and large
-model/recovery transfers use different routes and permissions.
+SQLite retains one process writer and its existing lock/transaction semantics. Split services require PostgreSQL.
+Ordinary product writes take the lab transaction advisory lock. Scheduler leadership uses a different, dedicated session
+lock; its business operations commit independently through that exact physical connection. A lost connection fences the
+old leader. Scraping cannot acquire leadership, and graceful shutdown waits for an owned metrics read before closing.
+
+API replicas retain only bounded caches/ephemeral HTTP state. OIDC verifies RS256, issuer, required expiry and web-client
+audience/authorized party through a bounded no-redirect JWKS cache. `kc:sub` identifies a user; ordinary new identities
+remain pending approval. A realm admin never revives a suspended/rejected account. Device tokens stay independent.
+Local throttles remain in the combined desktop mode; the identity provider owns cloud password protection.
 
 ```mermaid
 flowchart LR
-  Browser[Researcher browser / notebook] --> Edge[Cloudflare + Caddy]
-  Edge --> Lab[CPU Lab Server]
-  Agent[Device agent] --> Lab
-  Lab --> Metadata[(Product SQLite)]
-  Lab --> Files[(Recovery and metadata storage)]
+  Browser[Browser / notebook] --> Edge[Gateway and optional web replicas]
+  Edge --> API[API replicas]
+  Edge --> Devices[Device service]
+  Edge --> Storage[Storage service]
+  API --> DB[(Shared product PostgreSQL)]
+  Devices --> DB
+  Storage --> DB
+  Scheduler[Active / standby scheduler] --> DB
+  API --> Identity[OIDC identity provider]
+  Storage --> Objects[(Private recovery / datasets / backups buckets)]
+  Agent[Device agents] --> Devices
   Agent --> Coordinator[Device coordinator]
   Worker[GPU worker] --> Coordinator
-  Coordinator --> Ledger[(Per-run ledger + checkpoints)]
+  Coordinator --> Ledger[(Per-run ledger / checkpoints)]
 ```
+
+The gateway/identity/object-service deployment in this diagram is a contract for MiniCloud acceptance, not a claim that
+it is already deployed. The live local lab retains its deployed combined SQLite application with Caddy/Cloudflare.
+Bulk compute/model/recovery transfer remains on LAN/Tailscale; small scoped public dataset transfers are bounded.
+Strict runs require a coordinator GPU distinct from worker GPUs.
 
 ## B-Q2: where data and backups live
 
-The paths below are configuration keys or paths relative to an owning private directory. No live storage path, token
-or signing key needs to be copied into this document.
+These are configured ownership boundaries. Private connection strings, signing keys and live storage paths do not
+belong in this document. [Container settings](container-configuration.md), [observability](observability.md) and the
+[course API guide](course-demo.md) define their detailed contracts.
 
-| Data                                             | Location / setting                                                                  | Owner and evidence in source                                                                                                                                                               |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Lab metadata                                     | `productStateDirectory/product.sqlite`                                              | `Store`; users, workspaces, runs, devices, reservations, assignments, telemetry, audit and policy. `backend/server.py:initialize` creates `state/product.sqlite`.                          |
-| Run execution ledger                             | `<run-directory>/ledger.sqlite` on coordinator device                               | `heteroes.product.runner` opens `Ledger(..., enforce_chain=True)`. Includes candidate attempts/results, recorded updates and parent/child hashes.                                          |
-| Published weights, artifacts and checkpoints     | The coordinator's private run directory and its recovery points                     | Runtime runner, publication helpers, product recovery modules. These are separate from product SQLite.                                                                                     |
-| Recovery objects and uploaded datasets/models    | `storageDirectory` with the local backend                                           | `LocalBackend` and `RecoveryStorage`; product metadata tracks object identity and authorization.                                                                                           |
-| Metadata backup objects                          | `metadataStorageDirectory`; per-backup object key `metadata/<point>/product.sqlite` | `metadata_backup.py` uses SQLite's backup API and uploads/verifies snapshots through the storage backend. Restore procedures must include required configuration and signing-key recovery. |
-| Local storage signing key                        | Private server configuration root (`storage-signing.key`)                           | Created by server initialization; never stored in Git or printed. Metadata backup files alone do not replace this configuration.                                                           |
-| Installers and download manifest                 | Configured downloads directory (`--downloads`, `HETEROES_DOWNLOADS_DIRECTORY`)      | Packaged artifacts, independent of application metadata.                                                                                                                                   |
-| Research receipts, historical logs and artifacts | Git branch `evidence-archive`                                                       | [Evidence index](../EVIDENCE-INDEX.md); not the live application state or its backup.                                                                                                      |
+| Data                                              | Location / setting                                                          | Owner / recovery boundary                                                                                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product metadata                                  | PostgreSQL `databaseUrl`, or desktop `productStateDirectory/product.sqlite` | Users, workspaces, runs, devices, queue, reservations, assignments, telemetry, audit and durable diagnostics; repositories over `db/engine.py` |
+| Run execution ledger and recorded updates         | Coordinator's private per-run state                                         | Runtime ledger/generation record; separate from the product database                                                                           |
+| Published weights and checkpoints                 | Coordinator private state and verified recovery objects                     | Device runtime publication/restore and exact generation identity                                                                               |
+| Model/recovery object bytes                       | Local `storageDirectory`, or S3 recovery bucket                             | Storage backend; DB tracks identity, verification, reservation and authorization                                                               |
+| Dataset object bytes                              | Local storage or separate S3 datasets bucket                                | Purpose-scoped dataset backend and frozen device grants                                                                                        |
+| Metadata backup objects                           | Local metadata directory or S3 backups bucket                               | `metadata/<point>/product.sqlite` or `product.pgdump`, plus checksum/manifest                                                                  |
+| Storage capability signing key                    | Private key file, configurable through `HETEROES_STORAGE_SIGNING_KEY_FILE`  | Share across participating replicas; recover separately from metadata dumps                                                                    |
+| Identity provider accounts, credentials and realm | External Keycloak database/configuration                                    | Not contained in a HeteroES product dump; MiniCloud owns its separate lifecycle                                                                |
+| Course student records                            | Mounted JSON and separate `studentdb.students`                              | API uses a SELECT-only role/read-only transaction; administrative CRUD uses another role                                                       |
+| Installers and web/download manifests             | Configured build/download trees                                             | Independent packaged artifacts, not a product backup                                                                                           |
+| Metrics and request logs                          | Per-service registries/stdout; future Prometheus/Loki deployment            | Scheduler DB-derived gauges avoid double counting; no raw credential-bearing request fields                                                    |
+| Research receipts and historical logs             | `evidence-archive` branch                                                   | [Evidence index](../EVIDENCE-INDEX.md); immutable research evidence, separate from live state                                                  |
 
-A product database backup does not contain model/recovery object bytes or a coordinator's live process memory. A
-complete recovery procedure must restore metadata and its referenced objects, then resume a run from a verified recovery
-point on the coordinator. The runtime's write-ahead generation record prevents silently recomputing a different update.
+A database backup contains neither recovery/model object bytes nor coordinator process memory. Restore must recover
+metadata, its referenced objects and required private configuration/key material, then resume from a verified coordinator
+recovery point. PostgreSQL restore validates the archive/target and uses an atomic transaction; it revokes sessions and
+download tickets, preserves physical reservations and holds dispatch for operator review. The runtime write-ahead
+generation record prevents silently recomputing a different update.
+
+The server CPU profile has23 Linux/24 Windows wheels after adding SQLAlchemy/greenlet. Cloud-only SDK/JWT/Prometheus
+libraries remain optional. Both source builders include recursive backend Python/SQL and the reviewed shared CPU runtime
+subset, excluding tests. The three root command adapters remain; library imports use canonical layer paths. Import-only
+proof protects every existing pre-B9 test/helper, including its child Python programs. The numerical runtime is unchanged
+from accepted Part A. Final same-source multi-host acceptance is recorded in B10 evidence `2026-11-02-b10-final-cloud-acceptance`.
 
 ## Implemented layering after B2 (2026-11-01)
 
@@ -156,12 +189,12 @@ This is not full B4 completion: PostgreSQL pg_dump-to-backup-storage and an isol
 establish route/liveness ownership; B7 adds the full instrumentation. OIDC, S3/MinIO, cloud config/packaging and B10/C
 acceptance remain later work; nothing was deployed to the live lab.
 
-## Planned service boundaries
+## Cloud deployment boundary
 
-Plan B first separates API, business services, repositories and DB transactions, with compatibility imports while tests
-stay green. It then deploys one codebase as `api`, `devices`, `storage` and `scheduler`; desktop keeps `all` and SQLite.
-Cloud mode uses PostgreSQL transactions/advisory locks, Keycloak identity and S3/MinIO objects. This section is a target,
-not a claim that the split has already shipped. The B1 inventory below records complete route and state ownership.
+The source now implements the five-role composition and layered ownership above. Desktop retains `all`/SQLite;
+cloud roles use PostgreSQL, OIDC and S3 when explicitly configured. Source and isolated acceptance do not deploy the
+live lab. MiniCloud's gateway, replicated containers, external identity/object services and operational dashboards are
+part C and require their own deployment evidence. The B1 inventory below remains the measured pre-split baseline.
 
 ## Pre-split inventory (prepared from source, 2026-11-01)
 

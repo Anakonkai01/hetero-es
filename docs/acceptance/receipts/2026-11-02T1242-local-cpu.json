@@ -1,0 +1,108 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-aed2a90eb9b727bee281c5540fcfbdba5395ccb7e13dee69a9ad8d04c914a3c2",
+  "dirty": false,
+  "commit": "8da9df22d661e73c22a9b655c3bf2748001964fc",
+  "host": "local",
+  "profiles": [
+    "cpu"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-11-02T12:32:07+0700",
+  "finished": "2026-11-02T12:42:40+0700",
+  "results": [
+    {
+      "name": "acceptance-selftest",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 2.82,
+      "log": ".scratch/review-2026-11/B10/accept-cpu-final/acceptance-selftest/output.log",
+      "log_sha256": "01296d5dbbf878d0df860815bd1f117be77462ff941a0c98e075422513a3c0ce",
+      "detail": "",
+      "counts": {
+        "passed": 59,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "59 passed in 2.33s",
+      "log_tail": [
+        "$ python3 -m pytest -q -rs -p no:cacheprovider acceptance/tests",
+        "...........................................................              [100%]",
+        "59 passed in 2.33s"
+      ]
+    },
+    {
+      "name": "check-all",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 630.328,
+      "log": ".scratch/review-2026-11/B10/accept-cpu-final/check-all/output.log",
+      "log_sha256": "ac815db7d3522c6b4b1169f95b0ec18990ad59ca919f7461a853116dd1737a66",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ scripts/check-all.sh /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/B10/accept-cpu-final/check-all/checks",
+        "=== runtime-tests",
+        "PASS runtime-tests",
+        "=== python-lint",
+        "PASS python-lint",
+        "=== python-format",
+        "PASS python-format",
+        "=== prettier",
+        "PASS prettier",
+        "=== source-packages",
+        "PASS source-packages",
+        "=== backend-tests",
+        "PASS backend-tests",
+        "=== frontend-unit",
+        "PASS frontend-unit",
+        "=== worker-unit",
+        "PASS worker-unit",
+        "=== server-unit",
+        "PASS server-unit",
+        "=== product-ui-unit",
+        "PASS product-ui-unit",
+        "=== types",
+        "PASS types",
+        "=== lint",
+        "PASS lint",
+        "=== i18n",
+        "PASS i18n",
+        "=== web-build",
+        "PASS web-build",
+        "=== worker-build",
+        "PASS worker-build",
+        "=== web-onboarding",
+        "PASS web-onboarding",
+        "=== web-live",
+        "PASS web-live",
+        "=== web-experiments",
+        "PASS web-experiments",
+        "=== web-model-qualification",
+        "PASS web-model-qualification",
+        "=== web-audit-outcomes",
+        "PASS web-audit-outcomes",
+        "=== web-showcase",
+        "PASS web-showcase",
+        "=== web-pages",
+        "PASS web-pages",
+        "=== worker-onboarding",
+        "PASS worker-onboarding",
+        "=== worker-station",
+        "PASS worker-station",
+        "ALL PASS"
+      ]
+    }
+  ]
+}

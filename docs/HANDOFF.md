@@ -8,26 +8,28 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 - **Phần A hoàn tất:** đã sửa các finding review, gồm bảo mật HTTP, coordinator/restore, vùng số học đóng băng,
   ledger và khung nghiệm thu. [FINDINGS-A](review/FINDINGS-A.md) ghi từng sửa và bằng chứng.
-- **Nghiệm thu cùng source `src-ede4338e…` đạt 37/37 check:** CPU 2/2, 5070 Ti 24/24, 3060 WSL 8/8,
-  Windows native 3/3. Nguồn được nghiệm thu sạch; tài liệu và biên bản không tham gia source hash.
+- **Phần B hoàn tất B1–B10. Nguồn sạch `src-aed2a90e…` đạt 37/37 check:** CPU 2/2, 5070 Ti 24/24,
+  3060 WSL 8/8, Windows native 3/3. B-001…B-003 đã sửa và test; B-Q1/Q2 đã trả lời.
 - Noise/ES 572 test trên mỗi môi trường GPU; strict/eval 1 639 local, 1 560 WSL, 956 native; không skip.
   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
-- Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
-  Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
-- **Phần B đã xong B1–B9:** chia lớp/service, Postgres, OIDC, S3/MinIO, metrics/log, API đồ án, cấu hình môi trường và gói desktop.
-  Tiếp theo là nghiệm thu B10 trên cùng source sạch ở cả ba môi trường, rồi triển khai phần C. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
-  **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
+- Throughput 5070 Ti: short32 10 087,3 token/s, chat128 9 899,5, vượt sàn đã ghim. 137/137 mutant nghiệm thu và
+  76/76 mutant cloud bị phát hiện. WSL lần đầu không đạt; một lần chạy lại cùng source đạt 3 085,9/2 915,9 token/s.
+  Giữ cả hai biên bản; chưa xác định nguyên nhân lần đầu. Fault/replay, soak 600 thế hệ và int8 đều đạt.
+- Backend SQLite 694/Postgres 723 test xanh, không skip; cả hai app Linux được build và kiểm source bytes.
+  Python riêng trên Linux/Windows lần lượt cài 23/24 wheel CPU đã ghim và đạt 6 kiểm tra HTTP thực trên mỗi máy.
+- **Tiếp theo là phần C:** repo MiniCloud, cụm container, Keycloak thật, demo GPU riêng, minh chứng và bản nháp báo cáo.
+  Các kết quả phần B chưa chứng minh triển khai MiniCloud.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
 
 ## Current technical state
 
-- Part A is fast-forwarded and pushed on `main` at `6ee47147`; work continues on `feat/cloud-services`.
-  Source fixes through `a5d81cbd` were accepted at `21d7f591`.
-  Full source identity: `src-ede4338ef54a443a0ecc33a2bc96ea836ea188b856727ed63e095594a7b8b3a4`.
-  The final documentation/receipt commit has the same source identity. Continue B on `feat/cloud-services` from main.
-- Receipts and milestone gates: [STATUS](acceptance/STATUS.md). Final logs, reports and SHA verification:
-  evidence `2026-11-01-review-fixes`; complete CPU child logs: `2026-11-01-partA-cpu-ede4338e`.
+- Part B source is committed at `8da9df22`; the final documentation/receipt commit has the same clean identity:
+  `src-aed2a90eb9b727bee281c5540fcfbdba5395ccb7e13dee69a9ad8d04c914a3c2`.
+  Part B closes on `feat/cloud-services`, then fast-forwards/pushes `main`; that final commit is MiniCloud's `HETEROES_REF`.
+- Receipts and milestone gates: [STATUS](acceptance/STATUS.md). Final SHA-verified logs/reports:
+  evidence `2026-11-02-b10-final-cloud-acceptance` (37 selected passes, 38 raw records including the first WSL failure).
+  Part A's immutable P-FROZEN and acceptance remain in `2026-11-01-review-fixes` / `2026-11-01-partA-cpu-ede4338e`.
 - P-FROZEN: CPU 576 and GPU 694 before/after cases are byte-identical; update overhead +0.71%.
   A-014 is the approved release-state correction with old-DB migration, not a claim of unchanged ledger transitions.
 - Non-strict HF FP16 has independently measured GPU references: the RTX 3060 differs from RTX 5070 Ti at one answer.
@@ -36,7 +38,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   `strict_int8_lora_v1` remains standalone/SDK only.
 - CPU check-all: all 24 steps pass, including 3 324 runtime tests (1 045 intentional CUDA-hidden skips),
   678 backend SQLite tests (694 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
-  The B9 full PostgreSQL/MinIO matrix passes723 tests, zero skips; details below.
+  The B10 full PostgreSQL/MinIO matrix passes723 tests, zero skips; details below.
 
 ## Tiến độ kế hoạch 2026-11
 
@@ -151,7 +153,16 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   B10 preparation:24 acceptance mutations still targeted pre-refactor backend files. They now target their canonical
   owners with original meanings/count/layout retained; the new selftest checks all137 targets exist/match once/compile.
   All59 selftests and focused16+8 mutations pass. The first CPU attempt was interrupted before its receipt and rejected;
-  evidence `2026-11-02-b10-mutant-migration`. Final clean same-source three-host acceptance is still pending.
+  evidence `2026-11-02-b10-mutant-migration`.
+  B10 complete: clean source8da9df22/src-aed2a90e passes all37 required check/host pairs. Full actual-MinIO SQLite694/
+  PostgreSQL723, zero skips; PG audit445 PG+52 explicit SQLite Stores. All24 check-all steps, Linux app builds and
+  source-byte checks pass. All137 acceptance and76 cloud mutations killed; browser OIDC fixture6 contracts pass.
+  Fresh native Windows private Python3.12.15 installs24 pinned CPU wheels, passes6 actual HTTP checks and stops its
+  owned process. This complements B9's Linux23-wheel/6-HTTP proof without changing either GPU environment.
+  First WSL throughput failed with correct goldens; one focused repeat passed with unchanged source/floors/settings.
+  Both are retained and no unproven cause is claimed. Other GPU/fault/perf/soak/int8 checks pass on the same source.
+  Evidence `2026-11-02-b10-final-cloud-acceptance`; lab status before/during/after is identical, runtime source unchanged
+  from Part A. B-001…B-003 fixed; architecture answers reflect implemented layers/roles/storage. All C remains.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
@@ -160,7 +171,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Remaining scope and limits
 
-- B1–B9 are complete. Execute B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+- B1–B10 are complete. Execute C1–C8 in the approved order. Pin the final B main commit as MiniCloud's `HETEROES_REF`.
   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.
