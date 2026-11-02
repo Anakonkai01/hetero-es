@@ -5,9 +5,9 @@ import pytest
 from fastapi import HTTPException
 
 from backend.core.errors import ServiceError
-from backend.policies import active_profile, platform_profile
-from backend.request_models import Configuration
-from backend.validation import validate_configuration as legacy_validate
+from backend.services.policies import active_profile, platform_profile
+from backend.core.request_models import Configuration
+from backend.api.validation import validate_configuration as legacy_validate
 
 
 def test_shared_authorization_uses_plain_errors_and_rechecks_durable_access(lab):

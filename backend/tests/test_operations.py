@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.metadata_backup import publish_new_directory
+from backend.core.filesystem import publish_new_directory
 from labkit import login
 
 

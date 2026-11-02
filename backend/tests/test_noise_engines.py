@@ -3,8 +3,8 @@
 import pytest
 from pydantic import ValidationError
 
-from backend.device_models import SelfTest
-from backend.policies import noise_qualification
+from backend.core.device_models import SelfTest
+from backend.services.policies import noise_qualification
 from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
 
 
@@ -32,7 +32,7 @@ def test_selftest_rejects_unknown_or_wrong_engine_fingerprint():
 
 
 def test_model_qualification_is_bound_to_its_noise_engine():
-    from backend.policies import v3_qualification
+    from backend.services.policies import v3_qualification
 
     model = "d" * 64
     old = {"recipeVersions": [3], "noiseVersion": ENGINE_VERSION, "qualifiedModelHashes": [model]}

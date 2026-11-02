@@ -3,9 +3,9 @@
 import hashlib
 import json
 import pytest
-from backend.recovery_storage import RecoveryStorage, QuotaExceeded
-from backend.devices import AgentRuntime
-from backend.store import Store
+from backend.services.recovery_storage import RecoveryStorage, QuotaExceeded
+from backend.services.devices import AgentRuntime
+from backend.services.store import Store
 
 
 class Objects:
@@ -128,7 +128,7 @@ def test_unsafe_paths_and_changed_point_identity_are_rejected(storage):
 
 @pytest.mark.sqlite_file(reason="SQLite metadata backup and integrity_check")
 def test_metadata_backup_is_consistent_and_keeps_local_copy(storage):
-    from backend.metadata_backup import create_metadata_backup
+    from backend.services.metadata_backup import create_metadata_backup
     from pathlib import Path
     import sqlite3
 

@@ -1,7 +1,5 @@
-"""Compatibility packaged server exports and command entrypoint."""
+"""Stable packaged server command; application/bootstrap implementation lives in apps/ and services/."""
 
-from .core.server_models import Bootstrap as Bootstrap
-from .services.bootstrap import initialize as initialize
 from .apps.server import main as main
 
 if __name__ == "__main__":

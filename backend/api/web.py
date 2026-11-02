@@ -20,17 +20,16 @@ def install_routes(app, web_directory, downloads_directory):
             def installer_manifest():
                 manifest = json.loads((Path(downloads_directory) / "manifest.json").read_text())
                 private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
-                if private_root:
-                    config = load_config(private_root)
-                    # publicDownloads: the operator serves installers on the public origin too.
-                    if config.get("publicWebUrl") and not config.get("publicDownloads"):
-                        bulk = config.get("bulkApiUrl", config.get("apiUrl"))
-                        manifest["privateTransferRequired"] = True
-                        for group in ("installers", "serverInstallers"):
-                            for item in manifest.get(group, []):
-                                item["url"] = bulk + "/downloads/" + Path(item["name"]).name
-                        for item in manifest.get("linuxWorker", {}).values():
+                config = load_config(private_root, optional=not bool(private_root))
+                # publicDownloads: the operator serves installers on the public origin too.
+                if config.get("publicWebUrl") and not config.get("publicDownloads"):
+                    bulk = config.get("bulkApiUrl", config.get("apiUrl"))
+                    manifest["privateTransferRequired"] = True
+                    for group in ("installers", "serverInstallers"):
+                        for item in manifest.get(group, []):
                             item["url"] = bulk + "/downloads/" + Path(item["name"]).name
+                    for item in manifest.get("linuxWorker", {}).values():
+                        item["url"] = bulk + "/downloads/" + Path(item["name"]).name
                 return manifest
 
             # The publisher links installers from another disk; Starlette refuses such symlinks by default.

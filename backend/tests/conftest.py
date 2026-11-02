@@ -9,8 +9,8 @@ from dbkit import (
     fresh_postgres_database as fresh_postgres_database,
 )
 
-from backend.app import create_app
-from backend.devices import AgentRuntime
+from backend.apps.factory import create_app
+from backend.services.devices import AgentRuntime
 from labkit import USERS, enable, login, pair
 
 

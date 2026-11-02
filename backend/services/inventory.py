@@ -12,10 +12,8 @@ from ..repositories.inventory import InventoryRepository as repository
 
 def _private_config():
     private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
-    if not private_root:
-        return {}
     try:
-        return load_config(private_root)
+        return load_config(private_root, optional=True)
     except (OSError, ValueError):
         return {}
 

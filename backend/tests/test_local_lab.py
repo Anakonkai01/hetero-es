@@ -84,7 +84,7 @@ def test_named_tunnel_needs_fixed_https_addresses_and_a_config_file(lab_script, 
 
 @pytest.fixture
 def lab_db(tmp_path):
-    from backend.server import initialize
+    from backend.services.bootstrap import initialize
 
     root = tmp_path / "lab"
     initialize(

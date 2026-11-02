@@ -33,3 +33,14 @@ SHARED_MODULES = (
 def shared_sources(repo):
     root = Path(repo) / "runtime/src/heteroes"
     return [(root / name, "heteroes/" + name) for name in SHARED_MODULES]
+
+
+def server_sources(repo):
+    repo = Path(repo)
+    backend = repo / "backend"
+    files = sorted({*backend.rglob("*.py"), *backend.rglob("*.sql")})
+    return [
+        (path, path.relative_to(repo).as_posix())
+        for path in files
+        if path.is_file() and not {"tests", "__pycache__"} & set(path.relative_to(backend).parts)
+    ] + shared_sources(repo)

@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from backend.device_models import SelfTest
+from backend.core.device_models import SelfTest
 from heteroes.product.cpu_coordinator import PROFILE, UPDATE_EVIDENCE
 from labkit import boot, enable, pair
 from test_v3_study import assets, configuration, qualify_v3, v3_study as study_fixture

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from backend.store import Store
-from backend.errors import RuntimeRejected
+from backend.services.store import Store
+from backend.core.errors import RuntimeRejected
 from labkit import OMIT, draft, login, submitted
 
 

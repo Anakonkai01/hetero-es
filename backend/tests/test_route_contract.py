@@ -3,9 +3,9 @@
 import json
 from pathlib import Path
 
-from backend.app import create_app
-from backend.devices import AgentRuntime
-from backend.local_storage import LocalBackend
+from backend.apps.factory import create_app
+from backend.services.devices import AgentRuntime
+from backend.storage.local_backend import LocalBackend
 
 
 def test_product_route_contract_matches_archived_pre_split_inventory(tmp_path, monkeypatch):

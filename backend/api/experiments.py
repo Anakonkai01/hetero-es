@@ -1,6 +1,6 @@
 """Experiments HTTP adapters."""
 
-from ..request_models import BackupPolicy, Configuration, MembershipRequest
+from backend.core.request_models import BackupPolicy, Configuration, MembershipRequest
 from fastapi import Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from fastapi import APIRouter

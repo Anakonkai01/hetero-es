@@ -6,7 +6,7 @@ from pathlib import Path
 import time
 import uuid
 import pytest
-from backend.devices import AgentRuntime
+from backend.services.devices import AgentRuntime
 from labkit import boot, draft, enable, login, pair, pending_commands, queued, submitted  # noqa: F401  (fixtures lab and setup: conftest.py)
 
 
@@ -583,7 +583,7 @@ LEGACY_WINDOWS_REFERENCE = (
 
 
 def test_native_windows_admission_requires_exact_reference_and_worker_only():
-    from backend.devices import SelfTest
+    from backend.core.device_models import SelfTest
     from pydantic import ValidationError
     import pathlib
 
@@ -625,8 +625,8 @@ def test_native_windows_v3_worker_admission_is_bound_to_the_shipped_reference():
     import copy
     import pathlib
 
-    from backend.devices import SelfTest
-    from backend.policies import v3_qualification
+    from backend.core.device_models import SelfTest
+    from backend.services.policies import v3_qualification
     from pydantic import ValidationError
 
     evidence = pathlib.Path(__file__).parent / "fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference"

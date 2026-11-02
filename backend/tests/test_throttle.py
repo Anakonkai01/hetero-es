@@ -3,9 +3,9 @@
 from fastapi.testclient import TestClient
 import pytest
 
-from backend.app import create_app
-from backend.throttle import Throttle, client_address
-from backend.devices import AgentRuntime
+from backend.apps.factory import create_app
+from backend.core.throttle import Throttle, client_address
+from backend.services.devices import AgentRuntime
 
 
 class Clock:

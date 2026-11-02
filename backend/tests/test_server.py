@@ -3,8 +3,8 @@ import sqlite3
 import pytest
 
 from fastapi.testclient import TestClient
-from backend.app import app_from_environment
-from backend.server import initialize
+from backend.apps.factory import app_from_environment
+from backend.services.bootstrap import initialize
 
 pytestmark = pytest.mark.sqlite_file(reason="desktop/local SQLite bootstrap and file publication")
 

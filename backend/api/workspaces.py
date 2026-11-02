@@ -1,7 +1,7 @@
 """Workspace HTTP adapters; operations and persistence are separate."""
 
 from fastapi import APIRouter, Depends, Response
-from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+from backend.core.request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
 from ..services.workspaces import operations
 
 

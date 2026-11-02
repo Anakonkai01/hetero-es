@@ -21,17 +21,12 @@ def main():
     profile = json.loads(profile_path.read_text())
     assert profile["profile"] == "server-cpu-v1"
     assert (web / "index.html").is_file(), "Build the Web UI first"
-    sources = [
-        (p, str(p.relative_to(repo)))
-        for p in sorted((repo / "backend").rglob("*.py"))
-        if "tests" not in p.relative_to(repo / "backend").parts
-    ]
     import sys
 
     sys.path.insert(0, str(repo))
-    from backend.runtime_sources import shared_sources
+    from backend.core.runtime_sources import server_sources
 
-    sources += shared_sources(repo)
+    sources = server_sources(repo)
     sources += [
         (p, "web/" + p.relative_to(web).as_posix())
         for p in sorted(web.rglob("*"))

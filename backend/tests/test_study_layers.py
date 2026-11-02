@@ -3,7 +3,7 @@
 import pytest
 
 from backend.core.errors import ServiceError
-from backend.study_registry import Registry
+from backend.services.study_registry import Registry
 
 
 def test_registry_lookup_preserves_workspace_scope_and_uses_plain_errors(lab):

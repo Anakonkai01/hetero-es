@@ -310,7 +310,7 @@ def test_old_and_new_references_coexist_without_cross_engine_admission(v3_study)
     with store.db() as db:
         row = db.execute("SELECT * FROM model_references").fetchone()
         old_bytes = tuple(row)
-    from backend.policies import v3_qualification
+    from backend.services.policies import v3_qualification
 
     profile = runtime.devices()[0]["selfTest"]
     assert v3_qualification(profile, model["manifestHash"], ENGINE_VERSION) is None
@@ -350,7 +350,7 @@ def start_strict(lab, device, model):
 
 
 def test_a_strict_qualification_is_separate_from_the_plain_one(v3_study):
-    from backend.policies import v3_qualification
+    from backend.services.policies import v3_qualification
 
     lab, device, auth, model = setup(v3_study)
     c, store, runtime, admin = lab
@@ -378,7 +378,7 @@ def test_a_strict_probe_rejects_a_plain_reference(v3_study):
     reference, observations = report_inputs(model, ENGINE_V2)  # valid, but for hf_generate
     finish(c, auth, job, model, reference=reference, observations=observations)
     assert c.get(route(model), headers=admin).json()["jobs"][0]["errorCode"] == "MODEL_QUALIFICATION_MISMATCH"
-    from backend.policies import v3_qualification
+    from backend.services.policies import v3_qualification
 
     assert v3_qualification(runtime.devices()[0]["selfTest"], model["manifestHash"], ENGINE_V2, STRICT) == "model"
 
@@ -437,7 +437,7 @@ def test_a_pending_probe_blocks_only_probes_of_the_same_reference(v3_study):
 
 
 def test_a_profile_without_per_engine_hashes_never_qualifies_for_the_strict_decoder():
-    from backend.policies import v3_qualification
+    from backend.services.policies import v3_qualification
 
     legacy = {"recipeVersions": [3], "noiseVersion": ENGINE_V2, "qualifiedModelHashes": ["a" * 64]}
     assert v3_qualification(legacy, "a" * 64, ENGINE_V2) is None
@@ -524,7 +524,7 @@ def test_a_strict_run_needs_a_gpu_coordinator(v3_study):
 
 
 def test_the_strict_layout_compares_devices_and_physical_gpus():
-    from backend.policies import strict_layout
+    from backend.services.policies import strict_layout
 
     body = {"decodeEngine": STRICT}
     gpu = {"runtimeProfile": "native-gpu"}

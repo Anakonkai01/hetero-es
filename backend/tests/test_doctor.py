@@ -4,8 +4,9 @@ import sqlite3
 import pytest
 
 
-from backend.doctor import FAIL, PASS, WARN, main, run_checks
-from backend.server import initialize
+from backend.services.doctor import FAIL, PASS, WARN, run_checks
+from backend.apps.doctor import main
+from backend.services.bootstrap import initialize
 
 pytestmark = pytest.mark.sqlite_file(reason="SQLite diagnostics and deliberate on-disk corruption")
 

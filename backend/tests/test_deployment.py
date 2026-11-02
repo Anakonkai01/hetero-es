@@ -5,8 +5,8 @@ import socket
 import time
 import urllib.request
 import pytest
-from backend.deployment import caddyfile, idle, save_private
-from backend.server import initialize
+from backend.services.deployment import caddyfile, idle, save_private
+from backend.services.bootstrap import initialize
 
 
 def test_entrypoints_do_not_select_private_bulk_by_host_header():

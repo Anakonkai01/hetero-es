@@ -8,10 +8,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 import pytest
 
-from backend.local_storage import LocalBackend
-from backend.recovery_storage import RecoveryStorage
-from backend.devices import AgentRuntime
-from backend.store import Store
+from backend.storage.local_backend import LocalBackend
+from backend.services.recovery_storage import RecoveryStorage
+from backend.services.devices import AgentRuntime
+from backend.services.store import Store
 from test_recovery_storage import manifest
 
 

@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 import pytest
 
 from backend.apps.factory import create_app
-from backend.devices import AgentRuntime
+from backend.services.devices import AgentRuntime
 from test_oidc import ISSUER, CLIENT, jwks_server, signed, keys as keys
 from test_recovery_storage import Objects, manifest
 from labkit import pair

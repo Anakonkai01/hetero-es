@@ -5,8 +5,8 @@ import json
 import time
 
 import pytest
-from backend.devices import AgentRuntime
-from backend.store import Store
+from backend.services.devices import AgentRuntime
+from backend.services.store import Store
 from labkit import boot, enable, pair, queued
 
 

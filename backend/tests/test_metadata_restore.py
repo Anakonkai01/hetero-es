@@ -7,8 +7,8 @@ from pathlib import Path
 import sqlite3
 import pytest
 
-from backend.devices import AgentRuntime
-from backend.store import Store
+from backend.services.devices import AgentRuntime
+from backend.services.store import Store
 from backend.db.backups import backup_sqlite
 
 pytestmark = pytest.mark.sqlite_file(reason="SQLite snapshot file restoration and corruption checks")

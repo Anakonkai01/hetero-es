@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
-from backend.app import create_app
-from backend.devices import AgentRuntime
+from backend.apps.factory import create_app
+from backend.services.devices import AgentRuntime
 
 
 def test_same_origin_web_keeps_api_auth_and_unknown_paths(tmp_path):

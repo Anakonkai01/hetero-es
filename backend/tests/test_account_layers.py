@@ -9,8 +9,8 @@ import pytest
 
 from backend.core.errors import ServiceError
 from backend.services.accounts import AccountService
-from backend.devices import AgentRuntime
-from backend.store import Store
+from backend.services.devices import AgentRuntime
+from backend.services.store import Store
 
 
 def test_session_lookup_checks_expiry_and_revocation_from_durable_state(tmp_path):

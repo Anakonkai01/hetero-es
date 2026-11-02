@@ -1,7 +1,7 @@
 """Shared backend policies preserve strict input and durable settings behavior."""
 
 import pytest
-from backend.policies import backup_policy, dispatch_held, set_disabled_workers, read_setting
+from backend.services.policies import backup_policy, dispatch_held, set_disabled_workers, read_setting
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_shared_settings_preserve_hold_and_sorted_disabled_workers(lab):
 
 
 def test_unknown_process_state_and_physical_alias_keep_device_busy(lab):
-    from backend.policies import has_device_reservation, processes_drained
+    from backend.services.policies import has_device_reservation, processes_drained
 
     _, store, _, _ = lab
     assert processes_drained([])

@@ -14,8 +14,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
 - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
-- **Phần B đã xong B1–B8:** backend chia lớp, Postgres, service riêng, OIDC, S3/MinIO, metrics/log an toàn và API đồ án.
-  Tiếp theo là cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+- **Phần B đã xong B1–B9:** chia lớp/service, Postgres, OIDC, S3/MinIO, metrics/log, API đồ án, cấu hình môi trường và gói desktop.
+  Tiếp theo là nghiệm thu B10 trên cùng source sạch ở cả ba môi trường, rồi triển khai phần C. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
@@ -35,8 +35,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - Strict lab form default: `strict_b22_v1`. Its GPU coordinator must differ from its workers (D1).
   `strict_int8_lora_v1` remains standalone/SDK only.
 - CPU check-all: all 24 steps pass, including 3 324 runtime tests (1 045 intentional CUDA-hidden skips),
-  626 backend SQLite tests (641 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
-  The B7 full PostgreSQL/MinIO matrix passes669 tests, zero skips; details below.
+  678 backend SQLite tests (694 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
+  The B9 full PostgreSQL/MinIO matrix passes723 tests, zero skips; details below.
 
 ## Tiến độ kế hoạch 2026-11
 
@@ -134,6 +134,20 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   Source-package imports and lint/format pass; default111 routes remain exact. [Course API guide](design/course-demo.md)
   and evidence `2026-11-02-b8-course-api` record the configuration and real read-only-role proof. The last whole24-step
   browser/Electron check is B7; B8 changes only the disabled-by-default API feature. B9–B10 and all C remain.
+  B9 complete: environment overlays private JSON and supports secret files; OIDC environment-only startup requires no
+  local credentials. URL rotation and private installer transfers work without a private config directory. See
+  [container configuration](design/container-configuration.md). Optional malformed-config fallback is corrected (B-018).
+  Both server builders include recursive Python and SQL resources (B-019), excluding tests/cache.37 physical aliases
+  are removed; password/view helpers move byte-identically and only3 stable desktop command adapters remain at root.
+  Import-only proof checks96 existing test/helper files,41 changed, including2 embedded child Python imports; all
+  non-import AST/lines are preserved. Its own negative controls reject weakened assertions/calls/strings.
+  CPU profiles add SQLAlchemy2.0.55/greenlet3.4.0 only:23 Linux/24 Windows wheels; original Python pins and43 wheels
+  unchanged. Fresh private Linux Python3.12.15 installs23 hash-checked wheels and serves6 actual HTTP checks with
+  optional cloud/GPU libraries absent. Fresh desktop-built web replaces the stale source bundle; final archive bytes
+  match current backend/shared runtime and all125 web files. Old and final private receipts are retained separately.
+  Full actual-MinIO SQLite694/PG723, zero skips; PG audit445 PG +52 explicit SQLite Stores. Mutation17+8/25 killed,
+  all24 check-all steps and Linux apps --check pass. Evidence `2026-11-02-b9-configuration-packaging`. Windows wheels
+  are hash-verified; native private interpreter execution and the clean same-source GPU matrix remain B10. All C remains.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
@@ -142,7 +156,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Remaining scope and limits
 
-- B1–B8 are complete. Execute B9–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+- B1–B9 are complete. Execute B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.

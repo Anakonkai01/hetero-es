@@ -3,7 +3,7 @@
 import json
 from ..core.clock import now
 from ..core.constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
-from ..errors import RuntimeRejected
+from backend.core.errors import RuntimeRejected
 from .policies import dispatch_held
 from ..repositories.scheduling import SchedulingRepository as repository
 from ..db.transactions import begin_write

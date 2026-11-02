@@ -6,10 +6,10 @@ import pytest
 
 from fastapi.testclient import TestClient
 
-from backend.app import app_from_environment
-from backend.devices import AgentRuntime
-from backend.server import initialize
-from backend.writer_lock import acquire_writer
+from backend.apps.factory import app_from_environment
+from backend.services.devices import AgentRuntime
+from backend.services.bootstrap import initialize
+from backend.core.writer_lock import acquire_writer
 
 pytestmark = pytest.mark.sqlite_file(reason="local private-config factory and SQLite writer ownership")
 

@@ -2,8 +2,8 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from backend.app import create_app
-from backend.devices import AgentRuntime
+from backend.apps.factory import create_app
+from backend.services.devices import AgentRuntime
 from labkit import login
 from labkit import boot, enable, pair, queued
 from test_recovery_storage import Objects, manifest

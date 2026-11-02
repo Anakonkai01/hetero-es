@@ -3,7 +3,7 @@
 import json
 import uuid
 from types import SimpleNamespace
-from ..request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+from backend.core.request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
 from .policies import set_disabled_workers
 from ..core.clock import now
 from ..core.errors import ServiceError, DatabaseConflict

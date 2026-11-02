@@ -10,8 +10,8 @@ from typing import Literal
 
 from .errors import ServiceError
 from pydantic import Field, field_validator, model_validator
-from ..monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
-from ..addresses import endpoint, is_private
+from backend.core.monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
+from backend.core.addresses import endpoint, is_private
 from heteroes.product.cpu_coordinator import coordinator_only, UPDATE_EVIDENCE, UPDATE_EVIDENCE_V2
 from heteroes.noise.contracts import CPU_NOISE_FINGERPRINTS
 

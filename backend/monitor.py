@@ -1,9 +1,6 @@
-"""Compatibility namespace retained during application composition extraction."""
+"""Stable desktop monitor command and shared telemetry observation type."""
 
-import sys
-from .apps import monitor as _implementation
+from .apps.monitor import main as main, TelemetrySampler as TelemetrySampler
 
 if __name__ == "__main__":
-    raise SystemExit(_implementation.main())
-else:
-    sys.modules[__name__] = _implementation
+    raise SystemExit(main())

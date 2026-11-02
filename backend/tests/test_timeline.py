@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from backend.timeline import build_timeline
+from backend.services.timeline import build_timeline
 
 FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "run-fifo.json").read_text())
 

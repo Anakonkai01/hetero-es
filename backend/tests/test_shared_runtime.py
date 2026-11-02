@@ -8,7 +8,7 @@ import sys
 
 def test_backend_uses_shared_runtime_without_importing_torch():
     code = """import sys, json
-import backend.monitor, backend.study_registry
+import backend.monitor, backend.services.study_registry
 from heteroes.product.telemetry import TelemetrySampler
 from heteroes.study.data import dataset
 assert backend.monitor.TelemetrySampler is TelemetrySampler
@@ -20,7 +20,7 @@ print(json.dumps({'torchImported': False}))
 
 
 def test_server_packager_selects_only_cpu_shared_modules():
-    from backend.runtime_sources import shared_sources
+    from backend.core.runtime_sources import shared_sources
 
     repo = Path(__file__).resolve().parents[2]
     sources = shared_sources(repo)
@@ -61,7 +61,7 @@ def _runtime_imports(path, package, top_level_only=False):
 def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs():
     # The Lab Server ships only SHARED_MODULES: a backend import of another runtime module works in the repository and
     # fails in the packaged server. Checked over the whole import closure (backend files and the shared modules themselves).
-    from backend.runtime_sources import SHARED_MODULES
+    from backend.core.runtime_sources import SHARED_MODULES
 
     repo = Path(__file__).resolve().parents[2]
     root = repo / "runtime/src/heteroes"

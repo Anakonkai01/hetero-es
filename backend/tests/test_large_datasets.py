@@ -106,7 +106,7 @@ def test_a_device_without_the_private_route_gets_small_dataset_files_over_the_pu
     v3_study, tmp_path, monkeypatch
 ):
     # GSM8K demo tier 1, 2026-10-21: with Tailscale off, 3060-thao could never fetch the dataset (private grant only)
-    from backend import local_storage
+    from backend.storage import local_backend as local_storage
 
     c, admin, _ = v3_study
     store = c.app.state.store
@@ -147,7 +147,7 @@ def test_a_researcher_without_the_private_route_uploads_a_small_dataset_over_the
     v3_study, tmp_path, monkeypatch
 ):
     # owner 2026-10-22: no Tailscale by default; a notebook far from the lab must still be able to send its dataset
-    from backend import local_storage
+    from backend.storage import local_backend as local_storage
 
     c, admin, _ = v3_study
     (tmp_path / "private").mkdir()

@@ -19,7 +19,7 @@ def kinds(client, headers):
 def finish(store, run_id, status="COMPLETED"):
     with store.db() as db:
         body = json.loads(db.execute("SELECT body FROM experiments WHERE id=?", (run_id,)).fetchone()[0])
-        from backend.store import now
+        from backend.services.store import now
 
         db.execute(
             "UPDATE experiments SET body=? WHERE id=?",
@@ -28,7 +28,7 @@ def finish(store, run_id, status="COMPLETED"):
 
 
 def test_history_from_before_notifications_existed_does_not_flood_the_bell(setup):
-    from backend.notifications import Notifications
+    from backend.services.notifications import Notifications
 
     client, store, _ = setup
     admin = login(client, "admin")
@@ -51,7 +51,7 @@ def test_history_from_before_notifications_existed_does_not_flood_the_bell(setup
 
 
 def test_a_restart_keeps_the_starting_point_so_nothing_is_missed(setup):
-    from backend.notifications import Notifications
+    from backend.services.notifications import Notifications
 
     client, store, _ = setup
     admin = login(client, "admin")
@@ -164,7 +164,7 @@ def test_marking_as_read_changes_the_count_and_only_my_own_notifications(setup):
 
 def test_the_list_is_capped_and_unread_counts_everything_unread(setup):
     client, store, _ = setup
-    from backend.throttle import Throttle
+    from backend.core.throttle import Throttle
 
     client.app.state.registrations = Throttle(1000, 3600)
     admin = login(client, "admin")

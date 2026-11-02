@@ -26,8 +26,8 @@ from urllib.parse import urlsplit
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
-from backend.deployment import caddyfile, idle, save_private
-from backend.addresses import endpoint, is_private
+from backend.services.deployment import caddyfile, idle, save_private
+from backend.core.addresses import endpoint, is_private
 
 REGISTRATION_SECONDS = 45
 

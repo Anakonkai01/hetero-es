@@ -9,7 +9,7 @@ import uuid
 from argon2.exceptions import InvalidHashError, VerificationError
 
 from ..core.errors import ServiceError
-from ..passwords import password_problem
+from backend.core.passwords import password_problem
 from ..repositories.accounts import AccountExists, AccountsRepository
 
 

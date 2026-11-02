@@ -4,8 +4,8 @@ import ast
 from pathlib import Path
 import pytest
 
-from backend.devices import AgentRuntime
-from backend.store import Store
+from backend.services.devices import AgentRuntime
+from backend.services.store import Store
 
 
 def test_sql_execution_is_owned_by_database_and_repositories():

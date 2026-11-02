@@ -4,7 +4,7 @@ import json
 import sqlite3
 import pytest
 
-from backend.store import Store
+from backend.services.store import Store
 from labkit import draft, login, pending_commands, submitted
 
 

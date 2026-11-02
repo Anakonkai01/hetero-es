@@ -7,7 +7,7 @@ worker's own credential, and every change is audited. The frozen configuration n
 import json
 import time
 
-from backend.agent_scheduling import LEFT_OFFLINE_RELEASE_SECONDS
+from backend.services.agent_scheduling import LEFT_OFFLINE_RELEASE_SECONDS
 from labkit import boot, draft, enable, pair
 
 

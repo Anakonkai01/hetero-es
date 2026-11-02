@@ -25,21 +25,21 @@ from ..core.device_models import (
     Poll,
     WorkerCommand,
 )
-from ..agent_scheduling import AgentScheduling
-from ..agent_commands import AgentCommands
-from ..agent_polling import AgentPolling
+from backend.services.agent_scheduling import AgentScheduling
+from backend.services.agent_commands import AgentCommands
+from backend.services.agent_polling import AgentPolling
 from .model_qualification import ModelQualifications
 from ..db.migrations import initialize_agent_schema
 from .policies import has_device_reservation, processes_drained
 from .policies import set_disabled_workers, active_profile, platform_profile
-from ..config import load_config
+from backend.core.config import load_config
 import hashlib
 import json
 import os
 import secrets
 import time
 import uuid
-from ..addresses import endpoint, is_private
+from backend.core.addresses import endpoint, is_private
 from ..core.constants import MODEL, REVISION, QUIESCENT
 from heteroes.product.cpu_coordinator import coordinator_only
 from heteroes.catalog import SCHEDULER_POLICIES, SYNC_MODES, WORKLOAD_NAMES
@@ -142,10 +142,8 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
     def public_web_url(self):
         """The lab's public HTTPS address (it carries small dataset files to devices without the private route)."""
         root = os.environ.get("HETEROES_PRIVATE_CONFIG")
-        if not root:
-            return None
         try:
-            value = load_config(root).get("publicWebUrl")
+            value = load_config(root, optional=True).get("publicWebUrl")
             return endpoint(value) if value and not is_private(value) else None
         except (OSError, ValueError, TypeError):
             return None
@@ -154,10 +152,8 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
         """The lab's public compute address, read per command so a new Quick URL is used at once.
         Only a public HTTPS host name is passed on; anything else is ignored."""
         root = os.environ.get("HETEROES_PRIVATE_CONFIG")
-        if not root:
-            return None
         try:
-            value = load_config(root).get("publicComputeUrl")
+            value = load_config(root, optional=True).get("publicComputeUrl")
             return endpoint(value) if value and not is_private(value) else None
         except (OSError, ValueError, TypeError):
             return None

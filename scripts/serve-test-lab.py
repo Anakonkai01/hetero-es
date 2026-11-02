@@ -20,9 +20,9 @@ sys.path[:0] = [str(ROOT)]
 
 from fastapi.testclient import TestClient  # noqa: E402
 import uvicorn  # noqa: E402
-from backend.app import create_app  # noqa: E402
-from backend.devices import AgentRuntime  # noqa: E402
-from backend.local_storage import LocalBackend  # noqa: E402
+from backend.apps.factory import create_app  # noqa: E402
+from backend.services.devices import AgentRuntime  # noqa: E402
+from backend.storage.local_backend import LocalBackend  # noqa: E402
 
 USERS = {"admin": "test-admin-pass", "participant": "test-user-pass"}
 

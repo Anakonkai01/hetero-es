@@ -92,8 +92,8 @@ UPDATE_OPTIONS = {
 
 @pytest.mark.parametrize("value", [0, 0.05, 1])
 def test_audit_rate_request_and_template_contracts_accept_zero_and_bounds(value):
-    from backend.request_models import Configuration
-    from backend.templates import clean_config
+    from backend.core.request_models import Configuration
+    from backend.api.templates import clean_config
 
     config = Configuration(name="Audit settings", modelName="fixture", workerIds=["worker"], auditRate=value)
     assert config.auditRate == value
@@ -102,8 +102,8 @@ def test_audit_rate_request_and_template_contracts_accept_zero_and_bounds(value)
 
 @pytest.mark.parametrize("value", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
 def test_bad_audit_rate_is_rejected_by_request_and_template_contracts(value):
-    from backend.request_models import Configuration
-    from backend.templates import clean_config
+    from backend.core.request_models import Configuration
+    from backend.api.templates import clean_config
     from fastapi import HTTPException
     from pydantic import ValidationError
 
@@ -115,7 +115,7 @@ def test_bad_audit_rate_is_rejected_by_request_and_template_contracts(value):
 
 @pytest.mark.parametrize("rate,selected", [(0, 0), (1, 4)])
 def test_experiment_view_uses_frozen_rate_instead_of_assuming_five_percent(rate, selected):
-    from backend.experiment_view import experiment_view
+    from backend.services.experiment_view import experiment_view
 
     run_id = "a" * 32
     body = {"experimentId": run_id, "recipeVersion": 3, "auditRate": rate, "auditSummary": {"completed": 0}}
@@ -333,8 +333,8 @@ def test_v3_scorer_columns_are_every_field_of_its_config(v3_study):
 
 
 def test_v3_qualification_cannot_be_inferred_from_the_model_hash():
-    from backend.policies import v3_qualification
-    from backend.device_models import SelfTest
+    from backend.services.policies import v3_qualification
+    from backend.core.device_models import SelfTest
     from pydantic import ValidationError
 
     digest = "a" * 64
@@ -371,7 +371,7 @@ def test_queued_v3_work_stops_when_a_device_loses_v3_qualification(v3_study):
 
 
 def test_v3_templates_validate_and_keep_nullable_prompt():
-    from backend.templates import clean_config
+    from backend.api.templates import clean_config
     from fastapi import HTTPException
 
     options = {

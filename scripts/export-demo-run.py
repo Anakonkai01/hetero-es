@@ -16,7 +16,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from backend.timeline import build_timeline  # noqa: E402
+from backend.services.timeline import build_timeline  # noqa: E402
 
 KEEP_MARKS = {"worker_start", "executor_ready", "replay", "worker_unavailable", "recovered"}
 

@@ -1,11 +1,6 @@
-"""Compatibility doctor namespace and CLI during extraction."""
+"""Stable desktop doctor command; implementation lives in apps/ and services/."""
 
-import sys
-from .services import doctor as _implementation
-from .apps.doctor import main
+from .apps.doctor import main as main
 
-_implementation.main = main
 if __name__ == "__main__":
     raise SystemExit(main())
-else:
-    sys.modules[__name__] = _implementation

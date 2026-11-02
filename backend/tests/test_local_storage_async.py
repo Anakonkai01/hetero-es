@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 import httpx
 import pytest
 from fastapi import FastAPI
-from backend.local_storage import LocalBackend
+from backend.storage.local_backend import LocalBackend
 
 
 def setup(tmp_path):
@@ -29,7 +29,7 @@ def test_slow_disk_operation_keeps_unrelated_health_request_responsive(tmp_path,
     entered = threading.Event()
     release = threading.Event()
     finished = threading.Event()
-    from backend.local_storage import _Upload
+    from backend.storage.local_backend import _Upload
 
     original = os.fsync if operation == "fsync" else getattr(_Upload, operation)
 

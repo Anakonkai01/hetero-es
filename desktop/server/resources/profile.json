@@ -67,6 +67,12 @@
           "sizeBytes": 117683
         },
         {
+          "name": "greenlet-3.4.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+          "url": "https://files.pythonhosted.org/packages/36/f7/229f3aed6948faa20e0616a0b8568da22e365ede6a54d7d369058b128afd/greenlet-3.4.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+          "sha256": "a1c4f6b453006efb8310affb2d132832e9bbb4fc01ce6df6b70d810d38f1f6dc",
+          "sizeBytes": 615062
+        },
+        {
           "name": "h11-0.16.0-py3-none-any.whl",
           "url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
           "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
@@ -113,6 +119,12 @@
           "url": "https://files.pythonhosted.org/packages/ca/e2/2f793fa2f1b338aa03124efd4362956c84d7bf1b331dc86050bc0151e67d/pydantic_core-2.50.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
           "sha256": "f187030fc3d62c668feb0f09e92852e0eb414d7fcefc4748f2e67d245aade37e",
           "sizeBytes": 2160358
+        },
+        {
+          "name": "sqlalchemy-2.0.55-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+          "url": "https://files.pythonhosted.org/packages/df/86/e1c1521350fba22109fb6605b2a1f3e572d8e294239bb59c575b18fe45c2/sqlalchemy-2.0.55-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+          "sha256": "6e7694e736d63b476d81a0eae7b304d9b747a3f0a1b7dc10134655c4cccf5eb7",
+          "sizeBytes": 3473971
         },
         {
           "name": "starlette-1.7.0-py3-none-any.whl",
@@ -210,6 +222,12 @@
           "sizeBytes": 117683
         },
         {
+          "name": "greenlet-3.4.0-cp312-cp312-win_amd64.whl",
+          "url": "https://files.pythonhosted.org/packages/42/cf/bb2c32d9a100e36ee9f6e38fad6b1e082b8184010cb06259b49e1266ca01/greenlet-3.4.0-cp312-cp312-win_amd64.whl",
+          "sha256": "a0a53fb071531d003b075c444014ff8f8b1a9898d36bb88abd9ac7b3524648a2",
+          "sizeBytes": 238892
+        },
+        {
           "name": "h11-0.16.0-py3-none-any.whl",
           "url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
           "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
@@ -258,6 +276,12 @@
           "sizeBytes": 2171536
         },
         {
+          "name": "sqlalchemy-2.0.55-cp312-cp312-win_amd64.whl",
+          "url": "https://files.pythonhosted.org/packages/19/10/0ec446c9ee7467f869c298e12a3c5ec0f47a6cd64b2b59764ab6f1287017/sqlalchemy-2.0.55-cp312-cp312-win_amd64.whl",
+          "sha256": "a13820f47eda53d603f56feaadeab9787d0110b7fcbe6ab2ff2415bd3ea31c79",
+          "sizeBytes": 2177392
+        },
+        {
           "name": "starlette-1.7.0-py3-none-any.whl",
           "url": "https://files.pythonhosted.org/packages/4e/d6/1ec1b290f9e0fb067899b61e1d37a30c923068bad260b216dbe37a7d2967/starlette-1.7.0-py3-none-any.whl",
           "sha256": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
@@ -285,5 +309,5 @@
       "lockFile": "requirements-windows.txt"
     }
   },
-  "runtimeSha256": "b1bd8ea7399c941a43fb645040360753e415c413b2c9bb37cd73022c3703eb16"
+  "runtimeSha256": "2eaf0b90b8d008043f814e7c22205f1a22e6fca3514e87b6b8c2095af9f5820d"
 }

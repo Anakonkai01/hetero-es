@@ -21,7 +21,7 @@ from ..api.lab import install_lab_routes
 from ..api.live import LiveStreams
 from ..api.templates import install_routes as install_template_routes
 from ..api.notifications import install_routes as install_notification_routes
-from ..throttle import Throttle
+from backend.core.throttle import Throttle
 from ..api.security import local_user, workspace_scope
 from ..services.access import AccessService
 from ..core.errors import ServiceError
@@ -215,12 +215,30 @@ def app_from_environment(*, service=None):
     if service not in SERVICES:
         raise ValueError("Unknown backend service")
     private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
-    if not private_root:
-        raise ValueError("Set HETEROES_PRIVATE_CONFIG to the lab configuration directory")
-    root = Path(private_root)
-    credentials = json.loads((root / "credentials.json").read_text())
-    config = load_config(root)
-    database_url = os.environ.get("HETEROES_DATABASE_URL") or config.get("databaseUrl")
+    config = load_config(private_root)
+    root = Path(private_root) if private_root else Path(config["productStateDirectory"])
+    auth_mode = config.get("authMode", "local")
+    if auth_mode not in {"local", "oidc"}:
+        raise ValueError("Unknown authentication mode")
+    credentials = {"users": {}}
+    if auth_mode == "local":
+        source = os.environ.get("HETEROES_CREDENTIALS_FILE") or (root / "credentials.json" if private_root else None)
+        try:
+            if source is None:
+                raise ValueError
+            credentials = json.loads(Path(source).read_text())
+            if (
+                not isinstance(credentials, dict)
+                or not isinstance(credentials.get("users"), dict)
+                or any(
+                    not isinstance(name, str) or not isinstance(password, str)
+                    for name, password in credentials["users"].items()
+                )
+            ):
+                raise ValueError
+        except (OSError, ValueError):
+            raise ValueError("Local authentication requires valid bootstrap credentials") from None
+    database_url = config.get("databaseUrl")
     postgres = False
     path = Path(config["productStateDirectory"]) / "product.sqlite"
     if database_url:
@@ -264,7 +282,7 @@ def _app_from_config(root, credentials, config, writer, *, service="all", databa
 
         storage_backend = LocalBackend(
             config["storageDirectory"],
-            root / "storage-signing.key",
+            config.get("storageSigningKeyFile", root / "storage-signing.key"),
             config.get("bulkApiUrl", config["apiUrl"]),
             config.get("storageVolumeUUID"),
             config.get("metadataStorageDirectory"),

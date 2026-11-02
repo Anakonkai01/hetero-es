@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.passwords import MIN_LENGTH, password_problem
+from backend.core.passwords import MIN_LENGTH, password_problem
 from labkit import login
 
 

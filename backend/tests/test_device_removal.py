@@ -3,8 +3,8 @@
 import uuid
 import pytest
 from fastapi.testclient import TestClient
-from backend.app import create_app
-from backend.devices import AgentRuntime
+from backend.apps.factory import create_app
+from backend.services.devices import AgentRuntime
 from labkit import login
 from test_lab import register, activate
 from labkit import boot, enable, pair, queued

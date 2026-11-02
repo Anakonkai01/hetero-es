@@ -3,7 +3,7 @@
 import pytest
 
 from backend.core.errors import ServiceError
-from backend.local_storage import LocalBackend
+from backend.storage.local_backend import LocalBackend
 from labkit import enable, pair, queued
 from test_recovery_routes import lab as recovery_fixture
 from test_recovery_storage import manifest

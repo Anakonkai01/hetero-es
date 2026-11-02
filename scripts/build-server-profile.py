@@ -46,13 +46,12 @@ def main():
         lock_file = f"requirements-{platform}.txt"
         (out / lock_file).write_text("\n".join(lock) + "\n")
         platforms[platform] = {"python": base["platforms"][platform]["python"], "wheels": wheels, "lockFile": lock_file}
-    files = [(file, str(file.relative_to(repo))) for file in sorted((repo / "backend").glob("*.py"))]
     import sys
 
     sys.path.insert(0, str(repo))
-    from backend.runtime_sources import shared_sources
+    from backend.core.runtime_sources import server_sources
 
-    files += shared_sources(repo)
+    files = server_sources(repo)
     files += [
         (file, "web/" + file.relative_to(repo / "frontend/dist").as_posix())
         for file in sorted((repo / "frontend/dist").rglob("*"))

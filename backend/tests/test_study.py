@@ -2,9 +2,9 @@ import hashlib
 import json
 import pytest
 from fastapi.testclient import TestClient
-from backend.app import create_app
-from backend.devices import AgentRuntime
-from backend.local_storage import LocalBackend
+from backend.apps.factory import create_app
+from backend.services.devices import AgentRuntime
+from backend.storage.local_backend import LocalBackend
 from labkit import login
 
 

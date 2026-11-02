@@ -39,7 +39,7 @@ with tempfile.TemporaryDirectory(prefix="heteroes-source-packaging-") as tempora
             names = archive.getnames()
             for retired in ["backend/runtime.py", "src/heteroes/product/gateway.py", "src/heteroes/product/backup.py"]:
                 assert retired not in names
-            assert ("src/heteroes/product/run_supervisor.py" if app == "worker" else "backend/errors.py") in names
+            assert ("src/heteroes/product/run_supervisor.py" if app == "worker" else "backend/core/errors.py") in names
             extracted = scratch / f"extracted-{app}"
             archive.extractall(extracted, filter="data")
         if app == "worker":
@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory(prefix="heteroes-source-packaging-") as tempora
             source = extracted / "src"
             python = RUNTIME_PYTHON
         else:
-            code = "from backend.app import create_app; from backend.errors import RuntimeRejected"
+            code = "from backend.apps.factory import create_app; from backend.core.errors import RuntimeRejected"
             source = extracted
             python = sys.executable
         # Isolated interpreters cannot fall back to the working tree or user site.

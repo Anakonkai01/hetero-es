@@ -60,7 +60,7 @@ def restore(source, manifest, destination, admin_id="admin"):
         import sys
 
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-        from backend.metadata_backup import publish_new_directory
+        from backend.core.filesystem import publish_new_directory
 
         publish_new_directory(temporary, destination)
     except BaseException:

@@ -1,6 +1,6 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 
-from ..constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
+from backend.core.constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
 
 from .policies import (
     v2_qualification as v2_qualification,
@@ -17,10 +17,10 @@ import uuid
 from ..core.errors import ServiceError
 from ..repositories.agent_scheduling import AgentSchedulingRepository as repository
 from ..db.transactions import begin_write
-from ..errors import RuntimeRejected as RuntimeRejected
+from backend.core.errors import RuntimeRejected as RuntimeRejected
 from heteroes.study.data import sha as study_hash
 
-from ..constants import QUIESCENT as QUIESCENT
+from backend.core.constants import QUIESCENT as QUIESCENT
 from heteroes.product.cpu_coordinator import coordinator_only
 
 # A worker that left and whose device has not been seen for this long counts as stopped: it cannot confirm the stop while

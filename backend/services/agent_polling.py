@@ -1,6 +1,6 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 
-from ..constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
+from backend.core.constants import CORE_COMMAND_KINDS as CORE_COMMAND_KINDS, COMMAND_KINDS as COMMAND_KINDS
 
 import re
 import json
@@ -9,10 +9,10 @@ import time
 from ..core.errors import ServiceError
 from ..repositories.agent_polling import AgentPollingRepository as repository
 
-from ..constants import QUIESCENT as QUIESCENT
+from backend.core.constants import QUIESCENT as QUIESCENT
 
 
-from ..device_models import digest as digest
+from backend.core.device_models import digest as digest
 from heteroes.product.cpu_coordinator import coordinator_only
 
 

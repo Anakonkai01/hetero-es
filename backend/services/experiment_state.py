@@ -4,8 +4,8 @@ import hashlib
 import json
 import uuid
 from ..core.clock import now
-from ..constants import TERMINAL, REVISION
-from ..experiment_view import experiment_view
+from backend.core.constants import TERMINAL, REVISION
+from backend.services.experiment_view import experiment_view
 from ..repositories.experiments import ExperimentsRepository as repository
 
 

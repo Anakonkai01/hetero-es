@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter, Depends, Header, Request, Response
 
-from ..request_models import Login
-from ..throttle import client_address
+from backend.core.request_models import Login
+from backend.core.throttle import client_address
 from ..core.errors import ServiceError
 
 

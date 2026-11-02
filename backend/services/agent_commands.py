@@ -1,6 +1,6 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 
-from ..constants import (
+from backend.core.constants import (
     CORE_COMMAND_KINDS as CORE_COMMAND_KINDS,
     COMMAND_KINDS as COMMAND_KINDS,
     V3_CODE_KEYS as V3_CODE_KEYS,

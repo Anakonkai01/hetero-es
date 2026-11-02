@@ -1,7 +1,7 @@
 import json
 import pytest
 from pydantic import ValidationError
-from backend.devices import Enrollment, EndpointUpdate
+from backend.core.device_models import Enrollment, EndpointUpdate
 from labkit import boot, enable, pair, queued
 
 
