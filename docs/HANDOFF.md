@@ -14,8 +14,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
 - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
-- **Phần B đã xong B1–B7:** backend chia lớp, Postgres, service riêng, OIDC, S3/MinIO và metrics/log an toàn.
-  Tiếp theo là router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+- **Phần B đã xong B1–B8:** backend chia lớp, Postgres, service riêng, OIDC, S3/MinIO, metrics/log an toàn và API đồ án.
+  Tiếp theo là cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
@@ -126,6 +126,14 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   on actual PG after fixing the counter-value test gap (B-016); initial26/27 retained. Evidence
   `2026-11-02-b7-observability`. Desktop without optional Prometheus keeps basic service_up only; split/cloud requires it.
   B8–B10 and all C remain; no live monitoring/GPU/Keycloak/deployment acceptance is claimed by these CPU fixtures.
+  B8 complete: opt-in API-only hello/secure/student/students-db routes; flask-app JWT verification is independent of
+  lab accounts. Mounted JSON is fresh/bounded; fixed student SQL uses a separate read-only PG transaction and role.
+  Full actual-MinIO SQLite665/PostgreSQL694, zero skips, PG audit441 PG +50 explicit SQLite Stores. After whole-suite
+  collection, one independent oversized-valid-prefix regression was added; final focused SQLite25/PG26 and actual-PG
+  mutation15/15 pass (initial14/15 retained, B-017). Production source did not change after those full suites started.
+  Source-package imports and lint/format pass; default111 routes remain exact. [Course API guide](design/course-demo.md)
+  and evidence `2026-11-02-b8-course-api` record the configuration and real read-only-role proof. The last whole24-step
+  browser/Electron check is B7; B8 changes only the disabled-by-default API feature. B9–B10 and all C remain.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
@@ -134,7 +142,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Remaining scope and limits
 
-- B1–B7 are complete. Execute B8–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+- B1–B8 are complete. Execute B9–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.

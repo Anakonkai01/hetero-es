@@ -179,6 +179,20 @@ def create_app(
         if hasattr(runtime.storage_backend, "install_routes"):
             runtime.storage_backend.install_routes(registration)
 
+    if service == "api" and os.environ.get("HETEROES_COURSE_DEMO", "0") == "1":
+        from ..api.course import install_routes as install_course_routes
+        from ..services.course import CourseDemo
+
+        install_course_routes(
+            app,
+            CourseDemo(
+                issuer=oidc_issuer or os.environ.get("HETEROES_OIDC_ISSUER"),
+                jwks_url=oidc_jwks_url or os.environ.get("HETEROES_OIDC_JWKS_URL"),
+                students_file=os.environ.get("HETEROES_COURSE_STUDENTS_FILE"),
+                studentdb_url=os.environ.get("HETEROES_COURSE_STUDENTDB_URL"),
+            ),
+        )
+
     install_web_routes(registration, web_directory, downloads_directory)
     from ..services.observability import BusinessSnapshot, Metrics
     from ..api.observability import RequestObservability
