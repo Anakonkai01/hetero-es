@@ -1,0 +1,11 @@
+{
+  "baseline": "750575bd",
+  "files": {
+    "backend/api/course.py": "4ff38a0162fe4d79a5e91306532fc0a0b9f1eca814c014df8caba118b3ff89dd",
+    "backend/apps/factory.py": "d73af7414ded5a49c86eec27fa40c7515c7af7574bb21f4b3a8f53ec3f45466b",
+    "backend/repositories/course.py": "1f0d029d53990b7be8cfb979d77793b5fec316e98baf0af069c966dbd59661df",
+    "backend/services/course.py": "89d4dafd0019607ff999b4bc6340567d72d6a447c39d32eb0a95d8d5e28c9e78",
+    "backend/tests/test_course.py": "d17cb9139a88160ef8a85921ea3d50a79fc4678fa0947c1f1cdb54c97be9585b",
+    "docs/design/course-demo.md": "ea3c32a6dd114f00f7a65019b7c7d32b94a3453949b1465dff240453b994b5b3"
+  }
+}

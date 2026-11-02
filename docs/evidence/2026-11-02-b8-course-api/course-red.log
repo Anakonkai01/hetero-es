@@ -1,0 +1,106 @@
+.........FFFFFFFFFFF                                                     [100%]
+=================================== FAILURES ===================================
+___________ test_hello_exact_response_and_mounted_json_is_read_fresh ___________
+backend/tests/test_course.py:52: in test_hello_exact_response_and_mounted_json_is_read_fresh
+    assert client.get("/hello").json() == {"message": "Hello from App Server!"}
+E   AssertionError: assert {'detail': 'Not Found'} == {'message': '... App Server!'}
+E     
+E     Left contains 1 more item:
+E     {'detail': 'Not Found'}
+E     Right contains 1 more item:
+E     {'message': 'Hello from App Server!'}
+E     Use -v to get more diff
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.429+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.08642300235806033,"request_id":"b03a6cee84474f9bb5accba369816920"}
+__________ test_mounted_json_errors_are_generic_and_bounded[missing] ___________
+backend/tests/test_course.py:69: in test_mounted_json_errors_are_generic_and_bounded
+    assert response.status_code == 503
+E   assert 404 == 503
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.503+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.07027399988146499,"request_id":"4878595f5a4a4eb78882790f97113891"}
+_________ test_mounted_json_errors_are_generic_and_bounded[malformed] __________
+backend/tests/test_course.py:69: in test_mounted_json_errors_are_generic_and_bounded
+    assert response.status_code == 503
+E   assert 404 == 503
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.556+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.07028999971225858,"request_id":"a5f466773fc2433e86fef77067bd994e"}
+_________ test_mounted_json_errors_are_generic_and_bounded[oversized] __________
+backend/tests/test_course.py:69: in test_mounted_json_errors_are_generic_and_bounded
+    assert response.status_code == 503
+E   assert 404 == 503
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.617+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.09879499702947214,"request_id":"686e2ffe87de46098290ce2068fc6bbc"}
+____ test_secure_uses_flask_app_identity_without_registering_a_lab_account _____
+backend/tests/test_course.py:76: in test_secure_uses_flask_app_identity_without_registering_a_lab_account
+    assert client.get("/secure").status_code == 401
+E   AssertionError: assert 404 == 401
+E    +  where 404 = <Response [404 Not Found]>.status_code
+E    +    where <Response [404 Not Found]> = get('/secure')
+E    +      where get = <starlette.testclient.TestClient object at 0x7dc93720ea50>.get
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.701+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.09703899559099227,"request_id":"39996cdc981244ca9d4f393c9f8f91f6"}
+_______ test_secure_rejects_untrusted_or_other_client_tokens[web-client] _______
+backend/tests/test_course.py:99: in test_secure_rejects_untrusted_or_other_client_tokens
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.759+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.08469299791613594,"request_id":"850e268d9b7346bc97b35433fe236f52"}
+________ test_secure_rejects_untrusted_or_other_client_tokens[expired] _________
+backend/tests/test_course.py:99: in test_secure_rejects_untrusted_or_other_client_tokens
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.821+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.08247400546679273,"request_id":"3fae3f8d97b042a3aa8f846077121da7"}
+____ test_secure_rejects_untrusted_or_other_client_tokens[wrong-signature] _____
+backend/tests/test_course.py:99: in test_secure_rejects_untrusted_or_other_client_tokens
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.873+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.06990000110818073,"request_id":"e25c5862b49a4cb28da0e91545d5ebb1"}
+______ test_secure_rejects_untrusted_or_other_client_tokens[wrong-issuer] ______
+backend/tests/test_course.py:99: in test_secure_rejects_untrusted_or_other_client_tokens
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:20.954+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.09618000331101939,"request_id":"0c47a8c1d64a458c8abfd57e4cbf92c4"}
+_______ test_secure_rejects_untrusted_or_other_client_tokens[malformed] ________
+backend/tests/test_course.py:99: in test_secure_rejects_untrusted_or_other_client_tokens
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:21.012+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.07400200411211699,"request_id":"2046be8a878047148097989c90427cca"}
+__________ test_student_db_outage_does_not_expose_url_or_credentials ___________
+backend/tests/test_course.py:106: in test_student_db_outage_does_not_expose_url_or_credentials
+    assert response.status_code == 503
+E   assert 404 == 503
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"ts":"2026-11-02T04:24:21.064+00:00","level":"INFO","service":"api","method":"GET","route":"_unmatched","status":404,"duration_ms":0.07239700062200427,"request_id":"969b19d84d3246f2bb808a0d7a328f03"}
+=============================== warnings summary ===============================
+../../../../.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Product database targets: PostgreSQL 0, SQLite 20; explicit SQLite file contracts 0.
+=========================== short test summary info ============================
+FAILED backend/tests/test_course.py::test_hello_exact_response_and_mounted_json_is_read_fresh
+FAILED backend/tests/test_course.py::test_mounted_json_errors_are_generic_and_bounded[missing]
+FAILED backend/tests/test_course.py::test_mounted_json_errors_are_generic_and_bounded[malformed]
+FAILED backend/tests/test_course.py::test_mounted_json_errors_are_generic_and_bounded[oversized]
+FAILED backend/tests/test_course.py::test_secure_uses_flask_app_identity_without_registering_a_lab_account
+FAILED backend/tests/test_course.py::test_secure_rejects_untrusted_or_other_client_tokens[web-client]
+FAILED backend/tests/test_course.py::test_secure_rejects_untrusted_or_other_client_tokens[expired]
+FAILED backend/tests/test_course.py::test_secure_rejects_untrusted_or_other_client_tokens[wrong-signature]
+FAILED backend/tests/test_course.py::test_secure_rejects_untrusted_or_other_client_tokens[wrong-issuer]
+FAILED backend/tests/test_course.py::test_secure_rejects_untrusted_or_other_client_tokens[malformed]
+FAILED backend/tests/test_course.py::test_student_db_outage_does_not_expose_url_or_credentials
+11 failed, 9 passed, 1 warning in 1.23s

@@ -1,0 +1,92 @@
+[
+  {
+    "name": "course-enabled-without-flag",
+    "file": "backend/apps/factory.py",
+    "old": "service == \"api\" and os.environ.get(\"HETEROES_COURSE_DEMO\", \"0\") == \"1\"",
+    "new": "service == \"api\""
+  },
+  {
+    "name": "course-routes-on-other-roles",
+    "file": "backend/apps/factory.py",
+    "old": "service == \"api\" and os.environ.get(\"HETEROES_COURSE_DEMO\", \"0\") == \"1\"",
+    "new": "os.environ.get(\"HETEROES_COURSE_DEMO\", \"0\") == \"1\""
+  },
+  {
+    "name": "hello-wire-contract-changed",
+    "file": "backend/api/course.py",
+    "old": "Hello from App Server!",
+    "new": "Hello"
+  },
+  {
+    "name": "secure-accepts-web-client",
+    "file": "backend/services/course.py",
+    "old": "client_id=\"flask-app\"",
+    "new": "client_id=\"heteroes-web\""
+  },
+  {
+    "name": "secure-decodes-without-signature-or-claims",
+    "file": "backend/services/course.py",
+    "old": "claims = self.verifier.verify(token)",
+    "new": "claims = __import__(\"jwt\").decode(token, options={\"verify_signature\": False})"
+  },
+  {
+    "name": "secure-does-not-require-bearer-scheme",
+    "file": "backend/services/course.py",
+    "old": "if scheme.lower() != \"bearer\" or not token:",
+    "new": "if not token:"
+  },
+  {
+    "name": "students-static-empty-response",
+    "file": "backend/services/course.py",
+    "old": "return rows",
+    "new": "return []"
+  },
+  {
+    "name": "students-unbounded-file-size",
+    "file": "backend/services/course.py",
+    "old": "if len(payload) > _MAX_STUDENTS_BYTES:",
+    "new": "if False:"
+  },
+  {
+    "name": "students-object-instead-of-list-allowed",
+    "file": "backend/services/course.py",
+    "old": "if not isinstance(rows, list):",
+    "new": "if False:"
+  },
+  {
+    "name": "students-file-error-detail-exposed",
+    "file": "backend/services/course.py",
+    "old": "except (OSError, ValueError):\n            raise ServiceError(503, \"Course student file is unavailable\") from None",
+    "new": "except (OSError, ValueError) as error:\n            raise ServiceError(503, str(error)) from None"
+  },
+  {
+    "name": "students-database-error-detail-exposed",
+    "file": "backend/services/course.py",
+    "old": "except Exception:\n            raise ServiceError(503, \"Course student database is unavailable\") from None",
+    "new": "except Exception as error:\n            raise ServiceError(503, str(error)) from None"
+  },
+  {
+    "name": "students-db-order-reversed",
+    "file": "backend/repositories/course.py",
+    "old": "FROM students ORDER BY id",
+    "new": "FROM students ORDER BY id DESC"
+  },
+  {
+    "name": "students-db-public-column-changed",
+    "file": "backend/repositories/course.py",
+    "old": "SELECT id,student_id,fullname,dob,major",
+    "new": "SELECT id,student_id,fullname AS name,dob,major"
+  },
+  {
+    "name": "students-db-response-empty",
+    "file": "backend/repositories/course.py",
+    "old": "return [dict(row) for row in rows]",
+    "new": "return []"
+  },
+  {
+    "name": "students-db-accepts-other-dialects",
+    "file": "backend/services/course.py",
+    "old": "if url.drivername not in {\"postgres\", \"postgresql\", \"postgresql+psycopg\"} or not url.database:",
+    "new": "if not url.database:"
+  }
+]

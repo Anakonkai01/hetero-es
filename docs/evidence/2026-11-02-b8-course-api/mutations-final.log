@@ -1,0 +1,18 @@
+control ok    | 26 passed, 1 warning in 6.08s
+killed       course-enabled-without-flag | 1 failed, 25 passed, 1 warning in 6.07s
+killed       course-routes-on-other-roles | 4 failed, 22 passed, 1 warning in 5.39s
+killed       hello-wire-contract-changed | 1 failed, 25 passed, 1 warning in 5.28s
+killed       secure-accepts-web-client | 2 failed, 24 passed, 1 warning in 5.98s
+killed       secure-decodes-without-signature-or-claims | 5 failed, 21 passed, 1 warning in 5.20s
+killed       secure-does-not-require-bearer-scheme | 1 failed, 25 passed, 1 warning in 5.24s
+killed       students-static-empty-response | 1 failed, 25 passed, 1 warning in 5.16s
+killed       students-oversized-valid-prefix-accepted | 1 failed, 25 passed, 1 warning in 5.29s
+killed       students-object-instead-of-list-allowed | 1 failed, 25 passed, 1 warning in 6.07s
+killed       students-file-error-detail-exposed | 5 failed, 21 passed, 1 warning in 5.42s
+killed       students-database-error-detail-exposed | 1 failed, 25 passed, 1 warning in 5.48s
+killed       students-db-order-reversed | 1 failed, 25 passed, 1 warning in 5.20s
+killed       students-db-public-column-changed | 1 failed, 25 passed, 1 warning in 5.19s
+killed       students-db-response-empty | 1 failed, 25 passed, 1 warning in 5.14s
+killed       students-db-accepts-other-dialects | 1 failed, 25 passed, 1 warning in 5.09s
+
+15 of 15 mutants killed.
