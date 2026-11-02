@@ -1,0 +1,125 @@
+{
+  "changed": [
+    {
+      "name": "strict layout applies to every decoder",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "strict layout never applies",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "CPU coordinator allowed for strict",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "same device not detected",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "same physical GPU not detected",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "scheduling skips the strict layout",
+      "beforeFile": "backend/agent_scheduling.py",
+      "afterFile": "backend/services/agent_scheduling.py"
+    },
+    {
+      "name": "creation skips the strict layout",
+      "beforeFile": "backend/validation.py",
+      "afterFile": "backend/services/validation.py"
+    },
+    {
+      "name": "creation checks the coordinator as a worker",
+      "beforeFile": "backend/validation.py",
+      "afterFile": "backend/services/validation.py"
+    },
+    {
+      "name": "probe route drops the decoder",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "probe request accepts any decoder",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/core/study_models.py"
+    },
+    {
+      "name": "reference lookup ignores the decoder",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "pending probe of the other decoder blocks",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "job forgets the strict decoder",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "command to the device drops the decoder",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "report is checked against the engine only",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "report recipe decoder is not compared",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "status omits the strict references",
+      "beforeFile": "backend/model_qualification.py",
+      "afterFile": "backend/services/model_qualification.py"
+    },
+    {
+      "name": "v3_qualification ignores the decoder",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "v3_qualification treats every decoder as strict",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "legacy profile counts for strict runs",
+      "beforeFile": "backend/policies.py",
+      "afterFile": "backend/services/policies.py"
+    },
+    {
+      "name": "validation does not pass the decoder",
+      "beforeFile": "backend/validation.py",
+      "afterFile": "backend/services/validation.py"
+    },
+    {
+      "name": "evalDtype allowed for every decoder",
+      "beforeFile": "backend/validation.py",
+      "afterFile": "backend/services/validation.py"
+    },
+    {
+      "name": "empty evalDtype stays in the document",
+      "beforeFile": "backend/validation.py",
+      "afterFile": "backend/services/validation.py"
+    },
+    {
+      "name": "evalDtype is not an update key",
+      "beforeFile": "backend/constants.py",
+      "afterFile": "backend/core/constants.py"
+    }
+  ],
+  "unresolved": []
+}

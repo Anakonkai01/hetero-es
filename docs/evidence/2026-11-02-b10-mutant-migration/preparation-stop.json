@@ -1,0 +1,9 @@
+{
+  "stoppedOwnedProcesses": [
+    1514293,
+    1514570,
+    1514574
+  ],
+  "accepted": false,
+  "reason": "Backend mutation assets still refer to old module paths; fix/validate before final clean-source acceptance"
+}

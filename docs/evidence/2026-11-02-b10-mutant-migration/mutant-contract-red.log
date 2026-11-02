@@ -1,0 +1,10 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_all_mutation_targets_exist_match_once_and_produce_valid_python ______
+acceptance/tests/test_mutant_contract.py:15: in test_all_mutation_targets_exist_match_once_and_produce_valid_python
+    assert target is not None, (config.name, mutant["name"], mutant["file"])
+E   AssertionError: ('gpu-ownership-backend.json', 'strict layout applies to every decoder', 'backend/policies.py')
+E   assert None is not None
+=========================== short test summary info ============================
+FAILED acceptance/tests/test_mutant_contract.py::test_all_mutation_targets_exist_match_once_and_produce_valid_python
+1 failed in 0.06s

@@ -1,0 +1,149 @@
+{
+  "checked": 137,
+  "issues": [
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "probe route drops the decoder",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "probe request accepts any decoder",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "reference lookup ignores the decoder",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "pending probe of the other decoder blocks",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "job forgets the strict decoder",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "command to the device drops the decoder",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "report is checked against the engine only",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "report recipe decoder is not compared",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "status omits the strict references",
+      "file": "backend/model_qualification.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "v3_qualification ignores the decoder",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "v3_qualification treats every decoder as strict",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "legacy profile counts for strict runs",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "validation does not pass the decoder",
+      "file": "backend/validation.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "evalDtype allowed for every decoder",
+      "file": "backend/validation.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "empty evalDtype stays in the document",
+      "file": "backend/validation.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "strict-qualification-backend.json",
+      "name": "evalDtype is not an update key",
+      "file": "backend/constants.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "strict layout applies to every decoder",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "strict layout never applies",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "CPU coordinator allowed for strict",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "same device not detected",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "same physical GPU not detected",
+      "file": "backend/policies.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "scheduling skips the strict layout",
+      "file": "backend/agent_scheduling.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "creation skips the strict layout",
+      "file": "backend/validation.py",
+      "issue": "missing file"
+    },
+    {
+      "config": "gpu-ownership-backend.json",
+      "name": "creation checks the coordinator as a worker",
+      "file": "backend/validation.py",
+      "issue": "missing file"
+    }
+  ]
+}

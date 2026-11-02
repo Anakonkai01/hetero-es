@@ -1,0 +1,19 @@
+control ok    | 28 passed, 1 warning in 5.66s
+killed       probe route drops the decoder | 1 failed, 17 passed, 1 warning in 3.76s
+killed       probe request accepts any decoder | 1 failed, 20 passed, 1 warning in 4.27s
+killed       reference lookup ignores the decoder | 1 failed, 17 passed, 1 warning in 3.71s
+killed       pending probe of the other decoder blocks | 1 failed, 22 passed, 1 warning in 4.84s
+killed       job forgets the strict decoder | 1 failed, 17 passed, 1 warning in 3.68s
+killed       command to the device drops the decoder | 1 failed, 17 passed, 1 warning in 3.70s
+killed       report is checked against the engine only | 1 failed, 17 passed, 1 warning in 3.71s
+killed       report recipe decoder is not compared | 1 failed, 17 passed, 1 warning in 3.69s
+killed       status omits the strict references | 1 failed, 17 passed, 1 warning in 3.72s
+killed       v3_qualification ignores the decoder | 1 failed, 17 passed, 1 warning in 3.66s
+killed       v3_qualification treats every decoder as strict | 1 failed, 1 warning in 0.34s
+killed       legacy profile counts for strict runs | 1 failed, 23 passed, 1 warning in 4.69s
+killed       validation does not pass the decoder | 1 failed, 21 passed, 1 warning in 4.39s
+killed       evalDtype allowed for every decoder | 1 failed, 21 passed, 1 warning in 4.43s
+killed       empty evalDtype stays in the document | 1 failed, 24 passed, 1 warning in 4.89s
+killed       evalDtype is not an update key | 1 failed, 24 passed, 1 warning in 4.96s
+
+16 of 16 mutants killed.

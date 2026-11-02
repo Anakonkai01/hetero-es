@@ -1,0 +1,18 @@
+{
+  "README.md": "84aefa3042aab4b83abb3f246253df184a347aed1d8a4d7e78cb8716324673f1",
+  "acceptance-selftest-preparation.log": "410efa8748991df41b65fa13d33226137049e1ea39ce6517373e072e425152cb",
+  "gpu-ownership-backend-before.json": "fe19a6e0dfc36617ac4a8ef2a563c649ccdd046a35ca9e4366edb3c83a7116fa",
+  "migrate-mutant-targets.py": "b250fd74b2533f81ec394be434b4e126e21573e23f7dd094931a2b87b5d22770",
+  "migrated-ownership-mutations.log": "9fd723b053ecef4ff51f577107af98a6234980c4e405157cef51cc4593a2e40c",
+  "migrated-qualification-mutations.log": "88260f1f1276e605453a3d3d34827f24843e68563d7e6f4ee40767bb8d7f64e7",
+  "mutant-contract-final.log": "549ca11e4fe3df25ea1c34a3bac944e6e63975250497b6adc3e172fa62165968",
+  "mutant-contract-red.log": "34dbc6d66dd73e892d49f63e7fa867ff07fc4be04b4ad91d45a19c5ff748f832",
+  "mutant-migration-report.json": "a27b770e571cef0b7491390725ad5f4852ff5c582844e472564a69346c2c411f",
+  "mutant-target-audit-red.json": "bc05df0f85fe9af9744364e58905420f8cb65be2ecc4e4b204642bec75649f87",
+  "preparation-stop.json": "90c77db4ff78ba7e833ca8fb247fb5b43eb21c100fbfebdc0d77ab741ca65bf3",
+  "redundant-check-stop.json": "ffcfc80e54d21990d0d47410b48e5dc9ef8883b758cd6617c42cbf692dbf3226",
+  "source/acceptance/mutants/gpu-ownership-backend.json": "220d0ebd2b7dda94e1b5e94b65f30604dfedffb4a3e3ed98f8b429260f6a4f57",
+  "source/acceptance/mutants/strict-qualification-backend.json": "33b30e6ca31f1971fbe5d24150a55418c37c459aa1aa5a40c16c02a0514d99e3",
+  "source/acceptance/tests/test_mutant_contract.py": "387c885e5159b6ea794f0734124670e252d569c631a45cfe676d2a1cfd1a6495",
+  "strict-qualification-backend-before.json": "6425be9f14ebffd61686cf0b2a1a27f3e09b27202c0eac4c90c7508c1bea4dc0"
+}

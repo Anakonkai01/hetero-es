@@ -1,0 +1,8 @@
+{
+  "stoppedRedundantStandaloneCheckAll": [
+    1514377,
+    1514381
+  ],
+  "reason": "CPU acceptance already owns the full check-all; avoid duplicate work and fixture-port collisions",
+  "accepted": false
+}

@@ -1,0 +1,11 @@
+control ok    | 28 passed, 1 warning in 5.67s
+killed       strict layout applies to every decoder | 1 failed, 1 warning in 0.35s
+killed       strict layout never applies | 1 failed, 25 passed, 1 warning in 5.34s
+killed       CPU coordinator allowed for strict | 1 failed, 26 passed, 1 warning in 5.67s
+killed       same device not detected | 1 failed, 27 passed, 1 warning in 5.74s
+killed       same physical GPU not detected | 1 failed, 27 passed, 1 warning in 5.64s
+killed       scheduling skips the strict layout | 1 failed, 25 passed, 1 warning in 5.39s
+killed       creation skips the strict layout | 1 failed, 25 passed, 1 warning in 5.34s
+killed       creation checks the coordinator as a worker | 1 failed, 21 passed, 1 warning in 4.55s
+
+8 of 8 mutants killed.
