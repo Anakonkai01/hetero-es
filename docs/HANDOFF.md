@@ -4,7 +4,7 @@ One page, kept current. Start with [REVIEW-GUIDE.md](REVIEW-GUIDE.md), then the
 [approved A → B → C plan](plans/codex-2026-11-review-fixes-and-minicloud.md).
 Historical handoffs and immutable evidence live on `evidence-archive` ([index](EVIDENCE-INDEX.md)).
 
-## Tóm tắt cho chủ dự án (2026-11-01)
+## Tóm tắt cho chủ dự án (2026-11-02)
 
 - **Phần A hoàn tất:** đã sửa các finding review, gồm bảo mật HTTP, coordinator/restore, vùng số học đóng băng,
   ledger và khung nghiệm thu. [FINDINGS-A](review/FINDINGS-A.md) ghi từng sửa và bằng chứng.
@@ -14,8 +14,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
 - Throughput 5070 Ti: short32 10 100,4 token/s, chat128 9 931,9, trên sàn đã ghim. 137/137 mutant bị phát hiện.
   Fault/replay, soak 600 thế hệ, vòng đời int8 và hai app Linux đã đạt.
-- **Phần B đã xong B1–B6:** backend chia lớp, Postgres, service riêng, OIDC và S3/MinIO. Tiếp theo là metrics/log,
-  router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
+- **Phần B đã xong B1–B7:** backend chia lớp, Postgres, service riêng, OIDC, S3/MinIO và metrics/log an toàn.
+  Tiếp theo là router đồ án, cấu hình/đóng gói và nghiệm thu B10. Keycloak thật sẽ được nghiệm thu trong cụm phần C.
   **Phần C chưa triển khai:** repo MiniCloud, cụm container, demo GPU riêng, minh chứng và bản nháp báo cáo.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
@@ -35,7 +35,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - Strict lab form default: `strict_b22_v1`. Its GPU coordinator must differ from its workers (D1).
   `strict_int8_lora_v1` remains standalone/SDK only.
 - CPU check-all: all 24 steps pass, including 3 324 runtime tests (1 045 intentional CUDA-hidden skips),
-  464 backend SQLite tests, browser/Electron fixtures, lint/type/i18n and source-package imports.
+  626 backend SQLite tests (641 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
+  The B7 full PostgreSQL/MinIO matrix passes669 tests, zero skips; details below.
 
 ## Tiến độ kế hoạch 2026-11
 
@@ -115,6 +116,16 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   signer independently enforces the same rule (separate probe retained). B-012/013 format/header-coverage issues fixed.
   Evidence `2026-11-01-b6-s3-minio`; source-package imports and lint/format pass. B7–B10 and all C remain, including the
   environment-only overlay, packaged Python dependencies and real Keycloak/GPU/deployment acceptance.
+  B7 complete: every role has DB/storage readiness and private-registry HTTP counters/histograms by route pattern;
+  only the live scheduler leader exports fresh DB business gauges. GPU labels/units and retained-snapshot/storage limits
+  are defined in [observability](design/observability.md). JSON stdout has exactly nine safe request fields; a real
+  Uvicorn transport test rules out bearer-bearing traceback leaks. Concurrent owned reads survive graceful scheduler
+  shutdown; invalid/unrepresentable telemetry and generation values cannot break scrapes (B-014/015).
+  Final actual-MinIO SQLite641/PostgreSQL669, zero skips; PG audit418 PG +50 explicit SQLite Stores. All24 resumed
+  check-all steps pass, including browser/Electron fixtures; the interrupted first run is rejected. Mutation31/31 killed
+  on actual PG after fixing the counter-value test gap (B-016); initial26/27 retained. Evidence
+  `2026-11-02-b7-observability`. Desktop without optional Prometheus keeps basic service_up only; split/cloud requires it.
+  B8–B10 and all C remain; no live monitoring/GPU/Keycloak/deployment acceptance is claimed by these CPU fixtures.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
@@ -123,7 +134,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Remaining scope and limits
 
-- B1–B6 are complete. Execute B7–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
+- B1–B7 are complete. Execute B8–B10 then C1–C8 in the approved order. Publish the final B commit as MiniCloud's `HETEROES_REF`.
   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.

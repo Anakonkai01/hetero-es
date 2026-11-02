@@ -180,6 +180,19 @@ def create_app(
             runtime.storage_backend.install_routes(registration)
 
     install_web_routes(registration, web_directory, downloads_directory)
+    from ..services.observability import BusinessSnapshot, Metrics
+    from ..api.observability import RequestObservability
+
+    legacy = (
+        service == "all"
+        and store.database.dialect == "sqlite"
+        and auth_mode == "local"
+        and getattr(runtime.storage_backend, "mode", "local") != "s3"
+    )
+    app.state.metrics = Metrics(
+        service, scheduler, BusinessSnapshot(store, getattr(app.state, "storage", None)), allow_legacy=legacy
+    )
+    app.add_middleware(RequestObservability, metrics=app.state.metrics, service=service)
     return app
 
 

@@ -148,6 +148,12 @@ class LocalBackend:
         if not device.exists() or Path(source).resolve() != device.resolve():
             raise ValueError("Selected storage volume is not mounted")
 
+    def ready(self):
+        self.check_volume()
+        for root in (self.root, self.metadata_root):
+            if root is not None and (not root.is_dir() or not os.access(root, os.R_OK | os.W_OK)):
+                raise OSError("Storage directory unavailable")
+
     def path(self, key):
         self.check_volume()
         if not isinstance(key, str) or not KEY.fullmatch(key):

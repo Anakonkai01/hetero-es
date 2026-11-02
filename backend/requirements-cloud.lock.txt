@@ -6,6 +6,7 @@ cryptography==50.0.2
 jmespath==1.1.0
 psycopg==3.3.6
 psycopg-binary==3.3.6
+prometheus_client==0.26.0
 python-dateutil==2.9.0.post0
 s3transfer==0.19.2
 six==1.17.0

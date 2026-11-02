@@ -12,6 +12,12 @@ def install_routes(app, store, service):
     def ready():
         try:
             store.database.ping()
+            backend = getattr(store.runtime, "storage_backend", None)
+            if backend is not None:
+                if hasattr(backend, "ready"):
+                    backend.ready()
+                else:
+                    backend.inventory()
         except Exception as error:
             return JSONResponse(
                 {"ready": False, "service": service, "errorType": type(error).__name__}, status_code=503
@@ -20,4 +26,5 @@ def install_routes(app, store, service):
 
     @app.get("/metrics", include_in_schema=False)
     def metrics():
-        return Response(f'heteroes_service_up{{service="{service}"}} 1\n', media_type="text/plain; version=0.0.4")
+        body, content_type = app.state.metrics.render()
+        return Response(body, headers={"Content-Type": content_type})
