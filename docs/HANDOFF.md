@@ -148,6 +148,10 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   Full actual-MinIO SQLite694/PG723, zero skips; PG audit445 PG +52 explicit SQLite Stores. Mutation17+8/25 killed,
   all24 check-all steps and Linux apps --check pass. Evidence `2026-11-02-b9-configuration-packaging`. Windows wheels
   are hash-verified; native private interpreter execution and the clean same-source GPU matrix remain B10. All C remains.
+  B10 preparation:24 acceptance mutations still targeted pre-refactor backend files. They now target their canonical
+  owners with original meanings/count/layout retained; the new selftest checks all137 targets exist/match once/compile.
+  All59 selftests and focused16+8 mutations pass. The first CPU attempt was interrupted before its receipt and rejected;
+  evidence `2026-11-02-b10-mutant-migration`. Final clean same-source three-host acceptance is still pending.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
