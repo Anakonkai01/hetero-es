@@ -6,7 +6,22 @@ from ..core.constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_
 from backend.core.errors import RuntimeRejected
 from .policies import dispatch_held
 from ..repositories.scheduling import SchedulingRepository as repository
+from ..repositories.recovery_storage import RecoveryStorageRepository
 from ..db.transactions import begin_write
+
+
+def cloud_sync_projection(db, body, incoming):
+    """Final storage verification wins over late or out-of-order coordinator upload reports."""
+    previous = body.get("cloudSync", {})
+    result = dict(incoming)
+    if previous.get("lastCloudGeneration", -1) > incoming.get("lastCloudGeneration", -1):
+        result.update({key: previous[key] for key in ("lastCloudGeneration", "pointId") if key in previous})
+    completed = body.get("completedGenerations", 0)
+    if body["status"] == "COMPLETED" and completed > 0:
+        point = RecoveryStorageRepository.verified_final_point(db, (body["experimentId"], completed - 1)).fetchone()
+        if point:
+            return {"status": "READY", "lastCloudGeneration": point["generation"], "pointId": point["id"]}
+    return result
 
 
 class SchedulingService:
@@ -143,17 +158,11 @@ class SchedulingService:
             if body["status"] == "PAUSED":
                 body["pausedAt"] = now()
                 repository._dispatch_run_delete_queue(db, (run_id,))
-            if "cloudSync" in snapshot:
-                previous = body.get("cloudSync", {})
-                incoming = snapshot["cloudSync"]
-                body["cloudSync"] = {**incoming}
-                if previous.get("lastCloudGeneration", -1) > incoming.get("lastCloudGeneration", -1):
-                    body["cloudSync"].update(
-                        {k: previous[k] for k in ("lastCloudGeneration", "pointId") if k in previous}
-                    )
             generations = snapshot["generations"]
             complete = [item for item in generations if item["status"] == "COMPLETED"]
             body["completedGenerations"] = snapshot.get("completedGenerationCount", len(complete))
+            if "cloudSync" in snapshot:
+                body["cloudSync"] = cloud_sync_projection(db, body, snapshot["cloudSync"])
             body["monitoringPartial"] = bool(snapshot.get("monitoringPartial"))
             body["workerBlocks"] = {
                 worker: {"reason": value["stopReason"], "blockedAt": value.get("blockedAt")}

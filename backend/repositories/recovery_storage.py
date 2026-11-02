@@ -5,6 +5,15 @@ from .base import execute
 
 class RecoveryStorageRepository:
     @staticmethod
+    def verified_final_point(db, parameters=()):
+        return execute(
+            db,
+            "SELECT id,generation FROM recovery_points WHERE run_id=:p0 AND generation=:p1 "
+            "AND final=1 AND status='READY' ORDER BY created DESC LIMIT 1",
+            parameters,
+        )
+
+    @staticmethod
     def grant_select_assignments(db, parameters=()):
         return execute(db, "SELECT coordinator,epoch,run_id FROM assignments WHERE id=:p0", parameters)
 

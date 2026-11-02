@@ -164,6 +164,11 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   Evidence `2026-11-02-b10-final-cloud-acceptance`; lab status before/during/after is identical, runtime source unchanged
   from Part A. B-001…B-003 fixed; architecture answers reflect implemented layers/roles/storage. All C remains.
 - Authorized SSH target: `thao_nguyen@100.92.20.58` only. Private access file is outside Git, mode 0600; never print it.
+- C checkpoint 2026-11-02: repo2 local đạt26/26,10/10 mở rộng và H1–H6 trên0175c93b; CPU coordinator +3060 WSL
+  hoàn thành2 thế hệ/4 candidate,3 recovery point READY; có20 ảnh và DOCX/PDF34 trang. Chưa có Hub/EC2/video thực hiện.
+  Đọc ảnh phát hiện B-021: snapshot cũ làm nhãn checkpoint PENDING dù storage đã xác minh READY. Đã sửa metadata
+  projection,10 regression/8 mutation và SQLite704/Postgres733 xanh. Đang nghiệm thu lại nguồn và sẽ ghim/run lại C;
+  goal chưa hoàn tất. Runtime numerical không thay đổi. Không coi biên bản cũ là nghiệm thu nguồn mới.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
 - Temporary Windows wake request is bounded (no power-plan edit). Live handles, expiry/renewal note and stop flags:

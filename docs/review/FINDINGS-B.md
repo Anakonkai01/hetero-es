@@ -30,3 +30,16 @@ Baseline: `58cf278c`. Q = maintainability; D = documentation. The original conce
 
 The colleague's parenthetical text denotes examples, English explanations or personal comments. These notes do not claim
 that the existing modular monolith is a correctness defect; the approved multi-service work is tracked as architecture.
+
+### B-021 — Final recovery projection regresses after a late coordinator snapshot (P2)
+
+Found during the actual MiniCloud run screenshot review: all three MinIO recovery points were READY, including the final
+generation1 checkpoint, while the run API/UI retained PENDING. The coordinator may report an older local upload state
+after storage verification; the previous merge kept the confirmed generation/point ID but overwrote its status.
+
+Fixed: completed-run reconciliation consults the authoritative recovery repository for a READY final point at exactly the
+last completed generation. Pending, nonfinal, older, foreign-run and active-run points never become proof of final sync.
+The raw coordinator snapshot remains unchanged. No numerical runtime, manifest, storage verification or GPU arithmetic
+changes. Ten regressions include actual scheduler/storage persistence in both completion orders;8/8 mutants are killed.
+The full actual-MinIO backend matrices pass704 SQLite /733 PostgreSQL tests, zero skips. Same-source GPU/package/system
+reacceptance and a new MiniCloud run remain in progress; the previous0175c93b receipt is not relabeled.
