@@ -1,0 +1,162 @@
+[
+  {
+    "container": "api-gateway-proxy-server",
+    "image": "heteroes-minicloud/heteroes-gateway:3429d810",
+    "imageId": "sha256:d21cc788eb5dbaf4067378418285707829c4d1157033fa024d1ff2b6725005d6",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "application-backend-server-1",
+    "image": "heteroes-minicloud/heteroes-backend:3429d810",
+    "imageId": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "application-backend-server-2",
+    "image": "heteroes-minicloud/heteroes-backend:3429d810",
+    "imageId": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 1
+  },
+  {
+    "container": "authentication-identity-server",
+    "image": "heteroes-minicloud/heteroes-identity:3429d810",
+    "imageId": "sha256:c65e725103650d4b310d93b8b35f69a493d7fc44d666ecb94c7c5bf9c28290e9",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "compute-coordinator-server",
+    "image": "heteroes-minicloud/heteroes-coordinator-cpu:3429d810",
+    "imageId": "sha256:bdd6a86a44322497c0bce8e0318f20618d7c3e89df2ca2257f423171472125fb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "heteroes-devices",
+    "image": "heteroes-minicloud/heteroes-backend:3429d810",
+    "imageId": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "heteroes-scheduler1",
+    "image": "heteroes-minicloud/heteroes-backend:3429d810",
+    "imageId": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "heteroes-scheduler2",
+    "image": "heteroes-minicloud/heteroes-backend:3429d810",
+    "imageId": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 3
+  },
+  {
+    "container": "heteroes-storage",
+    "image": "heteroes-minicloud/heteroes-backend:3429d810",
+    "imageId": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "internal-dns-server",
+    "image": "heteroes-minicloud/heteroes-dns:3429d810",
+    "imageId": "sha256:f1e3303c394b648c9dc17f18c65e035673aaec6ed23e66a0d7c489cbed1e8717",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "logging-alloy",
+    "image": "heteroes-minicloud/heteroes-alloy:3429d810",
+    "imageId": "sha256:96679fc3f09bc477e2afa8108164af4150aafe26e64cb7952772b9a61137f908",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "logging-loki-server",
+    "image": "heteroes-minicloud/heteroes-loki:3429d810",
+    "imageId": "sha256:68c34c852c6b8f193fa565a068b42ee026385adcecb6454c8c31275ece060011",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "monitoring-cadvisor-server",
+    "image": "ghcr.io/google/cadvisor@sha256:b8e7d1093144fd088f425ff003d75a4aa405de075db78dae3bc563730b1bd07a",
+    "imageId": "sha256:b8e7d1093144fd088f425ff003d75a4aa405de075db78dae3bc563730b1bd07a",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "monitoring-grafana-dashboard-server",
+    "image": "heteroes-minicloud/heteroes-grafana:3429d810",
+    "imageId": "sha256:c96649bd78a8593a6cfce421db24cf448790822dcbc0fb9d9ce97e60f2c3bbe5",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "monitoring-node-exporter-server",
+    "image": "prom/node-exporter@sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0",
+    "imageId": "sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "monitoring-prometheus-server",
+    "image": "heteroes-minicloud/heteroes-prometheus:3429d810",
+    "imageId": "sha256:a6356be52fc6184bfcf6e535bd285239baf91aca7e3904b0d7beabcd8eb28273",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "object-storage-server",
+    "image": "heteroes-minicloud/heteroes-minio:3429d810",
+    "imageId": "sha256:f2e9c8f1ca9045a9616c72f2eb956c58bc855d2640b40997a6c97f4b761b4b93",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "relational-database-server",
+    "image": "heteroes-minicloud/heteroes-postgres:3429d810",
+    "imageId": "sha256:edc83532b012a48541382101b103c2143430bf43a144ad4c5e17254bf24dba9c",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "web-frontend-server-1",
+    "image": "heteroes-minicloud/heteroes-web:3429d810",
+    "imageId": "sha256:822a41459f53e178b8a73e68fdf4d7520936f8424e2c2077f543055cbaddf5d9",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  },
+  {
+    "container": "web-frontend-server-2",
+    "image": "heteroes-minicloud/heteroes-web:3429d810",
+    "imageId": "sha256:822a41459f53e178b8a73e68fdf4d7520936f8424e2c2077f543055cbaddf5d9",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0
+  }
+]

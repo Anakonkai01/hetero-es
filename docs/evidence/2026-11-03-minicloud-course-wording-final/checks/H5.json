@@ -1,0 +1,21 @@
+{
+  "id": "H5",
+  "startedAt": "2026-11-03T07:27:54.994640+00:00",
+  "status": "PASS",
+  "details": {
+    "status": "PASS",
+    "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+    "assertions": 34,
+    "check": "H5",
+    "values": {
+      "heteroes_gpu_utilization_percent": 0,
+      "heteroes_gpu_vram_used_bytes": 1074790400,
+      "heteroes_gpu_vram_total_bytes": 12884901888,
+      "heteroes_gpu_temperature_celsius": 45,
+      "heteroes_gpu_power_watts": 9.01,
+      "heteroes_gpu_sample_timestamp_seconds": 1793690862.1823187
+    },
+    "deviceId": "a32f6e0031d146ecb104f0becc5fe07e"
+  },
+  "durationSeconds": 0.20508
+}

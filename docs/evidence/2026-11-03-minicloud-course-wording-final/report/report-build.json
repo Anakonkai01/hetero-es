@@ -1,0 +1,10 @@
+{
+  "builtAt": "2026-11-03T14:26:55.377555",
+  "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+  "checks": ".scratch/checks-b021-final-stable-report/checks.json",
+  "screenshots": 21,
+  "files": {
+    "BaoCao-Cuoi-Ky-Cloud.docx": "0b1853ea667bc6a419479658ede91e4f61e5fcc72f71c41448f7b3d5fd12ca27",
+    "BaoCao-Cuoi-Ky-Cloud.pdf": "8c662a724e39c315d8561b315b10038872ccfba16f47a9884f56a44e03360292"
+  }
+}

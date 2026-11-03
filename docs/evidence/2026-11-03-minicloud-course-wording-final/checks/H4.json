@@ -1,0 +1,35 @@
+{
+  "id": "H4",
+  "startedAt": "2026-11-03T07:27:47.149210+00:00",
+  "status": "PASS",
+  "details": {
+    "status": "PASS",
+    "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+    "assertions": 128,
+    "check": "H4",
+    "runId": "7a47959223334f80921f8a533f6adc5a",
+    "points": [
+      {
+        "pointId": "a7cabe9cfc7f4154a816203d6d4618ff",
+        "generation": 1,
+        "final": false,
+        "status": "READY"
+      },
+      {
+        "pointId": "a670ef18d1fd458284d7ca27caecccf1",
+        "generation": 1,
+        "final": true,
+        "status": "READY"
+      },
+      {
+        "pointId": "4e67b59059134ab094edddd9c50cdc25",
+        "generation": 0,
+        "final": false,
+        "status": "READY"
+      }
+    ],
+    "verifiedObjects": 9,
+    "verifiedBytes": 881666
+  },
+  "durationSeconds": 7.845295
+}

@@ -1,0 +1,11 @@
+{
+  "id": "1",
+  "startedAt": "2026-11-03T07:27:35.968041+00:00",
+  "status": "PASS",
+  "details": {
+    "directWebStatus": 200,
+    "homeAndBlog": true,
+    "requiredBlogWordings": 2
+  },
+  "durationSeconds": 0.00178
+}

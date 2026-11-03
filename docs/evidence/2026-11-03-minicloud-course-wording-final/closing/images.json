@@ -1,0 +1,67 @@
+[
+  {
+    "component": "web",
+    "id": "sha256:822a41459f53e178b8a73e68fdf4d7520936f8424e2c2077f543055cbaddf5d9",
+    "repoTags": [
+      "heteroes-minicloud/heteroes-web:3429d810",
+      "heteroes-minicloud/heteroes-web:course"
+    ],
+    "repoDigests": [
+      "heteroes-minicloud/heteroes-web@sha256:822a41459f53e178b8a73e68fdf4d7520936f8424e2c2077f543055cbaddf5d9"
+    ],
+    "architecture": "amd64",
+    "os": "linux"
+  },
+  {
+    "component": "backend",
+    "id": "sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb",
+    "repoTags": [
+      "heteroes-minicloud/heteroes-backend:3429d810",
+      "heteroes-minicloud/heteroes-backend:course"
+    ],
+    "repoDigests": [
+      "heteroes-minicloud/heteroes-backend@sha256:7bd4517324d238bbf20fdc57cfb120b2f39eecdef84d2e084cf8f8b4ddb484bb"
+    ],
+    "architecture": "amd64",
+    "os": "linux"
+  },
+  {
+    "component": "gateway",
+    "id": "sha256:d21cc788eb5dbaf4067378418285707829c4d1157033fa024d1ff2b6725005d6",
+    "repoTags": [
+      "heteroes-minicloud/heteroes-gateway:3429d810",
+      "heteroes-minicloud/heteroes-gateway:course"
+    ],
+    "repoDigests": [
+      "heteroes-minicloud/heteroes-gateway@sha256:d21cc788eb5dbaf4067378418285707829c4d1157033fa024d1ff2b6725005d6"
+    ],
+    "architecture": "amd64",
+    "os": "linux"
+  },
+  {
+    "component": "dns",
+    "id": "sha256:f1e3303c394b648c9dc17f18c65e035673aaec6ed23e66a0d7c489cbed1e8717",
+    "repoTags": [
+      "heteroes-minicloud/heteroes-dns:3429d810",
+      "heteroes-minicloud/heteroes-dns:course"
+    ],
+    "repoDigests": [
+      "heteroes-minicloud/heteroes-dns@sha256:f1e3303c394b648c9dc17f18c65e035673aaec6ed23e66a0d7c489cbed1e8717"
+    ],
+    "architecture": "amd64",
+    "os": "linux"
+  },
+  {
+    "component": "coordinator-cpu",
+    "id": "sha256:bdd6a86a44322497c0bce8e0318f20618d7c3e89df2ca2257f423171472125fb",
+    "repoTags": [
+      "heteroes-minicloud/heteroes-coordinator-cpu:3429d810",
+      "heteroes-minicloud/heteroes-coordinator-cpu:course"
+    ],
+    "repoDigests": [
+      "heteroes-minicloud/heteroes-coordinator-cpu@sha256:bdd6a86a44322497c0bce8e0318f20618d7c3e89df2ca2257f423171472125fb"
+    ],
+    "architecture": "amd64",
+    "os": "linux"
+  }
+]

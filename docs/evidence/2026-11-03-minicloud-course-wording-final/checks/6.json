@@ -1,0 +1,12 @@
+{
+  "id": "6",
+  "startedAt": "2026-11-03T07:27:37.611064+00:00",
+  "status": "PASS",
+  "details": {
+    "dnsHostPort": 11053,
+    "answers": [
+      "10.77.10.10"
+    ]
+  },
+  "durationSeconds": 0.006959
+}

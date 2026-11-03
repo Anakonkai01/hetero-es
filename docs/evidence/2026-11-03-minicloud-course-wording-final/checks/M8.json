@@ -1,0 +1,11 @@
+{
+  "id": "M8",
+  "startedAt": "2026-11-03T07:27:43.112101+00:00",
+  "status": "PASS",
+  "details": {
+    "boards": 2,
+    "minimumPanelsEach": 3,
+    "liveMetricFamilies": 3
+  },
+  "durationSeconds": 0.012145
+}

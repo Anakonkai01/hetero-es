@@ -1,0 +1,12 @@
+{
+  "id": "M4",
+  "startedAt": "2026-11-03T07:27:42.366699+00:00",
+  "status": "PASS",
+  "details": {
+    "realm": "realm_523h0164",
+    "client": "flask-app",
+    "authenticated": 200,
+    "anonymous": 401
+  },
+  "durationSeconds": 0.038002
+}

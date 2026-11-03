@@ -1,0 +1,31 @@
+{
+  "id": "H3",
+  "startedAt": "2026-11-03T07:27:45.706920+00:00",
+  "status": "PASS",
+  "details": {
+    "status": "PASS",
+    "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+    "assertions": 10,
+    "check": "H3",
+    "runId": "7a47959223334f80921f8a533f6adc5a",
+    "ledger": {
+      "generations": 2,
+      "appliedUpdates": 2,
+      "committedCandidates": 4,
+      "results": 4,
+      "recordHashes": [
+        "4a60d56791ca9ecc4573c49c8c0950cfbb7e89cc8d6cb92fc76086be4aa7dc91",
+        "b412f359fd6e49373ee2c5e162307872da5ce5b78cd4dae86e40f87eb55455eb"
+      ],
+      "childWeightsSha256": [
+        "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db",
+        "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db"
+      ],
+      "rewardRange": [
+        0,
+        0
+      ]
+    }
+  },
+  "durationSeconds": 1.442157
+}

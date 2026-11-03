@@ -1,0 +1,13 @@
+{
+  "id": "M5",
+  "startedAt": "2026-11-03T07:27:42.404799+00:00",
+  "status": "PASS",
+  "details": {
+    "anonymousAvatar": 200,
+    "publicAvatarWriteDenied": 403,
+    "reportPdfSignature": true,
+    "reportPdfBytes": 2644703,
+    "reportPdfSha256": "8c662a724e39c315d8561b315b10038872ccfba16f47a9884f56a44e03360292"
+  },
+  "durationSeconds": 0.68488
+}

@@ -1,0 +1,10 @@
+{
+  "id": "M2",
+  "startedAt": "2026-11-03T07:27:42.222573+00:00",
+  "status": "PASS",
+  "details": {
+    "students": 5,
+    "unprovidedDataLabel": "mẫu"
+  },
+  "durationSeconds": 0.001254
+}

@@ -1,0 +1,219 @@
+{
+  "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+  "workspaceId": "d598f2a6b4114285af7bdd0681910723",
+  "purpose": "fresh bounded integration after B-021; no learning claim",
+  "model": {
+    "id": "762b6f0da928488aad60e2b00a7fa727",
+    "modelArtifactId": "762b6f0da928488aad60e2b00a7fa727",
+    "name": "Pinned Qwen0.5B C6",
+    "workspaceId": "d598f2a6b4114285af7bdd0681910723",
+    "ownerUserId": "kc:3f8e24fe-7690-4650-b403-f221e243daeb",
+    "reference": "Qwen/Qwen2.5-0.5B-Instruct",
+    "recipeVersion": 3,
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "manifest": {
+      "formatVersion": 1,
+      "modelId": "Qwen/Qwen2.5-0.5B-Instruct",
+      "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+      "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775",
+      "format": "safetensors",
+      "files": {
+        "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+        "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+        "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+        "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+        "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+        "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      }
+    },
+    "source": "REFERENCE",
+    "status": "REGISTERED",
+    "manifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c"
+  },
+  "dataset": {
+    "id": "eba41b09945047e2917f3d223b9d7586",
+    "datasetId": "eba41b09945047e2917f3d223b9d7586",
+    "name": "C6 integration arithmetic sample",
+    "workspaceId": "d598f2a6b4114285af7bdd0681910723",
+    "ownerUserId": "kc:3f8e24fe-7690-4650-b403-f221e243daeb",
+    "status": "READY",
+    "objectSha256": "cf796350cb4eb6ccf1271897c54b3da468aa06a2af699148f7ca90478630c571",
+    "identity": {
+      "contentHash": "2ecea9365d288715a7904900f24365bc2a10533d30f0787b5d9b67922ebadf0e",
+      "splitHashes": {
+        "train": "54c14ed9673d62ea058c44d502e82996b22f645cae69041c7c27446bf47413f0",
+        "validation": "f241b8ef773d3c2e334c7c6f8538c38f541f4cd6885d1a8cac8abd99732bfbcd",
+        "test": "0f980e5a574ab66d22a51d2c8453e262d9f03fcf4330f0bd3ca62435081c67b3"
+      }
+    },
+    "counts": {
+      "train": 16,
+      "validation": 2,
+      "test": 2
+    },
+    "splitSeed": 42,
+    "splitMode": "seeded-80-10-10",
+    "adapter": null,
+    "recipeVersion": 3,
+    "columns": [
+      "answer",
+      "prompt"
+    ]
+  },
+  "previousRuns": [
+    {
+      "runId": "2fd9de5118154ec695a1954125b188e0",
+      "status": "FAILED",
+      "failureReason": "URLError during private dataset retrieval",
+      "deviceReservationsReleased": true,
+      "sourceRef": "0175c93b493f1234601b187641ce94e407b7f57f"
+    },
+    {
+      "runId": "b50dece06abe47dd872ce9953e1d34dd",
+      "status": "FAILED",
+      "failureReason": "Private control edge rejected adapter/model data; separate private bulk listener added",
+      "deviceReservationsReleased": true,
+      "sourceRef": "0175c93b493f1234601b187641ce94e407b7f57f"
+    },
+    {
+      "sourceRef": "0175c93b493f1234601b187641ce94e407b7f57f",
+      "runId": "86a440d96fb04ec7ac57e6ad65ce6499",
+      "status": "COMPLETED",
+      "purpose": "accepted before B-021; retained unchanged"
+    }
+  ],
+  "assetsReusedFromSource": "0175c93b493f1234601b187641ce94e407b7f57f",
+  "runId": "7a47959223334f80921f8a533f6adc5a",
+  "configuration": {
+    "name": "MiniCloud CPU + RTX3060 two-generation demo",
+    "recipeVersion": 3,
+    "modelName": "Qwen/Qwen2.5-0.5B-Instruct",
+    "modelArtifactId": "762b6f0da928488aad60e2b00a7fa727",
+    "workerIds": [
+      "minicloud-wsl3060-9f62fd64"
+    ],
+    "coordinatorDeviceId": "397b7e014c134c55adeb4b5862457b5e",
+    "datasetIds": [
+      "eba41b09945047e2917f3d223b9d7586"
+    ],
+    "task": "text_v3",
+    "maxGenerations": 2,
+    "candidatesPerGeneration": 2,
+    "batchSize": 2,
+    "batchSeed": 11,
+    "maxNewTokens": 16,
+    "alpha": 0.001,
+    "sigma": 0.001,
+    "antithetic": true,
+    "coefficientRule": "zscore@1",
+    "sampler": "epoch-shuffle@1",
+    "noiseEngineVersion": "pcg64_u32_to_f16_normal_quantile_v2",
+    "decodeEngine": "hf_generate",
+    "evalChunk": 16,
+    "weightSpace": {
+      "kind": "lora",
+      "rank": 4,
+      "alpha": 8,
+      "targetModules": [
+        "q_proj",
+        "v_proj"
+      ]
+    },
+    "scorer": {
+      "kind": "declarative",
+      "name": "last-integer",
+      "version": 1,
+      "codeSha256": null,
+      "config": {}
+    },
+    "backupPolicy": {
+      "interval": 1,
+      "retain": 2
+    },
+    "auditRate": 0,
+    "hardCapSeconds": 240,
+    "stallSeconds": 120
+  },
+  "lastObservedStatus": "COMPLETED",
+  "lastObservedAt": "2026-11-03T06:12:16.349Z",
+  "cloudSync": {
+    "status": "READY",
+    "lastCloudGeneration": 1,
+    "pointId": "a670ef18d1fd458284d7ca27caecccf1"
+  },
+  "status": "PASS",
+  "finishedAt": "2026-11-03T06:12:16.356Z",
+  "runFields": [
+    "name",
+    "modelName",
+    "modelArtifactId",
+    "schedulerPolicy",
+    "allowJoin",
+    "syncMode",
+    "workerIds",
+    "task",
+    "maxGenerations",
+    "candidatesPerGeneration",
+    "alpha",
+    "sigma",
+    "decodeEngine",
+    "datasetIds",
+    "coordinatorDeviceId",
+    "backupPolicy",
+    "recipeVersion",
+    "noiseEngineVersion",
+    "batchSize",
+    "batchSeed",
+    "sigmaSchedule",
+    "sigmaMinimum",
+    "maxNewTokens",
+    "weightSpace",
+    "antithetic",
+    "scorer",
+    "coefficientRule",
+    "alphaSchedule",
+    "alphaMinimum",
+    "momentumBeta",
+    "momentumWindow",
+    "evalChunk",
+    "evalChunks",
+    "sampler",
+    "systemPrompt",
+    "validationInterval",
+    "auditRate",
+    "hardCapSeconds",
+    "stallSeconds",
+    "modelManifest",
+    "modelSource",
+    "datasetObjectSha256",
+    "datasetIdentity",
+    "experimentId",
+    "workspaceId",
+    "ownerUserId",
+    "status",
+    "cancelRequested",
+    "modelVersion",
+    "configHash",
+    "createdAt",
+    "completedGenerations",
+    "startedAt",
+    "workerIdentities",
+    "coordinatorIdentity",
+    "resumeRequested",
+    "pauseRequested",
+    "monitoringPartial",
+    "workerBlocks",
+    "cloudSync",
+    "auditSummary",
+    "usageSummary",
+    "studyMetrics",
+    "validationScore",
+    "membership",
+    "currentGenerationId",
+    "committedCandidateCount",
+    "testScore",
+    "failureReason",
+    "completedAt"
+  ]
+}

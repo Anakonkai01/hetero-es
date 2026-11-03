@@ -1,0 +1,10 @@
+{
+  "id": "M9",
+  "startedAt": "2026-11-03T07:27:43.124363+00:00",
+  "status": "PASS",
+  "details": {
+    "proxyStatus": 200,
+    "students": 5
+  },
+  "durationSeconds": 0.00156
+}

@@ -1,0 +1,10 @@
+{
+  "id": "5",
+  "startedAt": "2026-11-03T07:27:37.050147+00:00",
+  "status": "PASS",
+  "details": {
+    "demoObjects": 1,
+    "indexHtml": true
+  },
+  "durationSeconds": 0.560787
+}

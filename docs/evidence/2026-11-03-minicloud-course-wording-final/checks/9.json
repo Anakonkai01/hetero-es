@@ -1,0 +1,11 @@
+{
+  "id": "9",
+  "startedAt": "2026-11-03T07:27:37.623918+00:00",
+  "status": "PASS",
+  "details": {
+    "home": 200,
+    "api": 200,
+    "auth": 302
+  },
+  "durationSeconds": 0.001723
+}
