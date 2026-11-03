@@ -24,7 +24,7 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
 - **Sau đó (Claude, chiều 2026-11-03), theo yêu cầu sửa báo cáo:**
-  - Báo cáo môn Cloud được dựng lại bằng tiếng Việt, 45 trang, có sơ đồ mới, Dockerfile và output lệnh thật
+  - Báo cáo môn Cloud được dựng lại bằng tiếng Việt, 47 trang, có sơ đồ mới, Dockerfile và output lệnh thật
     (repo 2, nhánh `fix/report-vi-2026-11-03`, evidence `2026-11-03-report-vi`). Blog cũng đã chuyển sang tiếng Việt.
   - Run demo cũ có reward toàn 0 vì câu trả lời bị cắt ở 16 token. Run mới `d7a90ffc…` có reward 0,5–0,75 và trọng
     số đổi ở cả hai thế hệ. Bộ kiểm MiniCloud đạt 26/26 hai lần: một lần trước và một lần sau khi tải PDF mới lên.
