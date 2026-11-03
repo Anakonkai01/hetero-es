@@ -1,0 +1,154 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-c9f8f9d8dc7966ca95b8c36104cffeaf2ccc030d595fc4ed71266f9c2bb92229",
+  "dirty": false,
+  "commit": "243f41759714b6f464af3c4f655e9b99f0f7f851",
+  "host": "3060-wsl",
+  "profiles": [
+    "gpu"
+  ],
+  "machine": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": []
+  },
+  "started": "2026-11-02T18:59:16+0700",
+  "finished": "2026-11-02T19:21:23+0700",
+  "results": [
+    {
+      "name": "noise-es-gpu",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 50.653,
+      "log": "results/noise-es-gpu/output.log",
+      "log_sha256": "3e02330b78342de454332acf665a10328f93a72a679896fc5a68d86f798e067c",
+      "detail": "",
+      "counts": {
+        "passed": 572,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "572 passed in 49.53s",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 -m pytest -q -rs -p no:cacheprovider tests/noise tests/es",
+        "........................................................................ [ 12%]",
+        "........................................................................ [ 25%]",
+        "........................................................................ [ 37%]",
+        "........................................................................ [ 50%]",
+        "........................................................................ [ 62%]",
+        "........................................................................ [ 75%]",
+        "........................................................................ [ 88%]",
+        "....................................................................     [100%]",
+        "572 passed in 49.53s"
+      ]
+    },
+    {
+      "name": "strict-gpu-suite",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1152.708,
+      "log": "results/strict-gpu-suite/output.log",
+      "log_sha256": "bbd4e8283c048dbc30b70d02d5bcb42bf784d982fd42b236838650c7427c34c3",
+      "detail": "",
+      "counts": {
+        "passed": 1560,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 79
+      },
+      "pytest_summary": "1560 passed, 79 deselected in 1151.56s (0:19:11)",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/acceptance/probes/pytest_gpu_suite.py --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/results/strict-gpu-suite/pinned-model -- -q -rs -p no:cacheprovider tests/eval tests/v3/test_v3_strict_decoder.py tests/v3/test_model_qualification.py -m 'not sm120'",
+        "........................................................................ [  4%]",
+        "........................................................................ [  9%]",
+        "........................................................................ [ 13%]",
+        "........................................................................ [ 18%]",
+        "........................................................................ [ 23%]",
+        "........................................................................ [ 27%]",
+        "........................................................................ [ 32%]",
+        "........................................................................ [ 36%]",
+        "........................................................................ [ 41%]",
+        "........................................................................ [ 46%]",
+        "........................................................................ [ 50%]",
+        "........................................................................ [ 55%]",
+        "........................................................................ [ 60%]",
+        "........................................................................ [ 64%]",
+        "........................................................................ [ 69%]",
+        "........................................................................ [ 73%]",
+        "........................................................................ [ 78%]",
+        "........................................................................ [ 83%]",
+        "........................................................................ [ 87%]",
+        "........................................................................ [ 92%]",
+        "........................................................................ [ 96%]",
+        "................................................                         [100%]",
+        "1560 passed, 79 deselected in 1151.56s (0:19:11)"
+      ]
+    },
+    {
+      "name": "strict-parity-qwen",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 58.832,
+      "log": "results/strict-parity-qwen/output.log",
+      "log_sha256": "85cd761b5dcb242666e24598050db0131a952883c20499ae72d77036312306a3",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_parity.py --gpu --model qwen --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/results/strict-parity-qwen/parity.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3280.05it/s]",
+        "{\"status\": \"ok\", \"model\": \"qwen\", \"mismatches\": [], \"error\": null, \"wallSeconds\": 57.30039367300924}",
+        "PARITY OK"
+      ]
+    },
+    {
+      "name": "strict-parity-smol",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 25.72,
+      "log": "results/strict-parity-smol/output.log",
+      "log_sha256": "5a4b873b7b90ae632287a7635fd7abaf7c1b80559448a3351b3dfbef48073300",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_parity.py --gpu --model smol --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/results/strict-parity-smol/parity.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3573.23it/s]",
+        "{\"status\": \"ok\", \"model\": \"smol\", \"mismatches\": [], \"error\": null, \"wallSeconds\": 24.229395831993315}",
+        "PARITY OK"
+      ]
+    },
+    {
+      "name": "strict-parity-tiny",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 39.296,
+      "log": "results/strict-parity-tiny/output.log",
+      "log_sha256": "57fdad020a51ef169561b7e5f4bcd1ff77477b2ba64201b0f20a393b777a1937",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_parity.py --gpu --model tiny --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/results/strict-parity-tiny/parity.json",
+        "",
+        "Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]",
+        "Loading weights:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 157/201 [00:00<00:00, 1564.82it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 201/201 [00:00<00:00, 1584.74it/s]",
+        "{\"status\": \"ok\", \"model\": \"tiny\", \"mismatches\": [], \"error\": null, \"wallSeconds\": 37.75127262400929}",
+        "PARITY OK"
+      ]
+    }
+  ]
+}

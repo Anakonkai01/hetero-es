@@ -4,31 +4,32 @@ One page, kept current. Start with [REVIEW-GUIDE.md](REVIEW-GUIDE.md), then the
 [approved A → B → C plan](plans/codex-2026-11-review-fixes-and-minicloud.md).
 Historical handoffs and immutable evidence live on `evidence-archive` ([index](EVIDENCE-INDEX.md)).
 
-## Tóm tắt cho chủ dự án (2026-11-02)
+## Tóm tắt cho chủ dự án (2026-11-03)
 
 - **Phần A hoàn tất:** đã sửa các finding review, gồm bảo mật HTTP, coordinator/restore, vùng số học đóng băng,
   ledger và khung nghiệm thu. [FINDINGS-A](review/FINDINGS-A.md) ghi từng sửa và bằng chứng.
-- **Phần B hoàn tất B1–B10. Nguồn sạch `src-aed2a90e…` đạt 37/37 check:** CPU 2/2, 5070 Ti 24/24,
-  3060 WSL 8/8, Windows native 3/3. B-001…B-003 đã sửa và test; B-Q1/Q2 đã trả lời.
+- **Phần B và bản sửa B-021 hoàn tất. Nguồn sạch `src-c9f8f9d8…` đạt 37/37 check:** CPU 2/2, 5070 Ti 24/24,
+  3060 WSL 8/8, Windows native 3/3. B-001…B-003 và B-021 đã sửa/test; B-Q1/Q2 đã trả lời.
 - Noise/ES 572 test trên mỗi môi trường GPU; strict/eval 1 639 local, 1 560 WSL, 956 native; không skip.
   3060 chủ động deselect 79 ca chỉ áp dụng SM120. Qwen strict parity chung đạt cả ba môi trường.
-- Throughput 5070 Ti: short32 10 087,3 token/s, chat128 9 899,5, vượt sàn đã ghim. 137/137 mutant nghiệm thu và
-  76/76 mutant cloud bị phát hiện. WSL lần đầu không đạt; một lần chạy lại cùng source đạt 3 085,9/2 915,9 token/s.
-  Giữ cả hai biên bản; chưa xác định nguyên nhân lần đầu. Fault/replay, soak 600 thế hệ và int8 đều đạt.
-- Backend SQLite 694/Postgres 723 test xanh, không skip; cả hai app Linux được build và kiểm source bytes.
+- Throughput mới5070 Ti: short32 10 107,1 token/s, chat128 9 967,3; WSL3 104,3/2 919,5, vượt sàn đã ghim.
+  137/137 mutant nghiệm thu và8/8 mutant B-021 bị phát hiện. Biên bản B10 cũ vẫn giữ nguyên, gồm lần WSL không đạt.
+  Fault/replay, soak600 thế hệ và int8 đều đạt; numerical runtime không đổi.
+- Backend SQLite704/Postgres733 test xanh, không skip; cả hai app Linux được build và kiểm source bytes.
   Python riêng trên Linux/Windows lần lượt cài 23/24 wheel CPU đã ghim và đạt 6 kiểm tra HTTP thực trên mỗi máy.
-- **Tiếp theo là phần C:** repo MiniCloud, cụm container, Keycloak thật, demo GPU riêng, minh chứng và bản nháp báo cáo.
-  Các kết quả phần B chưa chứng minh triển khai MiniCloud.
+- **C đã đạt26/26 trên nguồn0175c93b**, có demo CPU+3060,20 ảnh và DOCX/PDF34 trang. Cần ghim/rebuild và chạy lại
+  theo nguồn B-021 vừa nghiệm thu; chưa chốt toàn bộ goal. Không dùng biên bản cũ để chứng minh nguồn mới.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
 
 ## Current technical state
 
-- Part B source is committed at `8da9df22`; the final documentation/receipt commit has the same clean identity:
-  `src-aed2a90eb9b727bee281c5540fcfbdba5395ccb7e13dee69a9ad8d04c914a3c2`.
-  Part B closes on `feat/cloud-services`, then fast-forwards/pushes `main`; that final commit is MiniCloud's `HETEROES_REF`.
+- Part B plus B-021 source is committed at `243f4175`; final documentation/receipt edits have the same clean identity:
+  `src-c9f8f9d8dc7966ca95b8c36104cffeaf2ccc030d595fc4ed71266f9c2bb92229`.
+  The reaccepted branch fast-forwards/pushes `main`; that final B commit becomes MiniCloud's updated `HETEROES_REF`.
 - Receipts and milestone gates: [STATUS](acceptance/STATUS.md). Final SHA-verified logs/reports:
-  evidence `2026-11-02-b10-final-cloud-acceptance` (37 selected passes, 38 raw records including the first WSL failure).
+  latest evidence `2026-11-03-b021-final-checkpoint-acceptance` (37/37,130 SHA-verified files). Previous
+  `2026-11-02-b10-final-cloud-acceptance` retains38 raw records including the first WSL failure.
   Part A's immutable P-FROZEN and acceptance remain in `2026-11-01-review-fixes` / `2026-11-01-partA-cpu-ede4338e`.
 - P-FROZEN: CPU 576 and GPU 694 before/after cases are byte-identical; update overhead +0.71%.
   A-014 is the approved release-state correction with old-DB migration, not a claim of unchanged ledger transitions.
@@ -37,8 +38,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - Strict lab form default: `strict_b22_v1`. Its GPU coordinator must differ from its workers (D1).
   `strict_int8_lora_v1` remains standalone/SDK only.
 - CPU check-all: all 24 steps pass, including 3 324 runtime tests (1 045 intentional CUDA-hidden skips),
-  678 backend SQLite tests (694 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
-  The B10 full PostgreSQL/MinIO matrix passes723 tests, zero skips; details below.
+  688 backend SQLite tests (704 with explicit real MinIO), browser/Electron fixtures, lint/type/i18n and source-package imports.
+  The latest full PostgreSQL/MinIO matrix passes733 tests, zero skips; details below.
 
 ## Tiến độ kế hoạch 2026-11
 
@@ -167,8 +168,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - C checkpoint 2026-11-02: repo2 local đạt26/26,10/10 mở rộng và H1–H6 trên0175c93b; CPU coordinator +3060 WSL
   hoàn thành2 thế hệ/4 candidate,3 recovery point READY; có20 ảnh và DOCX/PDF34 trang. Chưa có Hub/EC2/video thực hiện.
   Đọc ảnh phát hiện B-021: snapshot cũ làm nhãn checkpoint PENDING dù storage đã xác minh READY. Đã sửa metadata
-  projection,10 regression/8 mutation và SQLite704/Postgres733 xanh. Đang nghiệm thu lại nguồn và sẽ ghim/run lại C;
-  goal chưa hoàn tất. Runtime numerical không thay đổi. Không coi biên bản cũ là nghiệm thu nguồn mới.
+  projection,10 regression/8 mutation và SQLite704/Postgres733 xanh. Nguồn mới đã đạt37/37 và package Linux/native;
+  tiếp theo ghim/run lại C. Goal chưa hoàn tất. Runtime numerical không đổi. Biên bản cũ không thay nghiệm thu nguồn mới.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
 - Temporary Windows wake request is bounded (no power-plan edit). Live handles, expiry/renewal note and stop flags:
@@ -176,7 +177,8 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 
 ## Remaining scope and limits
 
-- B1–B10 are complete. Execute C1–C8 in the approved order. Pin the final B main commit as MiniCloud's `HETEROES_REF`.
+- B1–B10 and B-021 are complete. Repin/rebuild MiniCloud at the reaccepted B main commit, then repeat its bounded run,
+  checkpoint/API verification, full26-line checklist, screenshots and final report. Finish the full C delivery audit.
   Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.

@@ -41,5 +41,8 @@ Fixed: completed-run reconciliation consults the authoritative recovery reposito
 last completed generation. Pending, nonfinal, older, foreign-run and active-run points never become proof of final sync.
 The raw coordinator snapshot remains unchanged. No numerical runtime, manifest, storage verification or GPU arithmetic
 changes. Ten regressions include actual scheduler/storage persistence in both completion orders;8/8 mutants are killed.
-The full actual-MinIO backend matrices pass704 SQLite /733 PostgreSQL tests, zero skips. Same-source GPU/package/system
-reacceptance and a new MiniCloud run remain in progress; the previous0175c93b receipt is not relabeled.
+The full actual-MinIO backend matrices pass704 SQLite /733 PostgreSQL tests, zero skips. Source243f4175 is committed;
+all37 same-source check/host pairs pass, including5070 Ti,3060 WSL and native Windows,137 acceptance mutations and
+fresh Linux/native private-package execution. Evidence:2026-11-03-b021-final-checkpoint-acceptance,130 SHA-verified files.
+The fix applies to subsequent reconciliations; historical terminal row projections are not bulk-rewritten. A new
+MiniCloud run/checklist remains necessary; the previous0175c93b receipt is not relabeled as new-source acceptance.
