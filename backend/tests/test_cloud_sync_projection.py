@@ -108,3 +108,43 @@ def test_real_scheduler_and_storage_reconcile_both_completion_orders(storage, mo
     saved = store.get(active["experimentId"])
     assert saved["status"] == "COMPLETED" and saved["completedGenerations"] == 2
     assert saved["cloudSync"] == {"status": "READY", "lastCloudGeneration": 1, "pointId": final["pointId"]}
+
+
+@pytest.mark.parametrize("order", ["final-first", "periodic-first"])
+def test_late_periodic_twin_never_replaces_the_verified_final_point(storage, monkeypatch, order):
+    """B-022: a completed run uploads a periodic and a final point of its last generation almost together.
+    Whichever storage verification finishes last must not make the periodic point the run's checkpoint."""
+    recovery, objects, store = storage
+    active = store.create(
+        "admin",
+        {
+            "workerIds": ["worker"],
+            "coordinatorDeviceId": "coordinator",
+            "task": "arith16",
+            "candidatesPerGeneration": 2,
+            "maxGenerations": 2,
+            "alpha": 0.001,
+            "sigma": 0.001,
+            "decodeEngine": "hf_generate",
+            "schedulerPolicy": "greedy",
+            "syncMode": "synchronous",
+        },
+    )
+    monkeypatch.setattr(store.runtime, "submit", lambda config: None)
+    monkeypatch.setattr(
+        store.runtime,
+        "snapshot",
+        lambda run_id: {
+            "state": {"status": "COMPLETED"},
+            "generations": [],
+            "completedGenerationCount": 2,
+            "cloudSync": {"status": "PENDING"},
+        },
+    )
+    store.scheduling._dispatch_run(active)
+    run_id = active["experimentId"]
+    final = {**manifest(point="f" * 32), "runId": run_id, "generation": 1, "final": True}
+    periodic = {**manifest(point="e" * 32), "runId": run_id, "generation": 1, "final": False}
+    for point in [final, periodic] if order == "final-first" else [periodic, final]:
+        upload(recovery, objects, point)
+    assert store.get(run_id)["cloudSync"] == {"status": "READY", "lastCloudGeneration": 1, "pointId": "f" * 32}

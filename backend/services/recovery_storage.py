@@ -14,6 +14,7 @@ import uuid
 from types import SimpleNamespace
 from ..core.errors import ServiceError
 from ..repositories.recovery_storage import RecoveryStorageRepository as repository
+from .scheduling import cloud_sync_projection
 
 HEX = re.compile("[a-f0-9]{64}")
 
@@ -161,11 +162,13 @@ class RecoveryStorage:
                     if body:
                         old = body.get("cloudSync", {})
                         if old.get("lastCloudGeneration", -1) <= m["generation"]:
-                            body["cloudSync"] = {
-                                "status": "READY",
-                                "lastCloudGeneration": m["generation"],
-                                "pointId": point_id,
-                            }
+                            # The same rule as the coordinator-snapshot path: once a completed run has a verified
+                            # final point, a periodic twin of that generation verified later never replaces it (B-022).
+                            body["cloudSync"] = cloud_sync_projection(
+                                db,
+                                body,
+                                {"status": "READY", "lastCloudGeneration": m["generation"], "pointId": point_id},
+                            )
                             self.store.save(db, body)
             except Exception as error:
                 if isinstance(error, ValueError):

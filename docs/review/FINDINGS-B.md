@@ -50,3 +50,20 @@ checkpoint READY. The new-source final checklist passes26/26; its stable34-page 
 is bound byte-for-byte to the MinIO PDF. Latest evidence:2026-11-03-minicloud-course-wording-final on evidence-archive,
 mirrored from repo2 main c32a1bd after C-019's original-course text correction. The previous0175c93b receipt remains
 unchanged and is not relabeled as new-source acceptance.
+
+### B-022 — A periodic recovery point verified after the final point replaces it in the run projection (P3)
+
+Found 2026-11-03 by Claude while re-running the MiniCloud demo (run `d7a90ffc5a554b22a01b36ac52c1f744` at `3429d810`).
+A completed run uploads a periodic point and a final point of its last generation 0.26 s apart. Storage verification
+(`backend/services/recovery_storage.py`, `verify`) wrote `cloudSync.pointId` for any point whose generation is not older
+than the projected one, so whichever verification finished last won. Here the periodic point `a97127a6…` replaced the
+final point `154f8622…`. B-021 fixed only the coordinator-snapshot path (`cloud_sync_projection`). Impact is a wrong
+label, not wrong data: in this run both points list byte-identical files (same ledger and weight hashes).
+
+Fix (branch `fix/b022-final-point-projection`): `verify` now builds the projection with the same
+`cloud_sync_projection` rule, so a verified final point of the last completed generation always wins.
+Regression `test_late_periodic_twin_never_replaces_the_verified_final_point` covers both verification orders; it fails
+on the previous code (the pre-fix code is the killed mutant). Backend: SQLite 690 passed; PostgreSQL 716 passed
+(`scripts/check-backend-postgres.sh`, without the optional MinIO matrix).
+**Not yet done:** the three-host acceptance for the new source hash; MiniCloud stays pinned at `3429d810` until then. Its
+H4 check verifies the projection by content and reports `projectionIsFinal: false` with this ID.
