@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+  "pdfPages": 34,
+  "chapters": [
+    "Chương 1. Giới thiệu và mô hình hệ thống",
+    "Chương 2. Mạng và luồng dữ liệu",
+    "Chương 3. Triển khai Docker và cấu hình",
+    "Chương 4. Nghiệm thu thực tế",
+    "Chương 5. Đánh giá và phát triển"
+  ],
+  "screenshots": 21,
+  "imageOverflowPages": [],
+  "files": {
+    "BaoCao-Cuoi-Ky-Cloud.docx": "ca7866aaae398e12cb2e2b542d4c7830a894be44831da3cd4ca525d6873df245",
+    "BaoCao-Cuoi-Ky-Cloud.pdf": "01fbf2d71fdad35c879159d508ffb175f78ea1d669569536730231e67daa9f54"
+  }
+}

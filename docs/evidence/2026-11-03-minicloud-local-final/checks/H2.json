@@ -1,0 +1,30 @@
+{
+  "id": "H2",
+  "startedAt": "2026-11-03T06:49:36.948186+00:00",
+  "status": "PASS",
+  "details": {
+    "status": "PASS",
+    "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+    "assertions": 24,
+    "check": "H2",
+    "devices": [
+      {
+        "deviceId": "397b7e014c134c55adeb4b5862457b5e",
+        "name": "MiniCloud CPU coordinator",
+        "profile": "coordinator-cpu-v3",
+        "online": true,
+        "approved": true,
+        "contribution": true
+      },
+      {
+        "deviceId": "a32f6e0031d146ecb104f0becc5fe07e",
+        "name": "MiniCloud RTX3060 WSL",
+        "profile": "desktop-v3",
+        "online": true,
+        "approved": true,
+        "contribution": true
+      }
+    ]
+  },
+  "durationSeconds": 1.322962
+}

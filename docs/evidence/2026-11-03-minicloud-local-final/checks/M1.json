@@ -1,0 +1,11 @@
+{
+  "id": "M1",
+  "startedAt": "2026-11-03T06:49:34.903523+00:00",
+  "status": "PASS",
+  "details": {
+    "articles": 3,
+    "images": 3,
+    "homeLinks": 3
+  },
+  "durationSeconds": 0.003639
+}

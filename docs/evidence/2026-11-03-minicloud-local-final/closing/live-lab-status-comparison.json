@@ -1,0 +1,5 @@
+{
+  "status": "PASS",
+  "identical": true,
+  "limit": "Only the permitted local-lab.py status output is compared; it does not expose reservation counts or device state."
+}

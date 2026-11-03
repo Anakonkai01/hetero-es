@@ -1,0 +1,13 @@
+{
+  "id": "M6",
+  "startedAt": "2026-11-03T06:49:35.592140+00:00",
+  "status": "PASS",
+  "details": {
+    "records": {
+      "app-backend": 20,
+      "minio": 50,
+      "keycloak": 40
+    }
+  },
+  "durationSeconds": 0.01733
+}

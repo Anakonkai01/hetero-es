@@ -1,0 +1,21 @@
+{
+  "id": "10",
+  "startedAt": "2026-11-03T06:49:30.352341+00:00",
+  "status": "PASS",
+  "details": {
+    "aliases": [
+      "web",
+      "app-server",
+      "db",
+      "keycloak",
+      "minio",
+      "prometheus",
+      "grafana",
+      "dns-server",
+      "proxy",
+      "loki"
+    ],
+    "packetsEach": 3
+  },
+  "durationSeconds": 4.551042
+}

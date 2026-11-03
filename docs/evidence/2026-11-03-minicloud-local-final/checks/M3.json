@@ -1,0 +1,11 @@
+{
+  "id": "M3",
+  "startedAt": "2026-11-03T06:49:34.908322+00:00",
+  "status": "PASS",
+  "details": {
+    "sqlStudents": 3,
+    "adminCrud": true,
+    "readerInsertDenied": true
+  },
+  "durationSeconds": 0.132154
+}

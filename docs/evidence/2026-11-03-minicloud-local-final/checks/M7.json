@@ -1,0 +1,10 @@
+{
+  "id": "M7",
+  "startedAt": "2026-11-03T06:49:35.609553+00:00",
+  "status": "PASS",
+  "details": {
+    "webTargets": 2,
+    "webValues": 2
+  },
+  "durationSeconds": 0.000964
+}

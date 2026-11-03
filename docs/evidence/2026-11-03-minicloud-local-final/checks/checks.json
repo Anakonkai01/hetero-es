@@ -1,0 +1,486 @@
+{
+  "status": "PASS",
+  "mode": "local",
+  "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+  "checks": [
+    {
+      "id": "1",
+      "startedAt": "2026-11-03T06:49:28.718339+00:00",
+      "status": "PASS",
+      "details": {
+        "directWebStatus": 200,
+        "homeAndBlog": true
+      },
+      "durationSeconds": 0.001795
+    },
+    {
+      "id": "2",
+      "startedAt": "2026-11-03T06:49:28.720253+00:00",
+      "status": "PASS",
+      "details": {
+        "directAndProxy": 200
+      },
+      "durationSeconds": 0.003079
+    },
+    {
+      "id": "3",
+      "startedAt": "2026-11-03T06:49:28.723406+00:00",
+      "status": "PASS",
+      "details": {
+        "databases": [
+          "heteroes",
+          "keycloak",
+          "minicloud",
+          "studentdb"
+        ],
+        "noteQuery": true
+      },
+      "durationSeconds": 0.127198
+    },
+    {
+      "id": "4",
+      "startedAt": "2026-11-03T06:49:28.850748+00:00",
+      "status": "PASS",
+      "details": {
+        "enabledCourseUsers": [
+          "sv01",
+          "sv02"
+        ],
+        "gzipAdminAssets": 2
+      },
+      "durationSeconds": 0.96032
+    },
+    {
+      "id": "5",
+      "startedAt": "2026-11-03T06:49:29.811187+00:00",
+      "status": "PASS",
+      "details": {
+        "demoObjects": 1,
+        "indexHtml": true
+      },
+      "durationSeconds": 0.491627
+    },
+    {
+      "id": "6",
+      "startedAt": "2026-11-03T06:49:30.302912+00:00",
+      "status": "PASS",
+      "details": {
+        "dnsHostPort": 11053,
+        "answers": [
+          "10.77.10.10"
+        ]
+      },
+      "durationSeconds": 0.005936
+    },
+    {
+      "id": "7",
+      "startedAt": "2026-11-03T06:49:30.308926+00:00",
+      "status": "PASS",
+      "details": {
+        "targets": 12,
+        "allUp": true
+      },
+      "durationSeconds": 0.000945
+    },
+    {
+      "id": "8",
+      "startedAt": "2026-11-03T06:49:30.310001+00:00",
+      "status": "PASS",
+      "details": {
+        "dashboards": [
+          "HeteroES Lab",
+          "Logs",
+          "Node Exporter Full",
+          "System Health of 523H0145",
+          "System Health of 523H0164"
+        ]
+      },
+      "durationSeconds": 0.039914
+    },
+    {
+      "id": "9",
+      "startedAt": "2026-11-03T06:49:30.350001+00:00",
+      "status": "PASS",
+      "details": {
+        "home": 200,
+        "api": 200,
+        "auth": 302
+      },
+      "durationSeconds": 0.002271
+    },
+    {
+      "id": "10",
+      "startedAt": "2026-11-03T06:49:30.352341+00:00",
+      "status": "PASS",
+      "details": {
+        "aliases": [
+          "web",
+          "app-server",
+          "db",
+          "keycloak",
+          "minio",
+          "prometheus",
+          "grafana",
+          "dns-server",
+          "proxy",
+          "loki"
+        ],
+        "packetsEach": 3
+      },
+      "durationSeconds": 4.551042
+    },
+    {
+      "id": "M1",
+      "startedAt": "2026-11-03T06:49:34.903523+00:00",
+      "status": "PASS",
+      "details": {
+        "articles": 3,
+        "images": 3,
+        "homeLinks": 3
+      },
+      "durationSeconds": 0.003639
+    },
+    {
+      "id": "M2",
+      "startedAt": "2026-11-03T06:49:34.907232+00:00",
+      "status": "PASS",
+      "details": {
+        "students": 5,
+        "unprovidedDataLabel": "mẫu"
+      },
+      "durationSeconds": 0.001033
+    },
+    {
+      "id": "M3",
+      "startedAt": "2026-11-03T06:49:34.908322+00:00",
+      "status": "PASS",
+      "details": {
+        "sqlStudents": 3,
+        "adminCrud": true,
+        "readerInsertDenied": true
+      },
+      "durationSeconds": 0.132154
+    },
+    {
+      "id": "M4",
+      "startedAt": "2026-11-03T06:49:35.040641+00:00",
+      "status": "PASS",
+      "details": {
+        "realm": "realm_523h0164",
+        "client": "flask-app",
+        "authenticated": 200,
+        "anonymous": 401
+      },
+      "durationSeconds": 0.037002
+    },
+    {
+      "id": "M5",
+      "startedAt": "2026-11-03T06:49:35.077743+00:00",
+      "status": "PASS",
+      "details": {
+        "anonymousAvatar": 200,
+        "publicAvatarWriteDenied": 403,
+        "reportPdfSignature": true,
+        "reportPdfBytes": 2643465,
+        "reportPdfSha256": "01fbf2d71fdad35c879159d508ffb175f78ea1d669569536730231e67daa9f54"
+      },
+      "durationSeconds": 0.514306
+    },
+    {
+      "id": "M6",
+      "startedAt": "2026-11-03T06:49:35.592140+00:00",
+      "status": "PASS",
+      "details": {
+        "records": {
+          "app-backend": 20,
+          "minio": 50,
+          "keycloak": 40
+        }
+      },
+      "durationSeconds": 0.01733
+    },
+    {
+      "id": "M7",
+      "startedAt": "2026-11-03T06:49:35.609553+00:00",
+      "status": "PASS",
+      "details": {
+        "webTargets": 2,
+        "webValues": 2
+      },
+      "durationSeconds": 0.000964
+    },
+    {
+      "id": "M8",
+      "startedAt": "2026-11-03T06:49:35.610576+00:00",
+      "status": "PASS",
+      "details": {
+        "boards": 2,
+        "minimumPanelsEach": 3,
+        "liveMetricFamilies": 3
+      },
+      "durationSeconds": 0.01158
+    },
+    {
+      "id": "M9",
+      "startedAt": "2026-11-03T06:49:35.622228+00:00",
+      "status": "PASS",
+      "details": {
+        "proxyStatus": 200,
+        "students": 5
+      },
+      "durationSeconds": 0.001003
+    },
+    {
+      "id": "M10",
+      "startedAt": "2026-11-03T06:49:35.623288+00:00",
+      "status": "PASS",
+      "details": {
+        "hosts": [
+          "web-frontend-server-2",
+          "web-frontend-server-1",
+          "web-frontend-server-2",
+          "web-frontend-server-1",
+          "web-frontend-server-2",
+          "web-frontend-server-1"
+        ]
+      },
+      "durationSeconds": 0.001503
+    },
+    {
+      "id": "H1",
+      "startedAt": "2026-11-03T06:49:35.624863+00:00",
+      "status": "PASS",
+      "details": {
+        "status": "PASS",
+        "provider": "real Keycloak26.8.1",
+        "codeGrants": 1,
+        "pkceS256": 2,
+        "labSessionStatus": 200,
+        "sessionFields": [
+          "user",
+          "workspaces"
+        ],
+        "callbackQueryErased": true,
+        "noTokensInWebStorage": true
+      },
+      "durationSeconds": 1.323202
+    },
+    {
+      "id": "H2",
+      "startedAt": "2026-11-03T06:49:36.948186+00:00",
+      "status": "PASS",
+      "details": {
+        "status": "PASS",
+        "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+        "assertions": 24,
+        "check": "H2",
+        "devices": [
+          {
+            "deviceId": "397b7e014c134c55adeb4b5862457b5e",
+            "name": "MiniCloud CPU coordinator",
+            "profile": "coordinator-cpu-v3",
+            "online": true,
+            "approved": true,
+            "contribution": true
+          },
+          {
+            "deviceId": "a32f6e0031d146ecb104f0becc5fe07e",
+            "name": "MiniCloud RTX3060 WSL",
+            "profile": "desktop-v3",
+            "online": true,
+            "approved": true,
+            "contribution": true
+          }
+        ]
+      },
+      "durationSeconds": 1.322962
+    },
+    {
+      "id": "H3",
+      "startedAt": "2026-11-03T06:49:38.271242+00:00",
+      "status": "PASS",
+      "details": {
+        "status": "PASS",
+        "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+        "assertions": 10,
+        "check": "H3",
+        "runId": "7a47959223334f80921f8a533f6adc5a",
+        "ledger": {
+          "generations": 2,
+          "appliedUpdates": 2,
+          "committedCandidates": 4,
+          "results": 4,
+          "recordHashes": [
+            "4a60d56791ca9ecc4573c49c8c0950cfbb7e89cc8d6cb92fc76086be4aa7dc91",
+            "b412f359fd6e49373ee2c5e162307872da5ce5b78cd4dae86e40f87eb55455eb"
+          ],
+          "childWeightsSha256": [
+            "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db",
+            "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db"
+          ],
+          "rewardRange": [
+            0,
+            0
+          ]
+        }
+      },
+      "durationSeconds": 1.402594
+    },
+    {
+      "id": "H4",
+      "startedAt": "2026-11-03T06:49:39.673934+00:00",
+      "status": "PASS",
+      "details": {
+        "status": "PASS",
+        "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+        "assertions": 128,
+        "check": "H4",
+        "runId": "7a47959223334f80921f8a533f6adc5a",
+        "points": [
+          {
+            "pointId": "a7cabe9cfc7f4154a816203d6d4618ff",
+            "generation": 1,
+            "final": false,
+            "status": "READY"
+          },
+          {
+            "pointId": "a670ef18d1fd458284d7ca27caecccf1",
+            "generation": 1,
+            "final": true,
+            "status": "READY"
+          },
+          {
+            "pointId": "4e67b59059134ab094edddd9c50cdc25",
+            "generation": 0,
+            "final": false,
+            "status": "READY"
+          }
+        ],
+        "verifiedObjects": 9,
+        "verifiedBytes": 881666
+      },
+      "durationSeconds": 7.751332
+    },
+    {
+      "id": "H5",
+      "startedAt": "2026-11-03T06:49:47.425359+00:00",
+      "status": "PASS",
+      "details": {
+        "status": "PASS",
+        "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+        "assertions": 34,
+        "check": "H5",
+        "values": {
+          "heteroes_gpu_utilization_percent": 0,
+          "heteroes_gpu_vram_used_bytes": 1078984704,
+          "heteroes_gpu_vram_total_bytes": 12884901888,
+          "heteroes_gpu_temperature_celsius": 45,
+          "heteroes_gpu_power_watts": 9.38,
+          "heteroes_gpu_sample_timestamp_seconds": 1793688574.8224578
+        },
+        "deviceId": "a32f6e0031d146ecb104f0becc5fe07e"
+      },
+      "durationSeconds": 0.200219
+    },
+    {
+      "id": "H6",
+      "startedAt": "2026-11-03T06:49:47.625661+00:00",
+      "status": "PASS",
+      "details": {
+        "status": "PASS",
+        "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+        "assertions": 37,
+        "check": "H6",
+        "checkedAt": "2026-11-03T06:49:48.446Z",
+        "steps": [
+          {
+            "name": "API failover",
+            "requests": 6,
+            "upstreams": [
+              "10.77.10.20:8081, 10.77.10.21:8081",
+              "10.77.10.21:8081",
+              "10.77.10.21:8081",
+              "10.77.10.21:8081",
+              "10.77.10.21:8081",
+              "10.77.10.21:8081"
+            ]
+          },
+          {
+            "name": "Explicit docker kill is a manual stop",
+            "status": "exited",
+            "automaticRestartExpected": false,
+            "documentation": "https://docs.docker.com/engine/containers/start-containers-automatically/"
+          },
+          {
+            "name": "API main-process death/automatic restart",
+            "before": {
+              "restartCount": 0,
+              "health": "healthy"
+            },
+            "after": {
+              "restartCount": 1,
+              "health": "healthy"
+            }
+          },
+          {
+            "name": "Scheduler graceful takeover",
+            "before": {
+              "scheduler1": 1,
+              "scheduler2": 0
+            },
+            "stopped": "scheduler1",
+            "after": {
+              "scheduler1": 0,
+              "scheduler2": 1
+            }
+          },
+          {
+            "name": "Scheduler process-death takeover/restart",
+            "before": {
+              "restartCount": 1,
+              "health": "healthy"
+            },
+            "after": {
+              "restartCount": 2,
+              "health": "healthy"
+            },
+            "leaders": {
+              "scheduler1": 1,
+              "scheduler2": 0
+            }
+          },
+          {
+            "name": "Actual MinIO PostgreSQL restore",
+            "status": "PASS",
+            "target": "minicloud_restore_d583d68e63b7",
+            "sourcePoint": "8f48e9e25c334d3fbae30fe07a184b16",
+            "sourceCreatedAt": 1793685592.5093668,
+            "archiveSha256": "8fa314e2c9bd3ec444b0baac411259d790470217d0810636fe7ad468d3b0ae72",
+            "archiveBytes": 149182,
+            "restore": {
+              "restored": true,
+              "dispatchHeld": true,
+              "sessionsRevoked": true,
+              "reservationsPreserved": true,
+              "schemaName": "public"
+            },
+            "counts": {
+              "users": 1,
+              "workspaces": 2,
+              "experiments": 3,
+              "sessions": 0,
+              "cloud_downloads": 0,
+              "device_reservations": 0,
+              "physical_reservations": 0
+            },
+            "dispatchHeld": true
+          }
+        ],
+        "disposableDatabaseRemoved": true
+      },
+      "durationSeconds": 43.356529
+    }
+  ],
+  "passed": 26,
+  "total": 26
+}

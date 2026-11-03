@@ -1,0 +1,19 @@
+{
+  "id": "H1",
+  "startedAt": "2026-11-03T06:49:35.624863+00:00",
+  "status": "PASS",
+  "details": {
+    "status": "PASS",
+    "provider": "real Keycloak26.8.1",
+    "codeGrants": 1,
+    "pkceS256": 2,
+    "labSessionStatus": 200,
+    "sessionFields": [
+      "user",
+      "workspaces"
+    ],
+    "callbackQueryErased": true,
+    "noTokensInWebStorage": true
+  },
+  "durationSeconds": 1.323202
+}

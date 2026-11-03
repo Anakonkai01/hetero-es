@@ -1,0 +1,98 @@
+{
+  "id": "H6",
+  "startedAt": "2026-11-03T06:49:47.625661+00:00",
+  "status": "PASS",
+  "details": {
+    "status": "PASS",
+    "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+    "assertions": 37,
+    "check": "H6",
+    "checkedAt": "2026-11-03T06:49:48.446Z",
+    "steps": [
+      {
+        "name": "API failover",
+        "requests": 6,
+        "upstreams": [
+          "10.77.10.20:8081, 10.77.10.21:8081",
+          "10.77.10.21:8081",
+          "10.77.10.21:8081",
+          "10.77.10.21:8081",
+          "10.77.10.21:8081",
+          "10.77.10.21:8081"
+        ]
+      },
+      {
+        "name": "Explicit docker kill is a manual stop",
+        "status": "exited",
+        "automaticRestartExpected": false,
+        "documentation": "https://docs.docker.com/engine/containers/start-containers-automatically/"
+      },
+      {
+        "name": "API main-process death/automatic restart",
+        "before": {
+          "restartCount": 0,
+          "health": "healthy"
+        },
+        "after": {
+          "restartCount": 1,
+          "health": "healthy"
+        }
+      },
+      {
+        "name": "Scheduler graceful takeover",
+        "before": {
+          "scheduler1": 1,
+          "scheduler2": 0
+        },
+        "stopped": "scheduler1",
+        "after": {
+          "scheduler1": 0,
+          "scheduler2": 1
+        }
+      },
+      {
+        "name": "Scheduler process-death takeover/restart",
+        "before": {
+          "restartCount": 1,
+          "health": "healthy"
+        },
+        "after": {
+          "restartCount": 2,
+          "health": "healthy"
+        },
+        "leaders": {
+          "scheduler1": 1,
+          "scheduler2": 0
+        }
+      },
+      {
+        "name": "Actual MinIO PostgreSQL restore",
+        "status": "PASS",
+        "target": "minicloud_restore_d583d68e63b7",
+        "sourcePoint": "8f48e9e25c334d3fbae30fe07a184b16",
+        "sourceCreatedAt": 1793685592.5093668,
+        "archiveSha256": "8fa314e2c9bd3ec444b0baac411259d790470217d0810636fe7ad468d3b0ae72",
+        "archiveBytes": 149182,
+        "restore": {
+          "restored": true,
+          "dispatchHeld": true,
+          "sessionsRevoked": true,
+          "reservationsPreserved": true,
+          "schemaName": "public"
+        },
+        "counts": {
+          "users": 1,
+          "workspaces": 2,
+          "experiments": 3,
+          "sessions": 0,
+          "cloud_downloads": 0,
+          "device_reservations": 0,
+          "physical_reservations": 0
+        },
+        "dispatchHeld": true
+      }
+    ],
+    "disposableDatabaseRemoved": true
+  },
+  "durationSeconds": 43.356529
+}

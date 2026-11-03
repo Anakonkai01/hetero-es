@@ -1,0 +1,13 @@
+{
+  "id": "4",
+  "startedAt": "2026-11-03T06:49:28.850748+00:00",
+  "status": "PASS",
+  "details": {
+    "enabledCourseUsers": [
+      "sv01",
+      "sv02"
+    ],
+    "gzipAdminAssets": 2
+  },
+  "durationSeconds": 0.96032
+}

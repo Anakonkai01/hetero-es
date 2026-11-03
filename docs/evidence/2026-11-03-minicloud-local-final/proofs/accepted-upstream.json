@@ -1,0 +1,39 @@
+{
+  "sourceRef": "3429d810b871952715bc63f94360c5f3eb2be478",
+  "sourceCodeCommit": "243f4175",
+  "sourceTree": "src-c9f8f9d8dc7966ca95b8c36104cffeaf2ccc030d595fc4ed71266f9c2bb92229",
+  "checkHostPairs": 37,
+  "sqlitePassed": 704,
+  "postgresPassed": 733,
+  "acceptanceMutantsKilled": 137,
+  "checkpointMutantsKilled": 8,
+  "privateLinuxWheels": 23,
+  "privateWindowsWheels": 24,
+  "privateHttpChecksEach": 6,
+  "packagedBackendFiles": 138,
+  "evidenceCommit": "6640bba6",
+  "evidenceFolder": "docs/evidence/2026-11-03-b021-final-checkpoint-acceptance",
+  "numericalRuntimeUnchangedFrom": "6ee47147",
+  "throughput": {
+    "local5070": {
+      "short32": {
+        "meanOfMedians": 10107.143965232171,
+        "floor": 9873.1
+      },
+      "chat128": {
+        "meanOfMedians": 9967.250462648346,
+        "floor": 9753.0
+      }
+    },
+    "wsl3060": {
+      "short32": {
+        "meanOfMedians": 3104.3318601818105,
+        "floor": 3041.6
+      },
+      "chat128": {
+        "meanOfMedians": 2919.4848732230566,
+        "floor": 2867.2
+      }
+    }
+  }
+}
