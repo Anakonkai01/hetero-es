@@ -1,0 +1,13 @@
+$ python3 scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-gpu/mutation-gpu-ownership-runtime --mutants acceptance/mutants/gpu-ownership-runtime.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_strict_decoder.py tests/v3/test_sdk_lab.py'
+control ok    | 29 passed in 23.01s
+killed       export keeps the live model on the GPU | 1 failed, 18 passed in 22.94s
+killed       release keeps the strict engine | 1 failed, 18 passed in 22.94s
+killed       release leaves the model on the GPU | 1 failed, 18 passed in 22.86s
+killed       strict release forgets to pop | 1 failed, 18 passed in 22.84s
+killed       sdk qualifies the plain decoder | 1 failed, 27 passed in 22.98s
+killed       sdk drops the decoder field | 1 failed, 27 passed in 22.91s
+killed       lab request drops evalDtype | 1 failed, 28 passed in 22.95s
+killed       lab request always sends evalDtype | 1 failed, 28 passed in 22.95s
+killed       managed lab accepts FP16 for any decoder | 1 failed, 28 passed in 22.87s
+
+9 of 9 mutants killed.

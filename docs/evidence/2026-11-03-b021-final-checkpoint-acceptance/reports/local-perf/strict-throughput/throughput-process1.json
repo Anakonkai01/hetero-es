@@ -1,0 +1,28 @@
+{
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "fingerprint": "74bf89e7a89e41601ebd1e90fde91de7a0eb859004b762e7ee8346cfc509c6ea",
+ "cases": {
+  "short32": {
+   "secondsSamples": [
+    0.1012683989999914,
+    0.10115446700001485,
+    0.10128905000010491,
+    0.10105062499997075,
+    0.10135024500004874
+   ],
+   "medianTokensPerSecond": 10111.742756001178,
+   "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+  },
+  "chat128": {
+   "secondsSamples": [
+    0.4109525890000896,
+    0.41071692899981826,
+    0.4107281530000364,
+    0.4106690390001404,
+    0.4108654159999787
+   ],
+   "medianTokensPerSecond": 9972.532854351566,
+   "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+  }
+ }
+}

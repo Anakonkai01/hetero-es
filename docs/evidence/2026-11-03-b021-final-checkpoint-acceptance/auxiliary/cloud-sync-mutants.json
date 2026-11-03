@@ -1,0 +1,50 @@
+[
+  {
+    "name": "drop-final-projection-call",
+    "file": "backend/services/scheduling.py",
+    "old": "cloud_sync_projection(db, body, snapshot[\"cloudSync\"])",
+    "new": "dict(snapshot[\"cloudSync\"])"
+  },
+  {
+    "name": "skip-authoritative-read",
+    "file": "backend/services/scheduling.py",
+    "old": "if body[\"status\"] == \"COMPLETED\" and completed > 0:",
+    "new": "if False:"
+  },
+  {
+    "name": "ready-during-running",
+    "file": "backend/services/scheduling.py",
+    "old": "body[\"status\"] == \"COMPLETED\"",
+    "new": "True"
+  },
+  {
+    "name": "wrong-completed-generation",
+    "file": "backend/services/scheduling.py",
+    "old": "completed - 1",
+    "new": "completed"
+  },
+  {
+    "name": "wrong-run-checkpoint",
+    "file": "backend/repositories/recovery_storage.py",
+    "old": "run_id=:p0 AND generation=:p1",
+    "new": "run_id<>:p0 AND generation=:p1"
+  },
+  {
+    "name": "older-final-checkpoint",
+    "file": "backend/repositories/recovery_storage.py",
+    "old": "generation=:p1",
+    "new": "generation<=:p1"
+  },
+  {
+    "name": "nonfinal-checkpoint",
+    "file": "backend/repositories/recovery_storage.py",
+    "old": "AND final=1 AND status='READY'",
+    "new": "AND status='READY'"
+  },
+  {
+    "name": "unverified-final-checkpoint",
+    "file": "backend/repositories/recovery_storage.py",
+    "old": "AND final=1 AND status='READY'",
+    "new": "AND final=1"
+  }
+]

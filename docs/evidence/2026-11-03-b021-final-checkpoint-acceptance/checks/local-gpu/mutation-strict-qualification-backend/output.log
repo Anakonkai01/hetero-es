@@ -1,0 +1,20 @@
+$ python3 scripts/mutation-check.py --repo . --copy backend --copy runtime/src --copy pyproject.toml --env CUDA_VISIBLE_DEVICES= --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-gpu/mutation-strict-qualification-backend --mutants acceptance/mutants/strict-qualification-backend.json --test '/home/pc5070ti/projects/heteroes/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py'
+control ok    | 28 passed, 1 warning in 5.49s
+killed       probe route drops the decoder | 1 failed, 17 passed, 1 warning in 3.64s
+killed       probe request accepts any decoder | 1 failed, 20 passed, 1 warning in 4.15s
+killed       reference lookup ignores the decoder | 1 failed, 17 passed, 1 warning in 3.61s
+killed       pending probe of the other decoder blocks | 1 failed, 22 passed, 1 warning in 4.66s
+killed       job forgets the strict decoder | 1 failed, 17 passed, 1 warning in 3.64s
+killed       command to the device drops the decoder | 1 failed, 17 passed, 1 warning in 3.62s
+killed       report is checked against the engine only | 1 failed, 17 passed, 1 warning in 3.62s
+killed       report recipe decoder is not compared | 1 failed, 17 passed, 1 warning in 3.67s
+killed       status omits the strict references | 1 failed, 17 passed, 1 warning in 3.61s
+killed       v3_qualification ignores the decoder | 1 failed, 17 passed, 1 warning in 3.65s
+killed       v3_qualification treats every decoder as strict | 1 failed, 1 warning in 0.35s
+killed       legacy profile counts for strict runs | 1 failed, 23 passed, 1 warning in 4.71s
+killed       validation does not pass the decoder | 1 failed, 21 passed, 1 warning in 4.44s
+killed       evalDtype allowed for every decoder | 1 failed, 21 passed, 1 warning in 4.46s
+killed       empty evalDtype stays in the document | 1 failed, 24 passed, 1 warning in 4.92s
+killed       evalDtype is not an update key | 1 failed, 24 passed, 1 warning in 4.96s
+
+16 of 16 mutants killed.

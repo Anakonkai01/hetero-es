@@ -1,0 +1,6 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_throughput.py --gpu --models /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-perf-20261103/strict-throughput/throughput.json
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 5116.36it/s]
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7237.11it/s]
+short32 10107.1 token/s floor 9873.1
+chat128 9967.3 token/s floor 9753.0
+THROUGHPUT OK

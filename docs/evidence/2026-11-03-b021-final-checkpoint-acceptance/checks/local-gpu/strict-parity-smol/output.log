@@ -1,0 +1,4 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_parity.py --gpu --model smol --models /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-gpu/strict-parity-smol/parity.json
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7366.27it/s]
+{"status": "ok", "model": "smol", "mismatches": [], "error": null, "wallSeconds": 27.475118503993144}
+PARITY OK

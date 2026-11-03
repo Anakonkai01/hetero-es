@@ -1,0 +1,4 @@
+$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_parity.py --gpu --model qwen --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/results/strict-parity-qwen/parity.json
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3280.05it/s]
+{"status": "ok", "model": "qwen", "mismatches": [], "error": null, "wallSeconds": 57.30039367300924}
+PARITY OK

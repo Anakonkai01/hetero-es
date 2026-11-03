@@ -1,0 +1,19 @@
+$ python3 scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy scripts --copy tests/ledger --copy tests/v3 --env PYTHONPATH=src:tests/ledger:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-gpu/mutation-recovery-io --mutants acceptance/mutants/recovery-io.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/ledger/test_cloud_sync.py tests/ledger/test_recovery_points.py tests/v3/test_v3_recovery.py -k '"'"'not download_restore_cli'"'"''
+control ok    | 31 passed, 1 deselected in 22.03s
+killed       upload reads unbounded blocks | 1 failed, 6 passed, 1 deselected in 0.16s
+killed       changed point completed | 1 failed, 8 passed, 1 deselected in 0.15s
+killed       backoff ignored | 1 failed, 4 passed, 1 deselected in 0.13s
+killed       backoff does not grow | 1 failed, 4 passed, 1 deselected in 0.13s
+killed       backoff uncapped | 1 failed, 4 passed, 1 deselected in 0.13s
+killed       success keeps the backoff | 1 failed, 5 passed, 1 deselected in 0.13s
+killed       newest cloud copy not kept | 1 failed, 2 passed, 1 deselected in 0.12s
+killed       paused checkpoint not kept | 1 failed, 3 passed, 1 deselected in 0.12s
+killed       verified point forgets its remote copy | 1 failed, 10 passed, 1 deselected in 0.15s
+killed       cache trusted without a match | 1 failed, 19 passed, 1 deselected in 0.16s
+killed       cache ignores mtime | 1 failed, 19 passed, 1 deselected in 0.18s
+killed       cache ignores manifest bytes | 1 failed, 19 passed, 1 deselected in 0.16s
+killed       restore trusts the cache | 1 failed, 19 passed, 1 deselected in 0.16s
+killed       strict stop not carried | 1 failed, 29 passed, 1 deselected in 22.07s
+killed       drain states not restored | 1 failed, 29 passed, 1 deselected in 22.06s
+
+15 of 15 mutants killed.

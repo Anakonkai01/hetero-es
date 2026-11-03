@@ -1,0 +1,12 @@
+$ python3 scripts/mutation-check.py --repo . --copy backend --copy runtime/src --copy pyproject.toml --env CUDA_VISIBLE_DEVICES= --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-gpu/mutation-gpu-ownership-backend --mutants acceptance/mutants/gpu-ownership-backend.json --test '/home/pc5070ti/projects/heteroes/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py'
+control ok    | 28 passed, 1 warning in 5.47s
+killed       strict layout applies to every decoder | 1 failed, 1 warning in 0.35s
+killed       strict layout never applies | 1 failed, 25 passed, 1 warning in 5.24s
+killed       CPU coordinator allowed for strict | 1 failed, 26 passed, 1 warning in 5.55s
+killed       same device not detected | 1 failed, 27 passed, 1 warning in 5.54s
+killed       same physical GPU not detected | 1 failed, 27 passed, 1 warning in 5.48s
+killed       scheduling skips the strict layout | 1 failed, 25 passed, 1 warning in 5.24s
+killed       creation skips the strict layout | 1 failed, 25 passed, 1 warning in 5.21s
+killed       creation checks the coordinator as a worker | 1 failed, 21 passed, 1 warning in 4.41s
+
+8 of 8 mutants killed.

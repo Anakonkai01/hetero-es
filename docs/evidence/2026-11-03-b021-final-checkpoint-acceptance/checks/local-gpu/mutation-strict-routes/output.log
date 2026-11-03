@@ -1,0 +1,18 @@
+$ python3 scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/eval/test_strict_decoder.py --copy tests/eval/test_integer_tma.py --copy tests/eval/test_attention_key_stages.py --copy tests/eval/test_request_context.py --env PYTHONPATH=src:tests/eval --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-gpu/mutation-strict-routes --mutants acceptance/mutants/strict-routes.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/eval/test_integer_tma.py tests/eval/test_attention_key_stages.py tests/eval/test_request_context.py'
+control ok    | 107 passed in 135.33s (0:02:15)
+killed       timeout bit collides with layout bit | 1 failed, 6 passed in 1.77s
+killed       kernels ignore transport bit | 1 failed in 1.81s
+killed       decode ignores transport bit | 1 failed in 1.80s
+killed       TMA admits 128-row tiles | 1 failed, 7 passed in 1.80s
+killed       TMA admits split K | 1 failed, 7 passed in 1.84s
+killed       stale map address | 1 failed, 48 passed in 87.63s (0:01:27)
+killed       wrong weight swizzle | 1 failed, 8 passed in 5.51s
+killed       TMA drops residual | 1 failed, 26 passed in 42.56s
+killed       stages replace split-kernel range | 1 failed, 53 passed in 87.77s (0:01:27)
+killed       stage scores read wrong subtree | 1 failed, 59 passed in 89.57s (0:01:29)
+killed       stage never opts into large shared | 1 failed, 62 passed in 91.08s (0:01:31)
+killed       context rounded to 8 | 1 failed, 95 passed in 111.18s (0:01:51)
+killed       session reused across contexts | 1 failed, 102 passed in 119.73s (0:01:59)
+killed       layout uses configured context | 1 failed, 102 passed in 117.99s (0:01:57)
+
+14 of 14 mutants killed.

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-private-install/stage-native-fresh.py", line 10, in <module>
+    archive.add(out/'check-private-native.py',arcname='check-private-server.py')
+  File "/home/pc5070ti/miniforge3/envs/ai/lib/python3.12/tarfile.py", line 2217, in add
+    tarinfo = self.gettarinfo(name, arcname)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/ai/lib/python3.12/tarfile.py", line 2090, in gettarinfo
+    statres = os.lstat(name)
+              ^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-private-install/check-private-native.py'

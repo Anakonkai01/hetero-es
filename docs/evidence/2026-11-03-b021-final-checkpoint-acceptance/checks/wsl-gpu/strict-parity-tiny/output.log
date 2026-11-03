@@ -1,0 +1,4 @@
+$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_parity.py --gpu --model tiny --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261102-185916/results/strict-parity-tiny/parity.json
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  78%|███████▊  | 157/201 [00:00<00:00, 1564.82it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 1584.74it/s]
+{"status": "ok", "model": "tiny", "mismatches": [], "error": null, "wallSeconds": 37.75127262400929}
+PARITY OK

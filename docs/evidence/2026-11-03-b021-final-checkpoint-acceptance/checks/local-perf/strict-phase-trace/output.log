@@ -1,0 +1,13 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/strict_phase_trace.py --gpu --model /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models/qwen --pairs 6 --out /home/pc5070ti/projects/heteroes/.scratch/review-2026-11/C/b021-accept-local-perf-20261103/strict-phase-trace/phase-trace.json
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7787.32it/s]
+STRICT PHASE TRACE PASS
+  load             n= 1 mean=   1.452s peak= 0.928 GiB
+  engine           n= 1 mean=   0.700s peak= 0.929 GiB
+  cold:perturb     n= 2 mean=   0.723s peak= 1.129 GiB
+  cold:refresh     n= 2 mean=   0.000s peak= 1.074 GiB
+  cold:rollout     n= 2 mean=   4.241s peak= 1.225 GiB
+  cold:restore     n= 2 mean=   0.142s peak= 1.141 GiB
+  warm:perturb     n=10 mean=   0.714s peak= 1.143 GiB
+  warm:refresh     n=10 mean=   0.000s peak= 1.089 GiB
+  warm:rollout     n=10 mean=   0.366s peak= 1.224 GiB
+  warm:restore     n=10 mean=   0.142s peak= 1.151 GiB

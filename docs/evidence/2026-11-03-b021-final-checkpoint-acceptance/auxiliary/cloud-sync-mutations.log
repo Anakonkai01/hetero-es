@@ -1,0 +1,11 @@
+control ok    | 10 passed, 1 warning in 0.55s
+killed       drop-final-projection-call | 1 failed, 9 passed, 1 warning in 0.57s
+killed       skip-authoritative-read | 3 failed, 7 passed, 1 warning in 0.58s
+killed       ready-during-running | 1 failed, 9 passed, 1 warning in 0.59s
+killed       wrong-completed-generation | 3 failed, 7 passed, 1 warning in 0.69s
+killed       wrong-run-checkpoint | 4 failed, 6 passed, 1 warning in 0.59s
+killed       older-final-checkpoint | 1 failed, 9 passed, 1 warning in 0.58s
+killed       nonfinal-checkpoint | 1 failed, 9 passed, 1 warning in 0.59s
+killed       unverified-final-checkpoint | 1 failed, 9 passed, 1 warning in 0.59s
+
+8 of 8 mutants killed.

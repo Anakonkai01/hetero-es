@@ -1,0 +1,109 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-c9f8f9d8dc7966ca95b8c36104cffeaf2ccc030d595fc4ed71266f9c2bb92229",
+  "dirty": false,
+  "commit": "243f41759714b6f464af3c4f655e9b99f0f7f851",
+  "host": "3060-wsl",
+  "profiles": [
+    "perf"
+  ],
+  "machine": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": []
+  },
+  "started": "2026-11-03T12:24:07+0700",
+  "finished": "2026-11-03T12:25:46+0700",
+  "results": [
+    {
+      "name": "strict-throughput",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 46.715,
+      "log": "results/strict-throughput/output.log",
+      "log_sha256": "29a4827449d743f75f0d37f46034bbef21e8e619253c4ee5514c2860bb6e736e",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_throughput.py --gpu --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-c9f8f9d8dc79-20261103-122407/results/strict-throughput/throughput.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights:  92%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f| 267/290 [00:00<00:00, 2660.51it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 2744.26it/s]",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3327.43it/s]",
+        "short32 3104.3 token/s floor 3041.6",
+        "chat128 2919.5 token/s floor 2867.2",
+        "THROUGHPUT OK"
+      ]
+    },
+    {
+      "name": "int8-memory",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 16.108,
+      "log": "results/int8-memory/output.log",
+      "log_sha256": "48806ff55816019b08086764c6d21cb74b6f0df0f416b740b2705bfd64d13e6a",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/int8_memory.py --gpu --model /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models/qwen --out /tmp/heteroes-accept-c9f8f9d8dc79-20261103-122407/results/int8-memory",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3205.02it/s]",
+        "{",
+        " \"gpu\": \"NVIDIA GeForce RTX 3060\",",
+        " \"fp16ParameterMiBAfterFreeze\": 268.130615234375,",
+        " \"frozenProjectionFp16Parameters\": [],",
+        " \"load\": {",
+        "  \"allocatedMiB\": 610.9677734375,",
+        "  \"peakMiB\": 952.7734375",
+        " },",
+        " \"candidate\": {",
+        "  \"peakMiB\": 711.34912109375,",
+        "  \"allocatedMiB\": 650.9677734375",
+        " },",
+        " \"restoredExactly\": true,",
+        " \"frozenBaseSha256\": \"6e2ae8e99519d23dbf05fc143d127505c44051cf59c6e5cbdf38eeca8587097b\",",
+        " \"reward\": 0.0",
+        "}",
+        "INT8 MEMORY OK"
+      ]
+    },
+    {
+      "name": "strict-phase-trace",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 36.695,
+      "log": "results/strict-phase-trace/output.log",
+      "log_sha256": "9a17b0503797fa1936602c2e97b37a4ee7a3ccae78f6c3809c6a0845702b7add",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_phase_trace.py --gpu --model /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models/qwen --pairs 6 --out /tmp/heteroes-accept-c9f8f9d8dc79-20261103-122407/results/strict-phase-trace/phase-trace.json",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 290/290 [00:00<00:00, 3172.04it/s]",
+        "STRICT PHASE TRACE PASS",
+        "  load             n= 1 mean=   1.725s peak= 0.928 GiB",
+        "  engine           n= 1 mean=   0.830s peak= 0.929 GiB",
+        "  cold:perturb     n= 2 mean=   0.771s peak= 1.129 GiB",
+        "  cold:refresh     n= 2 mean=   0.000s peak= 1.074 GiB",
+        "  cold:rollout     n= 2 mean=   2.993s peak= 1.225 GiB",
+        "  cold:restore     n= 2 mean=   0.224s peak= 1.141 GiB",
+        "  warm:perturb     n=10 mean=   0.790s peak= 1.143 GiB",
+        "  warm:refresh     n=10 mean=   0.000s peak= 1.089 GiB",
+        "  warm:rollout     n=10 mean=   0.630s peak= 1.224 GiB",
+        "  warm:restore     n=10 mean=   0.231s peak= 1.151 GiB"
+      ]
+    }
+  ]
+}
