@@ -17,20 +17,27 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   Fault/replay, soak600 thế hệ và int8 đều đạt; numerical runtime không đổi.
 - Backend SQLite704/Postgres733 test xanh, không skip; cả hai app Linux được build và kiểm source bytes.
   Python riêng trên Linux/Windows lần lượt cài 23/24 wheel CPU đã ghim và đạt 6 kiểm tra HTTP thực trên mỗi máy.
-- **C đã đạt26/26 trên nguồn0175c93b**, có demo CPU+3060,20 ảnh và DOCX/PDF34 trang. Cần ghim/rebuild và chạy lại
-  theo nguồn B-021 vừa nghiệm thu; chưa chốt toàn bộ goal. Không dùng biên bản cũ để chứng minh nguồn mới.
+- **Phần C hoàn tất:26/26 PASS trên nguồn3429d810 đã ghim/rebuild**, gồm10/10 mở rộng và H1–H6. Run mới CPU+3060
+  hoàn thành2 thế hệ/4 candidate; checkpoint cuối API/UI READY,3 recovery point được kiểm object thật từ MinIO.
+  DOCX/PDF34 trang,5 chương,21 ảnh thật; PDF cuối đã so byte/SHA/source với MinIO. **Đã hoàn tất goal A → B → C**
+  trong phạm vi kế hoạch; các việc cần tài nguyên/quyết định riêng O1–O9 có lệnh sẵn bên dưới.
 - **Lab thật giữ nguyên** bản `10457f9a`, instance `34d68e114a5316bb76de9c12f657dff0`; chỉ đọc qua
   `local-lab.py status`. Thiết bị `3060-thao` vẫn REVOKED. Không dùng DB/state/cổng của lab cho cloud thử nghiệm.
 
 ## Current technical state
 
-- Part B plus B-021 source is committed at `243f4175`; final documentation/receipt edits have the same clean identity:
+- Part B plus B-021 source is committed at `243f4175`; accepted B main is `3429d810b871952715bc63f94360c5f3eb2be478`.
+  Final documentation/receipt edits have the same clean identity:
   `src-c9f8f9d8dc7966ca95b8c36104cffeaf2ccc030d595fc4ed71266f9c2bb92229`.
-  The reaccepted branch fast-forwards/pushes `main`; that final B commit becomes MiniCloud's updated `HETEROES_REF`.
+  MiniCloud keeps that exact B commit as `HETEROES_REF`; subsequent upstream handoff edits are documentation-only.
 - Receipts and milestone gates: [STATUS](acceptance/STATUS.md). Final SHA-verified logs/reports:
   latest evidence `2026-11-03-b021-final-checkpoint-acceptance` (37/37,130 SHA-verified files). Previous
   `2026-11-02-b10-final-cloud-acceptance` retains38 raw records including the first WSL failure.
   Part A's immutable P-FROZEN and acceptance remain in `2026-11-01-review-fixes` / `2026-11-01-partA-cpu-ede4338e`.
+- MiniCloud main is local `afcd02d` (implementation `2d3714d`). Final evidence has102 SHA-verified files at
+  `~/projects/heteroes-minicloud/evidence/2026-11-03-local-final/`;41 receipt/artifact/closing files are mirrored in
+  `evidence-archive:docs/evidence/2026-11-03-minicloud-local-final`. Its checker passes26/26 and infrastructure tests
+  pass40 Python +5 Node with76/76 applied mutants killed. The unchanged Go probe's three mutants remain in foundation evidence.
 - P-FROZEN: CPU 576 and GPU 694 before/after cases are byte-identical; update overhead +0.71%.
   A-014 is the approved release-state correction with old-DB migration, not a claim of unchanged ledger transitions.
 - Non-strict HF FP16 has independently measured GPU references: the RTX 3060 differs from RTX 5070 Ti at one answer.
@@ -168,18 +175,28 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
 - C checkpoint 2026-11-02: repo2 local đạt26/26,10/10 mở rộng và H1–H6 trên0175c93b; CPU coordinator +3060 WSL
   hoàn thành2 thế hệ/4 candidate,3 recovery point READY; có20 ảnh và DOCX/PDF34 trang. Chưa có Hub/EC2/video thực hiện.
   Đọc ảnh phát hiện B-021: snapshot cũ làm nhãn checkpoint PENDING dù storage đã xác minh READY. Đã sửa metadata
-  projection,10 regression/8 mutation và SQLite704/Postgres733 xanh. Nguồn mới đã đạt37/37 và package Linux/native;
-  tiếp theo ghim/run lại C. Goal chưa hoàn tất. Runtime numerical không đổi. Biên bản cũ không thay nghiệm thu nguồn mới.
+  projection,10 regression/8 mutation và SQLite704/Postgres733 xanh. Nguồn mới đã đạt37/37 và package Linux/native.
+  Đây là checkpoint lịch sử trước nghiệm thu C cuối bên dưới; biên bản cũ không thay nghiệm thu nguồn mới.
   WSL needs both the matching NVIDIA driver directory and `/usr/lib/wsl/lib` as configured in acceptance/hosts.py.
   WSL/native share one GPU. Temporary test dependencies in `/tmp/heteroes-codex-testdeps-20261027-01` vanish on reboot.
-- Temporary Windows wake request is bounded (no power-plan edit). Live handles, expiry/renewal note and stop flags:
-  `.scratch/review-2026-11/STATE.json`. Renew a bounded lease only while remote work needs it, release after remote work.
+- C final 2026-11-03 complete: pinned/rebuilt3429d810, new run `7a47959223334f80921f8a533f6adc5a`,26/26 PASS.
+  The final checkpoint is READY in API/UI; H4 reads9 actual MinIO objects/881666 bytes. API failover, single-leader
+  scheduler takeover, automatic restart after unexpected process death and actual S3 PGDMP restore pass.
+  The restore backup has0 reservations; explicit Docker kill is a manual stop, separately recorded. Reward0 and unchanged
+  weights prove integration, not learning. Historical terminal projections are not bulk-rewritten.
+  Report: `~/projects/heteroes-minicloud/out/BaoCao-Cuoi-Ky-Cloud.docx` and `.pdf`,34 pages/5 chapters/21 actual screenshots.
+  Final external receipt `evidence/2026-11-03-local-final/checks/checks.json` binds the stable PDF and avoids a circular hash.
+- Closing C state:20 healthy containers,12 Prometheus targets UP,5 dashboards; two approved contributors online/ON,
+  no queue or reservations. Keep the product deployment running. The bounded Windows wake request was released, with
+  no power-plan edit; future WSL worker availability requires its host awake. Current state is recorded in repo2 evidence
+  and `.scratch/review-2026-11/STATE.json`. The permitted live-lab status is identical before/after.
 
 ## Remaining scope and limits
 
-- B1–B10 and B-021 are complete. Repin/rebuild MiniCloud at the reaccepted B main commit, then repeat its bounded run,
-  checkpoint/API verification, full26-line checklist, screenshots and final report. Finish the full C delivery audit.
-  Test cloud on its own database/state, Docker project `heteroes-minicloud` and local network `10.77.10.0/24`.
+- The approved A → B → C goal is complete. Docker Hub/GitHub repo2 publication, EC2, owner personal details/video,
+  optional rentals and public-lab deployment remain the explicitly conditional owner actions below. No such external
+  publication/deployment is claimed. The local product uses its own database/state, Docker project `heteroes-minicloud`
+  and network `10.77.10.0/24`; source/archive history remains intact.
 - Existing separate milestones remain truthful: managed-runner M3.bookkeeping needs measurement;
   M1.architectures and M3.full-disk remain deferred. Part A does not deploy the new source.
 - Two strict workers in one process on one GPU remain an unsupported graph-capture layout; the lab avoids it.
@@ -201,19 +218,27 @@ Run WSL/native serially. Check live-lab status before GPU work; do not benchmark
 
 ## Việc của chủ dự án
 
-Các việc này không chặn phần A/B. Lệnh repo 2 sẽ chạy sau khi repo và scripts được tạo ở phần C.
+Các việc này là nhánh điều kiện của kế hoạch, không chặn việc chốt A/B/C local. Tại lần kiểm cuối2026-11-03:
+GitHub repo2 trả401, chưa có Docker Hub login hay EC2/Tailscale EC2 do bạn cung cấp. Không tạo tài khoản/thuê máy thay bạn.
 
-- O1: tạo repo `Anakonkai01/heteroes-minicloud` trên GitHub, rồi:
-  `cd ~/projects/heteroes-minicloud && git remote add origin git@github.com:Anakonkai01/heteroes-minicloud.git && git push origin --all`.
-- O2: tạo tài khoản Docker Hub, chạy `docker login`, ghi username vào file riêng; sau C5 chạy
-  `cd ~/projects/heteroes-minicloud && scripts/push-images.sh`.
+- O1: tạo repo `Anakonkai01/heteroes-minicloud` trên GitHub, chọn public/private và đăng nhập `gh auth login`, rồi:
+  `cd ~/projects/heteroes-minicloud && gh repo view Anakonkai01/heteroes-minicloud && git remote add origin git@github.com:Anakonkai01/heteroes-minicloud.git && git push origin --all`.
+  Repo local hiện chưa có remote; nếu bạn đã thêm thì giữ remote đúng và bỏ bước `remote add`.
+- O2: tạo tài khoản Docker Hub, chạy `docker login`, rồi thay `your_namespace` bằng username thật:
+  `cd ~/projects/heteroes-minicloud && scripts/push-images.sh --owner your_namespace --dry-run`;
+  sau khi xem tag chạy lại bỏ `--dry-run`. Mặc định chỉ đẩy web/gateway/DNS. Backend/coordinator có Python đọc được;
+  chỉ thêm `--include-source` nếu bạn quyết định công khai phần đó. Cả5 image đã build linux/amd64, tag3429d810 và course.
 - O3: tạo EC2 theo C7 (Ubuntu 24.04 x86_64, 8 GB RAM, gp3 40 GB, ap-southeast-1), security group theo kế hoạch; đặt
-  AWS Budget 20/50/80 USD. Ghi IP và đường dẫn khóa SSH vào file riêng; sau C7 chạy `scripts/deploy-ec2.sh` ở repo 2.
+  AWS Budget 20/50/80 USD. Điền IP/key/environment/email thật theo `config/ec2.example.json` vào file0600 ngoài repo,
+  ví dụ `~/.config/heteroes-private/ec2.json`, rồi:
+  `cd ~/projects/heteroes-minicloud && scripts/deploy-ec2.sh ~/.config/heteroes-private/ec2.json --dry-run`;
+  xem kế hoạch rồi chạy lại bỏ `--dry-run`. Xem `docs/deploy-ec2.md` để đặt env, subnet/HTTPS và security group.
 - O4 (tùy chọn): ghi khóa Tailscale EC2 vào file riêng để nối worker GPU qua mạng riêng.
-- O5: điền thông tin thật trong `team.json` của repo 2 và cung cấp avatar/PDF; trường chưa có giữ nhãn "mẫu".
-- O6: sửa bản nháp báo cáo và quay video theo `docs/video-script.md` của repo 2 sau C8.
+- O5: điền thông tin thật trong `team.json` của repo2, thay avatar mẫu bằng ảnh được phép dùng. Trường chưa có giữ nhãn
+  "mẫu". PDF báo cáo đã được dựng/upload; khi thay nội dung, dựng và nghiệm thu lại theo README repo2.
+- O6: sửa bản nháp DOCX/PDF đã có trong `out/` và quay video theo kịch bản7 phút `docs/video-script.md` của repo2.
 - O7: quyết định deploy bản sửa lên lab thật sau nghiệm thu. Agent không deploy lab trong kế hoạch này.
-- O8 (tùy chọn): tự thuê GPU, dùng hướng dẫn `docs/rent-gpu-worker.md` của repo 2 sau C8.
+- O8 (tùy chọn): tự thuê GPU, dùng hướng dẫn đã chuẩn bị `docs/rent-gpu-worker.md` của repo2.
 - O9: sửa unit đã cài bằng template đã commit khi thuận tiện:
   `install -m 644 ~/projects/heteroes/deploy/heteroes-lab.user.service ~/.config/systemd/user/heteroes-lab.service && systemctl --user daemon-reload`.
   Việc restart/deploy lab do chủ dự án quyết định riêng.

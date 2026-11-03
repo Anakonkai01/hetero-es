@@ -44,5 +44,8 @@ changes. Ten regressions include actual scheduler/storage persistence in both co
 The full actual-MinIO backend matrices pass704 SQLite /733 PostgreSQL tests, zero skips. Source243f4175 is committed;
 all37 same-source check/host pairs pass, including5070 Ti,3060 WSL and native Windows,137 acceptance mutations and
 fresh Linux/native private-package execution. Evidence:2026-11-03-b021-final-checkpoint-acceptance,130 SHA-verified files.
-The fix applies to subsequent reconciliations; historical terminal row projections are not bulk-rewritten. A new
-MiniCloud run/checklist remains necessary; the previous0175c93b receipt is not relabeled as new-source acceptance.
+The fix applies to subsequent reconciliations; historical terminal row projections are not bulk-rewritten.
+MiniCloud was repinned/rebuilt at3429d810 and new run7a47959223334f80921f8a533f6adc5a completed with final API/UI
+checkpoint READY. The new-source final checklist passes26/26; its stable34-page report has21 actual screenshots and
+is bound byte-for-byte to the MinIO PDF. Evidence:2026-11-03-minicloud-local-final on evidence-archive, mirrored from
+repo2 main afcd02d. The previous0175c93b receipt remains unchanged and is not relabeled as new-source acceptance.
