@@ -34,10 +34,10 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   latest evidence `2026-11-03-b021-final-checkpoint-acceptance` (37/37,130 SHA-verified files). Previous
   `2026-11-02-b10-final-cloud-acceptance` retains38 raw records including the first WSL failure.
   Part A's immutable P-FROZEN and acceptance remain in `2026-11-01-review-fixes` / `2026-11-01-partA-cpu-ede4338e`.
-- MiniCloud main is local `afcd02d` (implementation `2d3714d`). Final evidence has102 SHA-verified files at
-  `~/projects/heteroes-minicloud/evidence/2026-11-03-local-final/`;41 receipt/artifact/closing files are mirrored in
-  `evidence-archive:docs/evidence/2026-11-03-minicloud-local-final`. Its checker passes26/26 and infrastructure tests
-  pass40 Python +5 Node with76/76 applied mutants killed. The unchanged Go probe's three mutants remain in foundation evidence.
+- MiniCloud main is local `c32a1bd` (implementation `d181c89`). Final evidence has113 SHA-verified files at
+  `~/projects/heteroes-minicloud/evidence/2026-11-03-course-wording-final/`;41 receipt/artifact/closing files are mirrored in
+  `evidence-archive:docs/evidence/2026-11-03-minicloud-course-wording-final`. Its checker passes26/26 and infrastructure tests
+  pass41 Python +5 Node with77/77 applied mutants killed. The unchanged Go probe's three mutants remain in foundation evidence.
 - P-FROZEN: CPU 576 and GPU 694 before/after cases are byte-identical; update overhead +0.71%.
   A-014 is the approved release-state correction with old-DB migration, not a claim of unchanged ledger transitions.
 - Non-strict HF FP16 has independently measured GPU references: the RTX 3060 differs from RTX 5070 Ti at one answer.
@@ -185,7 +185,11 @@ Historical handoffs and immutable evidence live on `evidence-archive` ([index](E
   The restore backup has0 reservations; explicit Docker kill is a manual stop, separately recorded. Reward0 and unchanged
   weights prove integration, not learning. Historical terminal projections are not bulk-rewritten.
   Report: `~/projects/heteroes-minicloud/out/BaoCao-Cuoi-Ky-Cloud.docx` and `.pdf`,34 pages/5 chapters/21 actual screenshots.
-  Final external receipt `evidence/2026-11-03-local-final/checks/checks.json` binds the stable PDF and avoids a circular hash.
+  Final external receipt `evidence/2026-11-03-course-wording-final/checks/checks.json` binds the stable PDF and avoids a circular hash.
+- Final original-course audit corrected C-019: the blog now visibly includes both “MyMiniCloud Blog” (HTML example/plan)
+  and “MyMiniCloud – Blog” (course prose). Unit and actual HTTP red/green checks plus an independent mutant catch the
+  omission. Web images, all21 screenshots, report/MinIO PDF and the full26-check receipt were repeated. Earlier evidence
+  remains immutable; this text correction reuses the already accepted compute run without changing numerical/backend source.
 - Closing C state:20 healthy containers,12 Prometheus targets UP,5 dashboards; two approved contributors online/ON,
   no queue or reservations. Keep the product deployment running. The bounded Windows wake request was released, with
   no power-plan edit; future WSL worker availability requires its host awake. Current state is recorded in repo2 evidence
