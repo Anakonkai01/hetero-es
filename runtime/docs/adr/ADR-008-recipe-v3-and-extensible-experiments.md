@@ -85,7 +85,7 @@ therefore only a rule that builds **T**:
 - **lora**: the base model is frozen and pinned by `model.files`; T = the adapter parameters (FP16) created by the pinned
   configuration; the initial adapter is a published file named by `initialAdapterSha256` (no random initialization on
   workers). With PEFT's B = 0 initialization the first-order effect of a perturbation is σ·ε_B·A ≠ 0, so learning starts.
-  [CODE since 2026-10-19: `model/lora.py`, PEFT 0.21.2 pinned as the runtime's `lora` extra; not yet in the desktop
+  [CODE at the 2026-10-19 snapshot: `model/lora.py`, PEFT 0.21.2 pinned as the runtime's `lora` extra; at that date absent from the desktop
   worker profile, which is r11 work.]
 
 `parent_weights_sha256` becomes the hash of T's tensors (today T = all, so nothing changes for full). Publication and

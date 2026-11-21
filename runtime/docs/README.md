@@ -34,6 +34,4 @@ Ghi chú cách thực thi (không đổi số học, chỉ đổi cách chạy):
 
 ## Nguồn gốc phụ thuộc
 
-[THIRD_PARTY.md](../THIRD_PARTY.md) là bản nháp ghi nguồn gốc phần mềm và mô hình từ tháng 10.
-Xem phiên bản cấu hình tại [runtime pyproject](../pyproject.toml), [backend lockfile](../../backend/requirements.lock.txt)
-và [profile Worker](../../desktop/worker/resources).
+[THIRD_PARTY.md](../THIRD_PARTY.md) ghi nguồn mô hình, dataset, các phiên bản được ghim và giấy phép nguồn đã xác minh.

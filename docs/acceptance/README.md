@@ -7,6 +7,7 @@ Reports are generated from the committed `receipts/` for a single source identit
 | Report | Source |
 | --- | --- |
 | [STATUS.md](STATUS.md) | B-021, `src-c9f8f9d8…`. This is the latest tree with the full 37-pair matrix. Upstream `main` (`38327051`) has the same source identity. |
+| [STATUS-src-af91b853.md](STATUS-src-af91b853.md) | Current documentation checkout, `src-af91b853…`. The source hash includes updated guides and notebook files outside the excluded paths. |
 | [STATUS-src-89176a3d.md](STATUS-src-89176a3d.md) | B-022. The focused backend regression has a separate record in [FINDINGS-B](../review/FINDINGS-B.md#b-022--a-periodic-recovery-point-verified-after-the-final-point-replaces-it-in-the-run-projection-p3). |
 | [STATUS-src-6c669c56.md](STATUS-src-6c669c56.md) | Historical source snapshot. |
 

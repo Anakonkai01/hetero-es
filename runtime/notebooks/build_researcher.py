@@ -22,19 +22,22 @@ keeps a ledger from which every update can be recomputed.
 | 5. Settings | `ESConfig` | a recipe whose hash names the experiment |
 | 6. Submit, watch | `submit`, `watch` | qualifies the GPUs for the model, queues the run, streams its progress |
 
-Install once where this notebook runs (Python 3.12): the lab serves the SDK of its own release.
+Use Python 3.12 and the SDK matching your lab. On a lab that serves the notebook and SDK together, download its SDK
+wheel from the lab's Notebook page. For a lab built from this checkout, install from the repository root:
 
 ```
-pip install "https://lab.heteroes.site/notebooks/heteroes-0.0.1-py3-none-any.whl" huggingface_hub datasets
+python -m pip install -e ./runtime huggingface_hub datasets
 ```"""),
     md("""## 1. Connect
 
-The password is asked once and kept nowhere. The lab's devices are the GPUs of this workspace: their owners decide when
-they are ON."""),
+Enter the URL of a reachable lab that uses local account authentication. Choose a workspace your account can access.
+The password prompt is private. Device owners decide when their devices are ON."""),
     code("""from heteroes.sdk import ESConfig, ESTrainer
 from heteroes.sdk_lab import Dataset, Lab, Model
 
-lab = Lab.connect("https://lab.heteroes.site")
+lab_url = input("Lab URL: ").strip()
+workspace = input("Workspace name (Enter for your first workspace): ").strip() or None
+lab = Lab.connect(lab_url, workspace=workspace)
 for d in lab.devices():
     print(f"{d.name:16} {d.gpu:28} {d.vram_gb:5.1f} GB  online={d.online}  ON={d.on}  busy={d.busy}")"""),
     md("""## 2. Data: your own loader
@@ -45,7 +48,7 @@ length** so that a sampler can walk from short (easier) to long questions. The o
 500 training rows are held out for validation."""),
     code("""from datasets import load_dataset
 
-gsm8k = load_dataset("openai/gsm8k", "main")
+gsm8k = load_dataset("openai/gsm8k", "main", revision="740312add88f781978c0658806c59bc2815b9866")
 
 def rows_of(split):
     out = []
@@ -97,8 +100,12 @@ last_number(["... so the answer is\\n72", "I think 71"], [{"answer": "72"}, {"an
 *Batch* is how many questions each candidate answers per generation: more questions, less luck in the ranking. *Chunk*
 is how many of them go through the GPU in one call: a larger chunk is faster but needs more memory. Each GPU measured
 its memory per chunk for this model when it qualified; `suggest` scales that to your answer length and gives each GPU
-the largest chunk it holds (a GPU not measured yet gets a chunk from its memory size, and the note says so)."""),
-    code("""COORDINATOR, WORKERS = "5070ti-nhan", ["5070ti-nhan", "5070ti-nhut"]   # names or worker ids from section 1
+the largest chunk it holds (a GPU not measured yet gets a chunk from its memory size, and the note says so).
+Enter approved device names or worker IDs from section 1. The example uses the SDK's `hf_generate` decoder.
+A strict B22 run requires `decoder="strict_b22_v1"`, `eval_dtype="float16"` and a coordinator GPU distinct from
+the worker GPUs."""),
+    code("""COORDINATOR = input("Coordinator name or ID: ").strip()
+WORKERS = [name.strip() for name in input("Worker names or IDs (comma-separated): ").split(",") if name.strip()]
 hint = lab.suggest(model, data, max_new_tokens=256, devices=WORKERS)
 print(hint)"""),
     code("""args = ESConfig(
@@ -119,8 +126,10 @@ trainer = ESTrainer(args, reward_func=last_number, sampler_func=curriculum)"""),
     md("""## 6. Submit and watch
 
 `coordinator` is the GPU that keeps the ledger and runs your reward; `workers` evaluate candidates. A GPU not yet
-qualified for this model is qualified first (a few minutes; it must be ON). `submit` returns at once; `watch` draws the
-run live and can be interrupted at any time: the run goes on, and the lab's web page shows it too."""),
+qualified for this model is qualified first and must be ON. Run the submission cell when you have permission to use
+the selected devices. `submit` returns once the experiment is queued. Interrupting `watch` stops the dashboard while
+the run continues. For a long run, `partialTimeline` in `results()` signals that the complete history is in the
+coordinator's ledger."""),
     code("""run = trainer.submit(lab, coordinator=COORDINATOR, workers=WORKERS, name="GSM8K curriculum")
 run.url"""),
     code("""run.watch()"""),

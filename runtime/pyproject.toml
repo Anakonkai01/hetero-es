@@ -14,7 +14,7 @@ heteroes = "heteroes.v3.__main__:main"
 [project.optional-dependencies]
 # CPU tests include ledger simulation, offline plots and notebook contract checks.
 test = ["pytest", "hypothesis", "simpy", "matplotlib", "ipython"]
-# the LoRA weight space of Recipe v3 (ADR-008); not yet in the desktop worker profile
+# The LoRA weight space of Recipe v3 (ADR-008). The packaged Worker pins are kept in its own profiles.
 lora = ["peft==0.21.2"]
 
 [tool.setuptools.packages.find]

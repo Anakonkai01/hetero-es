@@ -7,6 +7,7 @@ Checked 2026-11-21 on the project workstation. See the [documentation map](READM
 
 | Phạm vi | Phiên bản | Kết quả kiểm tra |
 | --- | --- | --- |
+| Nhánh tài liệu hiện tại | Cùng mã chạy B-022. README cấp module và notebook tham gia vào mã định danh của công cụ nghiệm thu. | [Trạng thái theo cây tài liệu hiện tại](acceptance/STATUS-src-af91b853.md). |
 | Mã nguồn có B-022 | Bản sửa `411a0a3a`, nhánh `fix/b022-final-point-projection` ở `8f5dc4f5` | Checkpoint định kỳ xác minh muộn không thay checkpoint cuối đã xác minh. Đã có hồi quy backend. [Nghiệm thu M0–M6](acceptance/STATUS-src-89176a3d.md) cho cây nguồn này chưa chạy đủ ma trận. |
 | `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [Biên bản nghiệm thu](acceptance/STATUS.md). |
 | Lab công khai | Clone triển khai riêng tại `10457f9a`. Bộ cài công bố gần nhất là `lf1-20261014-r10` | Ngày 21/11, CPU server, public entry và named tunnel đều dừng. Unit lặp khởi động vì không tìm thấy ổ lưu trữ đã cấu hình. [Vận hành lab](guides/local-lab-operations.md). |
@@ -24,6 +25,7 @@ Checked 2026-11-21 on the project workstation. See the [documentation map](READM
 
 - The accepted B-021 source is `src-c9f8f9d8dc7966ca95b8c36104cffeaf2ccc030d595fc4ed71266f9c2bb92229`.
   B-022 is `src-89176a3d955c8157f52d0a98facd7001f91f63fefa672a8df6ca43e2a2ce9c82`.
+  This documentation checkout has source identity `src-af91b85367c3e0dae4e5e975a4082b59d706b32a6cbfb9aebfe6e13fce726dab`.
   [Acceptance reports](acceptance/README.md) bind receipts to the source identity.
 - The lab form defaults new Recipe v3 runs to `strict_b22_v1`. A strict run needs a coordinator GPU distinct
   from its workers (D1). `strict_int8_lora_v1` is available through the standalone runner and SDK. Exact parity was

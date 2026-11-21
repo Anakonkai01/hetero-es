@@ -37,7 +37,7 @@ the owner asks. Prefer finishing the system (product, multi-machine, speed, rese
 The live/public lab is installed at `~/.local/share/heteroes-lab/app` at its deployed commit, with its own environment. The
 working tree and local `main` can advance without deploying it. Change lab state only through `scripts/local-lab.py`.
 Do not restart its unit directly, kill processes manually, use `pkill -f`, or start another controller against its database.
-No cleanup installer is published; installer polish/r11 is separate. Keep the existing Conda `ai` environment unchanged.
+The last published installer line is r10. See `docs/HANDOFF.md` for deployment status. Keep the Conda `ai` environment unchanged.
 SSH to another machine requires a specific owner request; historical SSH permission does not authorize new remote work.
 
 GPU computation requires the owner's authorization, an explicit `--gpu` where supported and

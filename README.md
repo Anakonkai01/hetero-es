@@ -20,9 +20,9 @@ applies reproducible updates and supports replay across qualified devices. Both 
 
 | Path | Responsibility |
 | --- | --- |
-| `runtime/` | Numerical core, strict engine (`heteroes/strict/`), ledger, coordinator, device agent, qualification |
+| [`runtime/`](runtime/README.md) | Numerical core, strict engine (`heteroes/strict/`), ledger, coordinator, device agent, qualification |
 | `backend/` | HTTP adapters, services, repositories, database transactions and object storage |
-| `frontend/` | Web UI using the real API |
+| [`frontend/`](frontend/README.md) | Web UI using the real API |
 | `desktop/worker`, `desktop/server`, `desktop/shared` | Electron apps and shared download/process utilities |
 | `packages/product-ui/` | Shared UI, themes and Vietnamese translations |
 | `scripts/`, `deploy/` | Development checks, packaging and local lab operations |
@@ -56,10 +56,7 @@ npm run build:worker
 scripts/build-apps.sh --check .scratch/my-fresh-linux-check
 ```
 
-For web development, `npm run dev --workspace frontend` serves the UI on `127.0.0.1:5173` by default. Vite proxies
-`/api` to `127.0.0.1:8000`. Set `HETEROES_BACKEND_HOST` and `HETEROES_BACKEND_PORT` when your local development
-backend uses a different address. See the [development lab setup](docs/guides/local-lab-operations.md#isolated-development-lab)
-and [web commands](frontend/README.md).
+See the [frontend README](frontend/README.md) for the Vite proxy and CPU fixture setup.
 
 The packaging check builds both Linux apps unpacked in an isolated source copy and imports their shared modules from
 ASAR. It does not publish installers or replace the source checkout's resource profiles. Formatting-only changes can be

@@ -20,6 +20,9 @@ Xem [trạng thái và phiên bản](HANDOFF.md) trước khi làm việc với 
 | [server-desktop-guide.md](guides/server-desktop-guide.md) | Ứng dụng Server (Electron). |
 | [worker-desktop-guide.md](guides/worker-desktop-guide.md) | Ứng dụng Worker (Electron). |
 | [local-lab-operations.md](guides/local-lab-operations.md) | Kiểm tra và vận hành bản triển khai riêng của workstation. |
+| [frontend/README.md](../frontend/README.md) | Chạy web UI với backend phát triển hoặc lab thử nghiệm CPU. |
+| [runtime/README.md](../runtime/README.md) | Điểm vào CLI, SDK, notebook và lệnh kiểm tra runtime. |
+| [runtime/scripts/README.md](../runtime/scripts/README.md) | Các script chạy worker, xử lý dữ liệu, kiểm tra và phục hồi. |
 
 ## 3. Thiết kế và quyết định — [design/](design)
 
