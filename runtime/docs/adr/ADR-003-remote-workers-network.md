@@ -4,6 +4,10 @@
 - **Deciders:** A (Systems/Core owner)
 - **Related:** `TODO.md` groups `ideas-remote-workers` and `admission-in-the-join-flow`, `src/heteroes/replay.py`, `src/heteroes/http_transport.py`
 
+The observations below describe the 2026-10-08 networking proposal. For the product's current public replay and
+private bulk-transfer paths, see the [Worker guide](../../../docs/guides/quickstart-vi.md) and
+[Lab Server architecture](../../../docs/design/lab-server-architecture.md).
+
 ## Context
 Today the workers are on one cable (10.10.10.x) or reach the coordinator through Tailscale. The owner can borrow machines that stay at other people's homes (one 3060 is already here in WSL2; a second one is in another city on 09/10). The owner floated "a kind of Tailscale of our own".
 

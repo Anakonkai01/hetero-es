@@ -85,10 +85,11 @@ mismatch is a fault of the system, not a disagreement to outvote. The run ends w
 operator review`; no further update is admitted and no worker is quarantined or device decision made by this stop.
 A restart of the same run honors the saved receipt and stays stopped.
 
-## Limits and next gates
+## Verification and limits
 
-- CPU fixtures establish protocol, accounting, restart and concurrency behavior; they do not qualify inference on
-  GPUs or native Windows, nor prove token identity. The current protocol stores texts and hashes, not token IDs.
+- The CPU audit fixtures cover protocol, accounting, restart and concurrency. The audit protocol stores texts and
+  hashes. Token parity and managed strict faults have separate M1 and M5 receipts on the accepted B-021 source.
+  [Acceptance report](../../docs/acceptance/STATUS.md).
 - Receipt persistence is tested after successful file fsync/replace and reconstruction of independent guard/API
   objects. No hard-kill or power-loss acceptance was run. A failed storage write keeps the current process stopped;
   immediate process/power loss before a successful retry is not a durable-stop guarantee.
@@ -96,12 +97,13 @@ A restart of the same run honors the saved receipt and stays stopped.
   storage-failure limit stays a stated M5 limit (real full-disk acceptance is DEFERRED by the owner, 2026-10-23).
 - Retaining a lease lets an in-flight mismatch remain observable; absence of its eventual report is still incomplete
   coverage. This is not proof that all mismatches will be delivered under every failure.
-- Cross-process/multiple coordinator writers, persistent audit leases, D10 recovery, stage/progress watchdogs and
-  explicit generation hard caps are not implemented by this slice. The one coordinator recovery budget is unchanged.
+- Audit leases remain process-local. M2 separately verifies D10's one automatic restore recovery per worker and run,
+  and D11's stage/progress watchdog and finite hard cap. The coordinator has its own one-recovery budget.
+  [M2 acceptance](../../docs/acceptance/STATUS.md#m2).
 - Since M3 (2026-10-27) a v3 recovery point carries `audit-faults.json`, `audit-config.json`, every
   `audit-state/gN.json` and `audit-stop.json` as they were at capture, and restore writes them back. A strict stop
   happens before the next update, so it is normally later than the newest point: restoring that point on a
   replacement installation re-runs the stopped generation without the stop. Faults observed after a point's immutable
   snapshot are not reconciled; replacement recovery is not accepted as preserving the strict stop.
-- The lab projection reads files beside the ledger without a lock; a snapshot taken while a drain closes can be one
-  poll behind. The page is checked with fixture outcomes, not with a real multi-device run (that is M5).
+- The lab projection reads files beside the ledger without a lock. A snapshot taken while a drain closes can be one
+  poll behind. The audit UI contract is exercised by the M2 browser fixture.

@@ -1,10 +1,17 @@
-# Integer projection feasibility — implemented, NOT ACCEPTED
+# Integer projection feasibility (2026-10-25)
+
+The feasibility work led to [ADR-013](../../runtime/docs/adr/ADR-013-strict-b22-recipe-decoder.md).
+The lab form now selects `strict_b22_v1` for new Recipe v3 runs. The accepted B-021 source exercised Qwen across
+the RTX 5070 Ti, RTX 3060 WSL and RTX 3060 native Windows. SmolLM and TinyLlama have parity receipts on the 5070 Ti and
+3060 WSL. See the [source-specific acceptance reports](../acceptance/README.md).
+
+## Original prototype and admission gates
 
 The initial proposal below was implemented at `fb18a7b7` with a separate CPU/CUDA/decoder identity.
 The [operator contract](../../runtime/docs/strict/integer-projection-v1.md) specifies the implemented arithmetic and proof;
 [results and limits](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-integer/RESULTS-01.md) record CPU/GPU, trained-candidate and timing evidence.
-The selected experimental decoder defaults to B22. B14 has a recorded token difference from the old tree, and neither
-precision is a managed default or qualified backend. A later exact-conversion scratch prototype remains unselected.
+At this stage the experimental decoder used B22 and stayed outside the managed lab. B14 produced a different
+token from the old tree. The section below records the design evaluated at this stage.
 
 The previous selected FP32 backend preserves its tree. Its B32 inference still lags vLLM by ~18–28x on three trained
 models. ADR-012 explicitly permits a separately versioned fixed-point numerical reference. Do not alter v1 arithmetic
@@ -60,5 +67,5 @@ Gates before adoption:
 - New backend/reference version with magnitudeBits/scaling/rounding/reconstruction and nonlinear/source identity.
   No ordinary vendor fallback, no hardware qualification from a passing model hash, no managed recipe change.
 
-The full M0–M6 plan remains open, including watchdog/D10, recovery/retention, GPU role ownership, native Windows,
-SDK/API/UI qualification, system acceptance and one quantized frozen-base/LoRA format. Do not redefine completion.
+For the later integration gates, including recovery, GPU role ownership and frozen int8 + LoRA, see the
+[source-specific acceptance reports](../acceptance/README.md).

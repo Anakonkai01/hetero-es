@@ -44,8 +44,8 @@ may atomically publish `~/.config/heteroes-power/wall-meter.json` with:
 
 The example is a contract, not a measurement. The bridge must refresh from an
 actual device; stale (>15 seconds), wrong-host, wrong-scope or invalid values are
-ignored. There is no bridge configured on the current host and no network URL
-execution or user-controlled shell command in this input path.
+ignored. The workstation user's meter file was absent on 2026-11-21. The
+collector reads this local file and validates the sample before displaying it.
 
 The same OS user's Worker and Server monitors share private SQLite at
 `~/.local/share/heteroes-power/energy.sqlite` (directory 0700, database 0600).
@@ -73,8 +73,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now heteroes-rapl.service
 ```
 
-The fixed service is installed and active on this host. Other hosts need their
-own applicable sensor support; portable installers do not silently gain root.
+The workstation's `heteroes-rapl.service` was active on 2026-11-21. On other
+hosts, availability depends on the platform's counters and the installed publisher.
 Windows currently has NVIDIA GPU observations and fixed CIM CPU/RAM readings;
 Linux per-thread/I/O/process/hwmon detail and CPU RAPL power are not implemented
 through Windows hardware sensors. Native Windows acceptance of this UI remains
@@ -84,14 +84,14 @@ LibreHardwareMonitor WMI provider.
 Samples are cached for three seconds; Worker control polls remain ten seconds.
 Server's private CPU Python monitor produces JSON lines every three seconds and
 exits on parent stdin EOF. It uses only stdlib collectors, no Torch/CUDA. Server
-bundles the CPU-safe modules selected by `backend/runtime_sources.py` directly from
+bundles the CPU-safe modules selected by [`backend/core/runtime_sources.py`](../../backend/core/runtime_sources.py) directly from
 `runtime/src/heteroes/`. Worker and Server use this single source; no vendor-copy refresh
 is needed. `scripts/check-source-packages.py` verifies isolated archive imports without torch.
 Refresh a reviewed packaging source bundle with `scripts/refresh-server-runtime.py`; the
 Linux packaging check performs refreshes only inside its isolated source copy.
 
-The API retains 180 observations per device and returns 60; desktop recent history
-has 60 points. The chart shows actual timestamps and breaks gaps over 30 seconds.
+The API retains up to 180 observations per device and returns up to 60. Desktop
+recent history keeps up to 60 points. The chart shows actual timestamps and breaks gaps over 30 seconds.
 Long-term per-minute resource charts are not implied by day/month energy totals.
 The detailed protocol is separately capability-negotiated, preserving rolling
 compatibility with older strict Servers. Observation fields never grant device

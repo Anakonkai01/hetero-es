@@ -1,6 +1,6 @@
 # Experimental strict decoder graph
 
-> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
+> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [acceptance reports by source](../../../docs/acceptance/README.md) for the checks and measured hosts. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
 
 The strict CUDA implementation is shared by graph adapters, rather than specialized to one checkpoint.
 `strict/strict_decoder.py` provides an eager operator oracle and serial CUDA graph;

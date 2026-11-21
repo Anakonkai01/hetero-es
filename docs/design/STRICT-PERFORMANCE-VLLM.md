@@ -4,7 +4,10 @@ The owner asked to compare with vLLM, read its repository and prioritize general
 optimizing a single Qwen checkpoint. The repository was inspected at
 [`e7473bf6862289f0647d1f4b01498288b181e063`](https://github.com/vllm-project/vllm/tree/e7473bf6862289f0647d1f4b01498288b181e063),
 2026-10-24. The installed comparison package is vLLM 0.32.0; exact selected source hashes are in the benchmark
-receipts. A current source tree and an installed release are distinguished deliberately.
+receipts. Each section records a dated stage of the investigation. The October 28 release notes record the later
+B22 result of about 73% of vLLM on the compared 5070 Ti workload, below the 80% target. The B-021 acceptance report
+records throughput floors and parity by GPU and OS. [Release notes](../RELEASE-NOTES-2026-10-28.md) ·
+[Acceptance report](../acceptance/STATUS.md).
 
 ## What the source actually does
 
@@ -136,7 +139,8 @@ three local trained models. B22 matches their FP32-tree token streams on this fi
 minus-candidate stream and has larger prefill errors; this counterexample is retained. Neither result establishes
 general model quality or an all-input equivalence to the old tree. Smol/Qwen parent/candidate logits, tokens, text,
 reward and weight hashes match between 5070 Ti and 3060 with the same new full asset manifests/source identities.
-TinyLlama's trained cross-GPU check and native Windows remain open.
+At that stage the TinyLlama cross-GPU and native Windows checks were still pending. Later B-021 receipts cover
+TinyLlama on the 5070 Ti and 3060 WSL, and Qwen on native Windows. [M1 decoder acceptance](../acceptance/STATUS.md#m1).
 
 A scratch-only conversion prototype changes the FP16 exponent bits exactly and uses PTX integer RNE conversion.
 It exhaustively matches admitted finite FP16 value/row-exponent pairs and improves the surveyed single-row operator

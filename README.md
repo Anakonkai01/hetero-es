@@ -56,6 +56,11 @@ npm run build:worker
 scripts/build-apps.sh --check .scratch/my-fresh-linux-check
 ```
 
+For web development, `npm run dev --workspace frontend` serves the UI on `127.0.0.1:5173` by default. Vite proxies
+`/api` to `127.0.0.1:8000`. Set `HETEROES_BACKEND_HOST` and `HETEROES_BACKEND_PORT` when your local development
+backend uses a different address. See the [development lab setup](docs/guides/local-lab-operations.md#isolated-development-lab)
+and [web commands](frontend/README.md).
+
 The packaging check builds both Linux apps unpacked in an isolated source copy and imports their shared modules from
 ASAR. It does not publish installers or replace the source checkout's resource profiles. Formatting-only changes can be
 hidden in blame with `git blame --ignore-revs-file .git-blame-ignore-revs <file>`.

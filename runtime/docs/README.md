@@ -19,7 +19,7 @@
 | Nhiễu và sổ cái (đóng băng) | 001 nhiễu CPU PCG64 · 002 candidate/attempt/lease · 011 nhiễu số nguyên v2 |
 | Triển khai và vòng đời | 003 worker từ xa · 004 local-first · 005 quyền trạng thái · 006 mạng/lưu trữ offline · 007 danh tính/phiên bản/khôi phục · 009 lập lịch |
 | Recipe và đánh giá | 008 Recipe v3 · 010 chunk đánh giá theo thiết bị |
-| Engine strict (cùng token trên mọi GPU) | 012 một model strict · 013 decoder B22 · 014 int8 + LoRA |
+| Engine strict (token trùng trên GPU được hỗ trợ) | 012 một model strict · 013 decoder B22 · 014 int8 + LoRA |
 
 ## Engine strict — [strict/](strict)
 
@@ -31,3 +31,9 @@
 4. [frozen-int8-artifact-v1.md](strict/frozen-int8-artifact-v1.md): base int8 đóng băng + LoRA (thử nghiệm, chỉ SDK/standalone).
 
 Ghi chú cách thực thi (không đổi số học, chỉ đổi cách chạy): [b22-streamed-projection](strict/b22-streamed-projection.md), [b22-paired-weight-reads](strict/b22-paired-weight-reads.md), [b22-weight-prefetch](strict/b22-weight-prefetch.md), [attention-tree-execution](strict/attention-tree-execution.md), [bounded-lm-head](strict/bounded-lm-head.md), [strict-lora-output-execution](strict/strict-lora-output-execution.md).
+
+## Nguồn gốc phụ thuộc
+
+[THIRD_PARTY.md](../THIRD_PARTY.md) là bản nháp ghi nguồn gốc phần mềm và mô hình từ tháng 10.
+Xem phiên bản cấu hình tại [runtime pyproject](../pyproject.toml), [backend lockfile](../../backend/requirements.lock.txt)
+và [profile Worker](../../desktop/worker/resources).

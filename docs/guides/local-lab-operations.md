@@ -29,7 +29,9 @@ The systemd user unit supervises this deployed copy. The owner performs unit-lev
 Use the deployed clone for service operations and plan any source rollout separately. The last published installer line
 is r10. [Release and rollback record](../RELEASE-NOTES-2026-10-28.md).
 
-For development, point the server at a separately initialized private directory, database and ports.
+## Isolated development lab
+
+Point the server at a separately initialized private directory, database and ports.
 
 ```bash
 CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m backend.server \
