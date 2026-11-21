@@ -29,8 +29,7 @@ and applies the same 30-second clock tolerance. It does not create a product use
 The course identity exercise is independent of the lab's user-approval workflow.
 
 The JSON file is read afresh on each request, with a 1-MiB bound and a required top-level list. File failures return a
-generic 503. The MiniCloud fixture supplies the required five `id`/`name`/`major`/`gpa` records and marks unknown personal
-details as sample data; the backend does not invent them.
+generic 503. The operator provides the JSON file and its record fields.
 
 Student SQL is owned by `repositories/course.py`. Each request opens a short-lived PostgreSQL connection, starts a
 read-only transaction and issues one fixed SELECT. It never initializes product tables, acquires the lab's write lock
@@ -41,4 +40,4 @@ database is a course dependency, so its outage does not change product `/readyz`
 Tests use generated RSA keys and a local JWKS HTTP server. The real PostgreSQL matrix additionally creates a separate
 throwaway database and a UUID-owned read-only role, proves SELECT succeeds and INSERT is denied, checks date/order
 serialization and confirms that only the student table exists there. Those fixtures do not prove a deployed Keycloak
-realm or nginx gateway; MiniCloud acceptance supplies that evidence.
+realm or gateway deployment.

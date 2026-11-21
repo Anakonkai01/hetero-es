@@ -1,5 +1,7 @@
 # Kế hoạch review toàn hệ thống HeteroES (2026-10-29)
 
+Kế hoạch gốc theo mốc 29/10. Xem [HANDOFF](HANDOFF.md) và [kết quả review](review/) cho tình trạng hiện tại.
+
 Hai người review chia nhau: **Người A** lấy "lõi đúng-sai" (số học, engine, sổ cái, giao thức), **Người B** lấy "sản phẩm"
 (Recipe v3, agent/runner, backend, giao diện, đóng gói). Hai bên gặp nhau ở các **mối nối** (mục 4) và review chéo ở Pha 3.
 

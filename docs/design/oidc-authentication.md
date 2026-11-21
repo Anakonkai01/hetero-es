@@ -65,7 +65,7 @@ The web reads `/config.json` before rendering its session provider. Its nonsecre
 The default static config selects local mode. `HETEROES_WEB_BASE=/lab/` sets built asset URLs for a gateway subpath;
 `basePath` sets the browser router/callback paths at runtime. Deployment can mount a config without rebuilding for a
 new issuer/host. Use a public PKCE client with exact allowed callback/silent/logout URLs under that base. Browser PKCE
-needs HTTPS outside localhost; public EC2 HTTP alone is insufficient.
+requires a secure context. Use HTTPS outside localhost.
 
 `oidc-client-ts` uses code flow, PKCE and automatic silent renewal. Its user store is memory-only; only unfinished PKCE
 transaction state/verifiers use sessionStorage. OIDC selection clears an old local token before any session request.
@@ -78,8 +78,8 @@ authorization. `node scripts/check-web-oidc.mjs <fresh-output>` runs Chromium an
 owned ephemeral protocol fixture: code/verifier matching, refresh grant, memory-only tokens, SSO reload and end-session.
 It records only safe counters/receipt and a signed-in screenshot, no HAR/token/code logs. An early probe's claimed
 refresh had counter0; it is rejected. The final probe explicitly awaits counter advancement and asserts it again in the
-final receipt; zero/missing counters have independent regressions. This fixture is not actual Keycloak deployment;
-MiniCloud C owns that acceptance. The ordinary local-mode browser/Electron checks remain mandatory.
+final receipt. Zero and missing counters have independent regressions. This receipt covers the loopback protocol
+fixture. The public workstation lab uses its deployed local-auth profile. [Current deployment](../HANDOFF.md).
 
 Primary APIs: [PyJWT decode](https://pyjwt.readthedocs.io/en/stable/api.html),
 [oidc-client-ts settings](https://authts.github.io/oidc-client-ts/classes/UserManagerSettingsStore.html),

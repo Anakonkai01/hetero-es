@@ -74,8 +74,6 @@ calls, ordinary string values and non-import code must remain unchanged. Reprodu
   --base e23a2963 --out .scratch/import-only-proof.json
 ```
 
-Validation includes a fresh pinned private Linux interpreter, hash-checked offline installation of all 23 CPU wheels,
-and real loopback HTTP health/readiness/login/session/storage checks from the extracted server archive. It verifies
-that cloud/GPU libraries are absent. That result goes beyond source imports or Electron module checks. Windows wheel
-hash verification is separate from actually installing/running the private Windows interpreter; the final multi-host
-acceptance must state which of those it ran.
+B-021 acceptance includes fresh Python 3.12.15 private runtimes, hash-checked installation of all 23 Linux and
+24 Windows CPU wheels, and six real loopback HTTP checks on each platform. The separate Linux packaging check
+verifies archive bytes and application modules. See [the accepted source report](../acceptance/STATUS.md).

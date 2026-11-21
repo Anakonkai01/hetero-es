@@ -25,8 +25,8 @@ Both credentials must be explicit and nonempty. Server I/O uses the internal end
 Docker names/private addresses. Public internal endpoints require HTTPS. The separate device origin uses the existing
 numeric private/LAN/Tailscale rule, including for HTTPS. A public hostname cannot become a bulk endpoint. SDK clients
 use SigV4, path-style addressing, explicit region, bounded timeouts/retries and no environment proxies. Buckets are
-explicit/distinct and must already exist; the MiniCloud bootstrap creates them. No R2 account-confirmation or request
-class allowances apply. Quota counts bytes across the three buckets, including uploaded multipart parts.
+explicit and distinct. Create all three before starting the S3-backed service. Quota counts bytes across the three
+buckets, including uploaded multipart parts.
 
 ```mermaid
 flowchart LR
@@ -89,9 +89,8 @@ length mutant survived because a short-body test also failed at final byte-count
 now supplies a complete valid body with the wrong Content-Length, isolating the header guard. Neither intermediate
 result is counted as a killed mutant. Full matrix/mutation receipts are in the evidence index.
 
-These checks exercise isolated CPU/API/database/storage fixtures. Device test helpers supply CPU test profiles; they
-prove authorization and storage routing, not GPU computation. Actual MiniCloud deployment, Keycloak integration, GPU
-runs and multi-container failover remain C/B10. The live lab is not deployed or modified by these checks.
+These isolated tests cover authorization and storage routing with CPU device profiles. See the
+[B-021 report](../acceptance/STATUS.md) for the separate GPU and same-source acceptance checks.
 
 Primary APIs checked against the installed SDK and real MinIO:
 [presigned URLs](https://docs.aws.amazon.com/boto3/latest/reference/services/s3/client/generate_presigned_url.html),

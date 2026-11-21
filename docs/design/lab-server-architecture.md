@@ -1,26 +1,26 @@
 # Lab Server responsibilities and data ownership
 
-Current implementation: B1–B10, accepted at source8da9df22/src-aed2a90e (37/37 required checks). The dated B2/B3/B4 and pre-split inventory
-sections below retain their historical measurements at the stated baselines, including the original modular monolith
-`6ee47147`. This describes source and isolated acceptance, not the live lab database or a deployed MiniCloud cluster.
-See the approved [implementation plan](../plans/codex-2026-11-review-fixes-and-minicloud.md).
+The upstream implementation includes B1–B10 and B-021. The accepted tree at `3429d810`
+(`src-c9f8f9d8…`) passed 37/37 check/host pairs. The B-022 branch changes final checkpoint projection within the same
+service boundaries. The dated B2/B3/B4 and pre-split inventory retain the measurements for their original baselines.
+The workstation lab uses its own combined SQLite deployment at `10457f9a`. See [current status](../HANDOFF.md).
 
 ## Tóm tắt tiếng Việt
 
 Mã nguồn đã có năm chế độ CPU: `all` cho desktop/SQLite, cùng `api`, `devices`, `storage`, `scheduler` cho cloud/Postgres.
 API chia HTTP, nghiệp vụ và SQL thành các lớp riêng. Cloud hỗ trợ Keycloak/OIDC, S3/MinIO, metrics và log JSON an toàn;
 scheduler có một bản giữ khóa session và một bản chờ. Máy coordinator/worker vẫn sở hữu việc chạy ES, sổ cái và checkpoint.
-Lab thật vẫn chạy bản đã deploy riêng; việc cập nhật source/main không triển khai lại lab. Repo MiniCloud thuộc phần C.
+Lab công khai dùng bản triển khai riêng. Xem [hướng dẫn vận hành](../guides/local-lab-operations.md) để kiểm tra tình trạng.
 
 ## B-Q1: current server roles
 
-`backend.apps.factory.create_app` composes one role. `python -m backend.apps.<role>` starts a split service;
+`backend.apps.factory.create_app` composes one role. `python -m backend.apps.<role>` starts that role;
 `python -m backend.server` remains the stable packaged desktop command and selects the combined role. Every HTTP process
 runs without CUDA. GPU/coordinator agents own numerical execution separately.
 
 | Responsibility                                              | Implementation / HTTP owner                                                                         | Authoritative state                                                                                    |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Web and installer delivery                                  | `api/web.py`; optional on `api` and `all`; separate web replicas are a MiniCloud deployment concern | Built files and installer manifest; private bulk policy retained                                       |
+| Web and installer delivery                                  | `api/web.py`; optional on `api` and `all` | Built files and installer manifest; private bulk policy retained                                       |
 | User REST API, identity and workspace/run policy            | `api/`, `services/`, `repositories/`; `api`                                                         | Product DB; local password/session records or verified external OIDC identity                          |
 | Device enrollment, polling, telemetry and commands          | `api/devices.py`, `services/devices.py`, `services/agent_*`; `devices`                              | Durable device tokens, approval, assignments, process ownership and latest telemetry in the product DB |
 | Scheduling and background dispatch                          | `services/scheduler_controller.py`; `scheduler`, or locally `all`                                   | Dedicated PostgreSQL leader session, queue/reservations/diagnostics in the product DB                  |
@@ -31,7 +31,7 @@ runs without CUDA. GPU/coordinator agents own numerical execution separately.
 | Course exercise APIs                                        | `api/course.py`, `services/course.py`, `repositories/course.py`; opt-in `api` only                  | Mounted bounded JSON and a separate SELECT-only student database                                       |
 | HTTP/business observations                                  | Operational/ASGI adapters and observability service/repository                                      | Per-process HTTP counters; only a live scheduler leader reads business snapshots from DB               |
 
-The default product route contract remains 111 method/path pairs: API67, devices21, storage23, with no overlap. Web/API
+The default product route contract remains 111 method/path pairs: API 67, devices 21, storage 23, with no overlap. Web/API
 may mount two static file trees. Every role separately owns the three operational GET routes `/healthz`, `/readyz`,
 `/metrics`. Enabling course mode adds four API-only routes; those deliberately do not enter the default combined-role
 contract. Export it with `python -m backend.apps.routes --json`.
@@ -64,10 +64,9 @@ flowchart LR
   Coordinator --> Ledger[(Per-run ledger / checkpoints)]
 ```
 
-The gateway/identity/object-service deployment in this diagram is a contract for MiniCloud acceptance, not a claim that
-it is already deployed. The live local lab retains its deployed combined SQLite application with Caddy/Cloudflare.
-Bulk compute/model/recovery transfer remains on LAN/Tailscale; small scoped public dataset transfers are bounded.
-Strict runs require a coordinator GPU distinct from worker GPUs.
+The diagram shows the source tree's split service configuration. The workstation deployment uses the combined
+SQLite application behind Caddy/Cloudflare. Bulk compute, model and recovery transfer uses LAN/Tailscale. The public dataset
+proxy permits bounded, scoped transfers. Strict runs require a coordinator GPU distinct from its workers.
 
 ## B-Q2: where data and backups live
 
@@ -84,10 +83,10 @@ belong in this document. [Container settings](container-configuration.md), [obse
 | Dataset object bytes                              | Local storage or separate S3 datasets bucket                                | Purpose-scoped dataset backend and frozen device grants                                                                                        |
 | Metadata backup objects                           | Local metadata directory or S3 backups bucket                               | `metadata/<point>/product.sqlite` or `product.pgdump`, plus checksum/manifest                                                                  |
 | Storage capability signing key                    | Private key file, configurable through `HETEROES_STORAGE_SIGNING_KEY_FILE`  | Share across participating replicas; recover separately from metadata dumps                                                                    |
-| Identity provider accounts, credentials and realm | External Keycloak database/configuration                                    | Not contained in a HeteroES product dump; MiniCloud owns its separate lifecycle                                                                |
+| Identity provider accounts, credentials and realm | External Keycloak database/configuration                                    | Managed and backed up by the identity provider                                                                |
 | Course student records                            | Mounted JSON and separate `studentdb.students`                              | API uses a SELECT-only role/read-only transaction; administrative CRUD uses another role                                                       |
 | Installers and web/download manifests             | Configured build/download trees                                             | Independent packaged artifacts, not a product backup                                                                                           |
-| Metrics and request logs                          | Per-service registries/stdout; future Prometheus/Loki deployment            | Scheduler DB-derived gauges avoid double counting; no raw credential-bearing request fields                                                    |
+| Metrics and request logs                          | Per-service registries and JSON stdout            | Scheduler DB-derived gauges avoid double counting; no raw credential-bearing request fields                                                    |
 | Research receipts and historical logs             | `evidence-archive` branch                                                   | [Evidence index](../EVIDENCE-INDEX.md); immutable research evidence, separate from live state                                                  |
 
 A database backup contains neither recovery/model object bytes nor coordinator process memory. Restore must recover
@@ -96,11 +95,11 @@ recovery point. PostgreSQL restore validates the archive/target and uses an atom
 download tickets, preserves physical reservations and holds dispatch for operator review. The runtime write-ahead
 generation record prevents silently recomputing a different update.
 
-The server CPU profile has23 Linux/24 Windows wheels after adding SQLAlchemy/greenlet. Cloud-only SDK/JWT/Prometheus
+The server CPU profile has 23 Linux / 24 Windows wheels after adding SQLAlchemy/greenlet. Cloud-only SDK/JWT/Prometheus
 libraries remain optional. Both source builders include recursive backend Python/SQL and the reviewed shared CPU runtime
 subset, excluding tests. The three root command adapters remain; library imports use canonical layer paths. Import-only
 proof protects every existing pre-B9 test/helper, including its child Python programs. The numerical runtime is unchanged
-from accepted Part A. Final same-source multi-host acceptance is recorded in B10 evidence `2026-11-02-b10-final-cloud-acceptance`.
+from accepted Part A. See the [B-021 acceptance report](../acceptance/STATUS.md) for the latest accepted same-source matrix.
 
 ## Implemented layering after B2 (2026-11-01)
 
@@ -159,7 +158,7 @@ loopback port, writes its target audit/receipt and removes that container. Evide
 B3 legitimately modernizes test SQL, marks SQLite file contracts, uses the dedicated snapshot API, strengthens the
 runtime closure scanner to recursive production traversal and updates doctor instrumentation paths. Every baseline
 assertion from the 70 B2 test modules is retained (SQL literal quoting normalized in the proof). This is separate from
-B9's later import-only shim-removal proof. At the end of B3 the services still ran together; B4 progress is described below. B4–B10 and MiniCloud C remain unfinished.
+B9's later import-only shim-removal proof. At the end of B3 the services still ran together. The later split is recorded in B4 below.
 
 ## B4 service and scheduler core (2026-11-01)
 
@@ -185,16 +184,14 @@ Real PostgreSQL tests cover graceful takeover, process death, lost-session rollb
 independent-job progress. Local all keeps the previous dispatch loop. Core acceptance: SQLite 541 / PostgreSQL 559, zero skips, mutation 16/16.
 Evidence: `2026-11-01-b4-service-scheduler-core`.
 
-This is not full B4 completion: PostgreSQL pg_dump-to-backup-storage and an isolated restore drill remain. Metrics here
-establish route/liveness ownership; B7 adds the full instrumentation. OIDC, S3/MinIO, cloud config/packaging and B10/C
-acceptance remain later work; nothing was deployed to the live lab.
+This B4 core milestone preceded the [backup/restore drill](postgres-metadata-backup.md) and
+[B7 instrumentation](observability.md). See the current source configuration and acceptance above.
 
 ## Cloud deployment boundary
 
-The source now implements the five-role composition and layered ownership above. Desktop retains `all`/SQLite;
-cloud roles use PostgreSQL, OIDC and S3 when explicitly configured. Source and isolated acceptance do not deploy the
-live lab. MiniCloud's gateway, replicated containers, external identity/object services and operational dashboards are
-part C and require their own deployment evidence. The B1 inventory below remains the measured pre-split baseline.
+The combined desktop role uses SQLite by default. Split roles require shared PostgreSQL. Set up identity, object
+storage, gateway routing and monitoring for the target environment using the source contracts above. The B1 inventory below
+is the measured pre-split baseline.
 
 ## Pre-split inventory (prepared from source, 2026-11-01)
 
@@ -225,7 +222,7 @@ The proposed method/path ownership is API 67, devices 21 and storage 23. The sto
 explicit: /device/recovery-points belongs to storage, while device study/model transfer grants belong to devices.
 User-facing artifact routes, dataset upload/build routes and model upload/publish routes belong to storage. Ordinary
 experiment, model inventory, qualification request and account/workspace routes belong to API. Web mounts and installer
-manifest remain part of all for desktop compatibility and are served by web containers in MiniCloud.
+manifest remain part of all for desktop compatibility and are can be served by separate web replicas.
 
 Common health, readiness and metrics endpoints are operational routes on every process. Product-route union/equality
 must be checked separately from these deliberately shared diagnostics. Scheduler exposes no product route.

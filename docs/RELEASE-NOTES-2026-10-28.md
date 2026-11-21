@@ -1,7 +1,8 @@
 # Release notes — lab release 2026-10-28
 
-From the deployed lab commit `82c37fca` to `main` (accepted source tree `src-18d0b138`, code as of `517a6fb3`; later
-commits change only `docs/`). Acceptance: `docs/acceptance/STATUS.md` (25/25 local, 7/7 3060 WSL2, 2/2 3060 native).
+Release history for the lab deployed at `10457f9a` on 2026-10-28, following `82c37fca`. Its contemporaneous
+[acceptance report](https://github.com/Anakonkai01/hetero-es/blob/10457f9a/docs/acceptance/STATUS.md) records 25/25 local,
+7/7 RTX 3060 WSL2 and 2/2 RTX 3060 native. See [HANDOFF](HANDOFF.md) for current source and service availability.
 
 ## What changes for lab users
 

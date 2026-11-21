@@ -1,5 +1,7 @@
 # Kế hoạch cho Codex (chạy tự động): sửa phát hiện review → tách backend thành nhiều service → HeteroES MiniCloud
 
+Kế hoạch lịch sử ngày 31/10. Phạm vi đang duy trì của HeteroES nằm trong [HANDOFF](../HANDOFF.md).
+
 Lập 2026-10-31 (Claude Opus, sau 4 vòng hỏi chủ dự án). Người làm: **Codex, chạy tự động dài, không có người giám sát**.
 Repo 1: `~/projects/heteroes` (GitHub `Anakonkai01/hetero-es`). Repo 2 (mới): `~/projects/heteroes-minicloud`.
 

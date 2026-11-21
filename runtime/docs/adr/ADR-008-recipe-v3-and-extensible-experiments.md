@@ -7,6 +7,10 @@ superseded by section 9 once this ADR is accepted).
 Labels: **[CODE]** exists in the tree · **[DECIDED]** owner decision of 2026-10-19 · **[PROPOSED]** this draft ·
 **[DECIDED Q-x]** an owner answer of 2026-10-19.
 
+The context and rollout below describe the October design. Recipe v3 is implemented, including local CLI and
+managed SDK submission. The last public installer line and the source-level Windows/GPU results are recorded separately
+in [HANDOFF](../../../docs/HANDOFF.md). See [the SDK guide](../../../docs/design/plan-sdk-lab-bridge.md).
+
 ## Context
 
 Today an experiment is either a Recipe v1 (`manifest.py`: four built-in workloads, pinned Qwen) or a Recipe v2

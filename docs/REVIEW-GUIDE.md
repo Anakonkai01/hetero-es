@@ -1,7 +1,7 @@
-# Hướng dẫn review HeteroES (sau refactor 2026-10-28)
+# Hướng dẫn review HeteroES
 
 Tài liệu này dành cho người review code lần đầu. Nó nói nên đọc gì trước, mỗi phần code làm gì, những điều không được
-phá, cách chạy kiểm tra, và những gì đã bị gỡ khỏi `main` cùng chỗ tìm lại.
+phá, cách chạy kiểm tra và nơi tìm các mốc lịch sử.
 
 **Dự án khẳng định gì.** HeteroES không đưa ra thuật toán ES mới và không nhằm chứng minh ES học được. Đóng góp là hệ thống:
 hậu huấn luyện LLM bằng ES trên nhiều GPU gia đình khác loại, chạy đúng, tái lập được và đo được, dưới dạng một lab mà nhà
@@ -20,28 +20,22 @@ nghiên cứu đăng ký và tùy chỉnh được.
 5. `runtime/src/heteroes/v3/` (Recipe v3: chạy, phân tán, kiểm toán, theo dõi) và `product/` (agent, worker CLI,
    giám sát run).
 6. `backend/` (API của lab), `frontend/src/` (giao diện web), `desktop/` (ứng dụng Electron).
-7. `acceptance/registry.py` và `docs/acceptance/STATUS-*.md`: mọi gate M0–M6 và kiểm tra nào chứng minh gate đó.
+7. `acceptance/registry.py` và [biên bản theo cây nguồn](acceptance/README.md) để đối chiếu các gate M0–M6.
 
-## 2. Bản đồ module (số dòng không tính test, đếm ngày 2026-10-28)
+## 2. Bản đồ module
 
-| Thư mục                                          | File |   Dòng | Vai trò                                                                                                                                 |
-| ------------------------------------------------ | ---: | -----: | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `runtime/src/heteroes/strict/`                   |   21 |  8 835 | Engine strict: số học tham chiếu, plan số nguyên B22, kernel NVRTC (prefill/decode, TMA, attention), các decoder, int8 đóng băng + LoRA |
-| `runtime/src/heteroes/eval/`                     |   10 |  1 010 | Đánh giá chung: workload, sinh văn bản HF, compact decode, chấm điểm candidate, đo theo pha                                             |
-| `runtime/src/heteroes/noise/`                    |   10 |  3 037 | Engine nhiễu chuẩn (CPU PCG64, v2 số nguyên) và bản CUDA                                                                                |
-| `runtime/src/heteroes/es/`                       |    6 |    690 | Nhiễu loạn, snapshot/khôi phục, cập nhật ES                                                                                             |
-| `runtime/src/heteroes/ledger/`                   |    2 |  1 367 | Sổ cái SQLite: candidate, attempt, lease                                                                                                |
-| `runtime/src/heteroes/v3/`                       |   22 |  4 719 | Recipe v3: CLI `heteroes`, run cục bộ/phân tán, kiểm toán, tracker, chấm điểm, dữ liệu                                                  |
-| `runtime/src/heteroes/product/`                  |   33 |  7 395 | Agent thiết bị, worker CLI Linux, giám sát run, phục hồi, telemetry, qualification                                                      |
-| `runtime/src/heteroes/model/`, `study/`, `demo/` |   20 |  2 993 | Nạp model/schema tham số, study, dashboard cho notebook nhà nghiên cứu                                                                  |
-| `runtime/src/heteroes/*.py`                      |   23 |  5 487 | Coordinator, worker, transport HTTP, dispatch, manifest, SDK (`sdk.py`, `sdk_lab.py`)                                                   |
-| `backend/`                                       |   44 |  7 741 | API FastAPI của lab: tài khoản, thiết bị, lập lịch, lưu trữ phục hồi, chính sách                                                        |
-| `frontend/src/`                                  |  159 | 14 503 | Web UI (React)                                                                                                                          |
-| `desktop/`, `packages/product-ui/src/`           |   30 |  6 811 | Ứng dụng Worker/Server (Electron) và UI dùng chung                                                                                      |
-| `acceptance/`, `scripts/`                        |   58 |  8 306 | `scripts/accept.py`, probe nghiệm thu, đóng gói, vận hành lab                                                                           |
+| Thư mục | Vai trò |
+| --- | --- |
+| `runtime/src/heteroes/noise/`, `es/`, `ledger/`, `generation_record.py` | Nhiễu, perturb, snapshot/restore, cập nhật ES và sổ cái candidate/attempt/lease |
+| `runtime/src/heteroes/strict/`, `eval/` | Engine strict, kernel CUDA và các đường đánh giá khác |
+| `runtime/src/heteroes/v3/`, `product/` | Recipe v3, điều phối, kiểm toán, agent, telemetry và qualification |
+| `runtime/src/heteroes/sdk.py`, `sdk_lab.py` | SDK chạy cục bộ và SDK gửi run đến lab |
+| `backend/apps/`, `api/` | Điểm vào từng chế độ, lắp ghép ứng dụng và các HTTP adapter |
+| `backend/services/`, `repositories/`, `db/`, `storage/` | Nghiệp vụ, truy vấn dữ liệu, giao dịch/migration và lưu object cục bộ hoặc S3 |
+| `frontend/src/`, `packages/product-ui/`, `desktop/` | Web UI, UI dùng chung, bản dịch và ứng dụng Electron Worker/Server |
+| `acceptance/`, `scripts/` | Định nghĩa gate, công cụ kiểm tra, đóng gói và vận hành |
 
-Hai file lớn nhất là `strict/integer_cuda.py` (1 847 dòng) và `strict/strict_cuda.py` (1 661 dòng); phần lớn là chuỗi
-mã nguồn CUDA.
+Xem [kiến trúc backend](design/lab-server-architecture.md) để biết service nào sở hữu từng route, dữ liệu và bản sao lưu.
 
 ## 3. Bất biến không được phá
 
@@ -62,7 +56,7 @@ python3 scripts/accept.py list                         # mọi kiểm tra và ga
 export ACCEPT_PYTHON="$HOME/miniforge3/envs/heteroes-match/bin/python"
 python3 scripts/accept.py run cpu                      # ~10 phút, không cần GPU (check-all + selftest)
 HETEROES_GPU_ACCEPTANCE=1 python3 scripts/accept.py run gpu perf faults package mutation --keep
-python3 scripts/accept.py report --write               # ghi docs/acceptance/STATUS-*.md
+python3 scripts/accept.py report                       # đọc biên bản theo cây nguồn HEAD
 python3 scripts/check-archive-fixtures.py              # fixture test giống hệt bản lưu trữ
 python3 scripts/build-evidence-index.py --check        # chỉ mục evidence khớp nhánh lưu trữ
 ```
@@ -87,7 +81,7 @@ git của `main` vẫn chứa mọi file đã gỡ (`git show c33eb61e:<đườn
 
 - Không tách `strict/integer_cuda.py` và `strict/strict_cuda.py`: danh tính engine băm toàn bộ byte của từng file này;
   chuyển code Python khởi chạy kernel sang file khác sẽ đưa nó ra khỏi phạm vi hash đó.
-- Không gỡ luồng qualification v1/v2 và profile `desktop-v1`: lab đang chạy vẫn nhận thiết bị và resume run đã lưu theo
+- Không gỡ luồng qualification v1/v2 và profile `desktop-v1`: bản triển khai lab hỗ trợ thiết bị và resume run đã lưu theo
   các phiên bản đó; gỡ là đổi hành vi sản phẩm.
 - Không gom `runtime/scripts` vào `scripts/`: test, probe nghiệm thu và gói worker (`run_worker.py`) gọi chúng theo đường dẫn
   hiện tại.

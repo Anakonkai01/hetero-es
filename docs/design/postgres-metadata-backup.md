@@ -58,13 +58,13 @@ failure prints only an error type. Temporary SQL is deleted in either case.
 
 The B4 drill used a fresh PostgreSQL17 database and the real MinIO `heteroes-backups` bucket: upload, read-back checksum,
 download and a fresh restore, with unknown reservations retained, sessions revoked and dispatch held. A real object
-corruption test kept PENDING/local data and published no manifest. The SDK adapter in that test performs real S3 calls;
-production S3 backend/factory integration belongs to B6. This does not constitute deployment or GPU acceptance.
+corruption test kept PENDING/local data and published no manifest. That B4 drill used a test SDK adapter. A separate B6 drill verified the same backup/restore path through the
+[production S3 backend](s3-storage.md).
 
 The old official MinIO image could not be fetched. The test image was built from the pinned upstream release commit
 `9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a` (`RELEASE.2025-10-15T17-29-55Z`). The evidence records source archive,
-Dockerfile, base-image digests, image ID, runtime version and successful health probe. Reuse this reviewed build recipe
-for MiniCloud; do not substitute an unverified mirror. Source and client semantics:
+Dockerfile, base image digests, image ID, runtime version and successful health probe. See the pinned source and
+PostgreSQL client semantics.
 [MinIO release](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z),
 [pg_dump17](https://www.postgresql.org/docs/17/app-pgdump.html),
 [pg_restore17](https://www.postgresql.org/docs/17/app-pgrestore.html).

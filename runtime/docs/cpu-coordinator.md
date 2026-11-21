@@ -1,4 +1,4 @@
-# CPU-only coordinator (staged r11)
+# CPU-only coordinator for Recipe v3
 
 A machine without an NVIDIA GPU can coordinate Recipe v3 experiments through the Linux CLI. Install the isolated CLI
 runtime as usual, then select the CPU admission test explicitly:
@@ -26,5 +26,5 @@ enough RAM and may validate much more slowly than a GPU. Validation texts are re
 no claim that CPU validation texts match those of a GPU.
 
 The synthetic update does not estimate full-model update speed, so `updateSecondsPerSeed` is absent/null for this profile.
-Native Windows CPU admission uses the same profile validation, but this guide's installed CLI is Linux-only. Real native
-Windows CPU acceptance requires its own receipt. This staged feature is not deployed to the public r10 lab.
+This procedure uses the matching Linux CLI and Recipe v3 lab. Native Windows CPU admission has its own acceptance
+scope. The published r10 installer guide and upstream source status are in [HANDOFF](../../docs/HANDOFF.md).

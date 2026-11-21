@@ -85,8 +85,9 @@ Nghiệm thu cuối có source sạch `src-ede4338ef54a443a0ecc33a2bc96ea836ea18
 Noise/ES 572 passed trên mỗi môi trường GPU; strict/eval 1 639 local, 1 560 WSL và 956 native, không skip.
 3060 deselect rõ 79 ca chỉ áp dụng SM120. Qwen strict parity đạt cả ba; throughput trên sàn, fault/replay, soak 600 thế hệ,
 int8 lifecycle, package và 12 nhóm mutation đều đạt. CPU check-all đủ 24 bước; runtime 3 324 passed / 1 045 CUDA-hidden skips,
-backend SQLite 464 passed. Chi tiết ở [STATUS](../acceptance/STATUS.md) và [evidence index](../EVIDENCE-INDEX.md).
+backend SQLite 464 passed. Chi tiết nghiệm thu phần A ở [biên bản theo commit](https://github.com/Anakonkai01/hetero-es/blob/6ee47147/docs/acceptance/STATUS.md)
+và [evidence index](../EVIDENCE-INDEX.md).
 
 Các thất bại giữa chừng vẫn giữ nguyên trong `2026-11-01-partA-matrix-c0d90ddb`; không dùng chúng để kết luận source cuối.
-Phần A không deploy lab thật, không thay trạng thái thiết bị, không đóng các milestone đã hoãn hoặc đo bookkeeping riêng,
-và không thay thế việc triển khai/kiểm Postgres, OIDC, MinIO, MiniCloud trong B/C.
+Phần A ghi nhận các kết quả ở thời điểm review phần lõi. Xem [HANDOFF](../HANDOFF.md) cho backend đã reaccept,
+bản triển khai của lab và những gate còn mở.

@@ -1,8 +1,9 @@
-# Runtime follow-ups outside the cleanup
+# Historical runtime backlog (October 2026)
 
-These existing numerical/research follow-ups require separate review; behavior changes remain subject to the numerical
-contract. The completed repository cleanup does not claim to complete these research tasks. Paths below are relative to
-`runtime/`. The sole current handoff is [HANDOFF.md](HANDOFF.md).
+This records the research ideas and cleanup notes at the source checkpoints named in each section. Checkboxes,
+version proposals and host instructions describe those checkpoints. Use [HANDOFF.md](HANDOFF.md) for current work
+and the [numerical contract](../runtime/docs/numerical-contract.md) for behavior changes. Historical source paths
+below are relative to `runtime/`.
 
 ## snapshot-polish  (`src/heteroes/es/snapshot.py`)
 - [ ] Docstrings for `take_snapshot`, `diff_from_snapshot`, `restore_from_snapshot_`. State that after a

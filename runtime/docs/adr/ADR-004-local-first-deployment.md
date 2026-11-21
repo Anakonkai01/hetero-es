@@ -8,6 +8,9 @@ Evidence labels: **[CODE]** exists in the inspected tree · **[MEASURED]** a dat
 run recorded in evidence · **[PROPOSED]** recommendation · **[PENDING]** not yet
 accepted by a test or run.
 
+The decisions below describe the October local-first MVP. The workstation deployment still uses the combined role.
+The upstream source now includes split roles with PostgreSQL. See the [current backend architecture](../../../docs/design/lab-server-architecture.md).
+
 ## Decision
 
 1. **One Local Lab Server per lab.** A CPU-only FastAPI process with a management

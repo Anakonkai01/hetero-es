@@ -88,4 +88,7 @@ product `backend/tests/test_admission_hold.py`; mutation receipts are in
 
 ## Repository cleanup — 2026-10-19
 
-Admission hold/reconciliation behavior is preserved. Backend definitions now live in separate router, policy and agent modules. Current state: [canonical handoff](../../../docs/HANDOFF.md). Earlier code locations describe their dated checkpoints.
+Admission hold/reconciliation behavior is preserved. The current implementation lives in
+[services/scheduling.py](../../../backend/services/scheduling.py) and the split PostgreSQL scheduler uses
+[scheduler_controller.py](../../../backend/services/scheduler_controller.py). Earlier code locations describe their dated
+checkpoints. See [current backend architecture](../../../docs/design/lab-server-architecture.md).

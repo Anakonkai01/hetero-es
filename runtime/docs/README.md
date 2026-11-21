@@ -8,6 +8,7 @@
 | --- | --- |
 | [numerical-contract.md](numerical-contract.md) | Hợp đồng số học: nhiễu, perturb, restore, cập nhật ES, bản ghi thế hệ. Các mục §15–17 mô tả lựa chọn đời Recipe v1 (xem ADR-011/012/013 cho bản hiện hành). |
 | [v3-local-runs.md](v3-local-runs.md) | Chạy Recipe v3 cục bộ bằng CLI/SDK. |
+| [SDK chạy qua lab](../../docs/design/plan-sdk-lab-bridge.md) | Gửi run cho coordinator/worker của workspace, theo dõi và đọc kết quả. |
 | [audit-state-v1.md](audit-state-v1.md) | Trạng thái kiểm toán khi chạy và điều kiện nhận bản cập nhật (M2). |
 | [cpu-coordinator.md](cpu-coordinator.md) | Máy không GPU làm coordinator. |
 

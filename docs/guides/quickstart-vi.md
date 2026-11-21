@@ -2,9 +2,10 @@
 
 Đây là bản thử nghiệm riêng, chưa phát hành chính thức. Bộ cài **chưa được ký số**, nên Windows sẽ hỏi lại một lần.
 
-Bản đang cung cấp: **lf1-20261014-r10**. Tải trực tiếp tại
-**https://lab.heteroes.site/#downloads**; chọn **Worker** để tham gia lab này,
-hoặc **Lab Server** nếu muốn dựng lab riêng. Không cần chép file từ máy chủ.
+Bộ cài công bố gần nhất là **lf1-20261014-r10**. Khi lab hoạt động, mở mục **Desktop apps** để tải **Worker** hoặc
+**Lab Server** cho Windows. Lần kiểm tra ngày 21/11/2026 ghi nhận lab đang dừng do thiếu ổ lưu trữ đã cấu hình.
+Xem [trạng thái lab](../HANDOFF.md#phiên-bản-và-trạng-thái) trước khi thử tải.
+[Trang tải của lab](https://lab.heteroes.site/#downloads).
 
 Bạn muốn làm gì?
 - **A. Cho lab mượn GPU của bạn** (Worker): đọc phần A.
@@ -16,8 +17,8 @@ Bạn muốn làm gì?
 
 **Cần có:** Windows 11 (64-bit) hoặc Linux (64-bit); card NVIDIA có driver mới; khoảng 10 GB trống; mạng Internet cho lần cài đầu (tải khoảng 3–4 GB).
 
-1. **Đăng ký tài khoản.** Mở link lab (hiện là **https://lab.heteroes.site**), bấm *Register an account*. Mật khẩu từ 12 ký tự trở lên. Tài khoản ở trạng thái chờ cho đến khi quản trị viên duyệt.
-2. **Tải bộ cài** ngay ở trang chủ, mục *Desktop apps*, hoặc trang *Workers* sau khi đăng nhập. Windows: file `.exe` (các bước 3–8 dưới đây). **Linux: không có app, chỉ có dòng lệnh**: xem mục *Linux* ngay dưới.
+1. **Đăng ký tài khoản.** Khi lab hoạt động, mở **https://lab.heteroes.site**, bấm *Register an account*. Mật khẩu từ 12 ký tự trở lên. Tài khoản ở trạng thái chờ cho đến khi quản trị viên duyệt.
+2. **Tải bộ cài** ngay ở trang chủ, mục *Desktop apps*, hoặc trang *Workers* sau khi đăng nhập. Windows: file `.exe` (các bước 3–8 dưới đây). Trên Linux dùng dòng lệnh ở mục *Linux* bên dưới.
 3. **Cài đặt.** Windows hiện cảnh báo "Windows protected your PC" vì bộ cài chưa ký: bấm *More info* rồi *Run anyway*. Nếu báo thiếu DLL, cài *Microsoft Visual C++ x64 runtime* (app có sẵn đường dẫn).
 4. **Nhập địa chỉ lab** (cùng link ở bước 1) rồi đăng nhập bằng tài khoản của bạn.
 5. Bấm **Install isolated runtime** (tải Python, thư viện, model; chỉ lần đầu). Rồi bấm **Run compatibility check**: máy chạy thử một phép tính GPU và so với kết quả chuẩn. Nếu lỗi, giữ OFF và gửi báo cáo cho quản trị viên.
@@ -25,7 +26,8 @@ Bạn muốn làm gì?
 7. **Bật ON** chỉ khi bạn muốn chia sẻ GPU. Mỗi lần mở lại app, trạng thái luôn về OFF.
 8. Trước khi tắt máy hoặc trả máy: bấm **Stop safely**, chờ app báo đã dừng, rồi **Quit safely**.
 
-**Linux (dòng lệnh, từ 2026-10-22 là cách duy nhất trên Linux; WSL không còn được hỗ trợ, trên Windows hãy dùng app):**
+**Linux.** Với bản công bố r10, Linux dùng dòng lệnh và Windows dùng bộ cài native.
+WSL trong biên bản nghiệm thu là môi trường kiểm thử của mã nguồn upstream.
 dán dòng lệnh ở mục *Linux (command line)* trên trang chủ vào terminal. Một lệnh làm hết: kiểm tra máy, cài, tự kiểm GPU,
 hỏi mã ghép cặp (tạo ở *Workers → Add a GPU computer*), chạy nền như một service (tự chạy lại khi máy khởi động), chờ quản
 trị viên duyệt, rồi hỏi có bật ON không (và có giữ ON sau khi khởi động lại không). Dừng giữa chừng thì chạy
@@ -49,7 +51,7 @@ Giới hạn: máy bạn chỉ được tụt tối đa 64 bước so với lab.
 
 **Cần có:** một máy làm "văn phòng" (không cần GPU). Windows: bộ cài **HeteroES Lab Server** (các bước dưới). Linux: từ
 2026-10-22 không còn app Lab Server cho Linux; lab chạy như một service bằng dòng lệnh từ mã nguồn (`scripts/local-lab.py`
-với unit `deploy/heteroes-lab.user.service`, như lab chính đang chạy), hỏi quản trị viên dự án.
+với unit `deploy/heteroes-lab.user.service`, như cách cài đặt của lab chính), hỏi quản trị viên dự án.
 
 1. Tải **HeteroES Lab Server** từ link lab, cài và mở.
 2. Bấm **Install Server** (tải thư viện nhỏ, chỉ lần đầu).
@@ -79,5 +81,5 @@ Nếu địa chỉ lab cũ không còn dùng được, tắt đóng góp, chờ 
 Thao tác này xóa ghép đôi trên máy bạn; lab vẫn giữ lịch sử thiết bị. Đăng nhập lab mới và ghép đôi lại. Quản trị viên có
 thể xóa thiết bị đang chờ hoặc đã thu hồi khỏi danh sách. Thiết bị đã thu hồi không tự được duyệt lại.
 
-Bản dọn dẹp mã nguồn ngày 19/10 chưa thay bộ cài đang phát hành. Windows hiện chỉ được chấp nhận làm Worker Recipe v1;
-Coordinator cần Linux đã qua kiểm tra. Trạng thái và giới hạn kiểm chứng mới nhất ở [HANDOFF.md](../HANDOFF.md).
+Trong bộ cài r10, Windows dùng chế độ Worker Recipe v1 và coordinator cần Linux đã qua kiểm tra. Các biên bản
+Windows native cho mã nguồn upstream có phạm vi riêng. Xem [HANDOFF.md](../HANDOFF.md).

@@ -84,6 +84,5 @@ excluded. Unknown device/run statuses and failure kinds map to `OTHER`.
 Backend tests cover normalized routes, all four non-scheduler roles, exact JSON fields, credentials in headers/body/
 query/path, readiness failures, telemetry units and invalid values. A real loopback Uvicorn fixture checks that an
 unhandled bearer-bearing exception reaches neither stdout nor stderr. Actual PostgreSQL tests check physical-session
-identity, standby suppression, connection loss and concurrent graceful shutdown. These tests do not establish that a
-Prometheus/Grafana deployment has scraped the service or that live GPU telemetry has arrived; those checks belong to
-the separate MiniCloud acceptance.
+identity, standby suppression, connection loss and concurrent graceful shutdown. The receipts cover these isolated
+backend and PostgreSQL fixtures. A deployed environment can verify external scrapes and GPU telemetry independently.

@@ -1,7 +1,9 @@
 # Overnight follow-up decisions — 2026-10-23
 
-Source: owner responses in the follow-up grilling session for
-`handoff-2026-10-23-overnight.md`.
+This note records the 2026-10-23 overnight follow-up and owner decisions. Later M3 work added streamed recovery
+uploads, persisted backoff, verification caching and retention checks. The accepted source report tracks those gates
+alongside the open bookkeeping and deferred full-disk checks. The cause of the 2026-10-23 oomd incident remains
+unconfirmed. [Accepted source report](../acceptance/STATUS.md).
 
 ## Settled decisions
 
@@ -22,13 +24,13 @@ Source: owner responses in the follow-up grilling session for
 
 ## Important open incident: systemd-oomd killed the coordinator service
 
-Status: **policy agreed; root cause unresolved; mitigation not implemented**.
+At the 2026-10-23 review, the owner agreed the policy and the cause was still under investigation.
 
 **Review 2026-10-23 10:20 ([evidence](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-oomd-review/README.md)):** strong hypothesis = the
 recovery-point upload thread (`product/cloud_sync.py`) re-hashing ~3-4 GB per attempt, buffering ~1 GB per upload and
 writing ~1 GB every ~2 min to the lab storage on the NTFS/FUSE Archive disk during a 24 s/generation run. Confirmed
 separate bug: with the Archive full, the worker service still re-reads ~60 MB/s every 30 s with no run active and holds
-9.1 GB of page cache. Five fixes proposed there; none implemented.
+9.1 GB of page cache. The review proposed five changes. Its findings describe the code and measurements of that date.
 
 On 2026-10-23 at 02:50:07 (journal timestamp), systemd-oomd killed three processes
 in nhan's `heteroes-worker.service`. Its parent `user@1000.service` had memory

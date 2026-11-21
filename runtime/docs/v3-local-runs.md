@@ -217,7 +217,9 @@ experiment are reused on retry. Editing a local file requires a fresh output dir
 installed CLI's private token file; user access tokens are read from the environment, never command arguments or receipts.
 The managed lab supports its own FP32/CPU-noise recipe choices, fixed Worker port and managed audit/time limits; unsupported
 standalone flags are refused. A managed Windows LoRA coordinator remains subject to the lab's pinned-adapter restriction.
-This staged route requires the matching r11 lab and is not supported by the public r10 deployment.
+This entry point requires the matching Recipe v3 worker CLI and lab protocol. See the
+[SDK workflow](../../docs/design/plan-sdk-lab-bridge.md) for Python submission and
+[deployment status](../../docs/HANDOFF.md) for the last published installer line.
 
 
 ## Prompt, boxed answers and usage

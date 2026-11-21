@@ -6,8 +6,10 @@ Cloud access is not required for this local release.
 
 ## Start a new lab
 
-1. Extract the Linux portable installer and open `heteroes-server`. On Windows,
-   use the per-user installer after its native hardware acceptance is completed.
+1. On Windows, use the last published per-user r10 installer when the lab's
+   download page is available. On Linux, operate the lab from source using the
+   [workstation guide](local-lab-operations.md). The unpacked Linux Electron
+   build is used for development and packaging checks.
 2. Select **Install Server**. The app downloads hash-pinned standalone Python
    and CPU dependencies into its private directory. It does not modify system
    Python, a Conda environment or GPU drivers.
@@ -42,10 +44,10 @@ The bootstrap does not overwrite an existing lab or import historical process
 records. Use the existing backup/restore guide for migration into a fresh
 deployment; hold its queue and review worker configuration before releasing it.
 
-The current Linux proof used an actual portable app and fresh isolated CPU
-runtime under Xvfb. Native Windows and a nontechnical owner on a normal desktop
-remain acceptance gates. The CPU pilot can run without bundled Worker downloads;
-use the separately checksum-identified qualified Worker installer.
+Linux packaging checks exercise the unpacked app under Xvfb. The B-021
+matrix separately tested fresh private Python and six actual HTTP checks on
+Linux and native Windows. See [acceptance status](../acceptance/README.md) for
+source identities and scope. Worker downloads use their own package and checksum.
 
 ## Reproduce a reviewed build
 

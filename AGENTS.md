@@ -30,11 +30,11 @@ the owner asks. Prefer finishing the system (product, multi-machine, speed, rese
   (`scripts/build-evidence-index.py`). Tests read only copies under `*/tests/fixtures/archive/<archived path>`
   (`scripts/check-archive-fixtures.py` proves they are identical). Do not format fixtures, resource profiles, generated
   files or archives.
-- Do not change device approval/contribution based on an old handoff. `3060-thao` is REVOKED in the latest live read.
+- Device approval and contribution are live state. Verify them on the deployment before taking any authorized device action.
 
 ## Lab and hardware
 
-The live/public lab runs from `~/.local/share/heteroes-lab/app` at its deployed commit, with its own environment. The
+The live/public lab is installed at `~/.local/share/heteroes-lab/app` at its deployed commit, with its own environment. The
 working tree and local `main` can advance without deploying it. Change lab state only through `scripts/local-lab.py`.
 Do not restart its unit directly, kill processes manually, use `pkill -f`, or start another controller against its database.
 No cleanup installer is published; installer polish/r11 is separate. Keep the existing Conda `ai` environment unchanged.

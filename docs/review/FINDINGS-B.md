@@ -33,7 +33,7 @@ that the existing modular monolith is a correctness defect; the approved multi-s
 
 ### B-021 — Final recovery projection regresses after a late coordinator snapshot (P2)
 
-Found during the actual MiniCloud run screenshot review: all three MinIO recovery points were READY, including the final
+Found during a checkpoint integration run review: all three MinIO recovery points were READY, including the final
 generation 1 checkpoint, while the run API/UI retained PENDING. The coordinator may report an older local upload state
 after storage verification; the previous merge kept the confirmed generation/point ID but overwrote its status.
 
@@ -45,15 +45,12 @@ The full actual-MinIO backend matrices pass 704 SQLite /733 PostgreSQL tests, ze
 all 37 same-source check/host pairs pass, including 5070 Ti, 3060 WSL and native Windows, 137 acceptance mutations and
 fresh Linux/native private-package execution. Evidence:2026-11-03-b021-final-checkpoint-acceptance, 130 SHA-verified files.
 The fix applies to subsequent reconciliations; historical terminal row projections are not bulk-rewritten.
-MiniCloud was repinned/rebuilt at 3429d810 and new run 7a47959223334f80921f8a533f6adc5a completed with final API/UI
-checkpoint READY. The new-source final checklist passes 26/26; its stable 34-page report has 21 actual screenshots and
-is bound byte-for-byte to the MinIO PDF. Latest evidence:2026-11-03-minicloud-course-wording-final on evidence-archive,
-mirrored from repo 2 main c32a1bd after C-019's original-course text correction. The previous 0175c93b receipt remains
-unchanged and is not relabeled as new-source acceptance.
+Integration run `7a47959223334f80921f8a533f6adc5a` on `3429d810` confirmed READY in the API and UI.
+See the [B-021 acceptance report](../acceptance/STATUS.md) for the upstream source gates.
 
 ### B-022 — A periodic recovery point verified after the final point replaces it in the run projection (P3)
 
-Found 2026-11-03 by Claude while re-running the MiniCloud demo (run `d7a90ffc5a554b22a01b36ac52c1f744` at `3429d810`).
+Found 2026-11-03 during checkpoint integration replay (run `d7a90ffc5a554b22a01b36ac52c1f744` at `3429d810`).
 A completed run uploads a periodic point and a final point of its last generation 0.26 s apart. Storage verification
 (`backend/services/recovery_storage.py`, `verify`) wrote `cloudSync.pointId` for any point whose generation is not older
 than the projected one, so whichever verification finished last won. Here the periodic point `a97127a6…` replaced the
@@ -65,5 +62,6 @@ Fix (branch `fix/b022-final-point-projection`): `verify` now builds the projecti
 Regression `test_late_periodic_twin_never_replaces_the_verified_final_point` covers both verification orders; it fails
 on the previous code (the pre-fix code is the killed mutant). Backend: SQLite 690 passed; PostgreSQL 716 passed
 (`scripts/check-backend-postgres.sh`, without the optional MinIO matrix).
-**Not yet done:** the three-host acceptance for the new source hash; MiniCloud stays pinned at `3429d810` until then. Its
-H4 check verifies the projection by content and reports `projectionIsFinal: false` with this ID.
+The captured H4 check verified matching content and reported `projectionIsFinal: false` for this point ID.
+The fix is on `411a0a3a`. The [B-022 source report](../acceptance/STATUS-src-89176a3d.md) tracks the pending three-host
+acceptance.

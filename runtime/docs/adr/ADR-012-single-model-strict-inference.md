@@ -1,8 +1,8 @@
 # ADR-012 — One model per GPU and a versioned strict inference backend
 
-Status: owner decisions accepted on 2026-10-24; implementation and hardware acceptance in progress.
-This ADR records the owner's Q1–Q11 answers and subsequent authorization to start autonomous implementation.
-It does not claim that a new inference backend already exists or has passed cross-device acceptance.
+The owner accepted these decisions on 2026-10-24. The implemented backends are [strict B22](ADR-013-strict-b22-recipe-decoder.md)
+and [frozen int8 + LoRA](ADR-014-strict-int8-lora-decoder.md). The [acceptance reports](../../../docs/acceptance/README.md)
+record the supported GPU/OS combinations exercised and the gates still open or deferred.
 
 ## Decision
 
@@ -27,7 +27,7 @@ It does not claim that a new inference backend already exists or has passed cros
 
 ## Why a dtype switch is insufficient
 
-`EvalModel` currently keeps a full FP32 deepcopy of the live FP16 model. Removing the shadow eliminates duplicated
+The historical evaluation path keeps an FP32 copy of the live FP16 model. Removing the shadow eliminates duplicated
 weights, but historical FP16 experiments already include cross-GPU text and reward differences. Standard deterministic
 flags, a fixed seed, quantized storage or a finite passing corpus do not establish an all-input numerical guarantee.
 
@@ -52,9 +52,9 @@ acceptance separately. The new backend/reference identity must namespace qualifi
 
 ## Implementation and authorization boundaries
 
-The owner approved autonomous implementation and explicitly authorized GPU experiments and SSH to `3060-thao`.
-This does not change device approval/revocation or authorize a lab deployment. Use explicit GPU opt-ins, keep the
-existing `ai` environment unchanged and preserve host usability/oomd and the accepted data-retention policy.
+The October implementation used owner-authorized GPU and SSH access. Follow the current GPU, network and
+deployment rules in [AGENTS.md](../../../AGENTS.md). The existing `ai` environment and the agreed host and data-retention
+policies are part of that operating context.
 Keep credentials out of commands/logs/documents/commits. Record unreachable hardware as an acceptance limitation.
 
 The initial work adds opt-in host phase traces and storage inventory, a CPU reference/probe and meaningful regression

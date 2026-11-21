@@ -1,35 +1,42 @@
-# Plan (later session): the researcher SDK submits to the shared lab, and the notebook shows a researcher using it
+# Submit an experiment to the lab with the Python SDK
 
-Owner, 2026-10-22 ~12:30, after the midterm notebook: "tại sao cái notebook ko thể hiện được nhà thí nghiệm có thể sử dụng
-hệ thống như thế nào… mấy cái sdk gì gì đó ko được sử dụng hả". Decision: **planned for a later session, not now** (the
-midterm demo today keeps the current notebook). Not started.
+The SDK supports local execution through `ESTrainer.train()` and managed execution through
+`ESTrainer.submit()`. Use a reachable lab, an approved workspace, and the names or IDs of the devices assigned to
+that workspace. The [researcher notebook](../../runtime/notebooks/researcher.ipynb) shows data preparation, a pinned model,
+reward/sampler definitions and on-lab submission. Check [lab availability](../HANDOFF.md) before connecting.
 
-## The gap (as of `26c6d89`)
+## Managed submission
 
-- `heteroes.sdk` (`runtime/src/heteroes/sdk.py`: `ESConfig`, `@reward`, `ESTrainer`) runs **on one machine only**:
-  `ESTrainer.train()` calls `heteroes.v3.local.run_local`; its docstring says "nothing is sent anywhere".
-- The shared lab is reached another way: a recipe JSON → `heteroes.v3.lab_cli.offer_experiment(spec, coordinator,
-  workers, api, directory)`, which uploads the model, the dataset splits and any Python scorer/coefficient code, and
-  creates the experiment (idempotent through `lab-offer.json`). The GSM8K notebook calls it through
-  `heteroes.demo.lab.DemoLab.offer` / `gsm8k.launch(lab, tier)`, so a reader never sees the recipe, the reward or the
-  submit; since the midterm edition the tier cells only `load(...)` saved records.
-- So there is no `ESTrainer(...).submit(lab)`: a researcher either runs the SDK alone, writes JSON and calls an
-  internal function, or uses the web page.
+Use `Lab.connect()` for a lab with local username/password auth. `Lab.from_session()` loads a private session
+saved by [lab-login.py](../../scripts/lab-login.py). A client with a valid lab access token and workspace ID can also
+pass them directly to `Lab(url, token, workspace)`.
 
-## Wanted
+```python
+from heteroes.sdk import ESConfig, ESTrainer
+from heteroes.sdk_lab import Dataset, Lab, Model
 
-1. **SDK → lab bridge** (code + tests + mutation check): `ESTrainer.submit(lab, coordinator, workers, directory)` built on
-   `config()` / `to_config()` and `offer_experiment`; a `Lab` (session from `scripts/lab-login.py` or a token) with
-   `devices()`; a returned run object with `.status()`, `.watch()` (the live dashboard), `.results()` (validation,
-   selected checkpoint, test score, per-device work and audits **from the ledger**, since the lab timeline of a long run
-   is partial: RESULTS.md finding 10). A Python `@reward` must travel as pinned code exactly as `offer_experiment` already
-   does for `kind: python`.
-2. **Notebook opening section "You are the researcher"**: sign in, list the devices, write the GSM8K reward in Python
-   with `@reward`, declare `ESConfig`, `submit`, `watch`, `results`. The tier 1-3 sections stay as the evidence part.
-3. **A real short run through that path** on the lab's devices (they are busy with tier 3 until ~2026-10-23 11:00; a
-   submit before then only queues). Optionally a tiny `ESTrainer.train()` on one machine in the notebook.
+lab = Lab.connect("https://your-lab.example", workspace="research")
+print(lab.devices())
 
-## Open questions for the owner (grill before planning)
+# Supply a pinned repository revision and populated prompt/answer rows.
+model = Model.from_hf(model_repo, revision=model_commit)
+dataset = Dataset.from_rows(train=train_rows, validation=validation_rows, test=test_rows)
+config = ESConfig(model=model, dataset=dataset)
+trainer = ESTrainer(config, scorer={"name": "answer-line-last-number"})
+run = trainer.submit(lab, coordinator=coordinator_id, workers=worker_ids, name="research run")
+print(run.id, run.status())
+```
 
-Name and shape of the API (`submit` on `ESTrainer` or a separate `Lab.submit(config)`); whether `watch()` blocks;
-which result fields a researcher expects; whether a declarative scorer stays the default for shared labs.
+Submission registers the inputs, qualifies the selected devices by default, and queues the experiment. The local
+`lab-offer.json` receipt lets a retry reuse completed registration steps and the experiment. Keep its directory
+bound to the same inputs. An operator approves devices and their owners enable contribution. Select `strict_b22_v1`
+with `eval_dtype="float16"` for a strict SDK run and choose a coordinator GPU separate from the worker GPUs. The SDK's default decoder is
+`hf_generate`.
+
+`run.watch()` draws the notebook dashboard until the run ends or the cell is interrupted. Use `run.wait()` to
+wait for a terminal status, or `lab.run(experiment_id)` to reconnect. `run.results()` reads the lab's retained
+timeline and validation events. If it reports `partialTimeline`, use the coordinator's ledger for complete per-candidate
+and per-generation records. See [data ownership](lab-server-architecture.md#b-q2-where-data-and-backups-live).
+
+[SDK implementation](../../runtime/src/heteroes/sdk_lab.py) · [SDK lab tests](../../runtime/tests/v3/test_sdk_lab.py) ·
+[Local Recipe v3 experiments](../../runtime/docs/v3-local-runs.md)
