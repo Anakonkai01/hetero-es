@@ -28,13 +28,11 @@ runs without CUDA. GPU/coordinator agents own numerical execution separately.
 | Metadata backups                                            | `services/metadata_backup.py`; `storage`, or locally `all`                                          | SQLite snapshots or PostgreSQL 17 custom dumps, checksummed manifests and retained backup records      |
 | Live event streaming                                        | `api/live.py` and history routes; `api`                                                             | Per-process HTTP/SSE connections; shared DB observations rather than authoritative process memory      |
 | Notifications and platform operations                       | API adapters and domain services; `api`                                                             | DB notification/audit/maintenance and account-approval decisions                                       |
-| Course exercise APIs                                        | `api/course.py`, `services/course.py`, `repositories/course.py`; opt-in `api` only                  | Mounted bounded JSON and a separate SELECT-only student database                                       |
 | HTTP/business observations                                  | Operational/ASGI adapters and observability service/repository                                      | Per-process HTTP counters; only a live scheduler leader reads business snapshots from DB               |
 
 The default product route contract remains 111 method/path pairs: API 67, devices 21, storage 23, with no overlap. Web/API
 may mount two static file trees. Every role separately owns the three operational GET routes `/healthz`, `/readyz`,
-`/metrics`. Enabling course mode adds four API-only routes; those deliberately do not enter the default combined-role
-contract. Export it with `python -m backend.apps.routes --json`.
+`/metrics`. Export it with `python -m backend.apps.routes --json`.
 
 SQLite retains one process writer and its existing lock/transaction semantics. Split services require PostgreSQL.
 Ordinary product writes take the lab transaction advisory lock. Scheduler leadership uses a different, dedicated session
@@ -71,8 +69,8 @@ proxy permits bounded, scoped transfers. Strict runs require a coordinator GPU d
 ## B-Q2: where data and backups live
 
 These are configured ownership boundaries. Private connection strings, signing keys and live storage paths do not
-belong in this document. [Container settings](container-configuration.md), [observability](observability.md) and the
-[course API guide](course-demo.md) define their detailed contracts.
+belong in this document. [Container settings](container-configuration.md) and [observability](observability.md) define their
+detailed contracts.
 
 | Data                                              | Location / setting                                                          | Owner / recovery boundary                                                                                                                      |
 | ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,7 +82,6 @@ belong in this document. [Container settings](container-configuration.md), [obse
 | Metadata backup objects                           | Local metadata directory or S3 backups bucket                               | `metadata/<point>/product.sqlite` or `product.pgdump`, plus checksum/manifest                                                                  |
 | Storage capability signing key                    | Private key file, configurable through `HETEROES_STORAGE_SIGNING_KEY_FILE`  | Share across participating replicas; recover separately from metadata dumps                                                                    |
 | Identity provider accounts, credentials and realm | External Keycloak database/configuration                                    | Managed and backed up by the identity provider                                                                |
-| Course student records                            | Mounted JSON and separate `studentdb.students`                              | API uses a SELECT-only role/read-only transaction; administrative CRUD uses another role                                                       |
 | Installers and web/download manifests             | Configured build/download trees                                             | Independent packaged artifacts, not a product backup                                                                                           |
 | Metrics and request logs                          | Per-service registries and JSON stdout            | Scheduler DB-derived gauges avoid double counting; no raw credential-bearing request fields                                                    |
 | Research receipts and historical logs             | `evidence-archive` branch                                                   | [Evidence index](../EVIDENCE-INDEX.md); immutable research evidence, separate from live state                                                  |

@@ -78,7 +78,7 @@ def main():
     identifier = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + secrets.token_hex(3)
     output = (args.out or ROOT / ".scratch" / ("check-backend-postgres-" + identifier)).resolve()
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
-    name = "heteroes-minicloud-pgtest-" + identifier.lower()
+    name = "heteroes-pgtest-" + identifier.lower()
     environment = {
         **os.environ,
         "POSTGRES_PASSWORD": secrets.token_urlsafe(32),
@@ -104,8 +104,6 @@ def main():
             "--rm",
             "--name",
             name,
-            "--label",
-            "com.docker.compose.project=heteroes-minicloud",
             "--publish",
             "127.0.0.1::5432",
             "--env",
