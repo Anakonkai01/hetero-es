@@ -96,13 +96,15 @@ def run(input_path, device):
         # Foreign exception strings may contain transfer grants. Only a stable code leaves this process.
         from heteroes.worker import CandidateFailed
         from heteroes.ledger import FailureKind
+        from heteroes.strict.reference_ops import UnsupportedGpu
 
-        result = {
-            "status": "FAILED",
-            "errorCode": "RESTORE_MISMATCH"
-            if isinstance(error, CandidateFailed) and error.kind is FailureKind.RESTORE_MISMATCH
-            else "MODEL_PROBE_FAILED",
-        }
+        if isinstance(error, CandidateFailed) and error.kind is FailureKind.RESTORE_MISMATCH:
+            code = "RESTORE_MISMATCH"
+        elif isinstance(error, UnsupportedGpu):
+            code = "GPU_UNSUPPORTED_BY_DECODER"  # e.g. a GTX 16xx (sm75) asked for strict_b22_v1
+        else:
+            code = "MODEL_PROBE_FAILED"
+        result = {"status": "FAILED", "errorCode": code}
     write_json(root / "result.json", result)
     return result
 

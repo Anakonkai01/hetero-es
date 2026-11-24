@@ -22,6 +22,10 @@ class ReferenceArithmeticError(ValueError):
     """The proposed operation contract cannot represent or support this input."""
 
 
+class UnsupportedGpu(ReferenceArithmeticError):
+    """This GPU lacks an instruction the strict kernels are built on (integer MMA needs sm80, RTX 30 series or newer)."""
+
+
 class StrictMemoryBudget(ReferenceArithmeticError):
     """A request needs more than the decoder's explicit memory budget: refused before allocating (OUT_OF_MEMORY)."""
 

@@ -19,7 +19,7 @@ from heteroes.strict import integer_tma
 from heteroes.strict import integer_plan as planning
 from heteroes.strict import strict_cuda as sc
 from heteroes.strict import integer_lm_head
-from heteroes.strict.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError, UnsupportedGpu
 
 INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 # "stream" schedules eligible MMA projections (K % 16 == 0, 16-byte aligned operands) through the multistage
@@ -1032,7 +1032,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Integer workspace budget must be a positive integer")
         super().__init__(device)
         if int(self.arch[3:]) < 80:
-            raise ReferenceArithmeticError("Integer MMA prototype currently requires sm80 or newer")
+            raise UnsupportedGpu(f"Integer MMA needs sm80 or newer, this GPU is {self.arch}")
         self.magnitude_bits = magnitude_bits
         self.weight_load = weight_load
         self.mma_schedule = mma_schedule
