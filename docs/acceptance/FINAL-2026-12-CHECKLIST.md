@@ -2,6 +2,8 @@
 
 The release requires all 37 registered check–environment pairs on one clean source tree. The live lab, notebook, D1 regression tests and Countdown experiment also need receipts that identify the code and hardware used. Record `PASS`, `FAIL`, `NOT_RUN`, `DEFERRED` or `OPEN` and an evidence path for each result. Use the generated [acceptance report](README.md) for the matrix and the [workstation operations guide](../guides/local-lab-operations.md) for the live lab.
 
+Checked matrix items refer to [candidate source `src-7787621f…`](STATUS-src-7787621f.md). The first receipts cover the CPU, Linux packaging and CPU mutation checks.
+
 ## 1. Prepare the candidate and hosts
 
 - [ ] Record the candidate commit, source ID, verified model and dataset identities, Python/CUDA versions, GPU/driver, OS and boot mode.
@@ -17,7 +19,7 @@ The release requires all 37 registered check–environment pairs on one clean so
 - [ ] For a coordinator and one worker on the same GPU, allow the same-model estimate below and exactly at 90% of total VRAM. Refuse an estimate above the threshold, a missing or unusable qualification, or measurements that do not cover the selected run configuration. Check selection of the applicable model, device and measurement.
 - [ ] Preserve acceptance for distinct GPUs and the existing layout rules for earlier recipes. Keep strict coordinators on GPU. Reject two workers using one physical GPU and reject an unrelated run that tries to reserve a held GPU.
 - [ ] Verify that leaving releases the worker role while the coordinator retains its device and physical GPU reservations. Verify retry, rejoin, pause, recovery and final release. Check that scheduling and creation return actionable reasons when they refuse the layout.
-- [ ] Run the backend suite and the updated `gpu-ownership-backend` mutation group. Reconcile ADR-013, the acceptance registry wording and the form’s coordinator suggestion with the behavior demonstrated by the tests.
+- [x] Run the backend suite and the updated `gpu-ownership-backend` mutation group. Reconcile ADR-013, the acceptance registry wording and the form’s coordinator suggestion with the behavior demonstrated by the tests.
 - [ ] Check continuation from the CLI/SDK, including source SHA, the new generation-0 parent SHA, and validation of model, checkpoint and artifact integrity. Verify the expected rejection when a source has no usable checkpoint or its bytes fail verification.
 - [ ] Exercise **Continue** on the web run page. Test same-workspace `READY` selection, non-`READY` and cross-workspace rejection, model compatibility, receipt lineage and the exact initial parent SHA in the new run.
 
@@ -27,9 +29,9 @@ Run the profiles through `scripts/accept.py` with `--keep`, using the GPU opt-in
 
 ### Local CPU and build profiles (3)
 
-- [ ] `acceptance-selftest`
-- [ ] `check-all` — runtime/backend tests, lint, format, source imports, frontend/desktop tests, builds, i18n and browser/Electron contracts.
-- [ ] `package-linux` — build the Worker and Server and verify packaged runtime bytes.
+- [x] `acceptance-selftest`
+- [x] `check-all` — runtime/backend tests, lint, format, source imports, frontend/desktop tests, builds, i18n and browser/Electron contracts.
+- [x] `package-linux` — build the Worker and Server and verify packaged runtime bytes.
 
 ### RTX 5070 Ti GPU, performance and system profiles (11)
 
@@ -48,15 +50,15 @@ Run the profiles through `scripts/accept.py` with `--keep`, using the GPU opt-in
 ### Local mutation profile (12)
 
 - [ ] `mutation-strict-routes`
-- [ ] `mutation-watchdog`
-- [ ] `mutation-restore-recovery`
-- [ ] `mutation-strict-mismatch`
-- [ ] `mutation-audit-outcomes`
-- [ ] `mutation-recovery-io`
+- [x] `mutation-watchdog`
+- [x] `mutation-restore-recovery`
+- [x] `mutation-strict-mismatch`
+- [x] `mutation-audit-outcomes`
+- [x] `mutation-recovery-io`
 - [ ] `mutation-strict-decoder`
 - [ ] `mutation-strict-qualification-runtime`
-- [ ] `mutation-strict-qualification-backend`
-- [ ] `mutation-gpu-ownership-backend`
+- [x] `mutation-strict-qualification-backend`
+- [x] `mutation-gpu-ownership-backend`
 - [ ] `mutation-int8-lora`
 - [ ] `mutation-gpu-ownership-runtime`
 

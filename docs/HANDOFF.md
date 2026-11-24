@@ -7,6 +7,7 @@ Checked 2026-11-24 on the project workstation. See the [documentation map](READM
 
 | Phạm vi | Phiên bản | Kết quả kiểm tra |
 | --- | --- | --- |
+| Bản cuối kỳ đang nghiệm thu | `8d339686` trên `feat/final-2026-12` | [Cây nguồn `src-7787621f…`](acceptance/STATUS-src-7787621f.md) đạt 10/37 cặp CPU và đóng gói. |
 | Nhánh tài liệu hiện tại | Cùng mã chạy B-022. README cấp module và notebook tham gia vào mã định danh của công cụ nghiệm thu. | [Trạng thái theo cây tài liệu hiện tại](acceptance/STATUS-src-af91b853.md). |
 | Mã nguồn có B-022 | Bản sửa `411a0a3a`, nhánh `fix/b022-final-point-projection` ở `8f5dc4f5` | Checkpoint định kỳ xác minh muộn không thay checkpoint cuối đã xác minh. Đã có hồi quy backend. [Nghiệm thu M0–M6](acceptance/STATUS-src-89176a3d.md) cho cây nguồn này chưa chạy đủ ma trận. |
 | `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [Biên bản nghiệm thu](acceptance/STATUS.md). |
@@ -27,8 +28,9 @@ Checked 2026-11-24 on the project workstation. See the [documentation map](READM
   B-022 is `src-89176a3d955c8157f52d0a98facd7001f91f63fefa672a8df6ca43e2a2ce9c82`.
   This documentation checkout has source identity `src-af91b85367c3e0dae4e5e975a4082b59d706b32a6cbfb9aebfe6e13fce726dab`.
   [Acceptance reports](acceptance/README.md) bind receipts to the source identity.
-- The lab form defaults new Recipe v3 runs to `strict_b22_v1`. A strict run needs a coordinator GPU distinct
-  from its workers (D1). `strict_int8_lora_v1` is available through the standalone runner and SDK. Exact parity was
+- The lab form defaults new Recipe v3 runs to `strict_b22_v1`. On the final branch, D1 permits one worker to share
+  its coordinator's GPU when two estimated weight sets fit the 90% VRAM budget. The assignment retains the physical
+  reservation when the worker leaves. `strict_int8_lora_v1` is available through the standalone runner and SDK. Exact parity was
   measured on SM86 and SM120. The B-021 short32/chat128 receipts record 10,107.1/9,967.3 token/s on the 5070 Ti and
   3,104.3/2,919.5 on the 3060 WSL.
 - On the accepted tree, M3.bookkeeping and M5.release remain open. M1.architectures and M3.full-disk are deferred.
@@ -55,6 +57,9 @@ must run serially. Check the workstation lab before any authorized GPU work.
 - Nhánh làm việc `feat/final-2026-12` (từ nhánh docs 21/11, có B-022): gỡ MiniCloud và course API, thêm
   `python -m heteroes.v3 derive` (nối tiếp run từ trọng số đã kiểm chứng, [hướng dẫn](../runtime/docs/v3-local-runs.md#continue-an-earlier-run))
   và bộ dữ liệu số học `runtime/scripts/build_arithmetic_dataset.py`.
+- Commit `8d339686` hoàn thiện D1 và luồng **Chạy tiếp từ checkpoint** cho run Recipe v3 trên web. Điểm phục hồi
+  phải là `READY` trong cùng workspace. Coordinator tải trọng số qua quyền của phân công mới và kiểm SHA trước
+  khi mở thế hệ 0. Theo dõi các ca còn lại trong [checklist nghiệm thu](acceptance/FINAL-2026-12-CHECKLIST.md).
 - Nghiệm thu cây nguồn cuối trên CPU, 5070 Ti, 3060 WSL và 3060 Windows trước khi đưa vào `main`.
 - Cài lại lab sạch trên kho mới, rồi chủ dự án ghép lại worker (5070 Ti, 3060-thao).
 - MiniCloud đã bị chủ dự án bỏ (24/11); repo GitHub `Anakonkai-AI-Group/heteroes-minicloud` được giữ nguyên.
