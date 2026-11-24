@@ -219,3 +219,48 @@ def test_each_callsite_uses_its_intended_proxy_policy(name, origins, tmp_path, m
                 invoke(name, origin, tmp_path, monkeypatch)
         assert state["requests"]
         assert received == []
+
+
+@pytest.mark.parametrize("status", [301, 302, 303, 307, 308])
+def test_a_pinned_download_follows_a_move_within_its_own_origin(status, tmp_path):
+    """Hugging Face answers /resolve/ with a 307 to /api/resolve-cache/ on the same host; the SHA-256 decides."""
+    seen = []
+
+    class Hub(BaseHTTPRequestHandler):
+        def do_GET(self):
+            seen.append(self.path)
+            if self.path.startswith("/resolve/"):
+                self.send_response(status)
+                self.send_header("Location", "/api/resolve-cache/model.bin?etag=1")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            self.send_response(200)
+            self.send_header("Content-Length", "7")
+            self.end_headers()
+            self.wfile.write(b"payload")
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Hub)
+    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01})
+    thread.start()
+    try:
+        item = {
+            "name": "model.bin",
+            "url": f"http://127.0.0.1:{server.server_port}/resolve/model.bin",
+            "sizeBytes": 7,
+            "sha256": hashlib.sha256(b"payload").hexdigest(),
+        }
+        path = downloads.verified_download(item, tmp_path, say=lambda _: None, attempts=1)
+        assert path.read_bytes() == b"payload"
+        assert seen == ["/resolve/model.bin", "/api/resolve-cache/model.bin?etag=1"]
+        wrong = {**item, "name": "other.bin", "sha256": "0" * 64}
+        with pytest.raises(RuntimeError, match="CHECKSUM_MISMATCH"):
+            downloads.verified_download(wrong, tmp_path, say=lambda _: None, attempts=1)
+        assert not (tmp_path / "other.bin").exists()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()

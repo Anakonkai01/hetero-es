@@ -9,8 +9,10 @@ import time
 import urllib.error
 import urllib.request
 
+from urllib.parse import urljoin, urlsplit
+
 from heteroes.http_transport import USER_AGENT
-from heteroes.http_safety import opener
+from heteroes.http_safety import RedirectError, _origin
 
 
 DOWNLOAD_ATTEMPTS = 6
@@ -46,6 +48,24 @@ class Progress:
         elif not self.tty and 4 * done // self.total > self.quarter:
             self.quarter = 4 * done // self.total
             print(line, file=self.stream, flush=True)
+
+
+class SameOriginRedirect(urllib.request.HTTPRedirectHandler):
+    """A pinned file may move within its own origin (Hugging Face answers /resolve/ with a 307 to /api/resolve-cache/
+    on the same host); it never leaves it. Nothing secret is sent and the SHA-256 decides what is kept."""
+
+    max_redirections = 5
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        old, new = urlsplit(req.full_url), urlsplit(urljoin(req.full_url, newurl))
+        if (old.scheme, old.hostname, old.port) != (new.scheme, new.hostname, new.port):
+            raise RedirectError(code, _origin(req.full_url, newurl))
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def opener(*, proxy=False):
+    """Like heteroes.http_safety.opener (no environment proxy), but a move within the same origin is followed."""
+    return urllib.request.build_opener(SameOriginRedirect(), urllib.request.ProxyHandler(None if proxy else {}))
 
 
 def _fetch(item, partial, progress):
