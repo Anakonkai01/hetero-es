@@ -274,8 +274,7 @@ try {
   results.defaultCoordinatorAndManualChoice = true;
   await page.getByLabel(/CPU fixture/).check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  // M4: the strict decoder is offered for Recipe v3 and sends FP16. This fixture's one device coordinates and works, so
-  // the lab refuses the strict draft (D1: one weight set per GPU); qualification refusals are backend tests
+  // M4: the strict decoder is offered for Recipe v3 and sends FP16. The fixture shares a GPU without a measurement.
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByText('Advanced settings', { exact: true }).click();
@@ -285,7 +284,7 @@ try {
   assert.ok((await decoder.locator('option').evaluateAll((o) => o.map((x) => x.value))).includes('strict_b22_v1'));
   await decoder.selectOption('strict_b22_v1');
   await page.getByText('Every selected device needs the model check for the strict decoder').waitFor();
-  await page.getByText('One weight set per GPU: the coordinator needs its own GPU').waitFor();
+  await page.getByText('Sharing a GPU with the coordinator requires a model qualification').waitFor();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   const strictRequest = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/v1/experiments'));
@@ -293,12 +292,12 @@ try {
   const strictBody = (await strictRequest).postDataJSON();
   assert.equal(strictBody.decodeEngine, 'strict_b22_v1');
   assert.equal(strictBody.evalDtype, 'float16');
-  await page.getByText("its coordinator's GPU cannot also be one of its workers").waitFor();
+  await page.getByText('A strict run keeps one weight set per GPU unless two fit').waitFor();
   errors.splice(
     errors.findIndex((e) => /status of 422/.test(e)),
     1,
   ); // the refusal was the point of this step
-  results.strictRunKeepsOneWeightSetPerGpu = true;
+  results.strictGpuSharingNeedsMeasurement = true;
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByText('Advanced settings', { exact: true }).click();
@@ -330,6 +329,44 @@ try {
   await page.getByText('lora', { exact: true }).waitFor();
   results.v3ImportAndBrowserDraft = true;
   await page.screenshot({ path: path.join(output, 'v3-draft.png'), fullPage: true });
+
+  // The browser passes the chosen verified point to a new draft. Storage and assignment admission have API tests.
+  const sourcePath = `/api/v1/experiments/${v3.experimentId}`;
+  const sourcePoint = 'f'.repeat(32);
+  await page.route(base + sourcePath, (route) => route.fulfill({ json: { ...v3, weightSpace: { kind: 'full' } } }));
+  await page.route(base + sourcePath + '/recovery-points', (route) =>
+    route.fulfill({
+      json: [
+        { pointId: sourcePoint, generation: 5, status: 'READY', final: true },
+        { pointId: 'e'.repeat(32), generation: 6, status: 'PENDING', final: false },
+      ],
+    }),
+  );
+  await page.reload();
+  await page.getByText('Continue from checkpoint', { exact: false }).click();
+  assert.equal(await page.getByRole('button', { name: /^Generation 7/ }).count(), 0);
+  await page.getByRole('button', { name: /Generation 6.*Final checkpoint/ }).click();
+  await page.waitForURL('**/experiments/new');
+  assert.equal(await page.getByLabel('Experiment recipe').isDisabled(), true);
+  assert.equal(await page.getByLabel('Pinned model').isDisabled(), true);
+  assert.equal(await page.getByLabel('Weight space').isDisabled(), true);
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.route(base + '/api/v1/experiments', (route) =>
+    route.request().method() === 'POST' ? route.fulfill({ json: v3 }) : route.continue(),
+  );
+  const continuationRequest = page.waitForRequest(
+    (r) => r.method() === 'POST' && r.url().endsWith('/api/v1/experiments'),
+  );
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  assert.deepEqual((await continuationRequest).postDataJSON().continueFrom, {
+    runId: v3.experimentId,
+    pointId: sourcePoint,
+  });
+  results.continuationUsesVerifiedCheckpoint = true;
+  await page.unroute(base + '/api/v1/experiments');
+  await page.unroute(base + sourcePath);
+  await page.unroute(base + sourcePath + '/recovery-points');
 
   // A run that cannot start says why, from what its coordinator device reported (not from the run snapshot).
   await page.setViewportSize({ width: 1280, height: 900 });

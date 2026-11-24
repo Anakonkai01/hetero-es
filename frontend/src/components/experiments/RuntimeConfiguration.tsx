@@ -40,6 +40,7 @@ export function RuntimeConfiguration({
   pending: boolean;
 }) {
   const { t } = useProduct();
+  const continuation = initial?.continueFrom;
   const [step, setStep] = useState(0);
   const scope = useScopeKey();
   const workers = useWorkers();
@@ -176,6 +177,7 @@ export function RuntimeConfiguration({
           alpha,
           sigma,
           decodeEngine: decoder,
+          ...(continuation ? { continueFrom: { runId: continuation.runId, pointId: continuation.pointId } } : {}),
           // the strict decoder reads the live FP16 weights; other runs keep their documents without the field
           ...(version === 3 && decoder === 'strict_b22_v1' ? { evalDtype: 'float16' } : {}),
           coordinatorDeviceId: coordinator,
@@ -214,6 +216,7 @@ export function RuntimeConfiguration({
               {t('Experiment recipe')}
               <select
                 className="sel"
+                disabled={Boolean(continuation)}
                 value={version}
                 onChange={(e) => {
                   const next = Number(e.target.value);
@@ -273,7 +276,13 @@ export function RuntimeConfiguration({
             <div className="setup-grid">
               <label className="fg">
                 {t('Pinned model')}
-                <select className="sel" required value={modelId} onChange={(e) => setModelId(e.target.value)}>
+                <select
+                  className="sel"
+                  required
+                  disabled={Boolean(continuation)}
+                  value={modelId}
+                  onChange={(e) => setModelId(e.target.value)}
+                >
                   <option value="">{t('Select model')}</option>
                   {modelList.data
                     ?.filter((m) => m.manifest && ['REGISTERED', 'READY'].includes(m.status))
@@ -357,7 +366,9 @@ export function RuntimeConfiguration({
               </Link>
             </div>
           )}
-          {version === 3 && <V3Fields value={v3} onChange={setV3} alpha={alpha} />}
+          {version === 3 && (
+            <V3Fields value={v3} onChange={setV3} alpha={alpha} lockWeightSpace={Boolean(continuation)} />
+          )}
           {version === 3 && (
             <label className="fg">
               {t('Audit rate (%)')}
@@ -487,7 +498,7 @@ export function RuntimeConfiguration({
                     {t('Every selected device needs the model check for the strict decoder (Models page).')}
                   </p>
                   <p className="hint">
-                    {t('One weight set per GPU: the coordinator needs its own GPU, which none of the workers may use.')}
+                    {t('Sharing a GPU with the coordinator requires a model qualification and enough measured VRAM.')}
                   </p>
                 </>
               ) : (

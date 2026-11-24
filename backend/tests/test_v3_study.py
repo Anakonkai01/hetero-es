@@ -152,6 +152,68 @@ def configuration(d, model, data):
     }
 
 
+def test_continuation_only_uses_a_ready_matching_workspace_checkpoint(v3_study):
+    from labkit import enable as enable_device, pair as pair_device
+    from test_recovery_storage import manifest as point_manifest
+
+    client, admin, _ = v3_study
+    store = client.app.state.store
+    storage = client.app.state.storage
+    lab = client, store, store.runtime, admin
+    model, data = assets(v3_study)
+    coordinator, coordinator_auth = pair_device(lab, "continue-coordinator")
+    worker, worker_auth = pair_device(lab, "continue-worker", coordinator=False)
+    for device, auth in ((coordinator, coordinator_auth), (worker, worker_auth)):
+        profile = next(d["selfTest"] for d in store.runtime.devices() if d["deviceId"] == device["deviceId"])
+        qualify_v3(client, auth, profile, model)
+        enable_device(lab, device, auth)
+    config = {
+        **configuration(coordinator, model, data),
+        "coordinatorDeviceId": coordinator["deviceId"],
+        "workerIds": [worker["workerId"]],
+    }
+    source = client.post("/api/v1/experiments", headers=admin, json=config)
+    assert source.status_code == 200, source.text
+    source_id = source.json()["experimentId"]
+    checkpoint = {**point_manifest(), "runId": source_id, "generation": 17}
+    uploads = storage.begin(checkpoint)
+    ref = {"runId": source_id, "pointId": checkpoint["pointId"]}
+    continued = {**config, "name": "Continued run", "alpha": 0.01, "continueFrom": ref}
+
+    def create(**change):
+        return client.post("/api/v1/experiments", headers=admin, json={**continued, **change})
+
+    assert create().status_code == 409  # uploading is not READY
+    for upload in uploads["objects"]:
+        storage.backend.put(upload["key"], b"weights")
+    storage.verify(checkpoint["pointId"])
+    assert create(weightSpace={"kind": "full"}).status_code == 422
+    with store.db() as db:
+        store.save(db, {**store.get(source_id), "workspaceId": "elsewhere"})
+    assert create().status_code == 404
+    with store.db() as db:
+        store.save(db, {**store.get(source_id), "workspaceId": "lab"})
+    response = create()
+    assert response.status_code == 200, response.text
+    run = response.json()
+    sha = checkpoint["childWeightsSha256"]
+    assert run["continueFrom"] == {**ref, "generation": 17, "parentWeightsSha256": sha, "sizeBytes": 7}
+    assert run["alpha"] == 0.01
+    run_id = run["experimentId"]
+    assert client.post(f"/api/v1/experiments/{run_id}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    assert store.get(run_id)["status"] == "STARTING"
+    assignment = next(row for row in store.runtime.runs() if row["runId"] == run_id)
+    request = {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "sha256": sha}
+    transfer = "/api/v1/device/study-transfer"
+    assert client.post(transfer, headers=worker_auth, json=request).status_code == 403
+    grant = client.post(transfer, headers=coordinator_auth, json=request)
+    assert grant.status_code == 200, grant.text
+    assert grant.json()["sha256"] == sha and "publicUrl" not in grant.json()
+    storage.delete_point(checkpoint["pointId"])
+    assert client.post(transfer, headers=coordinator_auth, json=request).status_code == 409
+
+
 def test_v3_import_keeps_columns_and_rejects_leakage(v3_study):
     from heteroes.v3.data import verify
 

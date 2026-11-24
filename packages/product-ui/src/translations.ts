@@ -325,8 +325,6 @@ export const translations: Record<string, string> = {
   'Waiting for legacy ownership release before physical GPU scheduling':
     'Đang chờ giải phóng quyền sở hữu cũ trước khi xếp lịch GPU',
   'Selected worker aliases refer to the same physical GPU': 'Các máy đã chọn thực ra là cùng một GPU',
-  "A strict run keeps one weight set per GPU: its coordinator's GPU cannot also be one of its workers":
-    'Run nghiêm ngặt chỉ giữ một bộ trọng số trên mỗi GPU: GPU của coordinator không được đồng thời là worker của run',
   'A strict run needs a GPU coordinator: its validation and export use the strict decoder':
     'Run nghiêm ngặt cần coordinator có GPU: bước validation và export dùng decoder nghiêm ngặt',
   'GPU contribution was disabled': 'Chủ máy đã tắt đóng góp GPU',
@@ -1443,8 +1441,6 @@ export const translations: Record<string, string> = {
     'Đánh giá FP16 trên trọng số đang chạy · nhiễu chuẩn từ CPU · khôi phục trọng số chính xác.',
   'Every selected device needs the model check for the strict decoder (Models page).':
     'Mỗi thiết bị được chọn phải qua kiểm tra model cho decoder nghiêm ngặt (trang Models).',
-  'One weight set per GPU: the coordinator needs its own GPU, which none of the workers may use.':
-    'Mỗi GPU chỉ giữ một bộ trọng số: coordinator cần GPU riêng, không worker nào được dùng GPU đó.',
   'Standard decoder': 'Decoder tiêu chuẩn',
   'Strict decoder (FP16, bit-exact)': 'Decoder nghiêm ngặt (FP16, giống hệt từng bit)',
   'Check compatibility for the strict decoder': 'Kiểm tra tương thích cho decoder nghiêm ngặt',
@@ -1612,6 +1608,15 @@ export const translations: Record<string, string> = {
   Results: 'Kết quả',
   'Reward chart (PNG)': 'Biểu đồ reward (PNG)',
   'Run again like this': 'Chạy lại như run này',
+  'Continue from checkpoint': 'Chạy tiếp từ checkpoint',
+  'Could not load checkpoints': 'Không tải được các checkpoint',
+  'No verified checkpoints': 'Chưa có checkpoint đã xác minh',
+  'Final checkpoint': 'Checkpoint cuối',
+  'Source checkpoint': 'Checkpoint nguồn',
+  'Sharing a GPU with the coordinator requires a model qualification and enough measured VRAM.':
+    'Để dùng chung GPU với coordinator, cần kiểm định mô hình và có số đo VRAM đủ cho cả hai.',
+  'A strict run keeps one weight set per GPU unless two fit. Qualify the model on the coordinator to measure its memory, or choose a worker on another GPU':
+    'Run strict chỉ dùng chung GPU khi có đủ chỗ cho hai bộ trọng số. Hãy kiểm định mô hình trên coordinator để đo VRAM hoặc chọn worker dùng GPU khác.',
   'Saved by your workspace': 'Do không gian làm việc lưu',
   'Save settings as template': 'Lưu cấu hình làm mẫu',
   selected: 'đã chọn',

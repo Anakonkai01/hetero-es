@@ -9,10 +9,9 @@ export interface CoordinatorOption {
  * coordinator whenever one is available, because a CPU update is several times slower.
  *
  * - The lab's default is kept when it is a GPU coordinator.
- * - Otherwise a GPU coordinator is suggested. A strict run keeps one weight set per GPU (D1), so its coordinator's GPU
- *   cannot also work: the slowest GPU (largest measured update time) coordinates and the faster ones work. Other
- *   decoders may share the coordinator's GPU with a worker, so the fastest GPU coordinates.
- * - Without any GPU coordinator, the lab's default (if still offered) or nothing.
+ * - Otherwise prefer the GPU with the fastest measured update. Strict sharing is checked by the lab against the
+ *   selected model and qualification when a run is submitted.
+ * - Without a GPU, strict runs have no suggestion. Earlier layouts may use the offered lab default.
  */
 export function suggestCoordinator(
   devices: CoordinatorOption[],
@@ -22,9 +21,9 @@ export function suggestCoordinator(
   const gpus = devices.filter((d) => d.gpu);
   if (labDefault && gpus.some((d) => d.deviceId === labDefault)) return labDefault;
   if (gpus.length) {
-    const speed = (d: CoordinatorOption) => d.updateSecondsPerSeed ?? (strict ? -1 : Number.POSITIVE_INFINITY);
-    const ranked = [...gpus].sort((a, b) => (strict ? speed(b) - speed(a) : speed(a) - speed(b)));
+    const speed = (d: CoordinatorOption) => d.updateSecondsPerSeed ?? Number.POSITIVE_INFINITY;
+    const ranked = gpus.sort((a, b) => speed(a) - speed(b));
     return ranked[0].deviceId;
   }
-  return labDefault && devices.some((d) => d.deviceId === labDefault) ? labDefault : '';
+  return !strict && labDefault && devices.some((d) => d.deviceId === labDefault) ? labDefault : '';
 }

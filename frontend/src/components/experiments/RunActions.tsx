@@ -1,13 +1,24 @@
 import { useProduct } from '@heteroes/product-ui';
+import { useQuery } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { apiGet } from '../../api/client';
 import { useAppState } from '../../app/appState';
+import { useScopeKey } from '../../app/session';
 import { useTemplateMutations } from '../../hooks/useTemplates';
 import { fileStem, saveText } from '../../lib/chartExport';
 import { generationsCsv, summaryMarkdown } from '../../lib/exportRun';
 import { templateConfigFromExperiment } from '../../lib/templates';
 import type { Experiment } from '../../types/experiment';
 import type { Generation } from '../../types/generation';
+
+interface RecoveryPoint {
+  pointId: string;
+  generation: number;
+  final: boolean;
+  status: string;
+}
+
 /** The things you do with a run once you have seen it: run it again, keep its settings, export it for a report. */
 export function RunActions({
   experiment,
@@ -22,6 +33,16 @@ export function RunActions({
   const navigate = useNavigate();
   const { flash } = useAppState();
   const { create } = useTemplateMutations();
+  const scope = useScopeKey();
+  const [choosingPoint, setChoosingPoint] = useState(false);
+  const runId = experiment.experimentId;
+  const canContinue = experiment.recipeVersion === 3 && ['full', 'subset'].includes(experiment.weightSpace?.kind ?? '');
+  const checkpoints = useQuery({
+    queryKey: ['recovery-points', runId, ...scope],
+    queryFn: () => apiGet<RecoveryPoint[]>(`/api/v1/experiments/${encodeURIComponent(runId)}/recovery-points`),
+    enabled: canContinue && choosingPoint && scope.every(Boolean),
+  });
+  const ready = (checkpoints.data ?? []).filter((point) => point.status === 'READY');
   const [naming, setNaming] = useState(false);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -51,6 +72,39 @@ export function RunActions({
           ↻ {t('Run again like this')}
         </button>
       }
+      {canContinue && (
+        <details className="export-menu" onToggle={(event) => setChoosingPoint(event.currentTarget.open)}>
+          <summary className="btn">{t('Continue from checkpoint')} ▾</summary>
+          <div>
+            {checkpoints.isFetching && <p className="hint">{t('Loading…')}</p>}
+            {!checkpoints.isFetching && checkpoints.isError && (
+              <p className="note err" role="alert">
+                {t('Could not load checkpoints')}
+              </p>
+            )}
+            {!checkpoints.isFetching && !checkpoints.isError && !ready.length && (
+              <p className="hint">{t('No verified checkpoints')}</p>
+            )}
+            {ready.map((point) => (
+              <button
+                key={point.pointId}
+                type="button"
+                onClick={() =>
+                  navigate('/experiments/new', {
+                    state: {
+                      clone: experiment,
+                      continueFrom: { runId, pointId: point.pointId, generation: point.generation },
+                    },
+                  })
+                }
+              >
+                {t('Generation')} {point.generation + 1}
+                {point.final ? ` · ${t('Final checkpoint')}` : ''}
+              </button>
+            ))}
+          </div>
+        </details>
+      )}
       {
         <button
           type="button"

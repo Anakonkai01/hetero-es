@@ -35,10 +35,45 @@ def freeze_python_code(body):
     body["pythonCode"] = frozen
 
 
+def freeze_continuation(reference, body, current, store, runtime):
+    source = store.get(reference["runId"])
+    if not source or source.get("workspaceId") != current["workspaceId"]:
+        raise ServiceError(404, "Source experiment not found")
+    if (
+        source.get("recipeVersion") != 3
+        or source.get("modelManifest") != body["modelManifest"]
+        or source.get("weightSpace") != body["weightSpace"]
+        or body["weightSpace"]["kind"] not in ("full", "subset")
+    ):
+        raise ServiceError(422, "Continuation needs the source model and full or subset weight space")
+    storage = getattr(runtime, "storage", None)
+    if storage is None:
+        raise ServiceError(409, "Verified recovery storage is unavailable")
+    try:
+        point = storage.manifest(reference["pointId"])
+    except ValueError:
+        raise ServiceError(409, "Recovery point is not verified") from None
+    if point["runId"] != reference["runId"]:
+        raise ServiceError(404, "Recovery point not found in the source experiment")
+    child = point["childWeightsSha256"]
+    meta = point["files"].get(f"weights/{child}.bin")
+    if not meta or meta["sha256"] != child:
+        raise ServiceError(409, "Verified recovery point has no matching weight file")
+    body["continueFrom"] = {
+        **reference,
+        "generation": point["generation"],
+        "parentWeightsSha256": child,
+        "sizeBytes": meta["sizeBytes"],
+    }
+
+
 def validate_configuration(config, current, *, store, runtime, registry, scoped, capabilities):
     current = scoped(current, current["workspaceId"])
     cap = capabilities()
     body = config.model_dump()
+    continuation = body.pop("continueFrom")
+    if continuation and body["recipeVersion"] != 3:
+        raise ServiceError(422, "Continuation requires Recipe v3")
     if body.get("recipeVersion") == 3:
         from heteroes.noise.contracts import ENGINE_V2
 
@@ -128,7 +163,9 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             from .model_qualification import measured_memory
 
             with store.db() as db:
-                memory = measured_memory(db, body["modelArtifactId"], coordinator["deviceId"])
+                memory = measured_memory(
+                    db, body["modelArtifactId"], coordinator["deviceId"], body["noiseEngineVersion"]
+                )
         if version == 3 and (reason := strict_layout(body, coordinator, workers, memory)):
             raise ServiceError(422, reason)
         for d in selected:
@@ -157,6 +194,8 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             datasetObjectSha256=data["objectSha256"],
             datasetIdentity=data["identity"],
         )
+        if continuation:
+            freeze_continuation(continuation, body, current, store, runtime)
         if data.get("splitObjects"):  # a file-backed dataset: its split files may be transferred too
             body["datasetSplitObjects"] = data["splitObjects"]
     else:

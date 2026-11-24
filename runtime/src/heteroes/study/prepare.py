@@ -93,6 +93,14 @@ def study_cache(agent):
     ) / "study"
 
 
+def prepare_continuation(agent, assignment, source):
+    """Keep the verified parent in the coordinator's private cache before opening the new ledger."""
+    digest = source["parentWeightsSha256"]
+    return transfer(
+        agent, assignment, digest, study_cache(agent) / "continuations" / f"{digest}.bin", source["sizeBytes"]
+    )
+
+
 def prepare(agent, assignment, config, directory):
     cache = study_cache(agent)
     data_path = transfer(

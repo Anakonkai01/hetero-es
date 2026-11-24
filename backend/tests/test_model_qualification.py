@@ -17,11 +17,11 @@ def v3_study(tmp_path):
     yield from study_fixture.__wrapped__(tmp_path)
 
 
-def setup(study, alias="probe-gpu"):
+def setup(study, alias="probe-gpu", gpu_uuid=None):
     client, admin, _ = study
     store = client.app.state.store
     lab = client, store, store.runtime, admin
-    device, auth = pair(lab, alias)
+    device, auth = pair(lab, alias, gpu_uuid=gpu_uuid)
     auth = {
         **auth,
         "X-HeteroES-Agent-Commands": auth["X-HeteroES-Agent-Commands"] + ",QUALIFY_MODEL,CANCEL_MODEL_QUALIFICATION",
@@ -460,18 +460,30 @@ def test_a_plain_experiment_keeps_its_document_and_a_strict_one_submits_fp16(v3_
     assert submitted and submitted[0]["decodeEngine"] == STRICT and submitted[0]["evalDtype"] == "float16", submitted
 
 
-# ---- M4 D1: one weight set per GPU in a strict run (ADR-013) --------------------------------------------------------
+# ---- M4 D1: strict GPU ownership (ADR-013) -------------------------------------------------------------------------
 
 
-def strict_pair(study):
+def strict_device(study, alias, memory=None, gpu_uuid=None):
+    lab, device, auth, model = setup(study, alias, gpu_uuid)
+    c, _, _, _ = lab
+    finish(c, auth, start(lab, device, model), model)
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(
+        c,
+        auth,
+        start_strict(lab, device, model),
+        model,
+        reference=reference,
+        observations=observations,
+        chunkMemory=memory,
+    )
+    return lab, device, auth, model
+
+
+def strict_pair(study, coordinator_memory=None):
     """Two GPU devices of one lab, each qualified for the pinned model with the plain and the strict decoder."""
-    first_lab, first, first_auth, model = setup(study, "strict-a")
-    second_lab, second, second_auth, _ = setup(study, "strict-b")
-    for lab, device, auth in ((first_lab, first, first_auth), (second_lab, second, second_auth)):
-        c, _, _, _ = lab
-        finish(c, auth, start(lab, device, model), model)
-        reference, observations = report_inputs(model, ENGINE_V2, STRICT)
-        finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
+    first_lab, first, _, model = strict_device(study, "strict-a", coordinator_memory)
+    _, second, _, _ = strict_device(study, "strict-b")
     return first_lab, first, second, model
 
 
@@ -485,7 +497,7 @@ def strict_body(lab, coordinator, workers, model):
     return {**body, "workerIds": [w["workerId"] for w in workers], "decodeEngine": STRICT, "evalDtype": "float16"}
 
 
-def test_a_strict_run_never_shares_its_coordinators_gpu_with_a_worker(v3_study):
+def test_a_strict_run_cannot_share_its_coordinators_gpu_without_a_measurement(v3_study):
     lab, first, second, model = strict_pair(v3_study)
     c, store, runtime, admin = lab
     shared = c.post("/api/v1/experiments", headers=admin, json=strict_body(lab, first, [first, second], model))
@@ -506,6 +518,106 @@ def test_a_strict_run_never_shares_its_coordinators_gpu_with_a_worker(v3_study):
         assert reason and "one weight set per GPU" in reason
         assert runtime.waiting_reason(store.get(run), db, [second["workerId"]]) is None
     assert assignment["workerDevices"] == {second["workerId"]: second["deviceId"]}
+
+
+def test_a_qualified_shared_gpu_can_be_created_and_dispatched(v3_study):
+    lab, coordinator, other, model = strict_pair(v3_study, MEMORY)
+    c, store, runtime, admin = lab
+    body = strict_body(lab, coordinator, [coordinator, other], model)
+    reply = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert reply.status_code == 200, reply.text
+    run_id = reply.json()["experimentId"]
+    assert c.post(f"/api/v1/experiments/{run_id}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    assert store.get(run_id)["status"] == "STARTING", store.get(run_id).get("waitingReason")
+    assert len(runtime.reservations()) == 2
+    with store.db() as db:
+        assert db.execute("SELECT count(*) FROM physical_reservations").fetchone()[0] == 2
+
+
+@pytest.mark.parametrize("alias", [False, True])
+def test_a_shared_worker_can_join_leave_and_rejoin_without_releasing_the_coordinators_gpu(v3_study, alias):
+    from test_membership import assignment_body, change
+
+    lab, coordinator, other, model = strict_pair(v3_study, MEMORY)
+    c, store, runtime, admin = lab
+    gpu = next(d["physicalResourceId"] for d in runtime.devices() if d["deviceId"] == coordinator["deviceId"])
+    shared = strict_device(v3_study, "strict-a-alias", gpu_uuid=gpu)[1] if alias else coordinator
+    worker_id = shared["workerId"]
+    created = c.post("/api/v1/experiments", headers=admin, json=strict_body(lab, coordinator, [other], model))
+    assert created.status_code == 200, created.text
+    run_id = created.json()["experimentId"]
+    assert c.post(f"/api/v1/experiments/{run_id}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    assert store.get(run_id)["status"] == "STARTING"
+
+    joined = change(lab, run_id, worker_id)
+    assert joined.status_code == 200, joined.text
+    assignment = assignment_body(store, run_id)
+    assert assignment["workerDevices"][worker_id] == shared["deviceId"]
+    left = change(lab, run_id, worker_id, "remove")
+    assert left.status_code == 200, left.text
+    snapshot = {"membership": {"left": [worker_id]}, "state": {"workerStates": {worker_id: {"left": True}}}}
+    with store.db() as db:
+        row, _ = runtime._assignment(db, assignment["assignmentId"])
+        runtime.release_left_members(db, row, snapshot)
+        assert (
+            db.execute("SELECT assignment_id FROM physical_reservations WHERE resource_id=?", (gpu,)).fetchone()[0]
+            == assignment["assignmentId"]
+        )
+    assert {r["deviceId"] for r in runtime.reservations()} == {coordinator["deviceId"], other["deviceId"]}
+    assert worker_id not in assignment_body(store, run_id)["workerDevices"]
+    rejoined = change(lab, run_id, worker_id)
+    assert rejoined.status_code == 200, rejoined.text
+
+
+@pytest.mark.parametrize(
+    ("peak", "tokens", "chunk", "allowed"),
+    [
+        (4499, 256, 32, True),
+        (4500, 256, 32, True),
+        (4501, 256, 32, False),
+        (4500, 384, 32, False),
+        (4500, 256, 64, False),
+        (1999, 256, 32, False),
+    ],
+)
+def test_sharing_requires_two_measured_peaks_to_fit_at_the_requested_shape(peak, tokens, chunk, allowed):
+    from backend.services.policies import strict_layout
+
+    body = {"decodeEngine": STRICT, "evalChunks": [16, chunk], "maxNewTokens": tokens}
+    coordinator = {"deviceId": "a", "physicalResourceId": "gpu-a", "selfTest": {"runtimeProfile": "native-gpu"}}
+    alias = {"deviceId": "b", "physicalResourceId": "gpu-a"}
+    memory = {
+        **MEMORY,
+        "totalBytes": 10_000,
+        "baseBytes": 2_000,
+        "chunks": [{"chunk": 32, "ran": True, "peakBytes": peak, "seconds": 1.0}],
+    }
+    assert (strict_layout(body, coordinator, [alias], memory) is None) == allowed
+
+
+def test_a_shared_gpu_uses_only_current_qualification_measurements(v3_study):
+    from backend.services.model_qualification import measured_memory
+
+    lab, device, auth, model = strict_device(v3_study, "memory-gpu", MEMORY)
+    c, store, _, _ = lab
+    with store.db() as db:
+        assert measured_memory(db, model["id"], device["deviceId"], ENGINE_V2) == MEMORY
+        assert measured_memory(db, model["id"], device["deviceId"], ENGINE_VERSION) is None
+        assert measured_memory(db, "some-other-model", device["deviceId"], ENGINE_V2) is None
+        profile = db.execute("SELECT self_test FROM devices WHERE id=?", (device["deviceId"],)).fetchone()[0]
+        changed = {**json.loads(profile), "gpuIndex": 7}
+        db.execute("UPDATE devices SET self_test=? WHERE id=?", (json.dumps(changed), device["deviceId"]))
+        assert measured_memory(db, model["id"], device["deviceId"], ENGINE_V2) is None
+        db.execute("UPDATE devices SET self_test=? WHERE id=?", (profile, device["deviceId"]))
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
+    with store.db() as db:
+        assert measured_memory(db, model["id"], device["deviceId"], ENGINE_V2) is None
+    finish(c, auth, start(lab, device, model), model, chunkMemory=MEMORY)
+    with store.db() as db:
+        assert measured_memory(db, model["id"], device["deviceId"], ENGINE_V2) is None
 
 
 def test_a_strict_run_needs_a_gpu_coordinator(v3_study):

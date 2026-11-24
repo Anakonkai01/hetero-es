@@ -54,3 +54,16 @@ decoder, so a strict run's coordinator needs a GPU, and that GPU holds the coord
    recipe does not depend on the device it later runs on, and changing the dataclass default would silently change the
    recipe of every existing script. A strict SDK run states `decoder="strict_b22_v1", eval_dtype="float16"`; it reaches
    the lab with `evalDtype` and is qualified for the strict decoder (`sdk_lab.Lab.qualify(decoder=...)`).
+
+## Amendment 2026-11-24 (D1 sharing)
+
+The lab permits one worker to share the strict coordinator's GPU in the same assignment when two estimated weight sets
+fit within 90% of total VRAM. It uses the coordinator's latest completed strict qualification for the selected model,
+noise engine and current device profile. The measurement must cover the run's largest chunk. The estimate scales the
+measured bytes above the model with the requested generation length. The 90% cutoff is an admission estimate from
+qualification, whose prompts have a fixed length. It leaves a margin for GPU runtime and other memory use.
+
+Creation, dispatch and membership changes apply the same rule. Both roles count as one physical GPU reservation for the
+assignment, including when they have different device IDs. Worker withdrawal releases the worker role and preserves the
+coordinator's GPU reservation until assignment release. Strict coordination still requires a GPU. Export reload still
+follows release of the live model and its engine. Earlier recipes retain their layout rules.

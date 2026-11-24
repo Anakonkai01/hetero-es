@@ -107,6 +107,37 @@ def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, sp
     )
 
 
+def test_managed_continuation_starts_from_its_verified_parent(product_assets, tmp_path):
+    import torch
+
+    from heteroes.model.weights_io import publish_weights
+    from heteroes.product.v3 import prepare_run
+
+    source = tmp_path / "source"
+    source.mkdir()
+    cfg = product_config(product_assets, source)
+    loaded, _, _ = prepare_run(cfg, source, "cpu")
+    with torch.no_grad():
+        next(loaded.model.parameters()).fill_(0.125)
+    digest = publish_weights(loaded.model, loaded.schema, source)
+    path = source / f"{digest}.bin"
+    continuation = {
+        "runId": "b" * 32,
+        "pointId": "c" * 32,
+        "generation": 23,
+        "parentWeightsSha256": digest,
+        "sizeBytes": path.stat().st_size,
+    }
+    run_root = tmp_path / "new"
+    run_root.mkdir()
+    run_config = product_config(
+        product_assets, run_root, continueFrom=continuation, continuationWeightsPath=str(path), alpha=0.3
+    )
+    run_product(run_config, run_root)
+    with Ledger(run_root / "ledger.sqlite") as ledger:
+        assert ledger.list_generations(run_config["runId"])[0].parent_weights_sha256 == digest
+
+
 def run_product(cfg, tmp_path, python_scorer=None):
     import socket
 

@@ -126,6 +126,8 @@ class SchedulingService:
         if active.get("recipeVersion") == 3:
             config.update({key: active[key] for key in V3_KEYS})
             config.update({key: active[key] for key in (*V3_UPDATE_KEYS, *V3_CODE_KEYS) if key in active})
+            if "continueFrom" in active:
+                config["continueFrom"] = active["continueFrom"]
         try:
             self.store.runtime.submit(config)
         except RuntimeRejected as error:

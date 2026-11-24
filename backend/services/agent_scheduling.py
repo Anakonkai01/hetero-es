@@ -22,6 +22,7 @@ from heteroes.study.data import sha as study_hash
 
 from backend.core.constants import QUIESCENT as QUIESCENT
 from heteroes.product.cpu_coordinator import coordinator_only
+from heteroes.noise.contracts import ENGINE_VERSION
 
 # A worker that left and whose device has not been seen for this long counts as stopped: it cannot confirm the stop while
 # offline, and waiting for it held every device of a finished run (GSM8K demo tier 2, 2026-10-21).
@@ -50,14 +51,14 @@ class AgentScheduling:
         if body.get("decodeEngine") == "strict_b22_v1" and body.get("modelArtifactId"):
             from .model_qualification import measured_memory
 
-            memory = measured_memory(db, body["modelArtifactId"], coordinator["deviceId"])
+            memory = measured_memory(
+                db, body["modelArtifactId"], coordinator["deviceId"], body.get("noiseEngineVersion") or ENGINE_VERSION
+            )
         if reason := strict_layout(body, coordinator, chosen[1:], memory):
             return reason
         for d in chosen:
             if not d or d["approvalStatus"] != "APPROVED":
                 return "Selected device needs approval"
-            from heteroes.noise.contracts import ENGINE_VERSION
-
             engine = body.get("noiseEngineVersion") or ENGINE_VERSION
             if noise_qualification(d["selfTest"], engine):
                 return "Update and self-test selected device for the run's noise engine"
@@ -72,7 +73,7 @@ class AgentScheduling:
                 profile = d["selfTest"]
                 version = body["recipeVersion"]
                 qualification = (
-                    v3_qualification(profile, study_hash(body["modelManifest"]), engine)
+                    v3_qualification(profile, study_hash(body["modelManifest"]), engine, body.get("decodeEngine"))
                     if version == 3
                     else v2_qualification(profile, study_hash(body["modelManifest"]))
                 )
@@ -166,8 +167,14 @@ class AgentScheduling:
             # still reserved by THIS run (it is leaving it right now): it may come back at once; its agent never starts
             # the new launch beside the old one (GSM8K demo tier 2c: an add one second after the leave was refused)
             leaving = held and held[0] == row["id"] and ar["workerDevices"].get(worker_id) == device["deviceId"]
-            if held and not leaving:
-                raise RuntimeRejected("Waiting for confirmed GPU release")  # busy elsewhere (or this run's coordinator)
+            shared_coordinator = (
+                held
+                and held[0] == row["id"]
+                and device["deviceId"] == ar["coordinatorDeviceId"]
+                and body.get("decodeEngine") == "strict_b22_v1"
+            )
+            if held and not (leaving or shared_coordinator):
+                raise RuntimeRejected("Waiting for confirmed GPU release")
             if reason := self.waiting_reason(body, db, [worker_id]) or self.store.eligibility(db, body, [worker_id]):
                 raise RuntimeRejected(reason)
             if device["physicalResourceId"] in {devices[m]["physicalResourceId"] for m in members if m in devices}:
@@ -178,7 +185,7 @@ class AgentScheduling:
             if device["deviceId"] not in ar["deviceIds"]:
                 ar["deviceIds"].append(device["deviceId"])
             repository.change_members_update_assignments(db, (json.dumps(ar), row["id"]))
-            if not leaving:
+            if not held:
                 repository.change_members_insert_device_reservations(db, (device["deviceId"], row["id"]))
                 if device["physicalResourceId"]:
                     repository.change_members_insert_physical_reservations(
@@ -260,8 +267,13 @@ class AgentScheduling:
         experiment = repository.release_left_members_select_experiments(db, (row["run_id"],)).fetchone()
         initial = json.loads(experiment[0])["workerIds"] if experiment else []
         left -= set(self.intended_members(db, row["run_id"], initial))
+        if not left:
+            return
         states = (snapshot.get("state") or {}).get("workerStates", {})
         ar = json.loads(row["body"])
+        coordinator_id = ar["coordinatorDeviceId"]
+        coordinator = repository.release_left_members_select_devices(db, (coordinator_id,)).fetchone()
+        coordinator_gpu = json.loads(coordinator[0]).get("gpuUUID") if coordinator else None
         changed = False
         for worker_id in sorted(left):
             state = states.get(worker_id) or {}
@@ -271,20 +283,21 @@ class AgentScheduling:
             resource = repository.release_left_members_select_devices(db, (device_id,)).fetchone()
             gone = (
                 resource is not None
-                and device_id != ar["coordinatorDeviceId"]
+                and device_id != coordinator_id
                 and time.time() - resource["seen"] >= LEFT_OFFLINE_RELEASE_SECONDS
             )
             if not (state.get("left") or (state.get("confirmed") and state.get("alive") is False) or gone):
                 continue
             gpu = json.loads(resource[0]).get("gpuUUID") if resource else None
-            repository.release_left_members_delete_device_reservations(db, (device_id, row["id"]))
-            if gpu:
+            if device_id != coordinator_id:
+                repository.release_left_members_delete_device_reservations(db, (device_id, row["id"]))
+            if gpu and gpu != coordinator_gpu:
                 repository.release_left_members_delete_physical_reservations(db, (gpu, row["id"]))
             ar["workerDevices"].pop(worker_id)
             ar["computeGrants"].pop(worker_id, None)
             # the coordinator may still ask about it: the lab answers "stopped" instead of refusing (worker_command)
             ar.setdefault("releasedWorkers", {})[worker_id] = device_id
-            if device_id not in ar["workerDevices"].values() and device_id != ar["coordinatorDeviceId"]:
+            if device_id not in ar["workerDevices"].values() and device_id != coordinator_id:
                 ar["deviceIds"] = [d for d in ar["deviceIds"] if d != device_id]
             changed = True
         if changed:

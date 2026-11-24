@@ -17,6 +17,11 @@ class BackupPolicy(BaseModel):
     retain: int = Field(ge=1, le=1000, strict=True)
 
 
+class Continuation(Strict):
+    runId: str = Field(min_length=1, max_length=128)
+    pointId: str = Field(pattern=r"^[a-f0-9]{32}$")
+
+
 class Configuration(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     name: str = Field(min_length=3, max_length=160)
@@ -36,6 +41,7 @@ class Configuration(BaseModel):
     coordinatorDeviceId: str | None = None
     backupPolicy: dict | None = None
     recipeVersion: int = Field(default=1, ge=1, le=3, strict=True)
+    continueFrom: Continuation | None = None
     noiseEngineVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1", "pcg64_u32_to_f16_normal_quantile_v2"] | None = None
     batchSize: int = Field(default=32, ge=1, le=1024, strict=True)
     batchSeed: int = Field(default=11, ge=0, lt=2**53, strict=True)

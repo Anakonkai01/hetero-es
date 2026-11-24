@@ -63,10 +63,12 @@ export function V3Fields({
   value,
   onChange,
   alpha,
+  lockWeightSpace = false,
 }: {
   value: V3Settings;
   onChange: (value: V3Settings) => void;
   alpha: number;
+  lockWeightSpace?: boolean;
 }) {
   const { t } = useProduct();
   const set = (patch: Partial<V3Settings>) => onChange({ ...value, ...patch });
@@ -87,6 +89,7 @@ export function V3Fields({
         {t('Weight space')}
         <select
           className="sel"
+          disabled={lockWeightSpace}
           value={space.kind}
           onChange={(e) => {
             const kind = e.target.value;
@@ -110,6 +113,7 @@ export function V3Fields({
           <textarea
             className="inp"
             required
+            disabled={lockWeightSpace}
             value={space.include.join('\n')}
             onChange={(e) => set({ weightSpace: { ...space, include: e.target.value.split('\n') } })}
           />

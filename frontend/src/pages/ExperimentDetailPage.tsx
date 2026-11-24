@@ -321,6 +321,19 @@ export function ExperimentDetailPage() {
               <div className="cb">
                 <dl className="kv">
                   <KeyValue label={t('Model')}>{experiment.modelName}</KeyValue>
+                  {experiment.continueFrom && (
+                    <KeyValue label={t('Source checkpoint')}>
+                      <Link to={`/experiments/${experiment.continueFrom.runId}`}>
+                        {t('Generation')} {experiment.continueFrom.generation + 1}
+                      </Link>
+                      {experiment.continueFrom.parentWeightsSha256 && (
+                        <span className="mono tech" title={experiment.continueFrom.parentWeightsSha256}>
+                          {' · '}
+                          {shortId(experiment.continueFrom.parentWeightsSha256)}
+                        </span>
+                      )}
+                    </KeyValue>
+                  )}
                   <KeyValue label={t('Task')}>{experiment.task}</KeyValue>
                   {experiment.recipeVersion === 3 && (
                     <>

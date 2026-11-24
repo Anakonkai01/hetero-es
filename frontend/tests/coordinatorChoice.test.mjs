@@ -20,15 +20,16 @@ test('other decoders get the fastest GPU, which may also work', () => {
   assert.equal(suggestCoordinator([slow, fast], null, false), 'rtx5070ti');
 });
 
-test('a strict run gets the slowest GPU so that the faster ones work (one weight set per GPU)', () => {
-  assert.equal(suggestCoordinator([fast, slow, cpu], null, true), 'rtx3060');
+test('a strict run can favour the fastest coordinator', () => {
+  assert.equal(suggestCoordinator([fast, slow, cpu], null, true), 'rtx5070ti');
   const unmeasured = { deviceId: 'new-gpu', gpu: true, updateSecondsPerSeed: null };
   assert.equal(suggestCoordinator([fast, unmeasured], null, true), 'rtx5070ti');
   assert.equal(suggestCoordinator([unmeasured, fast], null, false), 'rtx5070ti');
 });
 
-test('without a GPU coordinator the lab default stays, if it is still offered', () => {
-  assert.equal(suggestCoordinator([cpu], 'cpu', true), 'cpu');
+test('without a GPU only other decoders can use the lab default', () => {
+  assert.equal(suggestCoordinator([cpu], 'cpu', true), '');
+  assert.equal(suggestCoordinator([cpu], 'cpu', false), 'cpu');
   assert.equal(suggestCoordinator([cpu], 'gone', false), '');
   assert.equal(suggestCoordinator([], null, false), '');
 });

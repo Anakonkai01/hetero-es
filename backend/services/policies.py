@@ -90,15 +90,18 @@ def shared_gpu_bytes(memory, body):
     ran = sorted((c for c in memory["chunks"] if c["ran"] and c["chunk"] >= chunk), key=lambda c: c["chunk"])
     if not ran:
         return None
+    base, peak, total = memory["baseBytes"], ran[0]["peakBytes"], memory["totalBytes"]
+    if not base <= peak <= total:
+        return None
     measured = memory["promptTokens"] + memory["newTokens"]
     scale = max(1.0, (memory["promptTokens"] + body.get("maxNewTokens", memory["newTokens"])) / measured)
-    return memory["baseBytes"] + (ran[0]["peakBytes"] - memory["baseBytes"]) * scale
+    return base + (peak - base) * scale
 
 
 def strict_layout(body, coordinator, workers, coordinator_memory=None):
     """
-    Why a strict run cannot use these devices, or None (D1, ADR-013: one weight set per GPU). The coordinator validates
-    and exports with the strict decoder, so it needs a GPU. Its GPU may also work for the run (owner decision
+    Why a strict run cannot use these devices, or None (D1, ADR-013). The coordinator validates and exports with
+    the strict decoder, so it needs a GPU. Its GPU may also work for the run (owner decision
     2026-11-24, relaxing D1) only when two weight sets fit: the coordinator's own measurement of this model
     (`coordinator_memory`, from its qualification) times two stays within SHARED_GPU_FRACTION of that GPU's memory.
     Without a measurement the GPU is not shared. Earlier recipes keep their layouts.
@@ -118,7 +121,7 @@ def strict_layout(body, coordinator, workers, coordinator_memory=None):
         need = shared_gpu_bytes(coordinator_memory, body)
         if need is None or 2 * need > SHARED_GPU_FRACTION * coordinator_memory["totalBytes"]:
             return (
-                "A strict run keeps one weight set per GPU unless two fit: qualify the model on the coordinator to "
+                "A strict run keeps one weight set per GPU unless two fit. Qualify the model on the coordinator to "
                 "measure its memory, or choose a worker on another GPU"
             )
     return None

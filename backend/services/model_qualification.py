@@ -282,12 +282,22 @@ class ModelQualifications:
         return accepted
 
 
-def measured_memory(db, asset_id, device_id):
-    """The chunk measurement of the latest completed qualification of this model on this device, or None."""
+def measured_memory(db, asset_id, device_id, engine):
+    """The latest completed strict probe for this model, engine and current device profile."""
+    device = repository.start_select_devices(db, (device_id,)).fetchone()
+    if device is None:
+        return None
+    profile = canonical_json_hash(json.loads(device["self_test"]))
     for (raw,) in repository.status_select_model_probe_jobs(db, (asset_id,)):
         job = json.loads(raw)
-        if job.get("deviceId") == device_id and job.get("status") == "COMPLETED" and job.get("chunkMemory"):
-            return job["chunkMemory"]
+        if (
+            job.get("deviceId") == device_id
+            and job.get("status") == "COMPLETED"
+            and job.get("profileHash") == profile
+            and job.get("noiseEngineVersion", ENGINE_VERSION) == engine
+            and job.get("decoder") == STRICT_DECODER
+        ):
+            return checked_memory(job.get("chunkMemory"))
     return None
 
 

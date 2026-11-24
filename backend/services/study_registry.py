@@ -297,8 +297,22 @@ def operations(registry, runtime, scoped, device_auth):
             if config.get("modelSource") == "UPLOAD":
                 allowed.update(config["modelManifest"]["files"].values())
             sha = body.get("sha256")
-            if sha not in allowed or not isinstance(sha, str):
+            continuation = config.get("continueFrom")
+            initial_weights = continuation and sha == continuation["parentWeightsSha256"]
+            if initial_weights:
+                if current["id"] != ar["coordinatorDeviceId"]:
+                    raise ServiceError(403, "Continuation transfer requires the assigned coordinator")
+                allowed.add(sha)
+            if not isinstance(sha, str) or sha not in allowed:
                 raise ServiceError(403, "Object is outside the frozen assignment")
+        if initial_weights:
+            try:
+                source = runtime.storage.manifest(continuation["pointId"])
+            except ValueError:
+                raise ServiceError(409, "Source recovery point is no longer available") from None
+            if (source["runId"], source["childWeightsSha256"]) != (continuation["runId"], sha):
+                raise ServiceError(409, "Frozen continuation weights differ from the recovery point")
+            return {"sha256": sha, "url": backend("recovery").download_url("objects/" + sha)}
         selected = backend("datasets" if sha in datasets else "recovery")
         grant = {"url": selected.download_url("objects/" + sha), "sha256": sha}
         public = runtime.public_web_url()

@@ -521,9 +521,8 @@ GATES = [
     Gate(
         "M4.gpu-ownership",
         "M4",
-        "D1 one weight set per GPU across worker, audit, validation and export",
-        # strict runs only (ADR-013 amendment): coordinator on its own GPU, export reload after the live set leaves it;
-        # earlier recipes keep their FP32 shadow and layouts
+        "D1 qualified sharing with a GPU coordinator and exclusive assignment ownership",
+        # ADR-013: two measured weight sets may share one GPU in one run. The export reload follows live-model release.
         checks=("check-all", "strict-gpu-suite", "mutation-gpu-ownership-backend", "mutation-gpu-ownership-runtime"),
     ),
     Gate("M4.packaging", "M4", "Linux Worker/Server packages carry the exact runtime", checks=("package-linux",)),

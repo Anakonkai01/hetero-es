@@ -62,7 +62,13 @@ export type SchedulerPolicy = 'greedy-tail' | 'greedy';
 
 export type SyncMode = 'synchronous';
 
+export interface ContinuationReference {
+  runId: string;
+  pointId: string;
+}
+
 export interface Experiment extends Partial<V3Settings> {
+  continueFrom?: ContinuationReference & { generation: number; parentWeightsSha256?: string; sizeBytes?: number };
   noiseEngineVersion?: string;
   workerIdentities?: Record<string, { name: string; gpuName?: string; gpuIndex?: number }>;
   workerBlocks?: Record<string, { reason: string; blockedAt?: number }>;
@@ -146,6 +152,7 @@ export interface Experiment extends Partial<V3Settings> {
 }
 
 export interface CreateExperimentRequest extends Partial<V3Settings> {
+  continueFrom?: ContinuationReference;
   auditRate?: number;
   hardCapSeconds?: number;
   stallSeconds?: number;

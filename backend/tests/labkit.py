@@ -46,7 +46,7 @@ def draft(client, headers, **changes):
     return client.post("/api/v1/experiments", json=body, headers=headers)
 
 
-def enroll(lab, alias="test-gpu", coordinator=True, name=None):
+def enroll(lab, alias="test-gpu", coordinator=True, name=None, *, gpu_uuid=None):
     """Pair one device with a fresh code; it stays PENDING. Returns (enrollment, agent headers)."""
     client, store, runtime, admin = lab
     code = client.post("/api/v1/devices/pairing-codes", headers=admin).json()["code"]
@@ -60,7 +60,7 @@ def enroll(lab, alias="test-gpu", coordinator=True, name=None):
             "gpuName": "Fake CPU test GPU",
             "vramTotalMb": 12000,
             "noiseVersion": "numpy_pcg64_normal_f32_to_f16_v1",
-            "gpuUUID": "GPU-" + str(uuid.uuid5(uuid.NAMESPACE_DNS, alias)),
+            "gpuUUID": gpu_uuid or "GPU-" + str(uuid.uuid5(uuid.NAMESPACE_DNS, alias)),
         },
         "computeUrl": "http://100.64.0.1:8769",
     }
@@ -72,10 +72,10 @@ def enroll(lab, alias="test-gpu", coordinator=True, name=None):
     return d, auth
 
 
-def pair(lab, alias="test-gpu", coordinator=True):
+def pair(lab, alias="test-gpu", coordinator=True, *, gpu_uuid=None):
     """Pair, approve into the workspace 'lab' and boot one device; returns (enrollment, agent headers)."""
     client, store, runtime, admin = lab
-    d, auth = enroll(lab, alias, coordinator)
+    d, auth = enroll(lab, alias, coordinator, gpu_uuid=gpu_uuid)
     assert (
         client.patch(
             "/api/v1/platform/devices/" + d["deviceId"], json={"approved": True, "workspaceId": "lab"}, headers=admin

@@ -187,10 +187,14 @@ class AgentManager(RunSupervisor):
         local = read_json(root / "config.json")
         local.update(backupPolicy=cfg.get("backupPolicy", {"interval": 1, "retain": 3}), deviceCredentials=True)
         if cfg.get("recipeVersion") in (2, 3):
-            from heteroes.study.prepare import prepare
+            from heteroes.study.prepare import prepare, prepare_continuation
 
             try:
                 local.update(prepare(self.agent, command, cfg, root))
+                if cfg.get("continueFrom") and not command.get("resumeFrom"):
+                    local["continuationWeightsPath"] = str(
+                        prepare_continuation(self.agent, command, cfg["continueFrom"])
+                    )
             except Exception as error:
                 # a run that cannot get its inputs must not keep the GPU pool in STARTING; only our own messages are
                 # shown (a network error may carry a grant URL)

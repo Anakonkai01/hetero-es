@@ -191,6 +191,12 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             )
         check_recipe_selftest(recipe, device)
         ledger = Ledger(root / "ledger.sqlite", max_attempts=3, enforce_chain=True)
+        if config.get("continueFrom") and not ledger.list_generations(config["runId"]):
+            from heteroes.model.weights_io import load_weights_
+
+            source = config["continueFrom"]
+            load_weights_(loaded.model, loaded.schema, config["continuationWeightsPath"], source["parentWeightsSha256"])
+            emit({"event": "continuation_loaded", **source})
         policy = config.get("backupPolicy")
         last_summary = None
         active_policy = policy

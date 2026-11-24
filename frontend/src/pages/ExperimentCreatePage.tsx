@@ -12,16 +12,19 @@ export function ExperimentCreatePage() {
   const { t } = useProduct();
   const create = useCreateExperiment();
   const navigate = useNavigate();
-  const clone = (
-    useLocation().state as {
-      clone?: Experiment;
-    } | null
-  )?.clone;
+  const state = useLocation().state as { clone?: Experiment; continueFrom?: Experiment['continueFrom'] } | null;
+  const clone = state?.clone;
+  const continueFrom = state?.continueFrom;
   const [source, setSource] = useState(clone ? 'clone' : '');
   const [template, setTemplate] = useState<Template>();
   const initial = useMemo(
-    () => (source === 'clone' ? wizardStart({ clone }) : template ? wizardStart({ template }) : undefined),
-    [source, clone, template],
+    () =>
+      source === 'clone'
+        ? { ...wizardStart({ clone }), continueFrom }
+        : template
+          ? wizardStart({ template })
+          : undefined,
+    [source, clone, continueFrom, template],
   );
   return (
     <>
