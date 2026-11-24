@@ -1,6 +1,6 @@
 # HeteroES — current state
 
-Checked 2026-11-21 on the project workstation. See the [documentation map](README.md) for guides, the
+Checked 2026-11-24 on the project workstation. See the [documentation map](README.md) for guides, the
 [review guide](REVIEW-GUIDE.md) for code ownership and the [evidence index](EVIDENCE-INDEX.md) for dated records.
 
 ## Phiên bản và trạng thái
@@ -10,7 +10,7 @@ Checked 2026-11-21 on the project workstation. See the [documentation map](READM
 | Nhánh tài liệu hiện tại | Cùng mã chạy B-022. README cấp module và notebook tham gia vào mã định danh của công cụ nghiệm thu. | [Trạng thái theo cây tài liệu hiện tại](acceptance/STATUS-src-af91b853.md). |
 | Mã nguồn có B-022 | Bản sửa `411a0a3a`, nhánh `fix/b022-final-point-projection` ở `8f5dc4f5` | Checkpoint định kỳ xác minh muộn không thay checkpoint cuối đã xác minh. Đã có hồi quy backend. [Nghiệm thu M0–M6](acceptance/STATUS-src-89176a3d.md) cho cây nguồn này chưa chạy đủ ma trận. |
 | `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [Biên bản nghiệm thu](acceptance/STATUS.md). |
-| Lab công khai | Clone triển khai riêng tại `10457f9a`. Bộ cài công bố gần nhất là `lf1-20261014-r10` | Ngày 21/11, CPU server, public entry và named tunnel đều dừng. Unit lặp khởi động vì không tìm thấy ổ lưu trữ đã cấu hình. [Vận hành lab](guides/local-lab-operations.md). |
+| Lab công khai | Clone triển khai riêng tại `10457f9a`. Bộ cài công bố gần nhất là `lf1-20261014-r10` | Dừng. Ổ Archive vẫn gắn đúng UUID nhưng thư mục kho `artifacts/lab-storage-20261012` đã bị xóa (khoảng 7/11, không còn trong thùng rác). Cơ sở dữ liệu vẫn ghi các object là READY, nên không được tạo lại thư mục rỗng: upload trùng SHA sẽ bị bỏ qua. Chủ dự án chọn cài lại lab sạch (24/11). [Vận hành lab](guides/local-lab-operations.md). |
 
 - Đã sửa các finding phần A và kiểm chứng P-FROZEN. Backend phần B có năm chế độ CPU, chạy SQLite ở chế độ gộp
   hoặc PostgreSQL ở chế độ tách service. OIDC và S3 là tùy chọn triển khai. Xem [kiến trúc backend](design/lab-server-architecture.md),
@@ -50,8 +50,11 @@ python3 -I "$HOME/.local/share/heteroes-lab/app/scripts/local-lab.py" status
 For GPU and remote commands, see [the acceptance guide](acceptance/README.md). WSL and native Windows share a GPU and
 must run serially. Check the workstation lab before any authorized GPU work.
 
-## Việc còn mở
+## Việc còn mở (kế hoạch nộp báo cáo cuối kì 04/12/2026)
 
-- Khôi phục điều kiện khởi động lab theo [hướng dẫn vận hành](guides/local-lab-operations.md). Unit đã dùng Python trong
-  venv như template. Ổ lưu trữ với UUID đã cấu hình cần có mặt để lần thử tiếp theo khởi động được.
-- Nghiệm thu B-022 trên ba môi trường trước khi đưa vào `main`. Việc triển khai lên lab công khai do chủ dự án quyết định riêng.
+- Nhánh làm việc `feat/final-2026-12` (từ nhánh docs 21/11, có B-022): gỡ MiniCloud và course API, thêm
+  `python -m heteroes.v3 derive` (nối tiếp run từ trọng số đã kiểm chứng, [hướng dẫn](../runtime/docs/v3-local-runs.md#continue-an-earlier-run))
+  và bộ dữ liệu số học `runtime/scripts/build_arithmetic_dataset.py`.
+- Nghiệm thu cây nguồn cuối trên CPU, 5070 Ti, 3060 WSL và 3060 Windows trước khi đưa vào `main`.
+- Cài lại lab sạch trên kho mới, rồi chủ dự án ghép lại worker (5070 Ti, 3060-thao).
+- MiniCloud đã bị chủ dự án bỏ (24/11); repo GitHub `Anakonkai-AI-Group/heteroes-minicloud` được giữ nguyên.
