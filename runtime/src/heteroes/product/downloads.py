@@ -52,19 +52,20 @@ class Progress:
 
 class SameOriginRedirect(urllib.request.HTTPRedirectHandler):
     """A pinned file may move within its own origin (Hugging Face answers /resolve/ with a 307 to /api/resolve-cache/
-    on the same host); it never leaves it. Nothing secret is sent and the SHA-256 decides what is kept."""
+    on the same host) or to an HTTPS address (a large file is then served by its CDN, us.aws.cdn.hf.co); never to
+    plain HTTP elsewhere. Nothing secret is sent (no token, no cookie) and the SHA-256 decides what is kept."""
 
     max_redirections = 5
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         old, new = urlsplit(req.full_url), urlsplit(urljoin(req.full_url, newurl))
-        if (old.scheme, old.hostname, old.port) != (new.scheme, new.hostname, new.port):
+        if new.scheme != "https" and (old.scheme, old.hostname, old.port) != (new.scheme, new.hostname, new.port):
             raise RedirectError(code, _origin(req.full_url, newurl))
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def opener(*, proxy=False):
-    """Like heteroes.http_safety.opener (no environment proxy), but a move within the same origin is followed."""
+    """Like heteroes.http_safety.opener (no environment proxy), but a pinned file's move is followed (see above)."""
     return urllib.request.build_opener(SameOriginRedirect(), urllib.request.ProxyHandler(None if proxy else {}))
 
 

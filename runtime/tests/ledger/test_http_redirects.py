@@ -264,3 +264,17 @@ def test_a_pinned_download_follows_a_move_within_its_own_origin(status, tmp_path
         server.shutdown()
         server.server_close()
         thread.join()
+
+
+def test_a_pinned_download_may_move_to_an_https_cdn_but_never_to_plain_http_elsewhere():
+    """A large Hugging Face file is served by its CDN (another HTTPS host); plain HTTP elsewhere stays refused."""
+    import urllib.request
+
+    from heteroes.http_safety import RedirectError
+
+    handler = downloads.SameOriginRedirect()
+    request = urllib.request.Request("https://huggingface.co/m/resolve/rev/model.safetensors", headers={"Range": "bytes=5-"})
+    moved = handler.redirect_request(request, None, 302, "Found", {}, "https://us.aws.cdn.hf.co/xet/abc?sig=1")
+    assert moved.full_url == "https://us.aws.cdn.hf.co/xet/abc?sig=1" and moved.get_header("Range") == "bytes=5-"
+    with pytest.raises(RedirectError, match="http://elsewhere.example"):
+        handler.redirect_request(request, None, 302, "Found", {}, "http://elsewhere.example/model.safetensors")
