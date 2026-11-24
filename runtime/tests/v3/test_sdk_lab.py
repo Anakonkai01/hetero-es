@@ -265,3 +265,27 @@ def test_a_strict_sdk_run_reaches_the_lab_with_fp16_and_a_plain_one_without_eval
     for wrong in ({"decoder": "strict_b22_v1"}, {"eval_dtype": "float16"}):  # FP16 belongs to the strict decoder only
         with pytest.raises(ValueError, match="FP16 for strict_b22_v1"):
             request(**wrong)
+
+
+@pytest.mark.parametrize(
+    "body, shown",
+    [
+        ({"message": "A strict run keeps one weight set per GPU unless two fit"}, "one weight set per GPU"),
+        ({"detail": [{"loc": ["body", "workerIds"], "msg": "Field required"}]}, "workerIds"),
+        ({"detail": "not yours"}, "not yours"),
+    ],
+)
+def test_a_refused_lab_request_says_why_in_the_error(monkeypatch, body, shown):
+    import io
+    import urllib.error
+
+    from heteroes import sdk_lab
+
+    class Refusing:
+        def open(self, request, timeout):
+            raise urllib.error.HTTPError(request.full_url, 422, "Unprocessable", {}, io.BytesIO(json.dumps(body).encode()))
+
+    monkeypatch.setattr(sdk_lab, "opener", lambda proxy: Refusing())
+    with pytest.raises(sdk_lab.LabError, match="Lab HTTP 422") as refused:
+        sdk_lab._http("https://lab.example/api/v1/experiments", "POST", {})
+    assert shown in str(refused.value)

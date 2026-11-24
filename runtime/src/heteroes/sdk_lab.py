@@ -532,7 +532,11 @@ def _http(url, method, body=None, headers=None):
             return json.loads(text) if text else None
     except urllib.error.HTTPError as error:
         try:
-            detail = json.load(error).get("detail")
+            body = json.load(error)
+            detail = body.get("detail") or body.get("message")  # FastAPI validation, or the lab's own refusal
         except (ValueError, AttributeError):
             detail = None
-        raise LabError(f"Lab HTTP {error.code}: {detail if isinstance(detail, str) else url}") from None
+        if detail is not None and not isinstance(detail, str):
+            # a validation error names the fields it refused (a list of {loc, msg}); keep that, not only the URL
+            detail = f"{url}: {json.dumps(detail, ensure_ascii=False, default=str)[:2000]}"
+        raise LabError(f"Lab HTTP {error.code}: {detail or url}") from None

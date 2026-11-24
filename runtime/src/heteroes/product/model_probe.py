@@ -79,8 +79,15 @@ def run(input_path, device):
             try:
                 from .chunk_memory import measure
 
-                result["chunkMemory"] = measure(model, command["manifest"]["files"], device)
-            except Exception:  # noqa: BLE001 - the qualification itself passed; only the suggestion is missing
+                result["chunkMemory"] = measure(
+                    model, command["manifest"]["files"], device, decoder=command.get("decoder", "hf_generate")
+                )
+            except Exception as error:  # noqa: BLE001 - the qualification itself passed; only the suggestion is missing
+                import sys
+
+                # only the exception's type leaves this process (foreign strings may hold transfer grants); the lab then
+                # treats the GPU as unmeasured, so a missing number must be visible in the worker log
+                print(f"chunk memory not measured: {type(error).__name__}", file=sys.stderr, flush=True)
                 result["chunkMemory"] = None
         emit({"stage": "done"})
     except Cancelled:

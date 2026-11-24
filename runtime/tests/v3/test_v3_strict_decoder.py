@@ -276,3 +276,23 @@ def test_strict_export_reloads_with_one_weight_set_on_the_gpu(product_assets, tm
     assert seen and max(seen) < weights // 4, (seen, weights)  # nothing of the live set remains when the copy loads
     assert strict_backend._engines.get(loaded.model) is None
     assert next(loaded.model.parameters()).device.type == "cpu"
+
+
+@gpu
+def test_a_strict_qualification_measures_the_fp16_weight_set_a_strict_run_holds(product_assets):  # noqa: F811
+    """The lab shares a GPU between a strict coordinator and a worker only when two measured weight sets fit; the
+    measure of a strict run must be its own FP16 weights and engine, not the FP32 copy other decoders evaluate with."""
+    from heteroes.product.chunk_memory import check, measure
+    from heteroes.v3.model import file_manifest
+    from heteroes.v3.options import STRICT_CHUNKS
+
+    path = product_assets / "model"
+    files = file_manifest(path)
+    general = check(measure(path, files, "cuda", chunks=(16, 32), prompt_tokens=16, new_tokens=8))
+    strict = check(
+        measure(path, files, "cuda", chunks=(16, 32, 128), prompt_tokens=16, new_tokens=8, decoder="strict_b22_v1")
+    )
+    assert [c["chunk"] for c in strict["chunks"]] == [c for c in (16, 32) if c in STRICT_CHUNKS]  # 128 is not strict
+    assert all(c["ran"] and c["peakBytes"] >= strict["baseBytes"] for c in strict["chunks"])
+    # FP16 weights alone, against FP16 plus an FP32 copy (three times as much): well under half
+    assert 2 * strict["baseBytes"] < general["baseBytes"]
