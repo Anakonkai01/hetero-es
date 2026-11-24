@@ -434,6 +434,16 @@ class Run:
     def timeline(self):
         return self.lab.request("GET", f"/api/v1/experiments/{self.id}/timeline")
 
+    def derive_model(self, base_model_path, out, point=None, cache=None, download=None):
+        """A model directory holding this run's verified weights (the final point by default) and their lineage: give it
+        as `model_path` of the next configuration to continue the run with other settings (`heteroes.v3.derive`)."""
+        from heteroes.v3 import derive
+
+        out = Path(out)
+        options = {} if download is None else {"download": download}
+        source = derive.lab_source(self.lab, self.id, cache or out.with_name(out.name + ".source"), point, **options)
+        return derive.derive_model(base_model_path, source, out)["path"]
+
     def watch(self, every=3.0):
         """Draw the live dashboard in the notebook until the run ends. Interrupting the cell stops only the drawing."""
         from heteroes.demo.dashboard import live

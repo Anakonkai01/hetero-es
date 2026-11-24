@@ -3,6 +3,11 @@
 
 Runs a Recipe v3 experiment on this machine (`heteroes.v3.local.run_local`). `spec.json` is the configuration documented in
 `runtime/docs/v3-local-runs.md`; relative paths in it are read from the spec's directory. Prints one line per generation.
+
+    python -m heteroes.v3 derive --base-model DIR (--run-dir RUN_DIR | --lab URL --workspace ID --run RUN_ID) --out DIR
+
+Turns the verified weights of an earlier run into a new pinned model directory with its lineage
+(`heteroes.v3.derive`); a new run on that directory continues from those weights with any settings.
 """
 
 import argparse
@@ -72,6 +77,16 @@ def main(argv=None):
     serve.add_argument("--workspace", help="workspace ID with --lab")
     serve.add_argument("--worker-home", type=Path, help="installed Linux CLI Worker home with --lab")
     serve.add_argument("--lab-token-env", default="HETEROES_LAB_ACCESS_TOKEN")
+    derive = commands.add_parser("derive", help="make a model directory from an earlier run's weights, to continue it")
+    derive.add_argument("--base-model", type=Path, required=True, help="the model directory the earlier run pinned")
+    derive.add_argument("--out", type=Path, required=True, help="new model directory (must not exist)")
+    derive.add_argument("--run-dir", type=Path, help="a run made on this machine: its last applied generation")
+    derive.add_argument("--lab", help="lab URL, for a run on the managed lab")
+    derive.add_argument("--workspace", help="workspace ID with --lab")
+    derive.add_argument("--run", help="lab run ID with --lab")
+    derive.add_argument("--point", help="recovery point ID (default: the final point, else the latest verified one)")
+    derive.add_argument("--cache", type=Path, help="where downloaded point files are kept (default: OUT + '.source')")
+    derive.add_argument("--lab-token-env", default="HETEROES_LAB_ACCESS_TOKEN")
     worker = commands.add_parser("worker", help="generate texts for a self-hosted coordinator")
     worker.add_argument("--coordinator", required=True)
     worker.add_argument("--model-path", type=Path, required=True)
@@ -151,6 +166,25 @@ def main(argv=None):
         with args.out.open("x", encoding="utf-8") as stream:
             stream.write(json.dumps(result, indent=2) + "\n")
         print(json.dumps(result))
+        return 0
+
+    if args.command == "derive":
+        from heteroes.v3 import derive as derivation
+
+        if (args.run_dir is None) == (args.lab is None):
+            parser.error("choose exactly one source: --run-dir or --lab")
+        if args.run_dir is not None:
+            source = derivation.local_source(args.run_dir)
+        else:
+            if not args.workspace or not args.run:
+                parser.error("--lab needs --workspace and --run")
+            from heteroes.v3.lab_cli import Lab
+
+            api = Lab(args.lab, args.workspace, token_env=args.lab_token_env)
+            cache = args.cache or args.out.with_name(args.out.name + ".source")
+            source = derivation.lab_source(api, args.run, cache, point_id=args.point)
+        result = derivation.derive_model(args.base_model, source, args.out)
+        print(json.dumps({"path": result["path"], "lineage": result["lineage"]}, indent=2, sort_keys=True))
         return 0
 
     if args.command == "manifest":

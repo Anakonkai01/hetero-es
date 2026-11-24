@@ -241,3 +241,28 @@ itself (not writing or hashing the child weights); CPU execution adds 0.
 Idle time, validation and unreported failures are excluded. This is execution accounting, not power/energy measurement.
 Old workers remain usable with partial coverage; retry receipts are deduplicated. These optional receipts do not change
 numerical identities, and recovery points include their database when present.
+
+## Continue an earlier run
+
+A finished (or paused) run can be continued with other settings: make a model directory from its verified weights, then
+run on that directory like on any model.
+
+```bash
+# a run made on this machine: its last applied generation
+python -m heteroes.v3 derive --base-model models/my-model --run-dir runs/first --out models/after-first
+# a lab run: its final recovery point, else the latest verified one (or --point ID); needs the private route
+python -m heteroes.v3 derive --base-model models/my-model --lab URL --workspace ID --run RUN_ID --out models/after-first
+```
+
+In Python: `heteroes.sdk.continue_from(run_dir, base_model_path, out)` or `Run(lab, run_id).derive_model(base, out)`.
+
+The new directory holds the base model's configuration and tokenizer bytes, a `model.safetensors` with the source
+weights, and `heteroes-lineage.json`: the base model identity, the weights SHA-256, the trainable schema and the source
+(run, point, generation), plus the lineage of the base when the base was itself derived. The lineage file is one of the
+pinned model files, so it is part of the new model's identity and every device checks it. Before the directory is
+published, the derivation reloads it and checks that its trainable weights hash to the source SHA-256; the next run's
+generation 0 therefore starts from exactly the source weights.
+
+The base directory must be exactly the model the source run pinned. The source run's momentum, schedules and generation
+numbering do not carry over: the continued run is a new run with its own recipe and seeds. LoRA runs (adapters only)
+cannot be continued this way yet.

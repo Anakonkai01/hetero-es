@@ -17,6 +17,10 @@ different experiment. A declarative scorer (`scorer={"name": "answer-line-last-n
 
 `train()` runs on this machine with the lab's own coordinator, workers and protocol (`heteroes.v3.local`); nothing is
 sent anywhere. `submit(lab, ...)` runs the same configuration on a shared lab (`heteroes.sdk_lab`).
+
+To continue a finished run with other settings, make a model from its weights and train on that model:
+`continue_from("runs/first", "models/my-model", "models/after-first")` (a run on this machine), or
+`Run(lab, run_id).derive_model("models/my-model", "models/after-first")` (a lab run).
 """
 
 import builtins
@@ -253,3 +257,11 @@ class ESTrainer:
         return run_local(
             self.config(), out_dir, device=device, workers=workers, log=log, timeout_seconds=timeout_seconds
         )
+
+
+def continue_from(run_dir, base_model_path, out):
+    """The model directory `out` holding the last weights of a run made by `train()`, with their lineage; use it as
+    `model_path` of the next ESConfig. `base_model_path` is the model that run trained (`heteroes.v3.derive`)."""
+    from heteroes.v3 import derive
+
+    return derive.derive_model(base_model_path, derive.local_source(run_dir), out)["path"]
