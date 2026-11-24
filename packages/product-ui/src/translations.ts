@@ -1104,7 +1104,7 @@ export const translations: Record<string, string> = {
   'Share your lab address with contributors.': 'Chia sẻ địa chỉ lab cho người đóng góp.',
   'Choose an address your contributors can reach and a disk for experiment checkpoints.':
     'Chọn địa chỉ người đóng góp truy cập được và ổ đĩa lưu checkpoint.',
-  'At least 12 characters': 'Ít nhất 12 ký tự',
+  'At least 8 characters': 'Ít nhất 8 ký tự',
   'Ready to bring your lab online.': 'Sẵn sàng đưa lab online.',
   'Use a LAN or Tailscale address to connect other computers.':
     'Dùng địa chỉ LAN hoặc Tailscale để kết nối các máy khác.',

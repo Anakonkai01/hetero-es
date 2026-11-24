@@ -242,12 +242,12 @@ function App() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        minLength={12}
+                        minLength={8}
                         maxLength={200}
                         autoComplete="new-password"
                         required
                       />
-                      <small className="hint">{t('At least 12 characters')}</small>
+                      <small className="hint">{t('At least 8 characters')}</small>
                     </label>
                   </div>
                   <div className="setup-info">

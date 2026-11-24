@@ -64,3 +64,20 @@ def test_failed_selected_disk_preflight_does_not_leave_a_partial_lab(tmp_path):
         )
     assert not root.exists()
     assert not (tmp_path / "artifacts").exists()
+
+
+@pytest.mark.parametrize(("password", "accepted"), [("12345678", True), ("1234567", False)])
+def test_owner_bootstrap_accepts_eight_characters(tmp_path, password, accepted):
+    values = {
+        "username": "admin",
+        "password": password,
+        "host": "127.0.0.1",
+        "port": 8765,
+        "storageDirectory": str(tmp_path / "artifacts"),
+    }
+    if not accepted:
+        with pytest.raises(ValueError):
+            initialize(tmp_path / "lab", values)
+        assert not (tmp_path / "lab").exists()
+        return
+    assert initialize(tmp_path / "lab", values)["initialized"] is True

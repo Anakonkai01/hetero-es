@@ -16,7 +16,7 @@ Cloud access is not required for this local release.
 3. Select the LAN or Tailscale address belonging to this computer. Loopback
    (`127.0.0.1`) works only on this computer. Choose an unused port.
 4. Choose a disk for checkpoints, and enter the administrator username and a
-   password of at least 12 characters. The password is sent privately to the
+   password of at least 8 characters. The password is sent privately to the
    bootstrap process; only its Argon2 hash is saved in SQLite.
 5. Select **Start Server**, then **Open lab**. Web and API share the shown
    address. Sign in, approve participants, pair and approve workers, then release

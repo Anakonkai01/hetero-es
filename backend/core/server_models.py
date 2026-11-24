@@ -6,7 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field
 class Bootstrap(BaseModel):
     model_config = ConfigDict(extra="forbid")
     username: str = Field(min_length=2, max_length=100, pattern=r"^[a-zA-Z0-9_.-]+$")
-    password: str = Field(min_length=12, max_length=200)
+    # The owner sets the first administrator; 8 characters like registration, without the common-password list.
+    password: str = Field(min_length=8, max_length=200)
     host: str
     port: int = Field(ge=1024, le=65535, strict=True)
     storageDirectory: str
