@@ -23,6 +23,7 @@ To continue a finished run with other settings, make a model from its weights an
 `Run(lab, run_id).derive_model("models/my-model", "models/after-first")` (a lab run).
 """
 
+import ast
 import builtins
 import dis
 import inspect
@@ -156,8 +157,13 @@ class ESConfig:
 
 def self_contained(function, what):
     """The source of a function defined in a notebook cell, which must not read names from the notebook: those would not
-    exist where the frozen code runs (the coordinator). ValueError names the first one."""
+    exist where the frozen code runs (the coordinator). ValueError names the first one. Decorators (such as
+    `@reward("name@1")`) stay in the notebook: the frozen file starts at `def`, since it runs without the notebook's
+    names and the identity they set is already read from the function."""
     source = textwrap.dedent(inspect.getsource(function))
+    definition = ast.parse(source).body[0]
+    if definition.decorator_list:
+        source = "".join(source.splitlines(True)[definition.lineno - 1 :])
     local = set(function.__code__.co_varnames)
 
     def globals_of(code):

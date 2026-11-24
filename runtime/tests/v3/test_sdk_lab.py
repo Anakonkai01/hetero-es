@@ -46,6 +46,53 @@ def test_a_reward_written_in_a_notebook_cell_is_frozen_from_its_own_source(tmp_p
         ESTrainer(args, reward_func=cell(LEAKY, "leaky"), code_dir=tmp_path / "code")
 
 
+DECORATED = """
+@reward("tail-hit@2")
+def tail_hit(completions, rows):
+    return [float(text.endswith(row["answer"])) for text, row in zip(completions, rows)]
+"""
+
+
+def test_a_named_reward_from_a_cell_is_frozen_without_its_decorator(tmp_path):
+    """The coordinator runs the frozen file alone, where `reward` is not defined: the decorator stays in the notebook."""
+    source = "from heteroes.sdk import reward\n" + DECORATED
+    filename = f"<ipython-input-{abs(hash(source))}>"
+    linecache.cache[filename] = (len(source), None, source.splitlines(True), filename)
+    namespace = {"__name__": "__main__"}
+    exec(compile(source, filename, "exec"), namespace)
+    data = Dataset.from_rows(rows(4), directory=tmp_path / "data")
+    trainer = ESTrainer(
+        ESConfig(model_path="m", model_id="x", dataset=data), reward_func=namespace["tail_hit"], code_dir=tmp_path
+    )
+    frozen = trainer.config()["scorer"]
+    assert (frozen["name"], frozen["version"], frozen["function"]) == ("tail-hit", 2, "tail_hit")
+    text = open(frozen["path"]).read()
+    assert "@reward" not in text and text.startswith("def tail_hit(")
+    alone = {}
+    exec(compile(text, frozen["path"], "exec"), alone)  # what the coordinator's sandbox does: no notebook names
+    assert alone["tail_hit"](["is 2", "is 9"], rows(2)) == [0.0, 0.0] and alone["tail_hit"](["1"], rows(1)) == [1.0]
+
+
+def test_a_hub_cache_with_an_earlier_full_download_gives_a_view_of_only_the_safe_files(tmp_path):
+    from heteroes.sdk_lab import safe_view
+
+    snapshot = tmp_path / "models--org--m" / "snapshots" / ("c" * 40)
+    (snapshot / "onnx").mkdir(parents=True)
+    for name in ("config.json", "model.safetensors", "merges.txt", "training_args.bin", "onnx/model.onnx"):
+        (snapshot / name).write_text(name)
+    view = safe_view(snapshot)
+    assert view != snapshot and view.name == "c" * 40
+    assert sorted(p.relative_to(view).as_posix() for p in view.rglob("*") if p.is_file()) == [
+        "config.json",
+        "merges.txt",
+        "model.safetensors",
+    ]
+    assert (view / "config.json").read_text() == "config.json" and safe_view(snapshot) == view  # idempotent
+    (snapshot / "training_args.bin").unlink()
+    __import__("shutil").rmtree(snapshot / "onnx")
+    assert safe_view(snapshot) == snapshot  # a clean snapshot is used as it is
+
+
 def test_rows_from_any_loader_are_frozen_with_their_counts_and_a_content_hash(tmp_path):
     data = Dataset.from_rows(train=rows(8), validation=rows(2, "v"), test=rows(3, "t"), directory=tmp_path / "a")
     assert data.counts == {"train": 8, "validation": 2, "test": 3}

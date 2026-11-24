@@ -41,6 +41,28 @@ class LabError(RuntimeError):
     pass
 
 
+def safe_view(snapshot):
+    """The hub snapshot itself when it holds only SAFE_FILES; else a sibling folder of links to just those files.
+
+    A cache that once received a full download (pickled `training_args.bin`, `onnx/`, code) keeps those files in the same
+    snapshot folder even when this download asked only for safe ones; the model the lab pins is the safe files alone,
+    which is also what every device downloads."""
+    from fnmatch import fnmatch
+
+    snapshot = Path(snapshot)
+    files = [p for p in sorted(snapshot.rglob("*")) if p.is_file()]
+    safe = [p for p in files if any(fnmatch(p.relative_to(snapshot).as_posix(), pattern) for pattern in SAFE_FILES)]
+    if len(safe) == len(files):
+        return snapshot
+    view = snapshot.parent.parent / "heteroes-safe" / snapshot.name
+    for file in safe:
+        target = view / file.relative_to(snapshot)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.is_symlink():
+            target.symlink_to(file.resolve())
+    return view
+
+
 class Lab:
     """A signed-in session on a lab: an access token (valid 12 hours) and a workspace, kept in memory only."""
 
@@ -299,8 +321,9 @@ class Model:
 
         from heteroes.v3.model import registration_manifest
 
-        path = Path(snapshot_download(repo_id, revision=revision, allow_patterns=SAFE_FILES))
-        commit = path.name  # the snapshot folder is named by the commit it resolved to
+        snapshot = Path(snapshot_download(repo_id, revision=revision, allow_patterns=SAFE_FILES))
+        commit = snapshot.name  # the snapshot folder is named by the commit it resolved to
+        path = safe_view(snapshot)
         return cls(repo_id, str(path), commit, "REFERENCE", registration_manifest(path, repo_id, commit))
 
     @classmethod
