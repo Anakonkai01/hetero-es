@@ -282,6 +282,15 @@ class ModelQualifications:
         return accepted
 
 
+def measured_memory(db, asset_id, device_id):
+    """The chunk measurement of the latest completed qualification of this model on this device, or None."""
+    for (raw,) in repository.status_select_model_probe_jobs(db, (asset_id,)):
+        job = json.loads(raw)
+        if job.get("deviceId") == device_id and job.get("status") == "COMPLETED" and job.get("chunkMemory"):
+            return job["chunkMemory"]
+    return None
+
+
 def checked_memory(value):
     """A device's chunk measurement as the lab keeps it; anything else is dropped (the qualification stands)."""
     from heteroes.product.chunk_memory import check

@@ -46,7 +46,12 @@ class AgentScheduling:
         chosen = [coordinator] + [by_worker.get(w) for w in selected]
         if any(d and coordinator_only(d["selfTest"]) for d in chosen[1:]):
             return "CPU coordinator-only devices cannot be selected as workers"
-        if reason := strict_layout(body, coordinator, chosen[1:]):
+        memory = None
+        if body.get("decodeEngine") == "strict_b22_v1" and body.get("modelArtifactId"):
+            from .model_qualification import measured_memory
+
+            memory = measured_memory(db, body["modelArtifactId"], coordinator["deviceId"])
+        if reason := strict_layout(body, coordinator, chosen[1:], memory):
             return reason
         for d in chosen:
             if not d or d["approvalStatus"] != "APPROVED":

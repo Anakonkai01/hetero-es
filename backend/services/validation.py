@@ -123,7 +123,13 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         ]
         coordinator = next((d for d in selected if d["deviceId"] == body["coordinatorDeviceId"]), None)
         workers = [d for d in selected if d["workerId"] in body["workerIds"]]
-        if version == 3 and (reason := strict_layout(body, coordinator, workers)):
+        memory = None
+        if version == 3 and coordinator is not None and body["decodeEngine"] == "strict_b22_v1":
+            from .model_qualification import measured_memory
+
+            with store.db() as db:
+                memory = measured_memory(db, body["modelArtifactId"], coordinator["deviceId"])
+        if version == 3 and (reason := strict_layout(body, coordinator, workers, memory)):
             raise ServiceError(422, reason)
         for d in selected:
             profile = d["selfTest"]

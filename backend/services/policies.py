@@ -74,11 +74,34 @@ def v3_qualification(profile, model_hash, engine=None, decoder=None):
     return None
 
 
-def strict_layout(body, coordinator, workers):
+SHARED_GPU_FRACTION = 0.9  # two weight sets may share a GPU only within this share of its memory
+
+
+def shared_gpu_bytes(memory, body):
+    """
+    Estimated peak GPU bytes of one weight set of this run on the measured device, or None when unknown. `memory` is the
+    chunk measurement the device took while qualifying the model (heteroes.product.chunk_memory): the model as an FP32
+    evaluation holds it (FP16 weights plus an FP32 copy, more than the strict decoder keeps), so the estimate errs high.
+    The chunk is the largest the run lets a device use; the memory above the weights scales up with longer generations.
+    """
+    if not memory:
+        return None
+    chunk = max(body.get("evalChunks") or [body.get("evalChunk") or 32])
+    ran = sorted((c for c in memory["chunks"] if c["ran"] and c["chunk"] >= chunk), key=lambda c: c["chunk"])
+    if not ran:
+        return None
+    measured = memory["promptTokens"] + memory["newTokens"]
+    scale = max(1.0, (memory["promptTokens"] + body.get("maxNewTokens", memory["newTokens"])) / measured)
+    return memory["baseBytes"] + (ran[0]["peakBytes"] - memory["baseBytes"]) * scale
+
+
+def strict_layout(body, coordinator, workers, coordinator_memory=None):
     """
     Why a strict run cannot use these devices, or None (D1, ADR-013: one weight set per GPU). The coordinator validates
-    and exports with the strict decoder, so it needs a GPU, and that GPU holds its model for the whole run: no worker of
-    the run may be the same device or the same physical GPU. Earlier recipes keep their layouts.
+    and exports with the strict decoder, so it needs a GPU. Its GPU may also work for the run (owner decision
+    2026-11-24, relaxing D1) only when two weight sets fit: the coordinator's own measurement of this model
+    (`coordinator_memory`, from its qualification) times two stays within SHARED_GPU_FRACTION of that GPU's memory.
+    Without a measurement the GPU is not shared. Earlier recipes keep their layouts.
     """
     if body.get("decodeEngine") != "strict_b22_v1" or coordinator is None:
         return None
@@ -92,7 +115,12 @@ def strict_layout(body, coordinator, workers):
         for w in workers
         if w
     ):
-        return "A strict run keeps one weight set per GPU: its coordinator's GPU cannot also be one of its workers"
+        need = shared_gpu_bytes(coordinator_memory, body)
+        if need is None or 2 * need > SHARED_GPU_FRACTION * coordinator_memory["totalBytes"]:
+            return (
+                "A strict run keeps one weight set per GPU unless two fit: qualify the model on the coordinator to "
+                "measure its memory, or choose a worker on another GPU"
+            )
     return None
 
 
