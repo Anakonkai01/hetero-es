@@ -91,6 +91,14 @@ def test_cpu_is_a_coordinator_but_never_a_worker(lab):
     assert gpu["workerId"] in runtime.capabilities()["workerIds"]
 
 
+def test_gpu_coordinators_are_flagged_and_offered_before_cpu_ones(lab):
+    client, _, _, admin = lab
+    cpu, _ = enroll_cpu(lab)
+    gpu, _ = pair(lab, "gpu")
+    devices = client.get("/api/v1/capabilities", headers=admin).json()["coordinatorDevices"]
+    assert [(d["deviceId"], d["gpu"]) for d in devices] == [(gpu["deviceId"], True), (cpu["deviceId"], False)]
+
+
 def test_v3_cpu_coordinator_skips_text_qualification_and_keeps_ownership(v3_study):
     client, admin, _ = v3_study
     store = client.app.state.store

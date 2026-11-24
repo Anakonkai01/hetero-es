@@ -179,8 +179,10 @@ heteroes worker --coordinator http://<coordinator-private-IP>:8765 --model-path 
 ```
 
 Run the worker command independently on each worker, using distinct worker IDs and fresh output directories. The
-coordinator prints its URL and recipe/plan hashes and writes `server.json`. `--device cpu` lets a CPU coordinate while
-remote GPUs generate texts. Native Windows LoRA coordination requires `--initial-adapter <pinned-file>`; it never creates
+coordinator prints its URL and recipe/plan hashes and writes `server.json`. `--device` defaults to `auto`: the
+coordinator takes the local GPU when there is one (it may share it with a local worker), because a CPU update is several
+times slower (27 s against 3 s per generation for Qwen2.5-0.5B with 32 candidates, 2026-11-24). `--device cpu` still lets
+a CPU coordinate while remote GPUs generate texts. `run --device` has the same `auto` default. Native Windows LoRA coordination requires `--initial-adapter <pinned-file>`; it never creates
 a random adapter. Full/subset Windows runs use the same pinned base files.
 
 Workers fetch only the recipe, plan and dataset through authenticated `/v1/inputs`, verify dataset hashes, model file

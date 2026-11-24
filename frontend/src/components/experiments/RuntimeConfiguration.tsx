@@ -9,6 +9,7 @@ import { V3Fields } from './V3Fields';
 import { POLICY_HINT, POLICY_LABEL } from '../../lib/labels';
 import { DEFAULT_V3, v3ReviewRows } from '../../lib/v3Settings';
 import { watchdogSettings } from '../../lib/watchdog';
+import { suggestCoordinator } from '../../lib/coordinatorChoice';
 import type { V3Settings } from '../../types/experiment';
 import type { CreateExperimentRequest, Experiment } from '../../types/experiment';
 import type { StudyDataset, StudyModel } from './StudyAssets';
@@ -19,6 +20,7 @@ interface Capabilities {
     displayName?: string;
     platform?: string;
     updateSecondsPerSeed?: number | null;
+    gpu?: boolean;
   }[];
   defaultCoordinatorDeviceId?: string | null;
   modelId: string;
@@ -57,7 +59,6 @@ export function RuntimeConfiguration({
   const [decoder, setDecoder] = useState(initial?.decodeEngine ?? 'hf_generate');
   const [selected, setSelected] = useState<string[]>(initial?.workerIds ?? []);
   const [coordinatorChoice, setCoordinator] = useState(initial?.coordinatorDeviceId);
-  const coordinator = coordinatorChoice ?? defaultCoordinator ?? '';
   const [interval, setInterval] = useState(initial?.backupPolicy?.interval ?? 1);
   const [retain, setRetain] = useState(initial?.backupPolicy?.retain ?? 3);
   const [policyChoice, setPolicy] = useState<string>(initial?.schedulerPolicy ?? 'greedy-tail');
@@ -89,6 +90,14 @@ export function RuntimeConfiguration({
   const [stall, setStall] = useState(initial?.stallSeconds?.toString() ?? '');
   const watchdog = watchdogSettings(hardCap, stall);
   const [version, setVersion] = useState(initial?.recipeVersion ?? 1);
+  // the creator's choice wins; otherwise a GPU coordinator is suggested (lib/coordinatorChoice)
+  const coordinator =
+    coordinatorChoice ??
+    suggestCoordinator(
+      cap.data?.coordinatorDevices ?? [],
+      defaultCoordinator,
+      version === 3 && decoder === 'strict_b22_v1',
+    );
   const [modelId, setModelId] = useState(initial?.modelArtifactId ?? '');
   const [datasetId, setDatasetId] = useState(initial?.datasetIds?.[0] ?? '');
   const [batchSize, setBatchSize] = useState(initial?.batchSize ?? 32);

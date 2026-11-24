@@ -48,12 +48,15 @@ def operations(store, runtime, scoped, visible, capabilities, registry):
                 "platform": d["selfTest"].get("platform", "linux"),
                 # measured by the device's self-test: the form shows seconds per generation from it
                 "updateSecondsPerSeed": d["selfTest"].get("updateSecondsPerSeed"),
+                # a physical GPU: the form prefers GPU coordinators (owner rule 2026-11-24; a CPU update is ~9x slower)
+                "gpu": d["selfTest"].get("gpuUUID") is not None,
             }
             for d in runtime.devices()
             if d["workspaceId"] == current["workspaceId"]
             and d["approvalStatus"] == "APPROVED"
             and d["selfTest"]["coordinator"]
         ]
+        coordinators.sort(key=lambda d: not d["gpu"])  # GPU coordinators first; stable within each group
         with store.db() as db:
             row = repository.get_capabilities_select_workspace_settings(db, (current["workspaceId"],)).fetchone()
         default = row[0] if row else None

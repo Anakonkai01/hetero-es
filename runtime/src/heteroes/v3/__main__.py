@@ -29,6 +29,15 @@ def _resolve(spec, base):
     return spec
 
 
+def coordinator_device(choice):
+    """`auto` is CUDA when PyTorch sees a GPU, else CPU (owner rule 2026-11-24: a GPU coordinator whenever possible)."""
+    if choice != "auto":
+        return choice
+    import torch
+
+    return "cuda" if torch.cuda.is_available() else "cpu"
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="heteroes", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -54,7 +63,7 @@ def main(argv=None):
     run = commands.add_parser("run", help="run an experiment on this machine")
     run.add_argument("spec", type=Path)
     run.add_argument("--out", type=Path, required=True)
-    run.add_argument("--device", default="cpu")
+    run.add_argument("--device", default="auto", help="auto (default): the GPU when there is one, else CPU")
     run.add_argument("--workers", type=int, default=1)
     run.add_argument("--timeout-seconds", type=float, default=None, help="bound on each generation")
     serve = commands.add_parser("serve", help="coordinate an experiment with external workers")
@@ -64,7 +73,12 @@ def main(argv=None):
         "--host", help="bind address; standalone default is loopback, --lab requires an explicit address"
     )
     serve.add_argument("--port", type=int, default=8765)
-    serve.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    serve.add_argument(
+        "--device",
+        choices=("auto", "cpu", "cuda"),
+        default="auto",
+        help="coordinator device; auto (default) takes the GPU when there is one: a CPU update is several times slower",
+    )
     serve.add_argument("--token-env", default="HETEROES_TOKEN")
     serve.add_argument("--timeout-seconds", type=float, default=1800)
     serve.add_argument("--worker-ids", help="comma-separated worker IDs eligible for audits")
@@ -99,6 +113,9 @@ def main(argv=None):
 
     if args.command in ("serve", "worker"):
         from heteroes.v3 import distributed
+
+        if args.command == "serve":
+            args.device = coordinator_device(args.device)
 
         if args.command == "worker":
             return distributed.worker(
@@ -203,6 +220,7 @@ def main(argv=None):
 
     from heteroes.v3.local import run_local
 
+    args.device = coordinator_device(args.device)
     spec = _resolve(json.loads(args.spec.read_text(encoding="utf-8")), args.spec.resolve().parent)
     summaries = run_local(
         spec, args.out, device=args.device, workers=args.workers, timeout_seconds=args.timeout_seconds
