@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { frameAt, runBounds, advance, applyDelta, replayStart } from '../src/lib/runFrame.ts';
+import { frameAt, runBounds, advance, applyDelta, replayStart, replayBounds, idleGaps } from '../src/lib/runFrame.ts';
 
 const real = JSON.parse(fs.readFileSync(new URL('./fixtures/run-fifo.timeline.json', import.meta.url), 'utf8'));
 const T0 = 1_000_000;
@@ -418,4 +418,31 @@ test('a replay starts from the beginning, playing; after watching the run live i
   assert.deepEqual(replayStart(bounds, false, 4), { atMs: 1000, playing: true, speed: 4 });
   assert.deepEqual(replayStart(bounds, true, 4), { atMs: 9000, playing: false, speed: 4 });
   assert.equal(replayStart(bounds, true, 16).speed, 16, 'the chosen speed is kept');
+});
+
+test('a replay of a trimmed history starts at its first detailed candidate, a full one at the run start', () => {
+  const timeline = synthetic({ experiment: { ...synthetic().experiment, status: 'COMPLETED', completedMs: T0 + 20000 } });
+  assert.deepEqual(replayBounds(timeline), runBounds(timeline));
+  timeline.history = { partial: true, detailedStartMs: T0 + 12500 };
+  assert.deepEqual(replayBounds(timeline), { startMs: T0 + 12500, endMs: T0 + 20000 });
+  timeline.history = { partial: true, detailedStartMs: null };
+  assert.deepEqual(replayBounds(timeline), runBounds(timeline));
+});
+
+test('a replay jumps over a long stretch where nothing happened (a run paused for a full disk)', () => {
+  const timeline = synthetic();
+  assert.deepEqual(idleGaps(timeline), []); // the ordinary pauses between generations are kept
+  const pause = 20 * 60_000;
+  timeline.generations[1] = { ...timeline.generations[1], openMs: T0 + 12000 + pause };
+  timeline.jobs = timeline.jobs.map((job) =>
+    job.generation === 1 ? { ...job, startMs: job.startMs + pause, endMs: job.endMs && job.endMs + pause } : job,
+  );
+  const gaps = idleGaps(timeline);
+  assert.equal(gaps.length, 1);
+  const [from, to] = gaps[0];
+  assert.ok(to - from > pause - 60_000);
+  const bounds = { startMs: T0, endMs: T0 + 40 * 60_000 };
+  const moved = advance({ atMs: from + 1000, playing: true, speed: 4 }, 250, bounds, gaps);
+  assert.equal(moved.atMs, to);
+  assert.equal(advance({ atMs: T0, playing: true, speed: 4 }, 250, bounds, gaps).atMs, T0 + 1000);
 });

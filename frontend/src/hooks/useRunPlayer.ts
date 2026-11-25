@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { advance, frameAt, replayStart, runBounds, type Frame, type PlayerState, type Timeline } from '../lib/runFrame';
+import { advance, frameAt, idleGaps, replayBounds, replayStart, runBounds, type Frame, type PlayerState, type Timeline } from '../lib/runFrame';
 
 const FLIGHT_MS = 700; // real time a packet takes to cross the diagram
 
@@ -27,7 +27,12 @@ export function useRunPlayer(
   reducedMotion: boolean,
   options: { loop?: boolean; speed?: number; afterLive?: boolean } = {},
 ): Player {
-  const baseBounds = useMemo(() => (timeline ? runBounds(timeline) : undefined), [timeline]);
+  // A replay plays the part of the run the lab holds details for, and skips long stretches where nothing happened.
+  const baseBounds = useMemo(
+    () => (timeline ? (mode === 'replay' ? replayBounds(timeline) : runBounds(timeline)) : undefined),
+    [timeline, mode],
+  );
+  const gaps = useMemo(() => (timeline && mode === 'replay' ? idleGaps(timeline) : []), [timeline, mode]);
   const [state, setState] = useState<PlayerState>({ atMs: 0, playing: mode === 'replay', speed: options.speed ?? 4 });
   const [clock, setClock] = useState(() => Date.now()); // the live playhead; refreshed by the animation loop, never read while rendering
   const [following, setFollowing] = useState(mode === 'live');
@@ -62,7 +67,8 @@ export function useRunPlayer(
     const loop = (now: number) => {
       const elapsed = last.current ? now - last.current : 0;
       last.current = now;
-      if (mode === 'replay' || !following) setState((s) => advance(s, elapsed, runBounds(timeline)));
+      if (mode === 'replay' || !following)
+        setState((s) => advance(s, elapsed, mode === 'replay' ? replayBounds(timeline) : runBounds(timeline), gaps));
       setClock(Date.now());
       frame = requestAnimationFrame(loop);
     };
@@ -73,7 +79,7 @@ export function useRunPlayer(
       cancelAnimationFrame(frame);
       if (slow) clearInterval(slow);
     };
-  }, [timeline, mode, following, state.playing, reducedMotion]);
+  }, [timeline, mode, following, state.playing, reducedMotion, gaps]);
 
   const live = mode === 'live' && following;
   const atMs = live ? clock + clockOffsetMs : state.atMs;

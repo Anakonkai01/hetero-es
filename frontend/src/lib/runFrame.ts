@@ -150,6 +150,37 @@ export function runBounds(timeline: Timeline): { startMs: number; endMs: number 
   return { startMs, endMs };
 }
 
+/**
+ * The span a replay plays. A long run's timeline keeps candidate details for its newest generations only; a replay
+ * then starts where those details start (the earlier generations would show workers with nothing to do for hours).
+ */
+export function replayBounds(timeline: Timeline): { startMs: number; endMs: number } {
+  const bounds = runBounds(timeline);
+  const detailed = timeline.history?.partial ? timeline.history.detailedStartMs : null;
+  return detailed != null && detailed > bounds.startMs && detailed < bounds.endMs ? { ...bounds, startMs: detailed } : bounds;
+}
+
+/**
+ * Stretches longer than `minMs` in which nothing was recorded (no candidate running, no generation or event
+ * starting or ending), such as a run paused for a full disk. A replay jumps over them, keeping `leadMs` on each side
+ * so the moment before and after stays visible.
+ */
+export function idleGaps(timeline: Timeline, minMs = 60_000, leadMs = 2_000): [number, number][] {
+  const spans: [number, number][] = [];
+  for (const job of timeline.jobs) spans.push([job.startMs, job.endMs ?? job.startMs]);
+  for (const g of timeline.generations)
+    for (const t of [g.openMs, g.evaluatedMs, g.doneMs]) if (t != null) spans.push([t, t]);
+  for (const mark of timeline.marks) spans.push([mark.atMs, mark.atMs]);
+  spans.sort((a, b) => a[0] - b[0]);
+  const gaps: [number, number][] = [];
+  let busyUntil = spans.length ? spans[0][1] : 0;
+  for (const [start, end] of spans.slice(1)) {
+    if (start - busyUntil > minMs) gaps.push([busyUntil + leadMs, start - leadMs]);
+    busyUntil = Math.max(busyUntil, end);
+  }
+  return gaps;
+}
+
 export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: number } = {}): Frame {
   const flightMs = options.flightMs ?? 700;
   const finished = timeline.jobs.filter((j) => j.endMs !== null && j.endMs <= atMs);
@@ -325,14 +356,17 @@ export function replayStart(
   return afterLive ? { atMs: bounds.endMs, playing: false, speed } : { atMs: bounds.startMs, playing: true, speed };
 }
 
-/** Moves the playhead by real elapsed time times the speed; it stops at the end and never goes before the start. */
+/** Moves the playhead by real elapsed time times the speed, over idle gaps; it stops at the end and never goes before the start. */
 export function advance(
   state: PlayerState,
   elapsedMs: number,
   bounds: { startMs: number; endMs: number },
+  gaps: [number, number][] = [],
 ): PlayerState {
   if (!state.playing) return state;
-  const next = Math.max(bounds.startMs, Math.min(bounds.endMs, state.atMs + elapsedMs * state.speed));
+  let next = Math.max(bounds.startMs, Math.min(bounds.endMs, state.atMs + elapsedMs * state.speed));
+  const inside = gaps.find(([from, to]) => from < next && next < to);
+  if (inside) next = Math.min(bounds.endMs, inside[1]); // nothing happened there: go on to where something does
   return { ...state, atMs: next, playing: next < bounds.endMs };
 }
 

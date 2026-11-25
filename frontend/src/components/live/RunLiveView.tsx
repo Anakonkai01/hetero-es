@@ -94,7 +94,7 @@ export function RunLiveView({
       ? { loop: true, speed: 4 }
       : variant === 'compact' && mode === 'replay'
         ? { loop: true, speed: 8 }
-        : { afterLive: afterLive || (mode === 'replay' && Boolean(timeline.history?.partial)) },
+        : { afterLive }, // a trimmed history replays from its first detailed candidate (replayBounds)
   );
   const { frame, bounds } = player;
   if (!frame || !bounds) return null;
