@@ -1,4 +1,4 @@
-from .policies import backup_policy as validated_backup_policy, strict_layout, v2_qualification, v3_qualification
+from .policies import DEFAULT_BACKUP_POLICY, backup_policy as validated_backup_policy, strict_layout, v2_qualification, v3_qualification
 
 from ..core.errors import ServiceError
 from ..core.constants import V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
@@ -102,7 +102,7 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
     ):
         raise ServiceError(422, "A Windows coordinator cannot create the LoRA adapter; choose a Linux coordinator")
     try:
-        body["backupPolicy"] = validated_backup_policy(body.get("backupPolicy") or {"interval": 1, "retain": 3})
+        body["backupPolicy"] = validated_backup_policy(body.get("backupPolicy") or DEFAULT_BACKUP_POLICY)
     except ValueError as error:
         raise ServiceError(422, str(error)) from None
     if body["recipeVersion"] in (2, 3):

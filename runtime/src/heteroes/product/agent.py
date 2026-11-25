@@ -17,6 +17,7 @@ import threading
 import urllib.error
 import uuid
 from .files import events, read_json, write_json
+from .recovery_policy import DEFAULT_BACKUP_POLICY
 from .run_supervisor import MAX_LAUNCH_ID, RunSupervisor, TERMINAL, QUIESCENT, ROOT, launched, validate
 from .remote import alive, identity, worker_environment, handle as remote_handle
 from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
@@ -181,11 +182,11 @@ class AgentManager(RunSupervisor):
         write_json(root / "device-grants.json", command["computeGrants"])
         write_json(
             root / "backup-policy.json",
-            command.get("effectiveBackupPolicy", cfg.get("backupPolicy", {"interval": 1, "retain": 3})),
+            command.get("effectiveBackupPolicy", cfg.get("backupPolicy", DEFAULT_BACKUP_POLICY)),
         )
         # Operational settings are local/private, outside canonical Recipe v1.
         local = read_json(root / "config.json")
-        local.update(backupPolicy=cfg.get("backupPolicy", {"interval": 1, "retain": 3}), deviceCredentials=True)
+        local.update(backupPolicy=cfg.get("backupPolicy", DEFAULT_BACKUP_POLICY), deviceCredentials=True)
         if cfg.get("recipeVersion") in (2, 3):
             from heteroes.study.prepare import prepare, prepare_continuation
 

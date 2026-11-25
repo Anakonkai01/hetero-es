@@ -85,6 +85,7 @@ class ESConfig:
     dataset: object = None  # heteroes.sdk_lab.Dataset: replaces train_dataset and prompt_field
     eval_chunks: list | None = None  # the chunks devices may use (ADR-010), e.g. from Lab.suggest; includes eval_chunk
     validation_interval: int | None = None  # a lab run: score the validation split every this many generations
+    backup_interval: int | None = None  # a lab run: keep a recovery point every this many generations (lab default 10)
     audit_rate: float = 0.05  # operational re-execution coverage, 0..1; zero disables audits
 
     def __post_init__(self):
@@ -250,6 +251,8 @@ class ESTrainer:
             spec["model"] = {**spec["model"], "revision": model.revision, "source": model.source}
         if self.args.validation_interval is not None:
             spec["validationInterval"] = self.args.validation_interval
+        if self.args.backup_interval is not None:
+            spec["backupPolicy"] = {"interval": self.args.backup_interval, "retain": 3}
         return {**spec, "name": name or f"{self.args.model_id} ES"}
 
     def submit(self, lab, coordinator, workers, name=None, directory=None, qualify=True, log=print):

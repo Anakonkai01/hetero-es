@@ -569,7 +569,7 @@ def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):
     result = c.patch("/api/v1/experiments/" + rid + "/backup-policy", headers=a, json={"interval": 2, "retain": 5})
     assert result.status_code == 200 and result.json()["appliesBeforeNextGeneration"]
     assert s.get(rid)["configHash"] == hash_before
-    assert s.get(rid)["backupPolicy"] == {"interval": 1, "retain": 3}
+    assert s.get(rid)["backupPolicy"] == {"interval": 10, "retain": 3}
     assert s.get(rid)["requestedBackupPolicy"] == {"interval": 2, "retain": 5}
     s.dispatch_once()
     assert len(r.runs()) == 1

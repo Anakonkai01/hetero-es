@@ -267,6 +267,23 @@ def test_a_strict_sdk_run_reaches_the_lab_with_fp16_and_a_plain_one_without_eval
             request(**wrong)
 
 
+def test_a_spec_may_name_its_recovery_point_policy_and_otherwise_leaves_it_to_the_lab():
+    from heteroes.v3.lab_cli import managed_configuration
+
+    spec = {
+        "model": {"id": "m"}, "data": {"batchSize": 4}, "generations": 2, "population": 4, "alpha": 1e-3,
+        "sigma": {"initial": 1e-3}, "scorer": {"kind": "declarative", "name": "last-integer"},
+    }
+    assert "backupPolicy" not in managed_configuration(spec, "c", ["w"], {"id": "m"}, {"datasetId": "d"})
+    from heteroes.sdk import ESConfig, ESTrainer
+
+    config = ESConfig(model_path="model", model_id="org/model", train_dataset="rows", backup_interval=10)
+    assert ESTrainer(config, scorer={"name": "last-integer"}).lab_spec()["backupPolicy"] == {"interval": 10, "retain": 3}
+    chosen = {**spec, "backupPolicy": {"interval": 5, "retain": 2}}
+    request = managed_configuration(chosen, "c", ["w"], {"id": "m"}, {"datasetId": "d"})
+    assert request["backupPolicy"] == {"interval": 5, "retain": 2}
+
+
 @pytest.mark.parametrize(
     "body, shown",
     [

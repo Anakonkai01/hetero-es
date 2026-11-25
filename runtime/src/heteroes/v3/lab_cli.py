@@ -168,6 +168,7 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
                 "validationInterval",
                 "allowJoin",
                 "schedulerPolicy",
+                "backupPolicy",
             )
             if key in spec
         },

@@ -255,6 +255,7 @@ trong 2 lần chấm liên tiếp, notebook hủy run và giữ điểm khôi ph
         decoder="strict_b22_v1",  # same tokens on every supported NVIDIA GPU
         eval_chunk=32,
         validation_interval={e['validation']},
+        backup_interval=10,  # a recovery point every 10 generations (each is a full copy of the weights)
         audit_rate=0.05,
     )
     return ESTrainer(args, code_dir=experiment.dir / "code", **make_reward)

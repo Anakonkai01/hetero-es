@@ -6,6 +6,11 @@ from ..core.errors import ServiceError
 from ..core.models import Strict as Strict, FiniteStrict as FiniteStrict
 
 
+# A recovery point every 10 generations (25/11: one per generation put ~12 s of disk writing on every generation's
+# critical path, filled the coordinator disk and the lab's recovery quota). A crash loses at most 9 generations.
+DEFAULT_BACKUP_POLICY = {"interval": 10, "retain": 3}
+
+
 def backup_policy(value):
     if (
         not isinstance(value, dict)

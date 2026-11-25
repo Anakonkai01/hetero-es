@@ -4,7 +4,7 @@ import json
 from ..core.clock import now
 from ..core.constants import ACTIVE, TERMINAL, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
 from backend.core.errors import RuntimeRejected
-from .policies import dispatch_held
+from .policies import DEFAULT_BACKUP_POLICY, dispatch_held
 from ..repositories.scheduling import SchedulingRepository as repository
 from ..repositories.recovery_storage import RecoveryStorageRepository
 from ..db.transactions import begin_write
@@ -100,7 +100,7 @@ class SchedulingService:
         }
         config.update(
             coordinatorDeviceId=active["coordinatorDeviceId"],
-            backupPolicy=active.get("backupPolicy", {"interval": 1, "retain": 3}),
+            backupPolicy=active.get("backupPolicy", DEFAULT_BACKUP_POLICY),
         )
         if active.get("recipeVersion") in (2, 3):
             config.update(
