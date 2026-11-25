@@ -74,21 +74,45 @@ def submit(trainer, lab, coordinator, workers, name, directory, attempts=4, log=
             time.sleep(60)
 
 
-def continued_model(lab, run, base, out, model_id):
-    """The next segment's model: the verified final weights of `run`, as a model of its own (uploaded to the lab)."""
+def kept_generation(run, segment):
+    """The generation whose weights a segment hands on: the last one, or the point it was stopped at."""
+    if "usedGenerations" in segment:
+        return segment["usedGenerations"] - 1
+    return run.experiment()["completedGenerations"] - 1
+
+
+def continued_model(lab, run, base, out, model_id, generation):
+    """The next segment's model: the verified weights of `run` at `generation`, as a model of its own (uploaded to the
+    lab). The recovery point is chosen by its generation, never by the lab's "final" flag: on 25/11 a run paused for low
+    disk recorded a "final" point at generation 3, and the real final point stayed unverified (recovery quota full)."""
     from heteroes.sdk_lab import Model
 
     out = Path(out)
     if not out.exists():
-        run.derive_model(base.path, out)
+        points = lab.request("GET", f"/api/v1/experiments/{run.id}/recovery-points")
+        ready = [p for p in points if p.get("status") == "READY" and p["generation"] == generation]
+        if not ready:
+            seen = sorted((p["generation"], p.get("status")) for p in points)
+            raise RuntimeError(f"run {run.id} has no verified recovery point at generation {generation} yet: {seen}")
+        partial = out.with_name(out.name + ".partial")
+        if partial.exists():
+            import shutil
+
+            shutil.rmtree(partial)
+        run.derive_model(base.path, partial, point=ready[0]["pointId"])
+        partial.rename(out)
+    lineage = json.loads((out / "heteroes-lineage.json").read_text())["source"]
+    if lineage["runId"] != run.id or lineage["generation"] != generation:
+        raise RuntimeError(f"{out} holds generation {lineage['generation']} of {lineage['runId']}, "
+                           f"not generation {generation} of {run.id}")
     return Model.from_path(out, model_id)
 
 
 def after_segment(lab, experiment, done, number):
-    """The model holding the final weights of segment `number` (1-based) of `done` (derived once, then reused)."""
-    _, run, model = done[number - 1]
+    """The model holding the kept weights of segment `number` (1-based) of `done` (derived once, then reused)."""
+    segment, run, model = done[number - 1]
     return continued_model(lab, run, model, experiment.dir / f"after-segment-{number:02d}",
-                           f"{done[0][2].id}+{experiment.name}-s{number:02d}")
+                           f"{done[0][2].id}+{experiment.name}-s{number:02d}", kept_generation(run, segment))
 
 
 def run_segments(lab, experiment, base_model, make_trainer, segments, coordinator, workers, log=print, every=30):
@@ -146,8 +170,6 @@ def plateaued(marks, patience=PATIENCE):
 def wait_or_stop(lab, run, experiment, key, log=print, every=30, patience=PATIENCE):
     """Wait for the run; cancel it when validation stopped improving, writing why in the state (`endedEarly`) and the
     generations the kept weights cover (`usedGenerations`: the newest verified recovery point + 1)."""
-    from heteroes.v3.derive import choose_point
-
     entry = experiment.state["segments"][key]
     seen = 0
     while (status := run.status()) not in TERMINAL:
@@ -158,14 +180,17 @@ def wait_or_stop(lab, run, experiment, key, log=print, every=30, patience=PATIEN
                 seen = len(marks)
                 if plateaued(marks, patience):
                     shown = ", ".join(f"{m:.4f}" for m in marks)
+                    entry["stoppedByRule"] = True
                     entry["endedEarly"] = (f"dừng sớm: validation không vượt mức tốt nhất trong {patience} lần chấm liên "
                                            f"tiếp ({shown})")
                     experiment.save()
                     log(f"{key}: {entry['endedEarly']} → hủy run")
                     run.cancel()
         time.sleep(every)
-    if status == "CANCELLED" and entry.get("endedEarly") and "usedGenerations" not in entry:
-        point = choose_point(lab.request("GET", f"/api/v1/experiments/{run.id}/recovery-points"))
+    # only a run this rule stopped gets its kept point here (an older early stop records it in the decisions file)
+    if status == "CANCELLED" and entry.get("stoppedByRule") and "usedGenerations" not in entry:
+        points = lab.request("GET", f"/api/v1/experiments/{run.id}/recovery-points")
+        point = max((p for p in points if p.get("status") == "READY"), key=lambda p: p["generation"])
         entry["usedGenerations"] = point["generation"] + 1
         entry["endedEarly"] += f"; giữ trọng số ở điểm khôi phục đã kiểm chứng thế hệ {point['generation']}"
         experiment.save()
