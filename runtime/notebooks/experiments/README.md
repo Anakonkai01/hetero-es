@@ -20,7 +20,8 @@ người dùng lab: đăng nhập → chọn mô hình, dữ liệu, bộ chấm
 3. **Mô hình**: `Model.from_hf(repo, revision)` ghim một commit Hugging Face; mỗi máy tự tải và kiểm SHA-256 từng tệp.
 4. **Bộ chấm**: bộ chấm khai báo có sẵn của lab (`boxed-number` hoặc `countdown`), thử trên vài câu trả lời mẫu.
 5. **Cấu hình**: `ESConfig` (32 candidate, σ = 0,001, α = 5·10⁻⁴, bộ suy luận nghiêm ngặt `strict_b22_v1`).
-6. **Chạy trên lab**: `ESTrainer.submit(lab, coordinator, workers)`, rồi chờ. Thêm một run ngắn 6 thế hệ chỉ trên một GPU
+6. **Chạy trên lab**: `ESTrainer.submit(lab, coordinator, workers)`, rồi chờ. Dừng sớm khi validation không vượt mức
+   tốt nhất trong 2 lần chấm liên tiếp (`runner.wait_or_stop`). Thêm một run ngắn 6 thế hệ chỉ trên một GPU
    để có mốc tốc độ.
 7. **Quá trình học**: reward train và validation theo thế hệ, số candidate mỗi máy chấm.
 8. **Chấm test một lần**: mô hình gốc và checkpoint được chọn bằng validation; McNemar, khoảng tin cậy bootstrap, tỉ lệ

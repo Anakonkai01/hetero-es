@@ -116,7 +116,10 @@ def run_segments(lab, experiment, base_model, make_trainer, segments, coordinato
         else:
             run = lab.run(entry["experimentId"])
             log(f"{key}: đã có run {run.id}")
-        status = run.wait(every=every)
+        status = wait_or_stop(lab, run, experiment, key, log=log, every=every)
+        entry = experiment.state["segments"][key]
+        if "usedGenerations" in entry:  # stopped early: the segment counts up to the weights kept
+            segment = {**segment, "usedGenerations": entry["usedGenerations"]}
         if status != "COMPLETED":
             # a segment stopped early counts only when its state records why (an explicit, written decision);
             # its newest verified recovery point is then the segment's result
@@ -126,6 +129,48 @@ def run_segments(lab, experiment, base_model, make_trainer, segments, coordinato
             log(f"{key}: dừng sớm ({status}) — {early}")
         done.append((segment, run, model))
     return done
+
+
+PATIENCE = 2  # validation checks in a row without a new best → stop (owner 25/11: "không cải thiện được nữa thì dừng sớm")
+
+
+def plateaued(marks, patience=PATIENCE):
+    """True when the last `patience` validation rewards are all below the best one before them (the base model's
+    validation counts as the first mark). Needs at least the base and `patience + 1` checks after it."""
+    if len(marks) < patience + 2:
+        return False
+    best_before = max(marks[:-patience])
+    return all(m <= best_before for m in marks[-patience:])
+
+
+def wait_or_stop(lab, run, experiment, key, log=print, every=30, patience=PATIENCE):
+    """Wait for the run; cancel it when validation stopped improving, writing why in the state (`endedEarly`) and the
+    generations the kept weights cover (`usedGenerations`: the newest verified recovery point + 1)."""
+    from heteroes.v3.derive import choose_point
+
+    entry = experiment.state["segments"][key]
+    seen = 0
+    while (status := run.status()) not in TERMINAL:
+        if entry.get("endedEarly") is None:
+            found = (run.experiment().get("studyMetrics") or {}).get("validation") or []
+            marks = [v["meanReward"] for v in found if v.get("meanReward") is not None]
+            if len(marks) > seen:
+                seen = len(marks)
+                if plateaued(marks, patience):
+                    shown = ", ".join(f"{m:.4f}" for m in marks)
+                    entry["endedEarly"] = (f"dừng sớm: validation không vượt mức tốt nhất trong {patience} lần chấm liên "
+                                           f"tiếp ({shown})")
+                    experiment.save()
+                    log(f"{key}: {entry['endedEarly']} → hủy run")
+                    run.cancel()
+        time.sleep(every)
+    if status == "CANCELLED" and entry.get("endedEarly") and "usedGenerations" not in entry:
+        point = choose_point(lab.request("GET", f"/api/v1/experiments/{run.id}/recovery-points"))
+        entry["usedGenerations"] = point["generation"] + 1
+        entry["endedEarly"] += f"; giữ trọng số ở điểm khôi phục đã kiểm chứng thế hệ {point['generation']}"
+        experiment.save()
+        log(f"{key}: {entry['endedEarly']}")
+    return status
 
 
 def score_model(model_dir, rows, scorer, max_new_tokens, chunk=32, decoder="strict_b22_v1", device="cuda"):

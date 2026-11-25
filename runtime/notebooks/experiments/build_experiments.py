@@ -238,7 +238,9 @@ for row, text, s in zip(sample, before["outputs"], before["scores"]):
         md(f"""## 5. Cấu hình
 
 32 candidate mỗi thế hệ, mỗi candidate chấm trên 32 câu train; σ và α theo từng đoạn. Validation
-({'500 câu' if e['task'] == 'gsm8k' else 'tập validation'}) được chấm mỗi {e['validation']} thế hệ trên coordinator."""),
+({'500 câu' if e['task'] == 'gsm8k' else 'tập validation'}) được chấm mỗi {e['validation']} thế hệ trên coordinator. **Dừng sớm**: nếu validation không vượt mức tốt nhất trước đó
+trong 2 lần chấm liên tiếp, notebook hủy run và giữ điểm khôi phục đã kiểm chứng mới nhất (lý do ghi vào
+`state/{name}.json`)."""),
         code(f'''def make_trainer(model, segment):
     args = ESConfig(
         model=model,
