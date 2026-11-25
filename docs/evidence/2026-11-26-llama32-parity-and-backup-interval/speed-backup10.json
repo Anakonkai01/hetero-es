@@ -1,0 +1,202 @@
+{
+ "everyGeneration": {
+  "run": "5f0c79f03a834cdfa7bc8f60ed5d5bad",
+  "rows": [
+   {
+    "generation": 0,
+    "total": 93.14,
+    "scoring": 76.98,
+    "update": 8.32,
+    "publish": 1.68,
+    "tail": 6.16
+   },
+   {
+    "generation": 1,
+    "total": 112.28,
+    "scoring": 84.77,
+    "update": 11.76,
+    "publish": 1.09,
+    "tail": 14.65
+   },
+   {
+    "generation": 2,
+    "total": 112.01,
+    "scoring": 94.73,
+    "update": 8.59,
+    "publish": 0.92,
+    "tail": 7.77
+   },
+   {
+    "generation": 3,
+    "total": 113.62,
+    "scoring": 90.2,
+    "update": 12.5,
+    "publish": 1.64,
+    "tail": 9.29
+   },
+   {
+    "generation": 4,
+    "total": 102.95,
+    "scoring": 83.97,
+    "update": 11.46,
+    "publish": 0.72,
+    "tail": 6.8
+   }
+  ],
+  "generations": 5,
+  "median": {
+   "total": 112.0,
+   "scoring": 84.8,
+   "update": 11.5,
+   "publish": 1.1,
+   "tail": 7.8
+  },
+  "mean": {
+   "total": 106.8,
+   "scoring": 86.1,
+   "update": 10.5,
+   "publish": 1.2,
+   "tail": 8.9
+  }
+ },
+ "every10": {
+  "run": "6131a0ade3834556b9051407c0516bd3",
+  "rows": [
+   {
+    "generation": 0,
+    "total": 93.55,
+    "scoring": 83.27,
+    "update": 7.95,
+    "publish": 1.24,
+    "tail": 1.1
+   },
+   {
+    "generation": 1,
+    "total": 87.35,
+    "scoring": 76.82,
+    "update": 8.15,
+    "publish": 0.68,
+    "tail": 1.69
+   },
+   {
+    "generation": 2,
+    "total": 107.37,
+    "scoring": 92.39,
+    "update": 12.03,
+    "publish": 1.7,
+    "tail": 1.26
+   },
+   {
+    "generation": 3,
+    "total": 93.9,
+    "scoring": 83.15,
+    "update": 8.18,
+    "publish": 0.94,
+    "tail": 1.64
+   },
+   {
+    "generation": 4,
+    "total": 97.44,
+    "scoring": 81.05,
+    "update": 11.71,
+    "publish": 1.48,
+    "tail": 3.2
+   },
+   {
+    "generation": 5,
+    "total": 117.74,
+    "scoring": 104.4,
+    "update": 8.44,
+    "publish": 1.17,
+    "tail": 3.72
+   },
+   {
+    "generation": 6,
+    "total": 97.02,
+    "scoring": 81.12,
+    "update": 12.84,
+    "publish": 1.91,
+    "tail": 1.14
+   },
+   {
+    "generation": 7,
+    "total": 134.21,
+    "scoring": 117.26,
+    "update": 8.72,
+    "publish": 4.99,
+    "tail": 3.23
+   },
+   {
+    "generation": 8,
+    "total": 104.21,
+    "scoring": 85.06,
+    "update": 8.97,
+    "publish": 4.55,
+    "tail": 5.63
+   },
+   {
+    "generation": 9,
+    "total": 129.78,
+    "scoring": 86.26,
+    "update": 8.15,
+    "publish": 0.97,
+    "tail": 34.4
+   },
+   {
+    "generation": 10,
+    "total": 131.05,
+    "scoring": 106.33,
+    "update": 15.16,
+    "publish": 1.89,
+    "tail": 7.66
+   },
+   {
+    "generation": 11,
+    "total": 93.92,
+    "scoring": 83.48,
+    "update": 8.0,
+    "publish": 0.5,
+    "tail": 1.94
+   },
+   {
+    "generation": 12,
+    "total": 102.48,
+    "scoring": 80.0,
+    "update": 12.85,
+    "publish": 5.1,
+    "tail": 4.53
+   },
+   {
+    "generation": 13,
+    "total": 104.47,
+    "scoring": 93.75,
+    "update": 8.35,
+    "publish": 1.36,
+    "tail": 1.01
+   },
+   {
+    "generation": 14,
+    "total": 96.77,
+    "scoring": 78.17,
+    "update": 12.85,
+    "publish": 2.23,
+    "tail": 3.51
+   }
+  ],
+  "generations": 15,
+  "median": {
+   "total": 102.5,
+   "scoring": 83.5,
+   "update": 8.7,
+   "publish": 1.5,
+   "tail": 3.2
+  },
+  "mean": {
+   "total": 106.1,
+   "scoring": 88.8,
+   "update": 10.2,
+   "publish": 2.0,
+   "tail": 5.0
+  }
+ }
+}
