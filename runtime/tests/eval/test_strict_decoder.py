@@ -137,3 +137,59 @@ def test_three_families_share_cuda_operators_and_packed_execution(family, monkey
     actual, _ = batch.forward_batch(rows)
     expected = torch.cat([eager.forward_tokens(row.cpu())[0] for row in rows])
     assert torch.equal(bits(actual.cpu()), bits(expected))
+
+
+LLAMA3 = {"rope_type": "llama3", "rope_theta": 10000.0, "factor": 8.0, "low_freq_factor": 1.0, "high_freq_factor": 4.0,
+          "original_max_position_embeddings": 64}  # head_dim 8: one pair each high (kept), middle (smoothed), low (scaled)
+
+
+def llama3_model():
+    model = model_for("llama")
+    config = model.config
+    config.rope_parameters = dict(LLAMA3)
+    rebuilt = LlamaForCausalLM(config).half().eval()
+    rebuilt.load_state_dict(model.state_dict())
+    return rebuilt
+
+
+def test_llama3_rope_table_is_the_transformers_table_computed_exactly():
+    # Llama 3.2 1B/3B: head_dim 64, theta 500000, factor 32 over an 8192-token original context
+    from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
+
+    from heteroes.strict.strict_decoder import rope_inverse_frequencies, rope_scaling
+
+    rope = {"rope_type": "llama3", "rope_theta": 500000.0, "factor": 32.0, "low_freq_factor": 1.0,
+            "high_freq_factor": 4.0, "original_max_position_embeddings": 8192}
+    config = LlamaConfig(hidden_size=2048, num_attention_heads=32, num_key_value_heads=8, rope_parameters=dict(rope))
+    expected, scale = ROPE_INIT_FUNCTIONS["llama3"](config, "cpu")
+    actual = torch.tensor(rope_inverse_frequencies(500000.0, 64, rope_scaling(rope)), dtype=torch.float32)
+    assert scale == 1.0
+    torch.testing.assert_close(actual, expected.float(), rtol=2e-6, atol=0)
+    plain = torch.tensor(rope_inverse_frequencies(500000.0, 64), dtype=torch.float32)
+    assert (actual < plain).any() and (actual == plain).any()  # long wavelengths scaled, short ones kept
+
+
+def test_llama3_reference_matches_independent_hf_graph_and_names_its_scaling():
+    model = llama3_model()
+    reference, _, _ = classes()
+    backend = reference(model, max_context=64, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41]])  # long enough for the scaled pairs to turn
+    actual, _ = backend.forward_tokens(ids)
+    oracle = copy.deepcopy(model).float()
+    with torch.inference_mode():
+        expected = oracle(ids).logits[:, -1]
+    torch.testing.assert_close(actual, expected, rtol=5e-4, atol=5e-5)
+    scaling = backend.identity["graph"]["ropeScaling"]
+    assert scaling["type"] == "llama3" and scaling["factor"] == 8.0
+    assert "ropeScaling" not in reference(model_for("llama"), max_context=64, allow_fixture=True).identity["graph"]
+
+
+@pytest.mark.parametrize("change", [{"factor": float("nan")}, {"high_freq_factor": 0.5}, {"extra": 1}, {"factor": None}])
+def test_a_malformed_llama3_rope_is_refused(change):
+    model = llama3_model()
+    model.config.rope_parameters.update(change)
+    if change.get("factor", 1) is None:
+        del model.config.rope_parameters["factor"]
+    reference, _, _ = classes()
+    with pytest.raises(ReferenceArithmeticError, match="[Uu]nsupported|[Gg]raph"):
+        reference(model, max_context=64, allow_fixture=True)

@@ -25,6 +25,53 @@ GRAPH_VERSION = "rms_swiglu_causal_rope_decoder_v1_experimental"
 REFERENCE_BACKEND = "decoder_pairwise_f32_reference_v1_experimental"
 CUDA_BACKEND = "decoder_pairwise_f32_cuda_v1_experimental"
 FAMILIES = {"qwen2": "Qwen2ForCausalLM", "llama": "LlamaForCausalLM", "mistral": "MistralForCausalLM"}
+# Llama 3.1/3.2 RoPE: the default frequencies, rescaled once per frequency band (no runtime arithmetic changes)
+LLAMA3_ROPE_KEYS = {"rope_theta", "rope_type", "factor", "low_freq_factor", "high_freq_factor",
+                    "original_max_position_embeddings"}
+PI = Decimal("3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798")
+
+
+def rope_scaling(rope):
+    """The checked llama3 parameters of a RoPE description, None for default RoPE; anything else is refused."""
+    kind = rope.get("rope_type", "default")
+    if kind == "default":
+        return None if not set(rope) - {"rope_theta", "rope_type"} else False
+    if kind != "llama3" or set(rope) != LLAMA3_ROPE_KEYS:
+        return False
+    values = {k: rope[k] for k in sorted(LLAMA3_ROPE_KEYS - {"rope_theta", "rope_type"})}
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0 for v in values.values()):
+        return False
+    if values["factor"] < 1 or values["high_freq_factor"] <= values["low_freq_factor"]:
+        return False
+    if type(values["original_max_position_embeddings"]) is not int:
+        return False
+    return {"type": "llama3", **values}
+
+
+def rope_inverse_frequencies(theta, head_dim, scaling=None):
+    """theta^(-2i/d) for each rotated pair, computed once on the CPU with 80 decimal digits so that every machine holds
+    the same float32 table; llama3 scaling divides the long wavelengths by `factor` and interpolates the middle band
+    (the formula of transformers' _compute_llama3_parameters)."""
+    with localcontext() as context:
+        context.prec = 80
+        base = Decimal(str(theta))
+        frequencies = [base ** (-Decimal(i) / Decimal(head_dim)) for i in range(0, head_dim, 2)]
+        if scaling is not None:
+            factor, low, high = (Decimal(str(scaling[k])) for k in ("factor", "low_freq_factor", "high_freq_factor"))
+            old = Decimal(scaling["original_max_position_embeddings"])
+            low_wavelength, high_wavelength = old / low, old / high
+            scaled = []
+            for frequency in frequencies:
+                wavelength = 2 * PI / frequency
+                if wavelength < high_wavelength:
+                    scaled.append(frequency)
+                elif wavelength > low_wavelength:
+                    scaled.append(frequency / factor)
+                else:
+                    smooth = (old / wavelength - low) / (high - low)
+                    scaled.append((1 - smooth) * frequency / factor + smooth * frequency)
+            frequencies = scaled
+        return [float(f) for f in frequencies]
 
 
 def describe_graph(model, max_context, *, frozen_int8=False):
@@ -49,8 +96,7 @@ def describe_graph(model, max_context, *, frozen_int8=False):
         FAMILIES.get(family) != type(model).__name__
         or model.training
         or config.hidden_act != "silu"
-        or rope.get("rope_type", "default") != "default"
-        or set(rope) - {"rope_theta", "rope_type"}
+        or rope_scaling(rope) is False
         or not isinstance(theta, (int, float))
         or not math.isfinite(theta)
         or theta <= 0
@@ -276,6 +322,7 @@ def describe_graph(model, max_context, *, frozen_int8=False):
         "dimensions": list(dimensions),
         "headDim": dim,
         "ropeTheta": theta,
+        **({"ropeScaling": scaling} if (scaling := rope_scaling(rope)) else {}),  # absent for default RoPE (identities unchanged)
         "rmsNormEpsilon": epsilon,
         "tiedHead": tied,
         "parameterShapes": {name: list(shape) for name, shape in sorted(expected.items())},
@@ -298,10 +345,9 @@ class StrictDecoderReference(Qwen2Reference):
         self.frozen_int8 = frozen_int8
         self.device = next(model.parameters()).device
         self.head_dim, self.theta, self.max_context = graph["headDim"], graph["ropeTheta"], max_context
+        frequencies = rope_inverse_frequencies(self.theta, self.head_dim, graph.get("ropeScaling"))
         with localcontext() as context:
             context.prec = 80
-            theta = Decimal(str(self.theta))
-            frequencies = [float(theta ** (-Decimal(i) / Decimal(self.head_dim))) for i in range(0, self.head_dim, 2)]
             self._attention_scale = float(Decimal(self.head_dim).sqrt() ** -1)
         frequency_cpu = torch.tensor(frequencies, dtype=torch.float32)
         self._inverse_frequency = frequency_cpu.to(self.device)
