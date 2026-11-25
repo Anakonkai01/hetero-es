@@ -65,6 +65,13 @@ def submit(trainer, lab, coordinator, workers, name, directory, attempts=4, log=
                 raise
             log(f"  connection dropped ({error}); trying again")
             time.sleep(15)
+        except Exception as error:  # noqa: BLE001 - only a failed qualification is retried, once
+            # 25/11 14:15: the first qualification of a just-uploaded model failed (MODEL_PROBE_FAILED) right after a lab
+            # restart; the same probe passed a few minutes later. Devices that already qualified are not probed again.
+            if "did not qualify" not in str(error) or attempt >= 1:
+                raise
+            log(f"  {error}; qualifying again in a minute")
+            time.sleep(60)
 
 
 def continued_model(lab, run, base, out, model_id):
@@ -176,16 +183,85 @@ def correct(report):
 
 
 def history(runs):
-    """Training reward and validation per generation across segments (one continuous axis), and work per device."""
+    """Training reward and validation per generation across segments (one continuous axis), and work per device.
+    A segment that stopped early and was continued from an earlier point (`usedGenerations`) counts only up to it."""
     rewards, validation, work, offset = [], [], {}, 0
-    for _, run, _ in runs:
+    for segment, run, _ in runs:
         result = run.results()
+        used = segment.get("usedGenerations", len(result["generations"]))
         for g in result["generations"]:
-            rewards.append((offset + g["generation"], g["rewardMean"]))
+            if g["generation"] < used:
+                rewards.append((offset + g["generation"], g["rewardMean"]))
         for v in result["validation"]:
-            if v["generation"] is not None:
+            if v["generation"] is not None and v["generation"] < used:
                 validation.append((offset + v["generation"], v["reward"]))
         for worker, count in result["completedPerDevice"].items():
             work[worker] = work.get(worker, 0) + count
-        offset += len(result["generations"])
+        offset += used
     return rewards, validation, work
+
+
+def one_gpu_run(lab, experiment, make_trainer, model, segment, device, generations=6, log=print, every=30):
+    """The same configuration on one GPU only, for a few generations: the 1-GPU reference of the speed table.
+    Kept in the state like a segment, so running the notebook again re-attaches to it."""
+    from heteroes.canonical import canonical_json_hash
+
+    key = "one-gpu"
+    entry = experiment.state.get(key)
+    if entry is None:
+        trainer = make_trainer(model, {**segment, "generations": generations})
+        name = f"{experiment.name}-1gpu"
+        offer = experiment.dir / "offers" / f"{key}-{canonical_json_hash(trainer.lab_spec(name))[:12]}"
+        log(f"{key}: {generations} thế hệ chỉ trên {device}")
+        run = submit(trainer, lab, device, [device], name, offer, log=log)
+        experiment.state[key] = {"experimentId": run.id, "workers": [device], "generations": generations}
+        experiment.save()
+    else:
+        run = lab.run(entry["experimentId"])
+    status = run.wait(every=every)
+    if status != "COMPLETED":
+        raise RuntimeError(f"{key} ended {status}: {run.url}")
+    return run
+
+
+RUNS = Path.home() / ".local/share/heteroes-worker/agent-state/runs"  # the coordinator's ledgers (on its machine)
+
+
+def speed(run_id, names):
+    """From the coordinator's ledger, which records every candidate: seconds between weight updates per set of machines
+    that scored that generation, candidates per machine, and audits (a candidate scored again by another machine).
+    The first generation (model loading) has no previous update and is left out."""
+    import collections
+    import sqlite3
+
+    path = RUNS / run_id / "ledger.sqlite"
+    if not path.is_file():
+        return None
+    db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    done = dict(db.execute("SELECT generation, recorded_at FROM generation_update"))
+    who, per_device = collections.defaultdict(set), collections.Counter()
+    for g, w in db.execute(
+        "SELECT c.generation, a.worker_id FROM result r JOIN attempt a ON a.candidate_id = r.candidate_id "
+        "AND a.attempt_number = r.attempt_number JOIN candidate c ON c.candidate_id = r.candidate_id"
+    ):
+        who[g].add(names.get(w, w))
+        per_device[names.get(w, w)] += 1
+    groups = collections.defaultdict(list)
+    for g in sorted(done):
+        if g - 1 in done and who.get(g):
+            groups[" + ".join(sorted(who[g]))].append(done[g] - done[g - 1])
+    audits, matched = db.execute("SELECT COUNT(*), COALESCE(SUM(matched), 0) FROM audit").fetchone()
+    return {"groups": dict(groups), "perDevice": dict(per_device), "audits": audits, "matched": matched}
+
+
+def finished(report, task):
+    """Answers that reached their final answer within the token limit (a boxed number, or an <answer> tag), and how
+    many of those are right: a gain that only comes from finishing more answers is not better reasoning."""
+    import re
+
+    checkpoint = report["checkpoints"][0]
+    mark = (lambda t: "</answer>" in t) if task == "countdown" else (lambda t: re.search(r"\\boxed\{", t) is not None)
+    done = [i for i, t in enumerate(checkpoint["outputs"]) if mark(t)]
+    right = sum(1 for i in done if checkpoint["scores"][i] == 1)
+    return {"finished": len(done), "rightAmongFinished": right, "count": len(checkpoint["outputs"]),
+            "truncated": checkpoint.get("truncated")}

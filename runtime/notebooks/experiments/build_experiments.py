@@ -1,6 +1,7 @@
 """Write the experiment notebooks (cells only, no outputs), in Vietnamese like ../demo.ipynb:
 
-e1-gsm8k-qwen05, e2-arith-smollm2, e3-gsm8k-qwen15, e4-countdown-qwen15 and tong-hop (the summary).
+00-chuan-bi (lab and GPU machines), e1-gsm8k-qwen05, e2-gsm8k-smollm17, e3-gsm8k-qwen15, e4-countdown-qwen15,
+e5-countdown-qwen05 and tong-hop (the summary). The first round (24-25/11) is kept in v1/.
 
 Run: python runtime/notebooks/experiments/build_experiments.py   (any Python with nbformat)
 """
@@ -19,36 +20,35 @@ EXPERIMENTS = {
         "title": "GSM8K × Qwen2.5-0.5B-Instruct",
         "task": "gsm8k",
         "about": "Bài toán lời văn cấp tiểu học (GSM8K, bộ chuẩn công khai): mô hình giải từng bước rồi ghi con số cuối "
-        "trong `\\boxed{}`. Đây là bài toán thứ ba của đề tài, sau phép nhân và Countdown.",
+        "trong `\\boxed{}`. Lần 1 (đêm 24/11) dùng giới hạn 320 token: mô hình gốc chưa viết xong khoảng một phần ba số câu, nên mức tăng phần lớn là do mô hình học viết gọn lại cho kịp ghi đáp án. Lần này giới hạn là 512 token (mô hình gốc trả lời xong khoảng 96–98% số câu), và notebook báo thêm tỉ lệ đúng **trên các câu đã trả lời xong**.",
         "repo": "Qwen/Qwen2.5-0.5B-Instruct",
         "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
-        "tokens": 320,
+        "tokens": 512,
         "reward": "boxed",
         "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
         "validation": 20,
     },
-    "e2-arith-smollm2": {
-        "title": "Phép nhân × SmolLM2-360M-Instruct (họ Llama)",
-        "task": "arithmetic",
-        "about": "Cùng bài phép nhân của notebook demo nhưng với một **họ mô hình khác**: SmolLM2 dùng kiến trúc Llama, "
-        "không phải Qwen. Bộ suy luận nghiêm ngặt của HeteroES hỗ trợ Qwen2, Llama và Mistral. Mô hình gốc hay ghi cả "
-        "phép tính vào `\\boxed{}` (ví dụ `\\boxed{879 * 2} = 1758`), nên bộ chấm có sẵn cho 0 điểm gần như mọi câu "
-        "và ES không có tín hiệu để học. Notebook này dùng một **hàm reward Python tự viết** có điểm từng phần.",
-        "repo": "HuggingFaceTB/SmolLM2-360M-Instruct",
-        "revision": "a10cc1512eabd3dde888204e902eca88bddb4951",
-        "tokens": 24,
-        "reward": "shaped",
-        "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 60, "reason": PAPER},
-        "validation": 10,
+    "e2-gsm8k-smollm17": {
+        "title": "GSM8K × SmolLM2-1.7B-Instruct (họ Llama)",
+        "task": "gsm8k",
+        "about": "Cùng bài GSM8K và cùng cách chấm như E1/E3 nhưng với một **họ mô hình khác**: SmolLM2 dùng kiến trúc "
+        "Llama, không phải Qwen. Bộ suy luận nghiêm ngặt của HeteroES cho cùng một chuỗi token trên mọi GPU NVIDIA từ "
+        "RTX 30 trở lên với cả hai họ. (Lần 1 dùng SmolLM2-360M với phép nhân và không học được gì: 0 → 0.)",
+        "repo": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+        "revision": "31b70e2e869a7173562077fd711b654946d38674",
+        "tokens": 512,
+        "reward": "boxed",
+        "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
+        "validation": 20,
     },
     "e3-gsm8k-qwen15": {
         "title": "GSM8K × Qwen2.5-1.5B-Instruct",
         "task": "gsm8k",
         "about": "GSM8K với mô hình lớn gấp ba (1,5 tỉ tham số). Mỗi candidate là một bản sao 1,5B tham số cộng nhiễu, "
-        "nên đây là phép thử tải của hệ thống trên GPU 12 GB.",
+        "nên đây cũng là phép thử tải của hệ thống trên GPU 12 GB. Lần 1 (đêm 24/11) dùng giới hạn 320 token: mô hình gốc chưa viết xong khoảng một phần ba số câu, nên mức tăng phần lớn là do mô hình học viết gọn lại cho kịp ghi đáp án. Lần này giới hạn là 512 token (mô hình gốc trả lời xong khoảng 96–98% số câu), và notebook báo thêm tỉ lệ đúng **trên các câu đã trả lời xong**.",
         "repo": "Qwen/Qwen2.5-1.5B-Instruct",
         "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
-        "tokens": 320,
+        "tokens": 512,
         "reward": "boxed",
         "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
         "validation": 20,
@@ -58,12 +58,28 @@ EXPERIMENTS = {
         "title": "Countdown × Qwen2.5-1.5B-Instruct",
         "task": "countdown",
         "about": "Countdown (dùng các số cho trước và + − × ÷ để ra số đích) với mô hình 1,5B, cùng dữ liệu và cách chia "
-        "của run Countdown 0,5B trong báo cáo, để so sánh hai cỡ mô hình.",
+        "với E5 (0,5B), để so sánh hai cỡ mô hình. Bài này khó thật: mô hình gốc chỉ đúng 1,6% kể cả khi được 1024 token, "
+        "nên mức tăng ở đây không phải do viết gọn. Đoạn 1 (đêm 24/11, 2×5070 Ti) bị lab hủy ở thế hệ 123 do một lỗi lab "
+        "(đã sửa); đoạn 2 chạy tiếp từ điểm khôi phục đã kiểm chứng ở thế hệ 110, trên 4 GPU.",
         "repo": "Qwen/Qwen2.5-1.5B-Instruct",
         "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
         "tokens": 384,
         "reward": "countdown",
         "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 150, "reason": PAPER},
+        "validation": 25,
+    },
+    "e5-countdown-qwen05": {
+        "title": "Countdown × Qwen2.5-0.5B-Instruct",
+        "task": "countdown",
+        "about": "Countdown với mô hình 0,5B. Đêm 24/11 bài này đã chạy **ngoài lab** (coordinator và worker dựng tay qua "
+        "SSH, khoảng 560 thế hệ qua nhiều đoạn): test 0 → 33/250, và mô hình gốc vẫn đúng 0/250 kể cả khi được 1024 token. "
+        "Ở đây chạy lại đúng theo luồng người dùng: notebook → lab → 4 GPU, cùng dữ liệu, cùng 384 token, một đoạn 200 "
+        "thế hệ, để xem lab có tái lập được kết quả đó không.",
+        "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+        "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "tokens": 384,
+        "reward": "countdown",
+        "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 200, "reason": PAPER},
         "validation": 25,
     },
 }
@@ -121,13 +137,41 @@ print({k: len(v) for k, v in splits.items()}, "| mã băm dữ liệu", data.sha
 print(splits["test"][0]["prompt"], "→ số đích", splits["test"][0]["target"])''',
 }
 
+SCORER_TEXT = {
+    "boxed": "`boxed-number`: lấy số trong `\\boxed{...}` cuối cùng của câu trả lời. Đúng đáp án được 1 điểm; có ô nhưng "
+    "sai số được 0,1 điểm (thưởng định dạng); không có ô được 0.",
+    "countdown": "`countdown` (reward của TinyZero và bài báo *Evolution Strategies at Scale*): lấy biểu thức trong thẻ "
+    "`<answer>` cuối cùng; dùng đúng mỗi số một lần và ra đúng số đích được 1 điểm; có thẻ nhưng sai được 0,1; không có "
+    "thẻ được 0. Biểu thức được phân tích cú pháp, không bao giờ được chạy như mã Python.",
+    "shaped": "Hàm reward Python tự viết (xem ô dưới).",
+}
+
 REWARD = {
-    "boxed": r'''SCORER = {"name": "boxed-number", "config": {"answerField": "answer", "formatReward": 0.1}}
+    "boxed": r'''from heteroes.v3.scoring import score
+
+SCORER = {"name": "boxed-number", "config": {"answerField": "answer", "formatReward": 0.1}}
 TEST_SCORER = SCORER  # "đúng" = score 1: the boxed number equals the answer
-make_reward = dict(scorer=SCORER)''',
-    "countdown": r'''SCORER = {"name": "countdown", "config": {"numbersField": "nums", "targetField": "target"}}
+make_reward = dict(scorer=SCORER)
+
+# the scorer on a few made-up answers to the first test question (the lab runs exactly this code on every GPU)
+demo = splits["test"][0]
+texts = [f"... so the answer is \\boxed{{{demo['answer']}}}", "... \\boxed{7}", f"the answer is {demo['answer']}"]
+full = {"kind": "declarative", "version": 1, "codeSha256": None, **SCORER}
+for text, points in zip(texts, score(full, texts, [demo] * len(texts))[1]):
+    print(f"{points:4}  ←  {text!r}")''',
+    "countdown": r'''from heteroes.v3.scoring import score
+
+SCORER = {"name": "countdown", "config": {"numbersField": "nums", "targetField": "target"}}
 TEST_SCORER = SCORER  # "đúng" = score 1: a valid expression over the given numbers that equals the target
-make_reward = dict(scorer=SCORER)''',
+make_reward = dict(scorer=SCORER)
+
+# the scorer on a few made-up answers to the first test question (the lab runs exactly this code on every GPU)
+demo = splits["test"][0]
+right = tasks.countdown_solution(demo["nums"], demo["target"])
+texts = [f"<think>...</think> <answer>{right}</answer>", "<answer>1 + 2</answer>", "không có thẻ answer"]
+full = {"kind": "declarative", "version": 1, "codeSha256": None, **SCORER}
+for text, points in zip(texts, score(full, texts, [demo] * len(texts))[1]):
+    print(f"{points:4}  ←  {text!r}")''',
     "shaped": r'''@reward("arith-shaped@1")
 def arith_shaped(completions, rows):
     """1 when the boxed number is the answer, 0.5 when the answer appears elsewhere, 0.1 for a box, else 0."""
@@ -162,7 +206,8 @@ def notebook(name, e):
 
 {e['about']}
 
-Notebook chạy theo đúng luồng của người nghiên cứu trên lab HeteroES:
+Notebook chạy theo đúng luồng của người nghiên cứu trên lab HeteroES (đăng nhập lab và thêm các máy GPU: xem
+`00-chuan-bi.ipynb`):
 
 | Bước | Ở đây |
 |---|---|
@@ -187,10 +232,13 @@ sao, mỗi worker tự tải từ Hugging Face rồi kiểm tra mã băm từng 
 print(model.id, model.revision[:12], model.source)
 for file, sha in model.manifest["files"].items():
     print(f"  {{file:28}} {{sha[:16]}}…")'''),
-        md(f"""## 4. Reward
+        md(f"""## 4. Bộ chấm (scorer) và reward
 
-Reward của một candidate là trung bình điểm trên lô 32 câu train. Trên tập test, **"đúng" nghĩa là điểm 1** (đáp án
-chính xác)."""),
+{SCORER_TEXT[e["reward"]]}
+
+Reward của một candidate là trung bình điểm trên lô 32 câu train. Trên tập test, **"đúng" nghĩa là điểm 1**. Bộ chấm
+là loại *khai báo* (declarative) có sẵn trong lab: lab ghim tên, phiên bản và cấu hình của nó vào công thức run, nên mọi
+GPU chấm bằng cùng một đoạn mã."""),
         code(REWARD[e["reward"]]),
         md(f"""### Mô hình gốc trả lời thế nào?
 
@@ -233,6 +281,30 @@ khi chạy lại notebook, các đoạn đã có chỉ được gắn lại.""")
         code('''runs = runner.run_segments(lab, experiment, model, make_trainer, segments, COORDINATOR, online_workers)
 for (segment, run, _), i in zip(runs, range(1, len(runs) + 1)):
     print(f"đoạn {i}: {run.id} {run.status()} {run.url}")'''),
+        md("""### 6.1 Tốc độ: 1 GPU so với nhiều GPU
+
+Cùng cấu hình chạy thêm 6 thế hệ **chỉ trên một 5070 Ti** để có mốc so sánh. Thời gian một thế hệ đọc từ ledger của
+coordinator (ghi mọi candidate: máy nào chấm, lúc nào xong). Thế hệ đầu (nạp mô hình) không tính, và dùng trung vị vì
+các thế hệ có chấm validation lâu hơn. Audit = một máy khác chấm lại một candidate; phải ra cùng SHA-256 của câu trả lời."""),
+        code('''import statistics
+
+alone = runner.one_gpu_run(lab, experiment, make_trainer, runs[-1][2], segments[-1], COORDINATOR) if not CHAY_MOI else None
+names = {d.worker_id: d.name for d in lab.devices()}
+speed = {}
+for label, run in [(f"đoạn {i}", r) for i, (_, r, _) in enumerate(runs, 1)] + ([("1 GPU", alone)] if alone else []):
+    measured = runner.speed(run.id, names)
+    if measured is None:
+        print(label, ": ledger của coordinator không có trên máy này")
+        continue
+    print(f"{label}: audit khớp {measured['matched']}/{measured['audits']}, candidate mỗi máy {measured['perDevice']}")
+    for machines, seconds in sorted(measured["groups"].items(), key=lambda kv: -len(kv[1])):
+        print(f"   {machines:48} {len(seconds):4} thế hệ, trung vị {statistics.median(seconds):6.1f} s/thế hệ")
+        speed.setdefault(machines, []).extend(seconds)
+speed = {m: {"generations": len(v), "medianSeconds": round(statistics.median(v), 1)} for m, v in speed.items()}
+one = next((v["medianSeconds"] for m, v in speed.items() if m == COORDINATOR), None)
+most = max(speed, key=lambda m: (m.count("+"), speed[m]["generations"])) if speed else None
+if one and most and most != COORDINATOR:
+    print(f"→ {most}: nhanh gấp {one / speed[most]['medianSeconds']:.2f} lần một 5070 Ti")'''),
         md("## 7. Quá trình học"),
         code('''import matplotlib.pyplot as plt
 
@@ -269,9 +341,14 @@ rows = splits["test"]
 base = runner.test_report(experiment, "base", -1, model.path, rows, TEST_SCORER, {tokens})
 first = runner.test_report(experiment, "first", 1, first_dir, rows, TEST_SCORER, {tokens})
 chosen = runner.test_report(experiment, f"segment-{{best:02d}}", best, best_dir, rows, TEST_SCORER, {tokens})
+finish = {{}}
 for label, report in (("mô hình gốc", base), ("cuối đoạn 1", first), (f"chọn (đoạn {{best}})", chosen)):
     ok, n = runner.correct(report)
-    print(f"{{label:16}} đúng {{ok}}/{{n}} = {{ok / n:6.1%}}   reward {{report['checkpoints'][0]['meanReward']:.4f}}")'''),
+    f = finish[label] = runner.finished(report, {e['task']!r})
+    print(f"{{label:16}} đúng {{ok}}/{{n}} = {{ok / n:6.1%}}   reward {{report['checkpoints'][0]['meanReward']:.4f}}   "
+          f"trả lời xong {{f['finished']}}/{{n}}, đúng trên số đã xong {{f['rightAmongFinished'] / max(f['finished'], 1):6.1%}}")'''),
+        md("""Cột cuối là phép kiểm tra của lần 1: nếu tỉ lệ đúng chỉ tăng vì mô hình **trả lời xong** nhiều câu hơn (còn tỉ
+lệ đúng trên các câu đã xong thì không đổi), thì ES chỉ dạy mô hình viết gọn, không phải suy luận tốt hơn."""),
         code('''from heteroes.v3.comparison import compare
 
 result = compare(base, chosen)
@@ -297,7 +374,8 @@ for i, row in enumerate(rows):
     "validation": validation, "workPerDevice": {names.get(w, w): c for w, c in work.items()},
     "test": {label: dict(zip(("correct", "count"), runner.correct(rep))) | {"meanReward": rep["checkpoints"][0]["meanReward"]}
              for label, rep in (("base", base), ("first", first), ("selected", chosen))},
-    "selectedSegment": best, "comparison": result,
+    "selectedSegment": best, "comparison": result, "finished": finish, "speed": speed,
+    "oneGpuRun": alone.id if alone else None,
 }
 out = runner.HERE / "results" / f"{experiment.name}.json"
 out.parent.mkdir(exist_ok=True)
@@ -307,70 +385,165 @@ print("đã lưu", out)'''),
     return cells
 
 
-SUMMARY = [
-    md("""# Tổng hợp các thí nghiệm HeteroES (đêm 24 → 25/11/2026)
+PREPARE = [
+    md("""# 00 · Chuẩn bị: lab HeteroES và các máy GPU
 
-Bảng gom kết quả các notebook thí nghiệm (`results/*.json`). "Đúng" = điểm 1 trên tập test, chấm **một lần** ở cuối;
-p là kiểm định McNemar chính xác (mô hình gốc so với checkpoint được chọn). Run Countdown × Qwen2.5-0.5B có từ trước
-(test 0 → 32/249) nằm trong báo cáo, không lặp lại ở đây."""),
-    code(r'''import json
+Notebook này đi qua những gì cần có **trước** khi chạy một thí nghiệm, theo đúng thứ tự một nhóm nghiên cứu làm:
+
+| Vai trò | Làm gì | Ở đâu |
+|---|---|---|
+| Người nghiên cứu | đăng nhập lab, xem các GPU đang có | notebook này (mục 1–2) |
+| Chủ máy GPU (người cho mượn) | cài worker bằng một dòng lệnh, nhập mã ghép | terminal trên máy GPU (mục 3) |
+| Quản trị lab | duyệt máy mới, bật/tắt đóng góp | trang Workers của lab, hoặc notebook này (mục 4) |
+| Người nghiên cứu | chọn mô hình, dữ liệu, bộ chấm, cấu hình rồi chạy | các notebook E1–E5 |
+
+Các thí nghiệm của đề tài dùng 4 GPU của 4 máy khác nhau, nối qua Tailscale: hai RTX 5070 Ti (máy của Nhân, kiêm
+coordinator, và máy của Nhựt) và hai RTX 3060 (máy của Quang và của Thảo, chạy trong WSL2 trên Windows)."""),
+    md("""## 1. Đăng nhập lab
+
+Lab công khai ở `https://lab.heteroes.site`. Đăng nhập một lần trong terminal (mật khẩu không bao giờ được ghi vào
+repo hay notebook; phiên có hạn 12 giờ và được lưu ở `~/.config/heteroes-demo/session.json`, quyền 0600):
+
+```bash
+python3 scripts/lab-login.py            # hỏi tên và mật khẩu; chạy lại khi phiên hết hạn
+```
+
+Một notebook đang chạy dài sẽ tự đọc lại phiên mới khi phiên cũ hết hạn."""),
+    code(r"""import sys
 from pathlib import Path
 
 HERE = Path.cwd()
-print(f"{'mô hình':30} {'thí nghiệm':22} {'n':>5} {'gốc':>5} {'sau ES':>7} {'p':>9}  thế hệ")
-for path in sorted((HERE / "results").glob("*.json")):
+SRC = (HERE / ".." / ".." / "src").resolve()
+for path in (str(SRC), str(HERE)):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+from heteroes.sdk_lab import Lab  # noqa: E402
+
+lab = Lab.from_session()
+print(lab)"""),
+    md("""## 2. Các GPU của lab
+
+Mỗi máy GPU là một *worker*. `online` = máy đang kết nối với lab; `ON` = chủ máy cho phép lab dùng GPU; `bận` = đang
+làm một run hay một lần kiểm thử."""),
+    code(r"""for d in lab.devices():
+    print(f"{d.name:14} {d.gpu:28} {d.vram_gb:5.1f} GB  online={d.online!s:5} ON={d.on!s:5} bận={d.busy!s:5}"
+          f"  coordinator={d.coordinator}")"""),
+    md("""## 3. Thêm một máy GPU (chủ máy làm)
+
+Trên máy GPU (Linux, hoặc Ubuntu trong WSL2 trên Windows), dán một dòng lệnh. Lệnh này không cần quyền quản trị, tải bộ
+cài từ lab và kiểm SHA-256 từng tệp:
+
+```bash
+curl -fsSL 'https://lab.heteroes.site/downloads/install-worker.sh' | HETEROES_DOWNLOADS='https://lab.heteroes.site/downloads' bash
+```
+
+Bộ cài kiểm tra driver và GPU, rồi hỏi **mã ghép** (pairing code). Mã ghép tạo ở trang Workers → *Add a GPU computer*,
+hoặc bằng ô dưới (đặt `TAO_MA_GHEP = True`). Mã dùng một lần và hết hạn sau vài phút.
+
+Sau khi ghép, chủ máy điều khiển máy của mình bằng `heteroes-worker`:
+
+| Lệnh | Làm gì |
+|---|---|
+| `heteroes-worker status` | máy đang làm gì, lab nào, GPU, phiên bản runtime |
+| `heteroes-worker on` / `off` | cho / thôi cho lab dùng GPU (run đang chạy tiếp trên các máy khác) |
+| `heteroes-worker watch` | màn hình trực tiếp: run, thế hệ, GPU, log |
+| `heteroes-worker doctor` | kiểm tra driver, ổ đĩa, dịch vụ, mạng, lab và đồng hồ |
+| `heteroes-worker clean` | xoá bản tải và runtime cũ (không bao giờ xoá dữ liệu run) |"""),
+    code(r"""TAO_MA_GHEP = False  # True: tạo một mã ghép mới cho một máy GPU
+
+if TAO_MA_GHEP:
+    reply = lab.request("POST", "/api/v1/devices/pairing-codes", {})
+    print("mã ghép:", reply["code"], f"(hết hạn sau {reply.get('expiresInSeconds', '?')} giây)")"""),
+    md("""## 4. Duyệt máy mới và bật đóng góp (quản trị lab)
+
+Một máy vừa ghép ở trạng thái `PENDING`: lab chưa giao việc cho nó cho đến khi quản trị viên duyệt. Ô dưới liệt kê máy
+chờ duyệt; đặt `DUYET = True` để duyệt tất cả."""),
+    code(r"""DUYET = False
+
+for d in lab.request("GET", "/api/v1/platform/devices"):
+    print(f"{d['displayName']:14} {d['approvalStatus']:9} ON={d['contributionEnabled']}")
+    if DUYET and d["approvalStatus"] == "PENDING":
+        lab.request("PATCH", f"/api/v1/platform/devices/{d['deviceId']}", {"approved": True, "workspaceId": lab.workspace})
+        print("   → đã duyệt")"""),
+    md("""## 5. Lab kiểm thử từng GPU với từng mô hình
+
+Trước run đầu tiên của một mô hình trên một GPU, lab tự **kiểm thử** (qualify) cặp đó: GPU tải mô hình (từ Hugging
+Face, hoặc từ lab với mô hình đã train), chạy một phép ES rất nhỏ bằng bộ suy luận nghiêm ngặt và so SHA-256 kết quả
+với máy tham chiếu. Lần kiểm thử cũng đo bộ nhớ của từng cỡ lô, để lab gợi ý cỡ lô cho mỗi GPU. GPU không đạt thì không
+được dùng cho mô hình đó. Các notebook E1–E5 gọi bước này tự động khi gửi run.
+
+Lỗi hay gặp:
+
+| Hiện tượng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| `GPU_UNSUPPORTED_BY_DECODER` | GPU cũ hơn RTX 30 (ví dụ GTX 1660, sm75): bộ suy luận nghiêm ngặt dùng lệnh nhân ma trận số nguyên của sm80 | dùng GPU từ RTX 30 trở lên |
+| Máy WSL nhận việc nhưng không gửi được kết quả | MTU mạng của WSL nhỏ (1280) nên gói Tailscale lớn bị rớt | trong WSL: `sudo ip link set tailscale0 mtu 1200` |
+| Ổ C: của Windows đầy | ổ ảo `ext4.vhdx` của WSL nằm trên C: và không tự co lại | `heteroes-worker clean`; nén vhdx bằng `wsl --shutdown` rồi `diskpart` |
+| `401` sau 12 giờ | phiên lab hết hạn | chạy lại `scripts/lab-login.py` |"""),
+    code(r"""import json
+
+for m in lab.request("GET", "/api/v1/models"):
+    print(f"{m['name'][:60]:60} {m.get('status')}")"""),
+    md("""Tiếp theo: mở một notebook thí nghiệm (E1–E5). Mỗi notebook đi qua dữ liệu → mô hình → bộ chấm → cấu hình → chạy
+trên lab → tốc độ → quá trình học → chấm test → ví dụ trước/sau."""),
+]
+
+
+SUMMARY = [
+    md("""# Tổng hợp các thí nghiệm HeteroES
+
+Bảng gom kết quả các notebook thí nghiệm (`results/*.json`). "Đúng" = điểm 1 trên tập test, chấm **một lần** ở cuối;
+p là kiểm định McNemar chính xác (mô hình gốc so với checkpoint được chọn). Cột "đúng / đã xong" là tỉ lệ đúng trên các
+câu mô hình trả lời xong trong giới hạn token: nếu cột này không tăng thì mức tăng chỉ là do viết gọn hơn."""),
+    code(r"""import json
+from pathlib import Path
+
+HERE = Path.cwd()
+
+
+def table(folder):
+    print(f"{'thí nghiệm':22} {'mô hình':30} {'n':>5} {'gốc':>5} {'sau ES':>7} {'p':>9}  {'đúng/đã xong: gốc → sau':>24}")
+    for path in sorted((folder / "results").glob("*.json")):
+        s = json.loads(path.read_text())
+        t = s["test"]
+        f = s.get("finished") or {}
+        cells = [v for k, v in f.items()]
+        ratio = (lambda x: x["rightAmongFinished"] / max(x["finished"], 1))
+        change = f"{ratio(cells[0]):6.1%} → {ratio(cells[-1]):6.1%}" if cells else "—"
+        print(f"{s['name']:22} {s['model'][:30]:30} {t['base']['count']:5} {t['base']['correct']:5} "
+              f"{t['selected']['correct']:7} {s['comparison']['mcnemarExactP']:9.2g}  {change:>24}")
+
+
+table(HERE)"""),
+    md("""## Tốc độ: 1 GPU so với nhiều GPU
+
+Trung vị số giây một thế hệ, đọc từ ledger của coordinator. Mốc 1 GPU là một run ngắn 6 thế hệ chỉ trên 5070 Ti của
+Nhân, cùng cấu hình."""),
+    code(r"""for path in sorted((HERE / "results").glob("*.json")):
     s = json.loads(path.read_text())
-    t = s["test"]
-    state = json.loads((HERE / "state" / path.name).read_text())["segments"]
-    planned = sum(x["generations"] for x in s["segments"])
-    early = [v["endedEarly"] for v in state.values() if v.get("endedEarly")]
-    note = f"{planned} (dừng sớm: {early[0]})" if early else str(planned)
-    print(f"{s['model']:30} {s['name']:22} {t['base']['count']:5} {t['base']['correct']:5} "
-          f"{t['selected']['correct']:7} {s['comparison']['mcnemarExactP']:9.2g}  {note}")'''),
-    md("""## Tốc độ trong run thật: 1 GPU so với 2 GPU
+    speed = s.get("speed") or {}
+    one = speed.get("5070ti-nhan", {}).get("medianSeconds")
+    print(s["name"])
+    for machines, v in sorted(speed.items(), key=lambda kv: kv[0].count("+")):
+        gain = f"  nhanh gấp {one / v['medianSeconds']:.2f}" if one and machines != "5070ti-nhan" else ""
+        print(f"   {machines:50} {v['generations']:4} thế hệ  {v['medianSeconds']:6.1f} s/thế hệ{gain}")"""),
+    md("""## Lần 1 (đêm 24 → 25/11) và các run trước đó
 
-Đọc từ ledger của coordinator (máy 5070 Ti của Nhân), nơi ghi **mọi** candidate: máy nào chấm, lúc nào xong.
-Thời gian một thế hệ = khoảng cách giữa hai lần ghi cập nhật trọng số (gồm cả các lần chấm validation mỗi 25 thế hệ,
-nên dùng trung vị). Audit = một máy khác chấm lại một candidate; phải ra cùng SHA-256 của câu trả lời."""),
-    code(r'''import collections
-import sqlite3
-import statistics
+Lần 1 nằm trong `v1/` (notebook, kết quả, quyết định). Phát hiện chính, và là lý do làm lại:
 
-RUNS = Path.home() / ".local/share/heteroes-worker/agent-state/runs"
-NAMES = {"cli-3dacd1745773": "5070ti-nhan", "cli-d152aa6a13f8": "5070ti-nhut", "cli-1a9e23ce56d1": "3060-quang",
-         "cli-a6c1c55a80d8": "3060-thao"}
+| Kết quả lần 1 | Có ý nghĩa? | Vì sao |
+|---|---|---|
+| E1 GSM8K × Qwen 0.5B, 462 → 528/1319 | không | 320 token: tỉ lệ đúng trên câu đã xong **giảm** 51% → 47%; mức tăng chỉ do trả lời xong nhiều câu hơn |
+| E3 GSM8K × Qwen 1.5B, 703 → 871/1319 | không | 320 token: đúng/đã xong 77,5% → 76,8%; 170 trong 251 câu được sửa là câu mà mô hình gốc bị cắt |
+| E2 phép nhân × SmolLM2-360M, 0 → 0 | không | mô hình không học được gì |
+| E4 Countdown × Qwen 1.5B, 4 → 31/250 | **có** | đúng/đã xong 2,1% → 12,4%; mô hình gốc chỉ 1,6% kể cả với 1024 token |
+| Countdown × Qwen 0.5B (24/11, ngoài lab), 0 → 33/250 | **có** | mô hình gốc 0/250 kể cả với 1024 token |
+| Phép nhân × Qwen 0.5B (trước 24/11, ngoài lab), 95 → 186/300 | một phần | phần lớn là học ghi `\\boxed{}` (179 → 300 câu có ô), nhưng đúng trên câu có ô vẫn tăng 53% → 62% |
 
-
-def speed(run_id):
-    db = sqlite3.connect(f"file:{RUNS / run_id / 'ledger.sqlite'}?mode=ro", uri=True)
-    done = dict(db.execute("SELECT generation, recorded_at FROM generation_update"))
-    who = collections.defaultdict(set)
-    for g, w in db.execute(
-        "SELECT c.generation, a.worker_id FROM result r JOIN attempt a ON a.candidate_id = r.candidate_id "
-        "AND a.attempt_number = r.attempt_number JOIN candidate c ON c.candidate_id = r.candidate_id"
-    ):
-        who[g].add(NAMES.get(w, w))
-    groups = collections.defaultdict(list)
-    for g in sorted(done):
-        if g - 1 in done and who.get(g):
-            groups[" + ".join(sorted(who[g]))].append(done[g] - done[g - 1])
-    audits, matched = db.execute("SELECT COUNT(*), COALESCE(SUM(matched), 0) FROM audit").fetchone()
-    return groups, audits, matched
-
-
-for name in ("e3-gsm8k-qwen15", "e4-countdown-qwen15"):
-    run_id = json.loads((HERE / "state" / f"{name}.json").read_text())["segments"]["segment-01"]["experimentId"]
-    if not (RUNS / run_id / "ledger.sqlite").is_file():
-        print(name, ": ledger không có trên máy này")
-        continue
-    groups, audits, matched = speed(run_id)
-    print(f"{name}: audit khớp {matched}/{audits}")
-    for machines, seconds in sorted(groups.items(), key=lambda kv: -len(kv[1])):
-        print(f"   {machines:28} {len(seconds):4} thế hệ, trung vị {statistics.median(seconds):6.1f} s/thế hệ")'''),
-    md("""Đọc kết quả: E4 chạy 4 thế hệ trên một 5070 Ti rồi máy 5070 Ti thứ hai (của Nhựt) được thêm vào **giữa run**
-(không dừng run). Mốc một máy chỉ có 4 thế hệ, gồm cả lúc nạp mô hình, nên tỷ lệ tăng tốc chỉ là ước lượng.
-Máy 3060 của Thảo được thêm vào E4 nhưng không gửi được kết quả về coordinator (mạng WSL rớt gói lớn), nên không có
-trong bảng; máy 3060 của Quang chỉ tham gia 2 thế hệ đầu của E3 trước khi ổ C: đầy."""),
+Lần 1 cũng gần như không phân tán: E1 và E2 chạy hoàn toàn trên một 5070 Ti, E3 chỉ có máy Quang góp 14 trong 3200
+candidate; chỉ E4 chạy trên 2 GPU (190/190 audit khớp)."""),
+    code(r"""table(HERE / "v1")"""),
 ]
 
 if __name__ == "__main__":
@@ -383,6 +556,10 @@ if __name__ == "__main__":
         nb = nbf.v4.new_notebook(cells=notebook(name, spec))
         nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
         (HERE / f"{name}.ipynb").write_text(nbf.writes(nb), encoding="utf-8")
+    if not wanted or "00-chuan-bi" in wanted:
+        nb = nbf.v4.new_notebook(cells=PREPARE)
+        nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
+        (HERE / "00-chuan-bi.ipynb").write_text(nbf.writes(nb), encoding="utf-8")
     if not wanted or "tong-hop" in wanted:
         nb = nbf.v4.new_notebook(cells=SUMMARY)
         nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}

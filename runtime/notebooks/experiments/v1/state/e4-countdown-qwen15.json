@@ -1,0 +1,15 @@
+{
+ "segments": {
+  "segment-01": {
+   "experimentId": "12aaaa92640d45ab80cae3e99cbc36dd",
+   "workers": [
+    "5070ti-nhan"
+   ],
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 150,
+   "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate",
+   "endedEarly": "lab hủy run ở thế hệ 123/150 lúc 10:33 ngày 25/11 do lỗi lab (gỡ một worker rồi tắt máy đó làm hủy cả run; đã sửa ở commit 85e3d630). Dùng điểm khôi phục đã kiểm chứng mới nhất: thế hệ 110."
+  }
+ }
+}

@@ -3,6 +3,14 @@
   "alpha": 0.0005,
   "sigma": 0.001,
   "generations": 150,
-  "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate"
+  "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate",
+  "usedGenerations": 111,
+  "note": "lab hủy run ở thế hệ 123; đoạn 2 nối từ điểm khôi phục đã kiểm chứng ở thế hệ 110"
+ },
+ {
+  "alpha": 0.0005,
+  "sigma": 0.001,
+  "generations": 100,
+  "reason": "chạy tiếp (25/11 chiều): validation còn tăng khi run bị hủy (0,150 → 0,160 → 0,171), giữ nguyên tham số và 384 token; lần này chạy trên 4 GPU (2×5070 Ti, 2×3060)"
  }
 ]
