@@ -1,0 +1,24 @@
+{
+ "segments": {
+  "segment-01": {
+   "experimentId": "3fde8df70e134d30860ed60c0abd1cb4",
+   "workers": [
+    "5070ti-nhan"
+   ],
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 60,
+   "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate"
+  },
+  "segment-02": {
+   "experimentId": "5afd1b89ae9b4590bc8b7aff77068400",
+   "workers": [
+    "5070ti-nhan"
+   ],
+   "alpha": 0.002,
+   "sigma": 0.001,
+   "generations": 60,
+   "reason": "đoạn 1 (α 5·10⁻⁴): reward train chỉ 0,21→0,25, validation đứng yên 0,243→0,240 và test không đổi một câu nào; bước cập nhật quá nhỏ để đổi câu trả lời tham lam của SmolLM2, nên tăng α gấp 4"
+  }
+ }
+}

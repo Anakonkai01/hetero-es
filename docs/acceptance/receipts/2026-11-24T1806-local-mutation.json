@@ -1,0 +1,269 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-7f816c942e207219ac1b262eb46a036451c2aee20e849e0e56a63262c07a3b8d",
+  "dirty": false,
+  "commit": "d4d0171f5c743e61600e6a1201543216f93b502e",
+  "host": "local",
+  "profiles": [
+    "mutation"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-44-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.99.02"
+    ]
+  },
+  "started": "2026-11-24T17:54:45+0700",
+  "finished": "2026-11-24T18:06:38+0700",
+  "results": [
+    {
+      "name": "mutation-watchdog",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 186.844,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-watchdog/output.log",
+      "log_sha256": "776a2f7541d16e31e2785c0ace0d5694501139907e4a13071be74ebba7b478cb",
+      "detail": "",
+      "counts": {
+        "passed": 18,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "18 passed in 13.20s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/ledger --copy tests/v3 --env PYTHONPATH=src:tests/ledger:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-watchdog --mutants acceptance/mutants/watchdog.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/ledger/test_stage_watchdog.py tests/v3/test_v3_progress.py'",
+        "control ok    | 18 passed in 13.20s",
+        "killed       every heartbeat is progress | 1 failed, 1 passed in 9.26s",
+        "killed       legacy heartbeats are not progress | 1 failed, 2 passed in 6.16s",
+        "killed       cap restarts with the coordinator | 1 failed, 5 passed in 61.67s (0:01:01)",
+        "killed       first start not persisted | 1 failed, 6 passed in 11.96s",
+        "killed       stall may equal the cap | 1 failed, 10 passed in 11.96s",
+        "killed       infinite cap admitted | 1 failed, 8 passed in 12.09s",
+        "killed       hard cap ignored | 1 failed, 12 passed in 12.01s",
+        "killed       progress sent unasked | 1 failed, 2 passed in 6.19s",
+        "killed       perturb not reported | 1 failed, 14 passed in 13.20s",
+        "killed       chunks not reported | 1 failed, 14 passed in 13.15s",
+        "killed       malformed progress admitted | 1 failed, 4 passed in 10.73s",
+        "",
+        "11 of 11 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-restore-recovery",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 80.151,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-restore-recovery/output.log",
+      "log_sha256": "1922d57e99da830092f6ce3d9ecc0fd4f807c2c36a0a199538322d6af8cc002f",
+      "detail": "",
+      "counts": {
+        "passed": 63,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "63 passed in 2.66s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/ledger --copy tests/v3 --env PYTHONPATH=src:tests/ledger:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-restore-recovery --mutants acceptance/mutants/restore-recovery.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/ledger/test_restore_recovery.py tests/ledger/test_run_supervisor.py tests/v3/test_v3_progress.py'",
+        "control ok    | 63 passed in 2.66s",
+        "killed       second recovery allowed | 1 failed, 2 passed in 1.05s",
+        "killed       no probation before the boundary | 1 failed, 1 passed in 0.86s",
+        "killed       alias of a healthy worker admitted | 1 failed, 6 passed in 1.26s",
+        "killed       base weights not reloaded | 1 failed, 1 passed in 0.94s",
+        "killed       no self-test | 1 failed, 4 passed in 31.13s",
+        "killed       failed recovery retried after restart | 1 failed, 4 passed in 31.12s",
+        "killed       restart forgets the alias | 1 failed, 5 passed in 1.26s",
+        "killed       lab quarantines a recovered device | 1 failed, 30 passed in 1.30s",
+        "killed       alias credential without recoveries | 1 failed, 6 passed in 1.25s",
+        "killed       reload skips the hash check | 1 failed, 62 passed in 2.75s",
+        "",
+        "10 of 10 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-strict-mismatch",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 141.814,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-strict-mismatch/output.log",
+      "log_sha256": "ad060714511b956cfe5cd96f3eb034005dc75593443b35ace859c309b287175b",
+      "detail": "",
+      "counts": {
+        "passed": 30,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "30 passed in 3.19s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-strict-mismatch --mutants acceptance/mutants/strict-mismatch.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_guard_integration.py tests/v3/test_audit_guard.py'",
+        "control ok    | 30 passed in 3.19s",
+        "killed       coordinator keeps the historical policy for strict | 1 failed, 6 passed in 122.68s (0:02:02)",
+        "killed       every decoder stops at a mismatch | 1 failed in 1.83s",
+        "killed       any non-default decoder counts as strict | 1 failed, 4 passed in 2.39s",
+        "killed       a run without a v3 evaluation section is strict | 1 failed, 2 passed in 2.40s",
+        "killed       guard ignores the strict flag | 1 failed in 2.19s",
+        "killed       first mismatch receipt not written | 1 failed, 6 passed in 2.66s",
+        "",
+        "6 of 6 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-audit-outcomes",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 57.011,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-audit-outcomes/output.log",
+      "log_sha256": "17337082bf8d16d032baa44b6d48d29ef59cd99e6fcc753984fb29936f838e62",
+      "detail": "",
+      "counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "29 passed in 9.05s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy scripts --copy tests/v3 --env PYTHONPATH=src:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-audit-outcomes --mutants acceptance/mutants/audit-outcomes.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_outcomes.py tests/v3/test_v3_audit.py tests/v3/test_audit_states.py'",
+        "control ok    | 29 passed in 9.05s",
+        "killed       open drain of an active run is unknown | 1 failed, 5 passed in 3.33s",
+        "killed       open drain of an ended run is pending | 1 failed, 6 passed in 3.59s",
+        "killed       recorded generation without sidecar is open | 1 failed, 1 passed in 2.37s",
+        "killed       frozen rate ignored | 1 failed in 2.42s",
+        "killed       conflicting sidecar trusted | 1 failed, 2 passed in 2.42s",
+        "killed       timed out not counted | 1 failed, 9 passed in 8.91s",
+        "killed       skipped not counted | 1 failed, 3 passed in 2.88s",
+        "killed       stop names the auditor as original | 1 failed, 5 passed in 3.32s",
+        "killed       strict policy not shown | 1 failed, 7 passed in 3.63s",
+        "killed       supervisor inverts run activity | 1 failed, 8 passed in 8.76s",
+        "",
+        "10 of 10 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-recovery-io",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 72.567,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-recovery-io/output.log",
+      "log_sha256": "5760154ced70bc7ed15b8cf74b606be37a531a686eb24139ef6fbcc025c01222",
+      "detail": "",
+      "counts": {
+        "passed": 31,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 1
+      },
+      "pytest_summary": "31 passed, 1 deselected in 21.68s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy scripts --copy tests/ledger --copy tests/v3 --env PYTHONPATH=src:tests/ledger:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-recovery-io --mutants acceptance/mutants/recovery-io.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/ledger/test_cloud_sync.py tests/ledger/test_recovery_points.py tests/v3/test_v3_recovery.py -k '\"'\"'not download_restore_cli'\"'\"''",
+        "control ok    | 31 passed, 1 deselected in 21.68s",
+        "killed       upload reads unbounded blocks | 1 failed, 6 passed, 1 deselected in 0.16s",
+        "killed       changed point completed | 1 failed, 8 passed, 1 deselected in 0.15s",
+        "killed       backoff ignored | 1 failed, 4 passed, 1 deselected in 0.13s",
+        "killed       backoff does not grow | 1 failed, 4 passed, 1 deselected in 0.13s",
+        "killed       backoff uncapped | 1 failed, 4 passed, 1 deselected in 0.13s",
+        "killed       success keeps the backoff | 1 failed, 5 passed, 1 deselected in 0.13s",
+        "killed       newest cloud copy not kept | 1 failed, 2 passed, 1 deselected in 0.13s",
+        "killed       paused checkpoint not kept | 1 failed, 3 passed, 1 deselected in 0.12s",
+        "killed       verified point forgets its remote copy | 1 failed, 10 passed, 1 deselected in 0.16s",
+        "killed       cache trusted without a match | 1 failed, 19 passed, 1 deselected in 0.16s",
+        "killed       cache ignores mtime | 1 failed, 19 passed, 1 deselected in 0.16s",
+        "killed       cache ignores manifest bytes | 1 failed, 19 passed, 1 deselected in 0.16s",
+        "killed       restore trusts the cache | 1 failed, 19 passed, 1 deselected in 0.17s",
+        "killed       strict stop not carried | 1 failed, 29 passed, 1 deselected in 22.23s",
+        "killed       drain states not restored | 1 failed, 29 passed, 1 deselected in 22.30s",
+        "",
+        "15 of 15 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-strict-qualification-backend",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 76.998,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-strict-qualification-backend/output.log",
+      "log_sha256": "b1fe48e8b1005b751e3e7afe3ebffb880013ee6dc392067ac792bc48036fd064",
+      "detail": "",
+      "counts": {
+        "passed": 38,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "warnings": 1
+      },
+      "pytest_summary": "38 passed, 1 warning in 6.63s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo . --copy backend --copy runtime/src --copy pyproject.toml --env CUDA_VISIBLE_DEVICES= --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-strict-qualification-backend --mutants acceptance/mutants/strict-qualification-backend.json --test '/home/pc5070ti/projects/heteroes/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py'",
+        "control ok    | 38 passed, 1 warning in 6.63s",
+        "killed       probe route drops the decoder | 1 failed, 17 passed, 1 warning in 3.70s",
+        "killed       probe request accepts any decoder | 1 failed, 20 passed, 1 warning in 4.20s",
+        "killed       reference lookup ignores the decoder | 1 failed, 17 passed, 1 warning in 3.66s",
+        "killed       pending probe of the other decoder blocks | 1 failed, 22 passed, 1 warning in 4.71s",
+        "killed       job forgets the strict decoder | 1 failed, 17 passed, 1 warning in 3.66s",
+        "killed       command to the device drops the decoder | 1 failed, 17 passed, 1 warning in 3.76s",
+        "killed       report is checked against the engine only | 1 failed, 17 passed, 1 warning in 3.65s",
+        "killed       report recipe decoder is not compared | 1 failed, 17 passed, 1 warning in 3.69s",
+        "killed       status omits the strict references | 1 failed, 17 passed, 1 warning in 3.69s",
+        "killed       v3_qualification ignores the decoder | 1 failed, 17 passed, 1 warning in 3.65s",
+        "killed       v3_qualification treats every decoder as strict | 1 failed, 1 warning in 0.36s",
+        "killed       legacy profile counts for strict runs | 1 failed, 23 passed, 1 warning in 4.68s",
+        "killed       validation does not pass the decoder | 1 failed, 21 passed, 1 warning in 4.43s",
+        "killed       evalDtype allowed for every decoder | 1 failed, 21 passed, 1 warning in 4.51s",
+        "killed       empty evalDtype stays in the document | 1 failed, 24 passed, 1 warning in 4.95s",
+        "killed       evalDtype is not an update key | 1 failed, 24 passed, 1 warning in 5.00s",
+        "",
+        "16 of 16 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-gpu-ownership-backend",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 97.591,
+      "log": ".scratch/accept/20261124-final2-cpu-mutation/mutation-gpu-ownership-backend/output.log",
+      "log_sha256": "8116fb47bef4b5e75beef1d7d9c697b3359221743ba0545bd6c3e0e0fcc03947",
+      "detail": "",
+      "counts": {
+        "passed": 38,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "warnings": 1
+      },
+      "pytest_summary": "38 passed, 1 warning in 6.63s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo . --copy backend --copy runtime/src --copy pyproject.toml --env CUDA_VISIBLE_DEVICES= --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-cpu-mutation/mutation-gpu-ownership-backend --mutants acceptance/mutants/gpu-ownership-backend.json --test '/home/pc5070ti/projects/heteroes/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py'",
+        "control ok    | 38 passed, 1 warning in 6.63s",
+        "killed       strict layout applies to every decoder | 1 failed, 1 warning in 0.35s",
+        "killed       strict layout never applies | 1 failed, 25 passed, 1 warning in 5.20s",
+        "killed       CPU coordinator allowed for strict | 1 failed, 36 passed, 1 warning in 6.68s",
+        "killed       same device not detected | 1 failed, 37 passed, 1 warning in 6.68s",
+        "killed       same physical GPU not detected | 1 failed, 31 passed, 1 warning in 6.17s",
+        "killed       scheduling skips the strict layout | 1 failed, 25 passed, 1 warning in 5.42s",
+        "killed       creation skips the strict layout | 1 failed, 25 passed, 1 warning in 5.25s",
+        "killed       creation checks the coordinator as a worker | 1 failed, 21 passed, 1 warning in 4.49s",
+        "killed       sharing ignores the second weight set | 1 failed, 31 passed, 1 warning in 6.13s",
+        "killed       sharing ignores generation length | 1 failed, 32 passed, 1 warning in 6.19s",
+        "killed       sharing ignores a stale profile | 1 failed, 35 passed, 1 warning in 6.56s",
+        "killed       sharing accepts non-strict probes | 1 failed, 35 passed, 1 warning in 6.44s",
+        "killed       the current coordinator cannot join as a worker | 1 failed, 27 passed, 1 warning in 5.84s",
+        "killed       leaving always releases a worker's device | 1 failed, 27 passed, 1 warning in 5.83s",
+        "killed       leaving always releases a worker's physical GPU | 1 failed, 27 passed, 1 warning in 5.81s",
+        "",
+        "15 of 15 mutants killed."
+      ]
+    }
+  ]
+}

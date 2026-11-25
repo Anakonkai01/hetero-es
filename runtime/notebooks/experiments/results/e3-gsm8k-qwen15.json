@@ -1,0 +1,82 @@
+{
+ "name": "e3-gsm8k-qwen15",
+ "model": "Qwen/Qwen2.5-1.5B-Instruct",
+ "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+ "segments": [
+  {
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 100,
+   "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate",
+   "experimentId": "ac3c5320e04b4dbea4358fe3668efa61"
+  }
+ ],
+ "validation": [
+  [
+   59,
+   0.7394
+  ],
+  [
+   79,
+   0.756
+  ],
+  [
+   99,
+   0.7657999999999999
+  ]
+ ],
+ "workPerDevice": {
+  "5070ti-nhan": 512
+ },
+ "test": {
+  "base": {
+   "correct": 703,
+   "count": 1319,
+   "meanReward": 0.5472327520849127
+  },
+  "first": {
+   "correct": 871,
+   "count": 1319,
+   "meanReward": 0.6796815769522365
+  },
+  "selected": {
+   "correct": 871,
+   "count": 1319,
+   "meanReward": 0.6796815769522365
+  }
+ },
+ "selectedSegment": 1,
+ "comparison": {
+  "direction": "B minus A",
+  "count": 1319,
+  "rowsHash": "e08d00d5080483f9a56effd8e2babcd5ec54dd8351254f553307e1a39754538c",
+  "scorer": {
+   "name": "boxed-number",
+   "config": {
+    "answerField": "answer",
+    "formatReward": 0.1
+   }
+  },
+  "generationA": -1,
+  "generationB": 1,
+  "meanA": 0.5472327520849127,
+  "meanB": 0.6796815769522364,
+  "difference": 0.13244882486732373,
+  "successDefinition": "score == 1",
+  "fixed": 251,
+  "broke": 83,
+  "bothCorrect": 620,
+  "bothWrong": 365,
+  "mcnemarExactP": 9.153139554198692e-21,
+  "bootstrapCI": [
+   0.10727824109173617,
+   0.15746777862016678
+  ],
+  "bootstrap": {
+   "method": "paired-percentile",
+   "confidence": 0.95,
+   "resamples": 10000,
+   "seed": 11
+  }
+ }
+}

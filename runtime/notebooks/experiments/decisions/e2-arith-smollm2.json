@@ -1,0 +1,14 @@
+[
+ {
+  "alpha": 0.0005,
+  "sigma": 0.001,
+  "generations": 60,
+  "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate"
+ },
+ {
+  "alpha": 0.002,
+  "sigma": 0.001,
+  "generations": 60,
+  "reason": "đoạn 1 (α 5·10⁻⁴): reward train chỉ 0,21→0,25, validation đứng yên 0,243→0,240 và test không đổi một câu nào; bước cập nhật quá nhỏ để đổi câu trả lời tham lam của SmolLM2, nên tăng α gấp 4"
+ }
+]

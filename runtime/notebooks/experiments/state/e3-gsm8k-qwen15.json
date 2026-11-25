@@ -1,0 +1,14 @@
+{
+ "segments": {
+  "segment-01": {
+   "experimentId": "ac3c5320e04b4dbea4358fe3668efa61",
+   "workers": [
+    "5070ti-nhan"
+   ],
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 100,
+   "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate"
+  }
+ }
+}

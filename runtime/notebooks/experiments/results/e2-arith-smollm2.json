@@ -1,0 +1,101 @@
+{
+ "name": "e2-arith-smollm2",
+ "model": "HuggingFaceTB/SmolLM2-360M-Instruct",
+ "revision": "a10cc1512eabd3dde888204e902eca88bddb4951",
+ "segments": [
+  {
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 60,
+   "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate",
+   "experimentId": "3fde8df70e134d30860ed60c0abd1cb4"
+  },
+  {
+   "alpha": 0.002,
+   "sigma": 0.001,
+   "generations": 60,
+   "reason": "đoạn 1 (α 5·10⁻⁴): reward train chỉ 0,21→0,25, validation đứng yên 0,243→0,240 và test không đổi một câu nào; bước cập nhật quá nhỏ để đổi câu trả lời tham lam của SmolLM2, nên tăng α gấp 4",
+   "experimentId": "5afd1b89ae9b4590bc8b7aff77068400"
+  }
+ ],
+ "validation": [
+  [
+   39,
+   0.24266666666666667
+  ],
+  [
+   49,
+   0.24266666666666667
+  ],
+  [
+   59,
+   0.24
+  ],
+  [
+   99,
+   0.24366666666666664
+  ],
+  [
+   109,
+   0.23833333333333334
+  ],
+  [
+   119,
+   0.23833333333333334
+  ]
+ ],
+ "workPerDevice": {
+  "5070ti-nhan": 1280
+ },
+ "test": {
+  "base": {
+   "correct": 0,
+   "count": 300,
+   "meanReward": 0.0003333333333333334
+  },
+  "first": {
+   "correct": 0,
+   "count": 300,
+   "meanReward": 0.0003333333333333334
+  },
+  "selected": {
+   "correct": 0,
+   "count": 300,
+   "meanReward": 0.0003333333333333334
+  }
+ },
+ "selectedSegment": 1,
+ "comparison": {
+  "direction": "B minus A",
+  "count": 300,
+  "rowsHash": "5b4b03ee4da072094bc68cba9459f951fcf33a9a960c6dc15b402aa15ca6900e",
+  "scorer": {
+   "name": "boxed-number",
+   "config": {
+    "answerField": "answer",
+    "formatReward": 0.1
+   }
+  },
+  "generationA": -1,
+  "generationB": 1,
+  "meanA": 0.0003333333333333334,
+  "meanB": 0.0003333333333333334,
+  "difference": 0.0,
+  "successDefinition": "score == 1",
+  "fixed": 0,
+  "broke": 0,
+  "bothCorrect": 0,
+  "bothWrong": 300,
+  "mcnemarExactP": 1.0,
+  "bootstrapCI": [
+   0.0,
+   0.0
+  ],
+  "bootstrap": {
+   "method": "paired-percentile",
+   "confidence": 0.95,
+   "resamples": 10000,
+   "seed": 11
+  }
+ }
+}

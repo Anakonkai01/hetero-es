@@ -1,0 +1,198 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-7f816c942e207219ac1b262eb46a036451c2aee20e849e0e56a63262c07a3b8d",
+  "dirty": false,
+  "commit": "d4d0171f5c743e61600e6a1201543216f93b502e",
+  "host": "local",
+  "profiles": [
+    "mutation"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-44-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.99.02"
+    ]
+  },
+  "started": "2026-11-24T22:52:28+0700",
+  "finished": "2026-11-24T23:18:26+0700",
+  "results": [
+    {
+      "name": "mutation-strict-routes",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 921.364,
+      "log": "../accept/20261124-final2-local-gpu-mutation-wt/mutation-strict-routes/output.log",
+      "log_sha256": "78905cb9f665762dbd1f8e0313a6f844d6aa8dc5abf73b9e0909b01b6f54454f",
+      "detail": "",
+      "counts": {
+        "passed": 107,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "107 passed in 136.04s (0:02:16)",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/eval/test_strict_decoder.py --copy tests/eval/test_integer_tma.py --copy tests/eval/test_attention_key_stages.py --copy tests/eval/test_request_context.py --env PYTHONPATH=src:tests/eval --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-local-gpu-mutation-wt/mutation-strict-routes --mutants acceptance/mutants/strict-routes.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/eval/test_integer_tma.py tests/eval/test_attention_key_stages.py tests/eval/test_request_context.py'",
+        "control ok    | 107 passed in 136.04s (0:02:16)",
+        "killed       timeout bit collides with layout bit | 1 failed, 6 passed in 2.94s",
+        "killed       kernels ignore transport bit | 1 failed in 1.79s",
+        "killed       decode ignores transport bit | 1 failed in 1.76s",
+        "killed       TMA admits 128-row tiles | 1 failed, 7 passed in 1.74s",
+        "killed       TMA admits split K | 1 failed, 7 passed in 1.74s",
+        "killed       stale map address | 1 failed, 48 passed in 92.88s (0:01:32)",
+        "killed       wrong weight swizzle | 1 failed, 8 passed in 5.81s",
+        "killed       TMA drops residual | 1 failed, 26 passed in 42.95s",
+        "killed       stages replace split-kernel range | 1 failed, 53 passed in 89.78s (0:01:29)",
+        "killed       stage scores read wrong subtree | 1 failed, 59 passed in 90.94s (0:01:30)",
+        "killed       stage never opts into large shared | 1 failed, 62 passed in 91.95s (0:01:31)",
+        "killed       context rounded to 8 | 1 failed, 95 passed in 111.76s (0:01:51)",
+        "killed       session reused across contexts | 1 failed, 102 passed in 121.13s (0:02:01)",
+        "killed       layout uses configured context | 1 failed, 102 passed in 118.56s (0:01:58)",
+        "",
+        "14 of 14 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-strict-decoder",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 114.809,
+      "log": "../accept/20261124-final2-local-gpu-mutation-wt/mutation-strict-decoder/output.log",
+      "log_sha256": "3f7f7f95401b4777ab49183aeafce34a8012af97fa303b31bb04d97c0e5488a1",
+      "detail": "",
+      "counts": {
+        "passed": 19,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "19 passed in 23.04s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-local-gpu-mutation-wt/mutation-strict-decoder --mutants acceptance/mutants/strict-decoder.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_strict_decoder.py'",
+        "control ok    | 19 passed in 23.04s",
+        "killed       budget refusal is not OUT_OF_MEMORY | 1 failed, 11 passed in 1.85s",
+        "killed       transport error is not mapped | 1 failed, 12 passed in 1.90s",
+        "killed       options accept strict FP32 | 1 failed, 2 passed in 1.79s",
+        "killed       documents accept strict FP32 | 1 failed, 1 passed in 0.72s",
+        "killed       strict chunks are the FP16 chunks | 1 failed, 1 passed in 0.72s",
+        "killed       strict decoder routed to library generate | 1 failed, 10 passed in 1.88s",
+        "killed       repetition penalty dropped | 1 failed, 16 passed in 16.70s",
+        "killed       engine rebuilt every call | 1 failed, 16 passed in 38.32s",
+        "killed       product run keeps FP32 | 1 failed, 14 passed in 2.06s",
+        "killed       managed opt-in ignored | 1 failed, 14 passed in 2.07s",
+        "killed       unsupported graph not checked at load | 1 failed, 17 passed in 16.68s",
+        "",
+        "11 of 11 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-strict-qualification-runtime",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 192.523,
+      "log": "../accept/20261124-final2-local-gpu-mutation-wt/mutation-strict-qualification-runtime/output.log",
+      "log_sha256": "6843854ea2ae882f176617772f576477df5818f993b4604a98b763b67a9b5428",
+      "detail": "",
+      "counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "29 passed in 22.08s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --copy tests/ledger --env PYTHONPATH=src:tests/v3:tests/ledger --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-local-gpu-mutation-wt/mutation-strict-qualification-runtime --mutants acceptance/mutants/strict-qualification-runtime.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_model_qualification.py tests/v3/test_model_probe_process.py tests/ledger/test_model_probe_agent.py'",
+        "control ok    | 29 passed in 22.08s",
+        "killed       key drops the decoder | 1 failed, 12 passed in 4.21s",
+        "killed       key accepts any decoder | 1 failed, 12 passed in 4.29s",
+        "killed       reference documents ignore the decoder dtype | 1 failed, 12 passed in 4.03s",
+        "killed       reference documents name the plain decoder | 1 failed, 12 passed in 4.13s",
+        "killed       check_reference builds the plain config | 1 failed, 13 passed in 13.90s",
+        "killed       build_reference builds the plain config | 1 failed, 13 passed in 12.88s",
+        "killed       strict cell config keeps float32 | 1 failed, 12 passed in 3.94s",
+        "killed       strict cell config names the plain decoder | 1 failed, 12 passed in 3.91s",
+        "killed       probe child ignores the decoder | 1 failed, 17 passed in 21.46s",
+        "killed       probe child ignores the noise engine | 1 failed, 17 passed in 21.55s",
+        "killed       frozen probe command drops the decoder | 1 failed, 26 passed in 21.58s",
+        "killed       frozen probe command drops the noise engine | 1 failed, 26 passed in 21.89s",
+        "killed       probe agent accepts any decoder | 1 failed, 28 passed in 23.76s",
+        "",
+        "13 of 13 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-int8-lora",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 88.237,
+      "log": "../accept/20261124-final2-local-gpu-mutation-wt/mutation-int8-lora/output.log",
+      "log_sha256": "f4e76a4afc09ac5705f61bbe1a050ccbe6dcde91c0b9ae7bf30909d2e12c1c6d",
+      "detail": "",
+      "counts": {
+        "passed": 12,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "12 passed in 16.42s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-local-gpu-mutation-wt/mutation-int8-lora --mutants acceptance/mutants/int8-lora.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_int8_lora.py'",
+        "control ok    | 12 passed in 16.42s",
+        "killed       int8 decoder without a LoRA space | 1 failed, 4 passed in 1.87s",
+        "killed       int8 decoder without a frozen base hash | 1 failed, 7 passed in 2.03s",
+        "killed       frozen base with another decoder | 1 failed, 7 passed in 1.98s",
+        "killed       no rank limit | 1 failed, 5 passed in 1.87s",
+        "killed       fp32 allowed for the int8 decoder | 1 failed, 3 passed in 1.86s",
+        "killed       base hash not compared | 1 failed, 2 passed in 1.86s",
+        "killed       base hash ignores the names | 1 failed, 11 passed in 14.19s",
+        "killed       prepare does not freeze | 1 failed, 2 passed in 1.92s",
+        "killed       frozen model decoded as B22 | 1 failed, 9 passed in 2.25s",
+        "killed       int8 chunks are the FP16 ones | 1 failed in 0.71s",
+        "killed       lab bridge offers the int8 decoder | 1 failed, 8 passed in 2.06s",
+        "killed       int8 decoder without the strict stop | 1 failed, 10 passed in 14.19s",
+        "killed       frozen export allowed | 1 failed, 10 passed in 14.83s",
+        "killed       plain LoRA documents gain the frozen key | 1 failed, 6 passed in 1.98s",
+        "",
+        "14 of 14 mutants killed."
+      ]
+    },
+    {
+      "name": "mutation-gpu-ownership-runtime",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 240.737,
+      "log": "../accept/20261124-final2-local-gpu-mutation-wt/mutation-gpu-ownership-runtime/output.log",
+      "log_sha256": "daa2e8acbb0437a93edee28c33ea9b0af88be6302971dbba02d693b33fcfcb15",
+      "detail": "",
+      "counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "29 passed in 22.97s",
+      "log_tail": [
+        "$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261124-final2-local-gpu-mutation-wt/mutation-gpu-ownership-runtime --mutants acceptance/mutants/gpu-ownership-runtime.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_strict_decoder.py tests/v3/test_sdk_lab.py'",
+        "control ok    | 29 passed in 22.97s",
+        "killed       export keeps the live model on the GPU | 1 failed, 18 passed in 23.58s",
+        "killed       release keeps the strict engine | 1 failed, 18 passed in 23.60s",
+        "killed       release leaves the model on the GPU | 1 failed, 18 passed in 23.59s",
+        "killed       strict release forgets to pop | 1 failed, 18 passed in 23.29s",
+        "killed       sdk qualifies the plain decoder | 1 failed, 27 passed in 23.46s",
+        "killed       sdk drops the decoder field | 1 failed, 27 passed in 23.47s",
+        "killed       lab request drops evalDtype | 1 failed, 28 passed in 23.41s",
+        "killed       lab request always sends evalDtype | 1 failed, 28 passed in 23.52s",
+        "killed       managed lab accepts FP16 for any decoder | 1 failed, 28 passed in 23.44s",
+        "",
+        "9 of 9 mutants killed."
+      ]
+    }
+  ]
+}
