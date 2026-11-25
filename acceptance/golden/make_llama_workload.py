@@ -28,7 +28,7 @@ for row in qwen["models"]["qwen"]["rows"]:
     messages = [{"role": "system", "content": turns["system"]}, {"role": "user", "content": turns["user"]}]
     text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, date_string=DATE)
     ids = tokenizer(text, add_special_tokens=False)["input_ids"]
-    rows.append({**{k: row[k] for k in ("id", "group", "answer", "scorer")}, "text": text, "tokenIds": json.dumps(ids)})
+    rows.append({**{k: row[k] for k in ("id", "group", "answer", "scorer")}, "text": text, "tokenIds": ids})
 print(
     json.dumps(
         {

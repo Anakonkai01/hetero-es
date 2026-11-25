@@ -6,6 +6,7 @@ người dùng lab: đăng nhập → chọn mô hình, dữ liệu, bộ chấm
 | Notebook | Nội dung |
 |---|---|
 | `00-chuan-bi.ipynb` | Đăng nhập lab, xem các GPU, thêm một máy GPU (lệnh cài, mã ghép), duyệt máy, kiểm thử GPU, lỗi hay gặp |
+| `e2-gsm8k-llama32-1b.ipynb` | GSM8K × Llama-3.2-1B-Instruct, 512 token (họ mô hình khác Qwen, RoPE `llama3`) |
 | `e1-gsm8k-qwen05.ipynb` | GSM8K × Qwen2.5-0.5B-Instruct, 512 token |
 | `e3-gsm8k-qwen15.ipynb` | GSM8K × Qwen2.5-1.5B-Instruct, 512 token |
 | `e4-countdown-qwen15.ipynb` | Countdown × Qwen2.5-1.5B-Instruct, 384 token, hai đoạn (đoạn 2 chạy tiếp từ thế hệ 110) |
@@ -50,12 +51,13 @@ cd runtime/notebooks/experiments
     --ExecutePreprocessor.kernel_name=heteroes-experiments --ExecutePreprocessor.timeout=-1 e5-countdown-qwen05.ipynb
 ```
 
-## Vì sao không có E2
+## E2: Llama-3.2-1B thay cho SmolLM2-1.7B
 
-E2 dự kiến là GSM8K × SmolLM2-1.7B (họ Llama). Mô hình này không dùng GQA (32 đầu KV), nên bộ suy luận nghiêm ngặt cần
-khoảng 6,1 GB cho lô 8 câu, vượt ngân sách 4,8 GB của decoder trên RTX 3060 12 GB; Llama 3.2 dùng RoPE `llama3` mà
-decoder chưa hỗ trợ. Bộ suy luận nghiêm ngặt hiện cần mô hình có GQA và RoPE mặc định (Qwen2, Llama và Mistral loại đó)
-để chạy trên GPU 12 GB.
+E2 dự kiến ban đầu là GSM8K × SmolLM2-1.7B (họ Llama). Mô hình này không dùng GQA (32 đầu KV), nên bộ suy luận nghiêm
+ngặt cần khoảng 6,1 GB cho lô 8 câu, vượt ngân sách 4,8 GB của decoder trên RTX 3060 12 GB. E2 nay dùng
+Llama-3.2-1B-Instruct (GQA 32/8 đầu): từ 26/11 decoder tính được RoPE kiểu `llama3` và đã chạy trên RTX 5070 Ti
+(cùng SHA đầu ra khi chạy lại). Kiểm chéo với RTX 3060 dùng probe `acceptance/probes/strict_parity.py --model llama32`
+(golden ghi trên 5070 Ti); E2 chạy khi có đủ GPU.
 
 ## Yêu cầu
 
