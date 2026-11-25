@@ -487,7 +487,11 @@ class Run:
         """What the lab shows of the run: status, rewards per generation, validations and work per device. A long run's
         timeline keeps its newest generations whole; the coordinator's ledger has every record."""
         experiment, timeline = self.experiment(), self.timeline()
-        events = [e for e in self.lab.request("GET", "/api/v1/events") if e.get("experimentId") == self.id]
+        events = [
+            e
+            for e in self.lab.request("GET", f"/api/v1/events?experimentId={self.id}")
+            if e.get("experimentId") == self.id
+        ]
         work = {}
         for job in timeline["jobs"]:
             if job.get("status") == "SUCCEEDED":
@@ -499,7 +503,12 @@ class Run:
                 for g in timeline["generations"]
                 if g.get("doneMs")
             ],
+            # the run's own record keeps every validation; the event list keeps only a run's newest events
             "validation": [
+                {"generation": v.get("generation"), "reward": v.get("meanReward")}
+                for v in (experiment.get("studyMetrics") or {}).get("validation") or []
+            ]
+            or [
                 {
                     "generation": (e.get("details") or {}).get("generation"),
                     "reward": (e.get("details") or {}).get("meanReward"),

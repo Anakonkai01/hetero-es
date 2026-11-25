@@ -289,3 +289,22 @@ def test_a_refused_lab_request_says_why_in_the_error(monkeypatch, body, shown):
     with pytest.raises(sdk_lab.LabError, match="Lab HTTP 422") as refused:
         sdk_lab._http("https://lab.example/api/v1/experiments", "POST", {})
     assert shown in str(refused.value)
+
+
+def test_a_long_run_keeps_its_validations_after_the_lab_trims_its_event_list():
+    # Seen 2026-11-25 (E4 Countdown 1.5B, 123 generations): the lab keeps a run's newest 500 events, so the early
+    # validation events were gone and the notebook found no validation to choose a checkpoint by.
+    from heteroes.sdk_lab import Lab, Run
+
+    lab = Lab("https://lab.example", "fixture", "lab")
+    kept = [{"generation": -1, "meanReward": 0.1}, {"generation": 24, "meanReward": 0.2}]
+    replies = {
+        "/api/v1/experiments/r": {"status": "CANCELLED", "completedGenerations": 2, "studyMetrics": {"validation": kept}},
+        "/api/v1/experiments/r/timeline": {"generations": [], "jobs": []},
+        "/api/v1/events?experimentId=r": [{"experimentId": "r", "eventType": "replay", "details": {}}],
+    }
+    lab.request = lambda method, path, body=None: replies[path]
+    assert Run(lab, "r").results()["validation"] == [
+        {"generation": -1, "reward": 0.1},
+        {"generation": 24, "reward": 0.2},
+    ]
