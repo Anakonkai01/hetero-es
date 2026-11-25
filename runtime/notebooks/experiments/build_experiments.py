@@ -506,18 +506,45 @@ def table(folder):
 
 
 table(HERE)"""),
-    md("""## Tốc độ: 1 GPU so với nhiều GPU
+    md("""## Tốc độ: một thế hệ dùng thời gian vào đâu
 
-Trung vị số giây một thế hệ, đọc từ ledger của coordinator. Mốc 1 GPU là một run ngắn 6 thế hệ chỉ trên 5070 Ti của
-Nhân, cùng cấu hình."""),
-    code(r"""for path in sorted((HERE / "results").glob("*.json")):
-    s = json.loads(path.read_text())
-    speed = s.get("speed") or {}
-    one = speed.get("5070ti-nhan", {}).get("medianSeconds")
-    print(s["name"])
-    for machines, v in sorted(speed.items(), key=lambda kv: kv[0].count("+")):
-        gain = f"  nhanh gấp {one / v['medianSeconds']:.2f}" if one and machines != "5070ti-nhan" else ""
-        print(f"   {machines:50} {v['generations']:4} thế hệ  {v['medianSeconds']:6.1f} s/thế hệ{gain}")"""),
+Trung vị giây mỗi thế hệ theo từng bước, không tính các thế hệ có chấm validation và thế hệ bị tạm dừng. Mốc 1 GPU là run
+ngắn 6 thế hệ chỉ trên 5070 Ti của Nhân, cùng cấu hình. Đọc từ nhật ký sự kiện và ledger của coordinator (chỉ có trên máy coordinator). Chỉ bước **chấm candidate** chia được
+cho nhiều GPU; cập nhật ES, phát hành trọng số và ghi điểm khôi phục chạy tuần tự trên coordinator, nên thêm GPU không
+làm chúng ngắn đi (định luật Amdahl). Các run dưới đây ghi điểm khôi phục **mỗi thế hệ**; từ 25/11 mặc định là 10 thế hệ
+một lần."""),
+    code(r"""import sys
+
+sys.path[:0] = [str(HERE), str(HERE.parents[1] / "src")]
+import matplotlib.pyplot as plt
+import runner
+
+names = {d.worker_id: d.name for d in __import__("heteroes.sdk_lab", fromlist=["Lab"]).Lab.from_session().devices()}
+rows = []
+for path in sorted((HERE / "state").glob("*.json")):
+    state = json.loads(path.read_text())
+    runs = [(k, v) for k, v in state.get("segments", {}).items()] + ([("one-gpu", state["one-gpu"])] if "one-gpu" in state else [])
+    for key, entry in runs:
+        p = runner.phases(entry["experimentId"])
+        if p and p["generations"]:
+            rows.append((f"{path.stem} {key}", entry["workers"], p, runner.device_timing(entry["experimentId"], names)))
+steps = ["chấm candidate", "cập nhật ES", "phát hành trọng số", "điểm khôi phục + mở thế hệ sau"]
+for label, workers, p, devices in rows:
+    print(f"{label:32} {len(devices)} GPU  tổng {p['tổng']:6.1f} s = " + " + ".join(f"{s} {p[s]}" for s in steps))
+    for device, d in sorted(devices.items()):
+        print(f"      {device:12} vào việc sau {d['startSeconds']:5.1f} s  {d['secondsPerCandidate']:5.2f} s/candidate  "
+              f"{d['candidatesPerGeneration']:5.1f} candidate/thế hệ")
+fig, ax = plt.subplots(figsize=(9, 0.6 * len(rows) + 1))
+left = [0] * len(rows)
+for step, color in zip(steps, ["#257de0", "#f47230", "#00b894", "#f2a600"]):
+    values = [p[step] for _, _, p, _ in rows]
+    ax.barh(range(len(rows)), values, left=left, color=color, label=step, edgecolor="white")
+    left = [a + b for a, b in zip(left, values)]
+ax.set_yticks(range(len(rows)), [f"{label} ({len(d)} GPU)" for label, _, _, d in rows])
+ax.set_xlabel("giây / thế hệ (trung vị)")
+ax.legend(loc="lower right", fontsize=8)
+plt.tight_layout()
+plt.show()"""),
     md("""## Lần 1 (đêm 24 → 25/11) và các run trước đó
 
 Lần 1 nằm trong `v1/` (notebook, kết quả, quyết định). Phát hiện chính, và là lý do làm lại:
@@ -533,7 +560,8 @@ Lần 1 nằm trong `v1/` (notebook, kết quả, quyết định). Phát hiện
 
 Lần 2 không còn E2. SmolLM2-1.7B (họ Llama) không chạy được trên RTX 3060 12 GB với bộ suy luận nghiêm ngặt: mô hình
 này không dùng GQA (32 đầu KV, bằng số đầu attention), nên bộ nhớ KV của lô 8 câu đã cần khoảng 6,1 GB, vượt ngân sách
-4,8 GB (40% VRAM) của decoder. Llama 3.2 dùng kiểu RoPE `llama3`, decoder chưa hỗ trợ (chỉ RoPE mặc định).
+4,8 GB (40% VRAM) của decoder. Llama 3.2 dùng kiểu RoPE `llama3`: từ 25/11 decoder đã tính được kiểu RoPE này (kiểm
+trên CPU so với `transformers`), còn chờ nghiệm thu trên GPU trước khi chạy E2 với Llama-3.2-1B.
 SmolLM2-360M thì chạy được nhưng chỉ đúng 2/128 câu GSM8K. Đây là giới hạn hiện tại của hệ thống: mô hình cần GQA
 và RoPE mặc định để vừa một GPU 12 GB.
 

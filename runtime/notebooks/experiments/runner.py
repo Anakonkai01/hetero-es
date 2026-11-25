@@ -335,3 +335,70 @@ def finished(report, task):
     right = sum(1 for i in done if checkpoint["scores"][i] == 1)
     return {"finished": len(done), "rightAmongFinished": right, "count": len(checkpoint["outputs"]),
             "truncated": checkpoint.get("truncated")}
+
+
+def phases(run_id):
+    """Median seconds of each step of a generation, from the coordinator's events (validation generations left out):
+    scoring the candidates (all GPUs; includes workers loading the new weights), the ES update, publishing the new
+    weights, and the wait until the next generation opens (the recovery point is written there)."""
+    import collections
+    import statistics
+
+    path = RUNS / run_id / "events.jsonl"
+    if not path.is_file():
+        return None
+    first = collections.defaultdict(dict)
+    for line in path.read_text().splitlines():
+        event = json.loads(line)
+        if "generation" in event:
+            first[event["generation"]].setdefault(event["event"], event["t"])
+    steps = collections.defaultdict(list)
+    for g, at in first.items():
+        after = first.get(g + 1, {})
+        needed = ("generation_open", "generation_complete", "update_applied", "generation_done")
+        if "validation_completed" in at or "generation_open" not in after or not all(k in at for k in needed):
+            continue
+        total = after["generation_open"] - at["generation_open"]
+        if total > 600:  # a paused generation is not a typical one
+            continue
+        steps["chấm candidate"].append(at["generation_complete"] - at["generation_open"])
+        steps["cập nhật ES"].append(at["update_applied"] - at["generation_complete"])
+        steps["phát hành trọng số"].append(at["generation_done"] - at["update_applied"])
+        steps["điểm khôi phục + mở thế hệ sau"].append(after["generation_open"] - at["generation_done"])
+        steps["tổng"].append(total)
+    return {k: round(statistics.median(v), 1) for k, v in steps.items()} | {"generations": len(steps["tổng"])}
+
+
+def device_timing(run_id, names):
+    """Per GPU, median over generations: when it starts its first candidate after the generation opens, seconds per
+    candidate while it works, and candidates per generation (from the ledger)."""
+    import collections
+    import sqlite3
+    import statistics
+
+    path = RUNS / run_id / "ledger.sqlite"
+    if not path.is_file():
+        return None
+    db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    opened = {g: t for g, t in db.execute("SELECT generation, COALESCE(applied_at, recorded_at) FROM generation_update")}
+    per = collections.defaultdict(lambda: collections.defaultdict(list))
+    for g, w, start, end in db.execute(
+        "SELECT c.generation, a.worker_id, a.leased_at, a.ended_at FROM result r JOIN attempt a ON a.candidate_id = "
+        "r.candidate_id AND a.attempt_number = r.attempt_number JOIN candidate c ON c.candidate_id = r.candidate_id"
+    ):
+        per[names.get(w, w)][g].append((start, end))
+    out = {}
+    for device, generations in per.items():
+        starts, rates, counts = [], [], []
+        for g, jobs in generations.items():
+            if g - 1 not in opened or min(s for s, _ in jobs) - opened[g - 1] > 300:
+                continue
+            first, last = min(s for s, _ in jobs), max(e for _, e in jobs)
+            starts.append(first - opened[g - 1])
+            rates.append((last - first) / len(jobs))
+            counts.append(len(jobs))
+        if starts:
+            out[device] = {"startSeconds": round(statistics.median(starts), 1),
+                           "secondsPerCandidate": round(statistics.median(rates), 2),
+                           "candidatesPerGeneration": round(statistics.mean(counts), 1)}
+    return out
