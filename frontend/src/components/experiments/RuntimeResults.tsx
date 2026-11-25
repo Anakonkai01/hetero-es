@@ -102,9 +102,9 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
         </div>
         <p className="info-caption">
           {e.recipeVersion === 3
-            ? `${t('Best validation reward')}: ${e.validationScore ?? '—'} · ${t('Test reward')}: ${e.studyMetrics?.testLocked !== false ? t('Locked') : (e.testScore ?? '—')} · ${t('Weight space')}: ${e.weightSpace?.kind}`
+            ? `${t('Best validation reward')}: ${e.validationScore != null ? e.validationScore.toFixed(4) : '—'} · ${t('Test reward')}: ${e.studyMetrics?.testLocked !== false ? t('Locked') : (e.testScore != null ? e.testScore.toFixed(4) : '—')} · ${t('Weight space')}: ${e.weightSpace?.kind}`
             : e.recipeVersion === 2
-              ? `${t('Best validation accuracy')}: ${e.validationScore ?? '—'} · ${t('Test accuracy')}: ${e.studyMetrics?.testLocked !== false ? t('Locked') : (e.testScore ?? '—')} · ${t('Export reload')}: ${e.studyMetrics?.independentReloadPassed ? t('Verified') : t('Pending')}`
+              ? `${t('Best validation accuracy')}: ${e.validationScore != null ? e.validationScore.toFixed(4) : '—'} · ${t('Test accuracy')}: ${e.studyMetrics?.testLocked !== false ? t('Locked') : (e.testScore != null ? e.testScore.toFixed(4) : '—')} · ${t('Export reload')}: ${e.studyMetrics?.independentReloadPassed ? t('Verified') : t('Pending')}`
               : t(
                   'Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.',
                 )}
