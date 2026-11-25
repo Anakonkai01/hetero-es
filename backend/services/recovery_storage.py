@@ -55,8 +55,20 @@ class RecoveryStorage:
             "warning": observed + reserved >= self.quota * 0.8,
         }
 
+    def release_superseded(self):
+        """Drop unfinished points older than a verified point of the same run, with their reserved bytes: a run only
+        ever resumes from its newest verified point, and an abandoned upload otherwise held twice its size of the quota
+        for good (25/11: 22 such points held 79 GB and refused the final point of a finished run)."""
+        with self.lock:
+            with self.store.db() as db:
+                stale = [row[0] for row in repository.superseded_pending_points(db, ())]
+            for point_id in stale:
+                self.delete_point(point_id)
+        return stale
+
     def begin(self, m):
         self.validate_manifest(m)
+        self.release_superseded()
         with self.lock:
             with self.store.db() as db:
                 old = repository.begin_select_recovery_points(db, (m["pointId"],)).fetchone()
@@ -157,6 +169,7 @@ class RecoveryStorage:
                 with self.store.db() as db:
                     repository.verify_update_recovery_points(db, (point_id,))
                 self.retain(m["runId"], m["backupPolicy"]["retain"])
+                self.release_superseded()
                 with self.store.db() as db:
                     body = self.store.get(m["runId"])
                     if body:

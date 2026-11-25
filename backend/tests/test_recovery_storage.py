@@ -114,6 +114,21 @@ def test_inflight_reservations_count_and_shared_objects_are_not_deleted(storage)
     assert len(st.points("b" * 32)) == 1
 
 
+def test_an_unfinished_point_older_than_a_verified_one_gives_its_reservation_back(storage):
+    st, obj, s = storage
+    abandoned = {**manifest(b"older" * 100, point="e" * 32), "generation": 1}
+    st.begin(abandoned)  # never uploaded: its bytes stay reserved
+    assert st.usage()["reservedBytes"] == 2 * 500
+    newer = {**manifest(point="f" * 32), "generation": 2}
+    upload(st, obj, newer)
+    assert [p["pointId"] for p in st.points("b" * 32)] == ["f" * 32]
+    assert st.usage()["reservedBytes"] == 0
+    pending_final = {**manifest(b"final" * 10, point="9" * 32), "generation": 3, "final": True}
+    st.begin(pending_final)  # newer than every verified point: kept while its upload goes on
+    st.begin(manifest(b"other", point="8" * 32) | {"runId": "c" * 32})
+    assert {p["pointId"] for p in st.points("b" * 32)} == {"f" * 32, "9" * 32}
+
+
 def test_unsafe_paths_and_changed_point_identity_are_rejected(storage):
     st, obj, s = storage
     m = manifest()

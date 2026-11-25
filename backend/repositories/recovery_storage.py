@@ -14,6 +14,15 @@ class RecoveryStorageRepository:
         )
 
     @staticmethod
+    def superseded_pending_points(db, parameters=()):
+        return execute(
+            db,
+            "SELECT p.id FROM recovery_points p WHERE p.status='PENDING' AND EXISTS (SELECT 1 FROM recovery_points q "
+            "WHERE q.run_id=p.run_id AND q.status='READY' AND q.generation>p.generation)",
+            parameters,
+        )
+
+    @staticmethod
     def grant_select_assignments(db, parameters=()):
         return execute(db, "SELECT coordinator,epoch,run_id FROM assignments WHERE id=:p0", parameters)
 

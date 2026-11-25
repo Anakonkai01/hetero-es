@@ -123,6 +123,15 @@ def test_failures_back_off_and_the_state_survives_a_restart(tmp_path):
     assert read_json(root / "cloud-backoff.json")["retryAt"] - now[0] == 3600  # capped
 
 
+def test_a_point_older_than_a_verified_one_is_not_uploaded(tmp_path, monkeypatch):
+    root = tmp_path / "runs" / "run"
+    points_of(root, [None, "READY", None], retain=3)
+    sent = []
+    monkeypatch.setattr(CloudSync, "upload", lambda self, point, assignment: sent.append(point.name) or {})
+    CloudSync(agent_for(tmp_path, offline), clock=lambda: 10.0).cycle()
+    assert sent == ["2"]  # the newest point goes up; g0, older than the verified g1, is never needed again
+
+
 def test_success_clears_the_backoff(tmp_path, monkeypatch):
     root = tmp_path / "runs" / "run"
     points_of(root, ["ERROR"])

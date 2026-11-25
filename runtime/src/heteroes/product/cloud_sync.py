@@ -101,9 +101,15 @@ class CloudSync:
             except Exception:
                 remaining.append(point_id)
         write_json(root / "cloud-cleanup.json", remaining)
+        newer_ready = False  # points come newest first
         for point in points:
             status = read_json(point / "cloud-state.json", {})
             if status.get("status") == "READY":
+                newer_ready = True
+                continue
+            if newer_ready:
+                # a run resumes from its newest verified point only: an older one is not uploaded any more (the lab
+                # drops its unfinished copy and the bytes it reserved)
                 continue
             try:
                 if status.get("status") == "VERIFYING":
