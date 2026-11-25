@@ -88,8 +88,11 @@ def source_identity(root):
     return {"sourceTreeSha256": hashlib.sha256(encoded).hexdigest(), "sourceFiles": files}
 
 
-def capture_point(root, summary, recipe, policy, final=False, identity=None):
+def capture_point(root, summary, recipe, policy, final=False, identity=None, always=False):
     """Called only after publication and before the next generation opens.
+
+    `final` marks the run's last weights; `always` captures between backup intervals without that mark (the point a
+    paused run resumes from: marking it final made it outrank the run's real final point, 25/11).
 
     Published weights are immutable: hard links keep them alive through pruning.
     Their filename already carries the runtime-verified publication SHA. Upload
@@ -97,7 +100,7 @@ def capture_point(root, summary, recipe, policy, final=False, identity=None):
     """
     root = Path(root)
     generation = summary["generation"]
-    if not final and (generation + 1) % policy["interval"]:
+    if not final and not always and (generation + 1) % policy["interval"]:
         return None
     large = data_root(root)
     destination = large / "recovery-points" / uuid.uuid4().hex

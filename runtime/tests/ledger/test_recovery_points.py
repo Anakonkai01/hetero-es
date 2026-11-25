@@ -52,6 +52,13 @@ def test_corruption_and_pending_publication_cannot_restore(tmp_path):
     assert not (tmp_path / "bad").exists()
 
 
+def test_a_pause_point_is_captured_between_intervals_and_is_not_the_runs_final_point(tmp_path):
+    root, sha = sample(tmp_path)
+    summary = {"generation": 0, "child_sha256": sha, "parent_sha256": sha}
+    point = capture_point(root, summary, {}, {"interval": 10, "retain": 3}, always=True)
+    assert json.loads((point / "manifest.json").read_text())["final"] is False
+
+
 def test_backup_policy_does_not_create_points_between_intervals(tmp_path):
     root, sha = sample(tmp_path)
     assert (

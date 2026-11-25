@@ -407,7 +407,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
                 last_summary,
                 recipe.to_dict(),
                 active_policy,
-                final=True,
+                always=True,
                 identity={
                     "code": {**code_info(), **source_identity(Path(__file__).resolve().parents[1])},
                     "environment": environment_info(device),
