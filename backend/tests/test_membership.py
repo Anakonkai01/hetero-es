@@ -407,6 +407,23 @@ def test_turning_a_member_off_sends_no_cancellation_to_anyone(lab):
     assert not [c for d in everyone for c in runtime.commands(d["deviceId"]) if c["kind"] == "CANCEL_ASSIGNMENT"]
 
 
+def test_turning_off_a_worker_already_removed_from_a_run_does_not_cancel_that_run(lab):
+    # Seen 2026-11-25 10:33 (E4 Countdown 1.5B, generation 123/150): the admin removed a worker whose results never
+    # arrived, then turned its machine OFF one second later; the lab cancelled the whole run for everyone.
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    first = devices[0][0]
+    assert change(lab, rid, first["workerId"], "remove").status_code == 200
+    client.post(
+        "/api/v1/devices/" + first["deviceId"] + "/contribution",
+        headers=admin,
+        json={"enabled": False, "bootId": "boot-1"},
+    )
+    assert not store.get(rid).get("cancelRequested")
+    everyone = [coordinator, *[d for d, _ in devices]]
+    assert not [c for d in everyone for c in runtime.commands(d["deviceId"]) if c["kind"] == "CANCEL_ASSIGNMENT"]
+
+
 def test_turning_the_last_member_off_still_cancels(lab):
     client, store, runtime, admin = lab
     rid, (coordinator, ch), devices = running(lab, workers=1)

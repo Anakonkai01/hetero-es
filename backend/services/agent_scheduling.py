@@ -251,7 +251,10 @@ class AgentScheduling:
         for (run_id,) in repository.leave_on_disable_select_assignments(db, (device["id"], device["id"])).fetchall():
             body = self.store.get(run_id)
             members = self.intended_members(db, run_id, body["workerIds"]) if body else []
-            if (
+            if body and device["worker_id"] not in members:
+                # already removed (its LEAVE is pending or done): only its reservation is left, nothing to cancel
+                left.add(run_id)
+            elif (
                 device["worker_id"] in members
                 and len(members) > 1
                 and self._try_change(db, run_id, device["worker_id"], "LEAVE")
