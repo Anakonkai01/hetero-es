@@ -527,8 +527,9 @@ table(HERE)"""),
 Trung vị giây mỗi thế hệ theo từng bước, không tính các thế hệ có chấm validation và thế hệ bị tạm dừng. Mốc 1 GPU là run
 ngắn 6 thế hệ chỉ trên 5070 Ti của Nhân, cùng cấu hình. Đọc từ nhật ký sự kiện và ledger của coordinator (chỉ có trên máy coordinator). Chỉ bước **chấm candidate** chia được
 cho nhiều GPU; cập nhật ES, phát hành trọng số và ghi điểm khôi phục chạy tuần tự trên coordinator, nên thêm GPU không
-làm chúng ngắn đi (định luật Amdahl). Các run dưới đây ghi điểm khôi phục **mỗi thế hệ**; từ 25/11 mặc định là 10 thế hệ
-một lần."""),
+làm chúng ngắn đi (định luật Amdahl). Các run của E4 ghi điểm khôi phục **mỗi thế hệ**; từ 25/11 mặc định là 10 thế hệ
+một lần. Dòng `e4-speed-backup10 one-gpu` (26/11) là cùng cấu hình E4 trên một 5070 Ti với điểm khôi phục 10 thế hệ một
+lần: bước "điểm khôi phục + mở thế hệ sau" giảm rõ, còn tổng một thế hệ chủ yếu phụ thuộc bước chấm candidate."""),
     code(r"""import sys
 
 sys.path[:0] = [str(HERE), str(HERE.parents[1] / "src")]
@@ -574,10 +575,11 @@ Lần 1 nằm trong `v1/` (notebook, kết quả, quyết định). Phát hiện
 | Countdown × Qwen 0.5B (24/11, ngoài lab), 0 → 33/250 | **có** | mô hình gốc 0/250 kể cả với 1024 token |
 | Phép nhân × Qwen 0.5B (trước 24/11, ngoài lab), 95 → 186/300 | một phần | phần lớn là học ghi `\\boxed{}` (179 → 300 câu có ô), nhưng đúng trên câu có ô vẫn tăng 53% → 62% |
 
-Lần 2 không còn E2. SmolLM2-1.7B (họ Llama) không chạy được trên RTX 3060 12 GB với bộ suy luận nghiêm ngặt: mô hình
+E2 của lần 2 đổi sang Llama-3.2-1B. SmolLM2-1.7B (họ Llama) không chạy được trên RTX 3060 12 GB với bộ suy luận nghiêm ngặt: mô hình
 này không dùng GQA (32 đầu KV, bằng số đầu attention), nên bộ nhớ KV của lô 8 câu đã cần khoảng 6,1 GB, vượt ngân sách
-4,8 GB (40% VRAM) của decoder. Llama 3.2 dùng kiểu RoPE `llama3`: từ 25/11 decoder đã tính được kiểu RoPE này (kiểm
-trên CPU so với `transformers`), còn chờ nghiệm thu trên GPU trước khi chạy E2 với Llama-3.2-1B.
+4,8 GB (40% VRAM) của decoder. Llama 3.2 dùng kiểu RoPE `llama3`: từ 25/11 decoder tính được kiểu RoPE này (kiểm
+trên CPU so với `transformers`), và ngày 26/11 Llama-3.2-1B đã chạy trên RTX 5070 Ti với golden parity riêng
+(`acceptance/golden/strict-b22-llama32.json`); còn chờ một RTX 3060 chạy lại probe đó, rồi E2 chạy với Llama-3.2-1B.
 SmolLM2-360M thì chạy được nhưng chỉ đúng 2/128 câu GSM8K. Đây là giới hạn hiện tại của hệ thống: mô hình cần GQA
 và RoPE mặc định để vừa một GPU 12 GB.
 

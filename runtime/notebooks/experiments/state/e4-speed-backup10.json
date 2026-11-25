@@ -1,0 +1,10 @@
+{
+ "segments": {},
+ "one-gpu": {
+  "experimentId": "6131a0ade3834556b9051407c0516bd3",
+  "workers": [
+   "5070ti-nhan"
+  ],
+  "generations": 16
+ }
+}
