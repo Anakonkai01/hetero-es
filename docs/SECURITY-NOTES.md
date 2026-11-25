@@ -4,7 +4,7 @@ The storage-path policy and the research coordinator trust model are recorded he
 
 | Finding                                                       | Evidence in current code                                                                                                                      | Decision needed                                                                                                                                          |
 | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A workstation-specific directory is forbidden in shipped code | `backend/storage/local_backend.py`, `backend/storage/s3_backend.py`, `runtime/src/heteroes/product/storage.py` and `desktop/worker/electron/setup.cjs` reject `/mnt/sekai` explicitly. | Decide the configurable storage policy and its migration/installer defaults. The owner rule prohibiting this directory on the workstation still applies. |
+| A workstation-specific directory is forbidden in shipped code | `runtime/src/heteroes/product/storage.py` and `desktop/worker/electron/setup.cjs` reject `/mnt/sekai` explicitly (the lab storage backends no longer do: since 2026-11-25 the owner keeps the lab's recovery storage there). | Decide the configurable storage policy and its migration/installer defaults. The owner rule prohibiting this directory on the workstation still applies. |
 
 ## Resolved: the private lab address is for members only (owner, 2026-10-21)
 

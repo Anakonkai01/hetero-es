@@ -55,8 +55,6 @@ class S3Backend:
         ):
             raise ValueError("Configure distinct recovery, datasets and backups bucket names")
         self.root = Path(config["stagingDirectory"]).resolve()
-        if self.root == Path("/mnt/sekai") or Path("/mnt/sekai") in self.root.parents:
-            raise ValueError("Sekai is not authorized for HeteroES storage")
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
         self._key_file = Path(config["signingKeyFile"])
         self._private_endpoint = private

@@ -41,8 +41,8 @@ The last published installer line is r10. See `docs/HANDOFF.md` for deployment s
 SSH to another machine requires a specific owner request; historical SSH permission does not authorize new remote work.
 
 GPU computation requires the owner's authorization, an explicit `--gpu` where supported and
-`HETEROES_GPU_ACCEPTANCE=1`. CPU checks use `CUDA_VISIBLE_DEVICES=''`. Never use `/mnt/sekai`. Verify the selected Archive
-disk UUID before writing there. Private state/runtimes stay on the system filesystem; packaging checks use `.scratch/`.
+`HETEROES_GPU_ACCEPTANCE=1`. CPU checks use `CUDA_VISIBLE_DEVICES=''`. Use `/mnt/sekai` only for the lab's recovery storage
+(`HETEROES-LAB-KHONG-XOA/`, owner 2026-11-25); nothing else goes there. Verify the selected disk UUID before writing. Private state/runtimes stay on the system filesystem; packaging checks use `.scratch/`.
 
 ## Numerical contract
 

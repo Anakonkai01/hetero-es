@@ -107,8 +107,6 @@ class LocalBackend:
             if not re.fullmatch("[a-fA-F0-9-]+", expected_uuid):
                 raise ValueError("Invalid storage volume UUID")
             self.check_volume()
-        if self.root == Path("/mnt/sekai") or Path("/mnt/sekai") in self.root.parents:
-            raise ValueError("Sekai is not authorized for HeteroES storage")
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.metadata_root = Path(metadata_root).resolve() if metadata_root is not None else None
         if self.metadata_root is not None:
