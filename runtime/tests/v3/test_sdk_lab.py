@@ -308,3 +308,27 @@ def test_a_long_run_keeps_its_validations_after_the_lab_trims_its_event_list():
         {"generation": -1, "reward": 0.1},
         {"generation": 24, "reward": 0.2},
     ]
+
+
+def test_a_notebook_keeps_working_after_signing_in_again_when_its_session_expires(monkeypatch, tmp_path):
+    # Seen 2026-11-25 10:32: a lab session lasts 12 hours; the notebook kernel kept the expired token and failed with
+    # 401 although `scripts/lab-login.py` had saved a fresh session.
+    from heteroes import sdk_lab
+
+    saved = tmp_path / "session.json"
+    saved.write_text(json.dumps({"url": "https://lab.example", "token": "old", "workspace": "w"}))
+    lab = sdk_lab.Lab.from_session(saved)
+    seen = []
+
+    def http(url, method, body=None, headers=None):
+        seen.append(headers["Authorization"])
+        if headers["Authorization"] != "Bearer new":
+            raise sdk_lab.LabError("Lab HTTP 401: session expired")
+        return {"ok": True}
+
+    monkeypatch.setattr(sdk_lab, "_http", http)
+    with pytest.raises(sdk_lab.LabError, match="401"):  # nobody signed in again: the expiry still shows
+        lab.request("POST", "/api/v1/experiments", {})
+    saved.write_text(json.dumps({"url": "https://lab.example", "token": "new", "workspace": "w"}))
+    assert lab.request("POST", "/api/v1/experiments", {}) == {"ok": True}
+    assert seen == ["Bearer old", "Bearer old", "Bearer new"]

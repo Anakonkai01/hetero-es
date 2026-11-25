@@ -66,9 +66,10 @@ def safe_view(snapshot):
 class Lab:
     """A signed-in session on a lab: an access token (valid 12 hours) and a workspace, kept in memory only."""
 
-    def __init__(self, url, token, workspace):
+    def __init__(self, url, token, workspace, session_path=None):
         self.url, self.workspace = url.rstrip("/"), workspace
         self._token = token
+        self._session_path = session_path  # a session read from a file is read again when its token expires
 
     def __repr__(self):
         return f"Lab({self.url!r}, workspace={self.workspace!r})"
@@ -89,10 +90,32 @@ class Lab:
     def from_session(cls, path=Path.home() / ".config" / "heteroes-demo" / "session.json"):
         """The session `scripts/lab-login.py` saved (0600, outside the repository)."""
         value = json.loads(Path(path).read_text())
-        return cls(value["url"], value["token"], value["workspace"])
+        return cls(value["url"], value["token"], value["workspace"], session_path=Path(path))
+
+    def _signed_in_again(self):
+        """True when the saved session now holds a newer token (someone ran `scripts/lab-login.py` again)."""
+        if self._session_path is None:
+            return False
+        try:
+            value = json.loads(self._session_path.read_text())
+        except (OSError, ValueError):
+            return False
+        if value.get("url", "").rstrip("/") != self.url or value.get("token") in (None, self._token):
+            return False
+        self._token, self.workspace = value["token"], value.get("workspace", self.workspace)
+        return True
 
     def request(self, method, path, body=None, retries=5, sleep=time.sleep):
-        """A read is retried through short network failures (the public edge resets a connection now and then)."""
+        """A read is retried through short network failures (the public edge resets a connection now and then). An
+        expired session (401) is retried once with the token saved since, so a long notebook outlives its 12 hours."""
+        try:
+            return self._request(method, path, body, retries, sleep)
+        except LabError as error:
+            if not str(error).startswith("Lab HTTP 401") or not self._signed_in_again():
+                raise
+            return self._request(method, path, body, retries, sleep)
+
+    def _request(self, method, path, body, retries, sleep):
         for attempt in range(retries if method == "GET" else 1):
             try:
                 return _http(
