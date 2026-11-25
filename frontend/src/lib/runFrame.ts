@@ -157,7 +157,9 @@ export function runBounds(timeline: Timeline): { startMs: number; endMs: number 
 export function replayBounds(timeline: Timeline): { startMs: number; endMs: number } {
   const bounds = runBounds(timeline);
   const detailed = timeline.history?.partial ? timeline.history.detailedStartMs : null;
-  return detailed != null && detailed > bounds.startMs && detailed < bounds.endMs ? { ...bounds, startMs: detailed } : bounds;
+  return detailed != null && detailed > bounds.startMs && detailed < bounds.endMs
+    ? { ...bounds, startMs: detailed }
+    : bounds;
 }
 
 /**

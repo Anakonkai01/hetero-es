@@ -273,7 +273,9 @@ def test_a_pinned_download_may_move_to_an_https_cdn_but_never_to_plain_http_else
     from heteroes.http_safety import RedirectError
 
     handler = downloads.SameOriginRedirect()
-    request = urllib.request.Request("https://huggingface.co/m/resolve/rev/model.safetensors", headers={"Range": "bytes=5-"})
+    request = urllib.request.Request(
+        "https://huggingface.co/m/resolve/rev/model.safetensors", headers={"Range": "bytes=5-"}
+    )
     moved = handler.redirect_request(request, None, 302, "Found", {}, "https://us.aws.cdn.hf.co/xet/abc?sig=1")
     assert moved.full_url == "https://us.aws.cdn.hf.co/xet/abc?sig=1" and moved.get_header("Range") == "bytes=5-"
     with pytest.raises(RedirectError, match="http://elsewhere.example"):

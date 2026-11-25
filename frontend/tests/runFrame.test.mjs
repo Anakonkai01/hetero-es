@@ -421,7 +421,9 @@ test('a replay starts from the beginning, playing; after watching the run live i
 });
 
 test('a replay of a trimmed history starts at its first detailed candidate, a full one at the run start', () => {
-  const timeline = synthetic({ experiment: { ...synthetic().experiment, status: 'COMPLETED', completedMs: T0 + 20000 } });
+  const timeline = synthetic({
+    experiment: { ...synthetic().experiment, status: 'COMPLETED', completedMs: T0 + 20000 },
+  });
   assert.deepEqual(replayBounds(timeline), runBounds(timeline));
   timeline.history = { partial: true, detailedStartMs: T0 + 12500 };
   assert.deepEqual(replayBounds(timeline), { startMs: T0 + 12500, endMs: T0 + 20000 });

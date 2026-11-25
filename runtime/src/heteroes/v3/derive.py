@@ -95,7 +95,9 @@ def choose_point(points, point_id=None):
     # silently replaced by an older verified one.
     newest = max(points, key=lambda p: (p["generation"], bool(p.get("final"))))
     if newest.get("final") and newest.get("status") != "READY":
-        raise ValueError(f"the run's final point (generation {newest['generation']}) is {newest.get('status')}, not READY yet")
+        raise ValueError(
+            f"the run's final point (generation {newest['generation']}) is {newest.get('status')}, not READY yet"
+        )
     return max(ready, key=lambda p: (p["generation"], bool(p.get("final"))))
 
 

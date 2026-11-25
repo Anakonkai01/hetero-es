@@ -26,8 +26,14 @@ REFERENCE_BACKEND = "decoder_pairwise_f32_reference_v1_experimental"
 CUDA_BACKEND = "decoder_pairwise_f32_cuda_v1_experimental"
 FAMILIES = {"qwen2": "Qwen2ForCausalLM", "llama": "LlamaForCausalLM", "mistral": "MistralForCausalLM"}
 # Llama 3.1/3.2 RoPE: the default frequencies, rescaled once per frequency band (no runtime arithmetic changes)
-LLAMA3_ROPE_KEYS = {"rope_theta", "rope_type", "factor", "low_freq_factor", "high_freq_factor",
-                    "original_max_position_embeddings"}
+LLAMA3_ROPE_KEYS = {
+    "rope_theta",
+    "rope_type",
+    "factor",
+    "low_freq_factor",
+    "high_freq_factor",
+    "original_max_position_embeddings",
+}
 PI = Decimal("3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798")
 
 
@@ -39,7 +45,10 @@ def rope_scaling(rope):
     if kind != "llama3" or set(rope) != LLAMA3_ROPE_KEYS:
         return False
     values = {k: rope[k] for k in sorted(LLAMA3_ROPE_KEYS - {"rope_theta", "rope_type"})}
-    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0 for v in values.values()):
+    if any(
+        isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0
+        for v in values.values()
+    ):
         return False
     if values["factor"] < 1 or values["high_freq_factor"] <= values["low_freq_factor"]:
         return False
@@ -322,7 +331,9 @@ def describe_graph(model, max_context, *, frozen_int8=False):
         "dimensions": list(dimensions),
         "headDim": dim,
         "ropeTheta": theta,
-        **({"ropeScaling": scaling} if (scaling := rope_scaling(rope)) else {}),  # absent for default RoPE (identities unchanged)
+        **(
+            {"ropeScaling": scaling} if (scaling := rope_scaling(rope)) else {}
+        ),  # absent for default RoPE (identities unchanged)
         "rmsNormEpsilon": epsilon,
         "tiedHead": tied,
         "parameterShapes": {name: list(shape) for name, shape in sorted(expected.items())},

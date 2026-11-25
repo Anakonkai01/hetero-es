@@ -271,14 +271,22 @@ def test_a_spec_may_name_its_recovery_point_policy_and_otherwise_leaves_it_to_th
     from heteroes.v3.lab_cli import managed_configuration
 
     spec = {
-        "model": {"id": "m"}, "data": {"batchSize": 4}, "generations": 2, "population": 4, "alpha": 1e-3,
-        "sigma": {"initial": 1e-3}, "scorer": {"kind": "declarative", "name": "last-integer"},
+        "model": {"id": "m"},
+        "data": {"batchSize": 4},
+        "generations": 2,
+        "population": 4,
+        "alpha": 1e-3,
+        "sigma": {"initial": 1e-3},
+        "scorer": {"kind": "declarative", "name": "last-integer"},
     }
     assert "backupPolicy" not in managed_configuration(spec, "c", ["w"], {"id": "m"}, {"datasetId": "d"})
     from heteroes.sdk import ESConfig, ESTrainer
 
     config = ESConfig(model_path="model", model_id="org/model", train_dataset="rows", backup_interval=10)
-    assert ESTrainer(config, scorer={"name": "last-integer"}).lab_spec()["backupPolicy"] == {"interval": 10, "retain": 3}
+    assert ESTrainer(config, scorer={"name": "last-integer"}).lab_spec()["backupPolicy"] == {
+        "interval": 10,
+        "retain": 3,
+    }
     chosen = {**spec, "backupPolicy": {"interval": 5, "retain": 2}}
     request = managed_configuration(chosen, "c", ["w"], {"id": "m"}, {"datasetId": "d"})
     assert request["backupPolicy"] == {"interval": 5, "retain": 2}
@@ -300,7 +308,9 @@ def test_a_refused_lab_request_says_why_in_the_error(monkeypatch, body, shown):
 
     class Refusing:
         def open(self, request, timeout):
-            raise urllib.error.HTTPError(request.full_url, 422, "Unprocessable", {}, io.BytesIO(json.dumps(body).encode()))
+            raise urllib.error.HTTPError(
+                request.full_url, 422, "Unprocessable", {}, io.BytesIO(json.dumps(body).encode())
+            )
 
     monkeypatch.setattr(sdk_lab, "opener", lambda proxy: Refusing())
     with pytest.raises(sdk_lab.LabError, match="Lab HTTP 422") as refused:
@@ -316,7 +326,11 @@ def test_a_long_run_keeps_its_validations_after_the_lab_trims_its_event_list():
     lab = Lab("https://lab.example", "fixture", "lab")
     kept = [{"generation": -1, "meanReward": 0.1}, {"generation": 24, "meanReward": 0.2}]
     replies = {
-        "/api/v1/experiments/r": {"status": "CANCELLED", "completedGenerations": 2, "studyMetrics": {"validation": kept}},
+        "/api/v1/experiments/r": {
+            "status": "CANCELLED",
+            "completedGenerations": 2,
+            "studyMetrics": {"validation": kept},
+        },
         "/api/v1/experiments/r/timeline": {"generations": [], "jobs": []},
         "/api/v1/events?experimentId=r": [{"experimentId": "r", "eventType": "replay", "details": {}}],
     }

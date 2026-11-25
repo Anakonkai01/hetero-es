@@ -139,8 +139,14 @@ def test_three_families_share_cuda_operators_and_packed_execution(family, monkey
     assert torch.equal(bits(actual.cpu()), bits(expected))
 
 
-LLAMA3 = {"rope_type": "llama3", "rope_theta": 10000.0, "factor": 8.0, "low_freq_factor": 1.0, "high_freq_factor": 4.0,
-          "original_max_position_embeddings": 64}  # head_dim 8: one pair each high (kept), middle (smoothed), low (scaled)
+LLAMA3 = {
+    "rope_type": "llama3",
+    "rope_theta": 10000.0,
+    "factor": 8.0,
+    "low_freq_factor": 1.0,
+    "high_freq_factor": 4.0,
+    "original_max_position_embeddings": 64,
+}  # head_dim 8: one pair each high (kept), middle (smoothed), low (scaled)
 
 
 def llama3_model():
@@ -158,8 +164,14 @@ def test_llama3_rope_table_is_the_transformers_table_computed_exactly():
 
     from heteroes.strict.strict_decoder import rope_inverse_frequencies, rope_scaling
 
-    rope = {"rope_type": "llama3", "rope_theta": 500000.0, "factor": 32.0, "low_freq_factor": 1.0,
-            "high_freq_factor": 4.0, "original_max_position_embeddings": 8192}
+    rope = {
+        "rope_type": "llama3",
+        "rope_theta": 500000.0,
+        "factor": 32.0,
+        "low_freq_factor": 1.0,
+        "high_freq_factor": 4.0,
+        "original_max_position_embeddings": 8192,
+    }
     config = LlamaConfig(hidden_size=2048, num_attention_heads=32, num_key_value_heads=8, rope_parameters=dict(rope))
     expected, scale = ROPE_INIT_FUNCTIONS["llama3"](config, "cpu")
     actual = torch.tensor(rope_inverse_frequencies(500000.0, 64, rope_scaling(rope)), dtype=torch.float32)
@@ -184,7 +196,9 @@ def test_llama3_reference_matches_independent_hf_graph_and_names_its_scaling():
     assert "ropeScaling" not in reference(model_for("llama"), max_context=64, allow_fixture=True).identity["graph"]
 
 
-@pytest.mark.parametrize("change", [{"factor": float("nan")}, {"high_freq_factor": 0.5}, {"extra": 1}, {"factor": None}])
+@pytest.mark.parametrize(
+    "change", [{"factor": float("nan")}, {"high_freq_factor": 0.5}, {"extra": 1}, {"factor": None}]
+)
 def test_a_malformed_llama3_rope_is_refused(change):
     model = llama3_model()
     model.config.rope_parameters.update(change)
