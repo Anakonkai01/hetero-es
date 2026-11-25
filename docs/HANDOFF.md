@@ -30,7 +30,8 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
 
 - Sau khi máy 5070 Ti khởi động lại (26/11), lab trả lời bình thường nhưng một run mới nằm ở hàng chờ mà không được giao
   (hàng chờ không bị giữ, không có giữ chỗ GPU). `python3 -I ~/.local/share/heteroes-lab/app/scripts/local-lab.py restart --python ~/.local/share/heteroes-lab/venv-backend/bin/python`
-  khi lab rảnh làm hàng chờ chạy lại. Nguyên nhân chưa rõ.
+  khi lab rảnh làm hàng chờ chạy lại. Nguyên nhân chưa rõ; `local-lab.py stop` rồi `boot` (04:02 26/11) không tái hiện được
+  (run thử được giao trong vài giây). Lần kẹt xảy ra sau một lần khởi động máy thật và ngay sau `heteroes-worker update`.
 - Triển khai lab: `git -C ~/.local/share/heteroes-lab/app pull --ff-only`, build web vào thư mục tạm rồi thay `frontend/dist`,
   khởi động lại bằng `local-lab.py` của chính bản cài (không dùng bản trong repo).
 - Phát hành worker Linux: worktree ở commit cần phát hành → `scripts/refresh-worker-runtime.py --track-a runtime` →
