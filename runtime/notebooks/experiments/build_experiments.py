@@ -1,6 +1,6 @@
 """Write the experiment notebooks (cells only, no outputs), in Vietnamese like ../demo.ipynb:
 
-00-chuan-bi (lab and GPU machines), e1-gsm8k-qwen05, e2-gsm8k-smollm17, e3-gsm8k-qwen15, e4-countdown-qwen15,
+00-chuan-bi (lab and GPU machines), e1-gsm8k-qwen05, e3-gsm8k-qwen15, e4-countdown-qwen15,
 e5-countdown-qwen05 and tong-hop (the summary). The first round (24-25/11) is kept in v1/.
 
 Run: python runtime/notebooks/experiments/build_experiments.py   (any Python with nbformat)
@@ -23,19 +23,6 @@ EXPERIMENTS = {
         "trong `\\boxed{}`. Lần 1 (đêm 24/11) dùng giới hạn 320 token: mô hình gốc chưa viết xong khoảng một phần ba số câu, nên mức tăng phần lớn là do mô hình học viết gọn lại cho kịp ghi đáp án. Lần này giới hạn là 512 token (mô hình gốc trả lời xong khoảng 96–98% số câu), và notebook báo thêm tỉ lệ đúng **trên các câu đã trả lời xong**.",
         "repo": "Qwen/Qwen2.5-0.5B-Instruct",
         "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
-        "tokens": 512,
-        "reward": "boxed",
-        "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
-        "validation": 20,
-    },
-    "e2-gsm8k-smollm17": {
-        "title": "GSM8K × SmolLM2-1.7B-Instruct (họ Llama)",
-        "task": "gsm8k",
-        "about": "Cùng bài GSM8K và cùng cách chấm như E1/E3 nhưng với một **họ mô hình khác**: SmolLM2 dùng kiến trúc "
-        "Llama, không phải Qwen. Bộ suy luận nghiêm ngặt của HeteroES cho cùng một chuỗi token trên mọi GPU NVIDIA từ "
-        "RTX 30 trở lên với cả hai họ. (Lần 1 dùng SmolLM2-360M với phép nhân và không học được gì: 0 → 0.)",
-        "repo": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
-        "revision": "31b70e2e869a7173562077fd711b654946d38674",
         "tokens": 512,
         "reward": "boxed",
         "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
@@ -540,6 +527,12 @@ Lần 1 nằm trong `v1/` (notebook, kết quả, quyết định). Phát hiện
 | E4 Countdown × Qwen 1.5B, 4 → 31/250 | **có** | đúng/đã xong 2,1% → 12,4%; mô hình gốc chỉ 1,6% kể cả với 1024 token |
 | Countdown × Qwen 0.5B (24/11, ngoài lab), 0 → 33/250 | **có** | mô hình gốc 0/250 kể cả với 1024 token |
 | Phép nhân × Qwen 0.5B (trước 24/11, ngoài lab), 95 → 186/300 | một phần | phần lớn là học ghi `\\boxed{}` (179 → 300 câu có ô), nhưng đúng trên câu có ô vẫn tăng 53% → 62% |
+
+Lần 2 không còn E2. SmolLM2-1.7B (họ Llama) không chạy được trên RTX 3060 12 GB với bộ suy luận nghiêm ngặt: mô hình
+này không dùng GQA (32 đầu KV, bằng số đầu attention), nên bộ nhớ KV của lô 8 câu đã cần khoảng 6,1 GB, vượt ngân sách
+4,8 GB (40% VRAM) của decoder. Llama 3.2 dùng kiểu RoPE `llama3`, decoder chưa hỗ trợ (chỉ RoPE mặc định).
+SmolLM2-360M thì chạy được nhưng chỉ đúng 2/128 câu GSM8K. Đây là giới hạn hiện tại của hệ thống: mô hình cần GQA
+và RoPE mặc định để vừa một GPU 12 GB.
 
 Lần 1 cũng gần như không phân tán: E1 và E2 chạy hoàn toàn trên một 5070 Ti, E3 chỉ có máy Quang góp 14 trong 3200
 candidate; chỉ E4 chạy trên 2 GPU (190/190 audit khớp)."""),
