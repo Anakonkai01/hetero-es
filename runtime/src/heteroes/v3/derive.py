@@ -79,7 +79,7 @@ def _download(url, target, sha256, size):
 
 
 def choose_point(points, point_id=None):
-    """The requested point, else the final one, else the latest verified one; only READY points qualify."""
+    """The requested point, else the newest verified one (the final point when it is the newest); only READY qualify."""
     ready = [p for p in points if p.get("status") == "READY"]
     if point_id is not None:
         chosen = next((p for p in points if p.get("pointId") == point_id), None)
@@ -90,7 +90,13 @@ def choose_point(points, point_id=None):
         return chosen
     if not ready:
         raise ValueError("the run has no verified (READY) recovery point")
-    return max(ready, key=lambda p: (bool(p.get("final")), p["generation"]))
+    # The newest generation wins; a final point only breaks a tie. An older point marked final (a paused run's point
+    # before 25/11) never outranks newer weights, and a final point still being verified is waited for, never
+    # silently replaced by an older verified one.
+    newest = max(points, key=lambda p: (p["generation"], bool(p.get("final"))))
+    if newest.get("final") and newest.get("status") != "READY":
+        raise ValueError(f"the run's final point (generation {newest['generation']}) is {newest.get('status')}, not READY yet")
+    return max(ready, key=lambda p: (p["generation"], bool(p.get("final"))))
 
 
 def lab_source(api, run_id, directory, point_id=None, download=_download):

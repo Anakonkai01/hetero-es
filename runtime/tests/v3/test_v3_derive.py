@@ -167,9 +167,16 @@ POINTS = [
 ]
 
 
-def test_point_choice_prefers_the_final_point_and_only_takes_verified_ones():
-    assert derive.choose_point(POINTS)["pointId"] == "pf"
+def test_point_choice_takes_the_newest_verified_point_and_only_verified_ones():
+    # pf is final but older than p3 (a paused run marked its point final before 25/11): the newer weights win
+    assert derive.choose_point(POINTS)["pointId"] == "p3"
     assert derive.choose_point([p for p in POINTS if not p["final"]])["pointId"] == "p3"
+    ending = [*POINTS, {"pointId": "p9", "generation": 9, "final": False, "status": "READY"},
+              {"pointId": "pe", "generation": 9, "final": True, "status": "READY"}]
+    assert derive.choose_point(ending)["pointId"] == "pe"  # the final point breaks a tie with its periodic twin
+    ending[-1] = {**ending[-1], "status": "PENDING"}
+    with pytest.raises(ValueError, match="final point .generation 9. is PENDING"):
+        derive.choose_point(ending)  # never an older point while the run's last weights are still being verified
     assert derive.choose_point(POINTS, "p0")["pointId"] == "p0"
     with pytest.raises(ValueError, match="VERIFYING, not READY"):
         derive.choose_point(POINTS, "p4")
