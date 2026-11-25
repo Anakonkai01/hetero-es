@@ -28,6 +28,22 @@ EXPERIMENTS = {
         "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
         "validation": 20,
     },
+    "e2-gsm8k-llama32-1b": {
+        "exclude": ["1660s"],
+        "title": "GSM8K × Llama-3.2-1B-Instruct",
+        "task": "gsm8k",
+        "about": "GSM8K với một họ mô hình khác Qwen: Llama 3.2 (1,2 tỉ tham số, GQA 32/8 đầu, RoPE kiểu `llama3`). "
+        "Thí nghiệm này chủ yếu để chứng minh bộ suy luận nghiêm ngặt và lab không gắn với một họ mô hình: từ 25/11 decoder tính "
+        "được tần số RoPE `llama3` (kiểm trên CPU so với `transformers`), và lab tự kiểm thử (qualify) mô hình mới trên từng "
+        "GPU trước khi chạy. Mô hình gốc đúng khoảng 28% trên 32 câu validation thử, không câu nào bị cắt ở 512 token, nên "
+        "mức tăng (nếu có) không phải do viết gọn.",
+        "repo": "unsloth/Llama-3.2-1B-Instruct",
+        "revision": "5a8abab4a5d6f164389b1079fb721cfab8d7126c",
+        "tokens": 512,
+        "reward": "boxed",
+        "first": {"alpha": 5e-4, "sigma": 1e-3, "generations": 100, "reason": PAPER},
+        "validation": 20,
+    },
     "e3-gsm8k-qwen15": {
         "title": "GSM8K × Qwen2.5-1.5B-Instruct",
         "task": "gsm8k",
@@ -60,8 +76,8 @@ EXPERIMENTS = {
         "task": "countdown",
         "about": "Countdown với mô hình 0,5B. Đêm 24/11 bài này đã chạy **ngoài lab** (coordinator và worker dựng tay qua "
         "SSH, khoảng 560 thế hệ qua nhiều đoạn): test 0 → 33/250, và mô hình gốc vẫn đúng 0/250 kể cả khi được 1024 token. "
-        "Ở đây chạy lại đúng theo luồng người dùng: notebook → lab → 4 GPU, cùng dữ liệu, cùng 384 token, một đoạn 200 "
-        "thế hệ, để xem lab có tái lập được kết quả đó không.",
+        "Ở đây chạy lại đúng theo luồng người dùng: notebook → lab → GPU, cùng dữ liệu, cùng 384 token, một đoạn tối đa 200 "
+        "thế hệ (dừng sớm khi validation thôi tăng), để xem lab có tái lập được kết quả đó không; điểm khôi phục ghi 10 thế hệ một lần.",
         "repo": "Qwen/Qwen2.5-0.5B-Instruct",
         "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
         "tokens": 384,

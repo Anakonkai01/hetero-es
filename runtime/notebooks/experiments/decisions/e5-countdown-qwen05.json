@@ -1,0 +1,8 @@
+[
+ {
+  "alpha": 0.0005,
+  "sigma": 0.001,
+  "generations": 200,
+  "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate"
+ }
+]
