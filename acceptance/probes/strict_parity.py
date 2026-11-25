@@ -10,6 +10,11 @@ gives the golden tokens. Finite evidence only: no quality, learning, managed lif
 
     HETEROES_GPU_ACCEPTANCE=1 PYTHONPATH=runtime/src:runtime/scripts python acceptance/probes/strict_parity.py --gpu \\
         --model qwen --models <dir with qwen/smol/tiny> --out receipt.json
+
+Llama 3.2 (llama3 RoPE, added 2026-11) has its own golden file and chat workload (golden/strict-b22-llama32.json,
+golden/workload-chat-llama32.json). `--record` runs a model that has no golden yet and writes the hashes this host
+produced (status "recorded", tile and stream schedules must agree); golden/make_llama_golden.py turns that receipt into
+the golden file, which another GPU then has to reproduce with the ordinary comparison run.
 """
 
 import argparse
@@ -22,13 +27,19 @@ import time
 
 HERE = Path(__file__).resolve().parent
 p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-p.add_argument("--model", required=True, choices=("qwen", "smol", "tiny"))
+p.add_argument("--model", required=True, choices=("qwen", "smol", "tiny", "llama32"))
 p.add_argument("--models", type=Path, required=True)
 p.add_argument("--out", type=Path, required=True)
-p.add_argument("--golden", type=Path, default=HERE.parent / "golden" / "strict-b22.json")
-p.add_argument("--chat-workload", type=Path, default=HERE.parent / "golden" / "workload-chat-01.json")
+p.add_argument(
+    "--golden", type=Path, help="default: golden/strict-b22.json (golden/strict-b22-llama32.json for llama32)"
+)
+p.add_argument("--chat-workload", type=Path, help="default: the golden's chatWorkload file (workload-chat-01.json)")
+p.add_argument("--record", action="store_true", help="no comparison: write this host's hashes for a new golden")
 p.add_argument("--gpu", action="store_true")
 a = p.parse_args()
+GOLDEN_DIR = HERE.parent / "golden"
+if a.golden is None:
+    a.golden = GOLDEN_DIR / ("strict-b22-llama32.json" if a.model == "llama32" else "strict-b22.json")
 if not a.gpu or os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or a.out.exists():
     p.error("GPU opt-in (--gpu and HETEROES_GPU_ACCEPTANCE=1) and a fresh --out are required")
 
@@ -64,13 +75,19 @@ def left_padded(rows):
     return ids, mask
 
 
-golden = json.loads(a.golden.read_text())["models"][a.model]
+if a.record:
+    golden = {"chatWorkload": a.chat_workload.name if a.chat_workload else "workload-chat-llama32.json"}
+else:
+    golden = json.loads(a.golden.read_text())["models"][a.model]
+if a.chat_workload is None:
+    a.chat_workload = GOLDEN_DIR / golden.get("chatWorkload", "workload-chat-01.json")
 report = {
     "status": "running",
     "model": a.model,
     "hardwareQualified": False,
     "probeSha256": sha(Path(__file__).read_bytes()),
-    "goldenSha256": sha(a.golden.read_bytes()),
+    "goldenSha256": None if a.record else sha(a.golden.read_bytes()),
+    "recorded": a.record,
     "environment": {
         "python": platform.python_version(),
         "torch": torch.__version__,
@@ -91,7 +108,7 @@ try:
     parent = model_weights_sha256(model, schema)
     report.update(modelFiles=files, parentSha256=parent, schemaHash=schema.hash)
     for key in ("modelFiles", "parentSha256", "schemaHash"):
-        if report[key] != golden[key]:
+        if not a.record and report[key] != golden[key]:
             raise ValueError(f"{key} differs from the golden experiment: wrong model files")
     engines = {
         name: IntegerDecoderGraph(
@@ -102,6 +119,9 @@ try:
     report["kernelIdentity"] = engines["stream"].kernels.identity()
     prompts = [tok(t, return_tensors="pt")["input_ids"].cuda() for t in PROMPTS]
     workloads = [("short8", *left_padded([x[0].tolist() for x in prompts]), 32, EXPECTED)]
+    if a.record:
+        report["chatWorkload"] = a.chat_workload.name
+        report["chatWorkloadSha256"] = golden["chatWorkloadSha256"] = sha(a.chat_workload.read_bytes())
     if "chatWorkloadSha256" in golden:
         if sha(a.chat_workload.read_bytes()) != golden["chatWorkloadSha256"]:
             raise ValueError("chat workload differs from the golden experiment")
@@ -144,10 +164,21 @@ try:
             case["restoreExact"] = model_weights_sha256(model, schema) == parent
         if not case["restoreExact"]:
             raise ValueError("restore is not exact")
-    for now, expected in zip(report["cases"], golden["cases"], strict=True):
-        for key in ("state", "weightsSha256", "results"):
-            if now[key] != expected[key]:
-                report["mismatches"].append(f"{now['state']}: {key}")
+    if a.record:
+        # a new golden needs both projection schedules to agree, as the sealed receipts of runtime 0eb86cb9 did
+        for case in report["cases"]:
+            if case["results"]["tile"] != case["results"]["stream"]:
+                report["mismatches"].append(f"{case['state']}: tile differs from stream")
+        eos_ids = model.generation_config.eos_token_id
+        golden["eos"] = {
+            "eosTokenIds": sorted(eos_ids if isinstance(eos_ids, list) else [eos_ids]),
+            "maxNewTokens": 512 - workloads[1][1].shape[1],  # the engines' context is 512 tokens
+        }
+    else:
+        for now, expected in zip(report["cases"], golden["cases"], strict=True):
+            for key in ("state", "weightsSha256", "results"):
+                if now[key] != expected[key]:
+                    report["mismatches"].append(f"{now['state']}: {key}")
     if "eos" in golden:
         # real EOS on the parent: the captured decode with its one-step-ahead queue must give the golden tokens
         eos = golden["eos"]
@@ -165,9 +196,18 @@ try:
             .tolist()
         )
         report["eos"] = {"tokensSha256": sha(json.dumps(tokens).encode())}
-        if report["eos"]["tokensSha256"] != eos["tokensSha256"]:
+        if a.record:
+            pad = 0  # rows that stopped early end in padding
+            report["eos"].update(
+                eosTokenIds=eos["eosTokenIds"],
+                maxNewTokens=eos["maxNewTokens"],
+                rowsEndingEarly=sum(
+                    1 for r in tokens if r and r[-1] == pad and any(t in eos["eosTokenIds"] for t in r)
+                ),
+            )
+        elif report["eos"]["tokensSha256"] != eos["tokensSha256"]:
             report["mismatches"].append("eos: tokensSha256")
-    report["status"] = "ok" if not report["mismatches"] else "mismatch"
+    report["status"] = ("recorded" if a.record else "ok") if not report["mismatches"] else "mismatch"
 except Exception as error:
     report.update(status="error", errorType=type(error).__name__, error=str(error)[:2000])
 report["wallSeconds"] = time.perf_counter() - started
@@ -177,4 +217,6 @@ with a.out.open("x") as f:
 print(json.dumps({k: report.get(k) for k in ("status", "model", "mismatches", "error", "wallSeconds")}))
 if report["status"] == "ok":
     print("PARITY OK")
-raise SystemExit(int(report["status"] != "ok"))
+if report["status"] == "recorded":
+    print("RECORDED")
+raise SystemExit(int(report["status"] not in ("ok", "recorded")))
