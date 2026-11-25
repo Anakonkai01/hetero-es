@@ -38,6 +38,10 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
   `scripts/build-linux-worker.py --build <tên> --out /mnt/Archive-2tb/HETEROES-LAB-KHONG-XOA/builds/<tên>/cli` → cập nhật
   `linuxWorker` trong `frontend/public/downloads/manifest.json` của bản cài lab và các symlink (bản cũ được giữ).
   `scripts/publish-local-installers.py` đòi build lại cả bộ cài Windows, nên lần 26/11 chỉ thay phần Linux.
+- Coordinator không tự dọn dữ liệu của run đã kết thúc: một run 1,5B giữ khoảng 20 GB (trọng số, hai điểm khôi phục, bản
+  xuất). Run đã xong được chuyển tay sang `/mnt/Archive-2tb/HETEROES-LAB-KHONG-XOA/coordinator-archive-20261125/`
+  (26/11: `5f0c79f0`, `6131a0ad`, `d4214933`). Ổ hệ thống cần ≥ 25 GB trống trước một run 1,5B; nên làm tự dọn sau khi
+  điểm cuối đã kiểm chứng trên kho lab.
 - Môi trường `ai` có PEFT 0.19.1 (bản ghim 0.21.2): 4 kiểm thử `test_v3_qualification` chạy bằng môi trường này thất bại;
   không sửa môi trường `ai`.
 
