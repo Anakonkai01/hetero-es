@@ -2,7 +2,7 @@
 
 The release requires all 37 registered check–environment pairs on one clean source tree. The live lab, notebook, D1 regression tests and Countdown experiment also need receipts that identify the code and hardware used. Record `PASS`, `FAIL`, `NOT_RUN`, `DEFERRED` or `OPEN` and an evidence path for each result. Use the generated [acceptance report](README.md) for the matrix and the [workstation operations guide](../guides/local-lab-operations.md) for the live lab.
 
-Checked matrix items refer to [candidate source `src-7787621f…`](STATUS-src-7787621f.md). The first receipts cover the CPU, Linux packaging and CPU mutation checks.
+Checked matrix items refer to [candidate source `src-95182970…`](STATUS-src-95182970.md) (commit `40c644af`, 26/11): 23 of the 26 local pairs pass (CPU, packaging, all 12 mutation groups, GPU, performance). The three `faults` pairs (`strict-e2e`, `-soak`, `-int8`) need Thảo's RTX 3060 as the second machine and could not start (SSH timeout, machine off). The 11 RTX 3060 pairs are not rerun yet.
 
 ## 1. Prepare the candidate and hosts
 
@@ -35,32 +35,32 @@ Run the profiles through `scripts/accept.py` with `--keep`, using the GPU opt-in
 
 ### RTX 5070 Ti GPU, performance and system profiles (11)
 
-- [ ] `noise-es-gpu`
-- [ ] `strict-gpu-suite`
-- [ ] `strict-parity-qwen`
-- [ ] `strict-parity-smol`
-- [ ] `strict-parity-tiny`
-- [ ] `strict-throughput` — golden tokens and throughput floor.
-- [ ] `int8-memory` — resource measurements for the frozen-int8 LoRA path.
-- [ ] `strict-phase-trace` — stage timings and peak memory.
+- [x] `noise-es-gpu`
+- [x] `strict-gpu-suite`
+- [x] `strict-parity-qwen`
+- [x] `strict-parity-smol`
+- [x] `strict-parity-tiny`
+- [x] `strict-throughput` — golden tokens and throughput floor.
+- [x] `int8-memory` — resource measurements for the frozen-int8 LoRA path.
+- [x] `strict-phase-trace` — stage timings and peak memory.
 - [ ] `strict-e2e` — healthy two-GPU run, worker loss during an active lease, equal generation records and child hashes, CPU replay.
 - [ ] `strict-e2e-soak` — 600 generations, correct replay and the registered bookkeeping growth limit.
 - [ ] `strict-e2e-int8` — two-GPU frozen-int8 LoRA lifecycle.
 
 ### Local mutation profile (12)
 
-- [ ] `mutation-strict-routes`
+- [x] `mutation-strict-routes`
 - [x] `mutation-watchdog`
 - [x] `mutation-restore-recovery`
 - [x] `mutation-strict-mismatch`
 - [x] `mutation-audit-outcomes`
 - [x] `mutation-recovery-io`
-- [ ] `mutation-strict-decoder`
-- [ ] `mutation-strict-qualification-runtime`
+- [x] `mutation-strict-decoder`
+- [x] `mutation-strict-qualification-runtime`
 - [x] `mutation-strict-qualification-backend`
 - [x] `mutation-gpu-ownership-backend`
-- [ ] `mutation-int8-lora`
-- [ ] `mutation-gpu-ownership-runtime`
+- [x] `mutation-int8-lora`
+- [x] `mutation-gpu-ownership-runtime`
 
 ### Thảo’s RTX 3060 WSL GPU and performance profiles (8)
 

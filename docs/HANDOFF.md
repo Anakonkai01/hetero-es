@@ -7,7 +7,7 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
 
 | Phạm vi | Phiên bản | Kết quả kiểm tra |
 | --- | --- | --- |
-| Bản cuối kỳ | Nhánh `feat/final-2026-12` (chưa push), nghiệm thu trên `f77832c7` = cây nguồn `src-912a5cf4…` | Nghiệm thu cục bộ (CPU, đóng gói, đột biến, GPU, hiệu năng, gây lỗi trên 5070 Ti) chạy đêm 26/11; xem mục dưới. |
+| Bản cuối kỳ | Nhánh `feat/final-2026-12` (chưa push), nghiệm thu trên `40c644af` = cây nguồn `src-95182970…` | [23/26 cặp tại máy 5070 Ti đạt](acceptance/STATUS-src-95182970.md) (CPU, đóng gói, 12 nhóm đột biến, GPU, hiệu năng). 3 cặp `strict-e2e*` cần máy 3060 của Thảo làm máy thứ hai (máy tắt), 11 cặp RTX 3060 chưa chạy lại. [Checklist](acceptance/FINAL-2026-12-CHECKLIST.md). |
 | Lab công khai | `https://lab.heteroes.site`, bản cài ở `~/.local/share/heteroes-lab/app` theo `872152cf`; kho phục hồi `/mnt/sekai/HETEROES-LAB-KHONG-XOA/lab-storage-20261125` | Chạy. Trang tải phát hành worker Linux `20261126-872152cf` (runtime `3f1adea02535`); bộ cài Windows vẫn là `20261204-8d339686`. |
 | Máy GPU của lab | `5070ti-nhan` (coordinator + worker, runtime mới); `5070ti-nhut`, `3060-quang`, `3060-thao` là máy mượn | Ba máy mượn tắt từ tối 25/11; khi bật lại cần `heteroes-worker update` để lên runtime mới. `1660s` không hỗ trợ bộ suy luận nghiêm ngặt (sm75). |
 | `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [Biên bản nghiệm thu](acceptance/STATUS.md). |
@@ -69,6 +69,7 @@ serially. Check the workstation lab before any authorized GPU work.
 ## Việc còn mở (báo cáo cuối kỳ nộp 04/12/2026)
 
 - Khi các máy mượn bật lại: `heteroes-worker update` trên từng máy; chạy probe parity Llama trên RTX 3060; nghiệm thu
-  3060 WSL/native trên cây nguồn cuối; đo tốc độ 2/4 GPU với điểm khôi phục 10 thế hệ; E5 và E2 trên nhiều GPU.
+  `faults` tại máy này (`HETEROES_GPU_ACCEPTANCE=1 python3 scripts/accept.py run faults --keep`, cần máy Thảo) và
+  3060 WSL/native (`scripts/accept.py remote 3060-wsl gpu perf`, `remote 3060-native gpu`) trên cây nguồn cuối; đo tốc độ 2/4 GPU với điểm khôi phục 10 thế hệ; E5 và E2 trên nhiều GPU.
 - Chủ dự án duyệt báo cáo (mục 5.11–5.13 mới), slide và video; push nhánh khi chủ dự án đồng ý.
 - Sau khi nghiệm thu và báo cáo xong: bộ suy luận nghiêm ngặt tổng quát (ghi chú thiết kế ở mục 6.3 của báo cáo).
