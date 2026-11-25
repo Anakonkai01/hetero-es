@@ -1,0 +1,161 @@
+{
+ "name": "e4-countdown-qwen15",
+ "model": "Qwen/Qwen2.5-1.5B-Instruct",
+ "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+ "segments": [
+  {
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 150,
+   "reason": "tham số của Qiu et al. 2025 (ES cho LLM): σ = 0,001, α = 5·10⁻⁴, khoảng 30 candidate",
+   "usedGenerations": 111,
+   "note": "lab hủy run ở thế hệ 123; đoạn 2 nối từ điểm khôi phục đã kiểm chứng ở thế hệ 110",
+   "experimentId": "12aaaa92640d45ab80cae3e99cbc36dd"
+  },
+  {
+   "alpha": 0.0005,
+   "sigma": 0.001,
+   "generations": 100,
+   "reason": "chạy tiếp (25/11 chiều): validation còn tăng khi run bị hủy (0,150 → 0,160 → 0,171), giữ nguyên tham số và 384 token; lần này chạy trên 4 GPU (2×5070 Ti, 2×3060)",
+   "experimentId": "c9fbe07a635f433aba87a15922edf1b1"
+  }
+ ],
+ "validation": [
+  [
+   -1,
+   0.09680000000000001
+  ],
+  [
+   24,
+   0.10360000000000001
+  ],
+  [
+   49,
+   0.14959999999999998
+  ],
+  [
+   74,
+   0.16040000000000001
+  ],
+  [
+   99,
+   0.17120000000000002
+  ],
+  [
+   110,
+   0.17120000000000002
+  ],
+  [
+   135,
+   0.1756
+  ],
+  [
+   160,
+   0.18280000000000002
+  ],
+  [
+   185,
+   0.1864
+  ],
+  [
+   210,
+   0.2008
+  ]
+ ],
+ "workPerDevice": {
+  "5070ti-nhut": 480,
+  "5070ti-nhan": 487,
+  "3060-thao": 44,
+  "3060-quang": 47
+ },
+ "test": {
+  "base": {
+   "correct": 4,
+   "count": 250,
+   "meanReward": 0.08960000000000001
+  },
+  "first": {
+   "correct": 31,
+   "count": 250,
+   "meanReward": 0.21120000000000003
+  },
+  "selected": {
+   "correct": 31,
+   "count": 250,
+   "meanReward": 0.21159999999999998
+  }
+ },
+ "selectedSegment": 2,
+ "comparison": {
+  "direction": "B minus A",
+  "count": 250,
+  "rowsHash": "0a0076442436ea02c81463f6a704432020b3f8c813e1cbc1906b966c3d54add9",
+  "scorer": {
+   "name": "countdown",
+   "config": {
+    "numbersField": "nums",
+    "targetField": "target"
+   }
+  },
+  "generationA": -1,
+  "generationB": 2,
+  "meanA": 0.0896,
+  "meanB": 0.2116,
+  "difference": 0.122,
+  "successDefinition": "score == 1",
+  "fixed": 29,
+  "broke": 2,
+  "bothCorrect": 2,
+  "bothWrong": 217,
+  "mcnemarExactP": 4.6286731958389383e-07,
+  "bootstrapCI": [
+   0.0844,
+   0.1608
+  ],
+  "bootstrap": {
+   "method": "paired-percentile",
+   "confidence": 0.95,
+   "resamples": 10000,
+   "seed": 11
+  }
+ },
+ "finished": {
+  "mô hình gốc": {
+   "finished": 188,
+   "rightAmongFinished": 4,
+   "count": 250,
+   "truncated": 27
+  },
+  "cuối đoạn 1": {
+   "finished": 249,
+   "rightAmongFinished": 31,
+   "count": 250,
+   "truncated": 1
+  },
+  "chọn (đoạn 2)": {
+   "finished": 250,
+   "rightAmongFinished": 31,
+   "count": 250,
+   "truncated": 0
+  }
+ },
+ "speed": {
+  "5070ti-nhan + 5070ti-nhut": {
+   "generations": 118,
+   "medianSeconds": 80.5
+  },
+  "5070ti-nhan": {
+   "generations": 9,
+   "medianSeconds": 122.2
+  },
+  "3060-quang + 3060-thao + 5070ti-nhan + 5070ti-nhut": {
+   "generations": 98,
+   "medianSeconds": 75.3
+  },
+  "3060-quang + 5070ti-nhan + 5070ti-nhut": {
+   "generations": 1,
+   "medianSeconds": 1214.5
+  }
+ },
+ "oneGpuRun": "5f0c79f03a834cdfa7bc8f60ed5d5bad"
+}
