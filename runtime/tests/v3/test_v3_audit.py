@@ -183,3 +183,36 @@ def test_expired_lease_can_move_to_another_worker_and_old_result_is_refused(setu
     assert replacement["attempt_number"] == 2
     assert result(api, work)["error"]["code"] in {"forbidden", "stale_attempt"}
     assert result(api, replacement, worker="replacement")["ok"]
+
+
+def test_audit_is_possible_only_while_another_worker_asks_for_work_or_holds_an_audit(tmp_path):
+    ledger = Ledger(tmp_path / "ledger.sqlite")
+    descriptors = [committed(ledger, i) for i in range(3)]
+    ledger.open_generation(descriptors)
+    for descriptor in descriptors:
+        held = ledger.lease(descriptor.candidate_id, "original", 60)
+        ledger.submit_result(descriptor, held.attempt_number, held.token, 0.75, completions=["canonical"])
+    now = [1000.0]
+    api = AuditAPI(
+        WorkerAPI(ledger, "audit", 0, 60),
+        ledger,
+        "audit",
+        0,
+        rate=1.0,
+        workers=["original", "auditor"],
+        lease_seconds=60,
+        clock=lambda: now[0],
+        fault_path=tmp_path / "audit-faults.json",
+    )
+    assert api.pending == 3 and not api.auditable(30)  # nobody asked yet
+    assert lease(api, "original")["work"] is None and not api.auditable(30)  # the original cannot audit itself
+    work = lease(api)["work"]
+    assert work is not None and api.auditable(30)
+    now[0] += 45  # the auditor went quiet, but its audit lease runs until its deadline
+    assert api.auditable(30)
+    assert result(api, work)["outcome"] == "COMMITTED" and api.pending == 2
+    assert not api.auditable(30)  # finished, and quiet for 45 s
+    assert lease(api)["work"] is not None and api.auditable(30)
+    now[0] += 61  # lease expired and quiet again
+    assert not api.auditable(30) and api.auditable(120)
+    ledger.close()

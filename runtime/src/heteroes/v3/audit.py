@@ -195,6 +195,7 @@ class AuditAPI:
             )
         )
         self._seen, self._leases, self._requests = set(), self.guard.audit_leases, OrderedDict()
+        self._asked = {}  # worker -> the last time it asked for work in this generation (see `auditable`)
         self._activity = 0  # audit leases, heartbeats, results and failures (see WorkerAPI.activity)
         self._lock = self.guard.audit_lock
         self.cancel_requested = cancel_requested
@@ -275,6 +276,19 @@ class AuditAPI:
                 write_json(self.state_path, value)
             self._drain = value
 
+    def auditable(self, window):
+        """Whether a pending audit can still be done soon: an audit lease is still running, or a worker other than the
+        candidate's original asked for work within `window` seconds. A member that stopped asking (it is leaving, or it
+        rejoined and is still downloading the weights) cannot audit; waiting for the timeout would only idle every GPU
+        (26/11: about 130 s per generation)."""
+        with self._lock:
+            now, records = self.clock(), self._records()
+            pending = {cid for cid, _ in records}
+            if any(cid in pending and not e["done"] and e["work"]["deadline"] > now for cid, e in self._leases.items()):
+                return True
+            active = {w for w, t in self._asked.items() if now - t <= window} - self.quarantined_workers
+            return any(w != original for _, original in records for w in active)
+
     @property
     def available_workers(self):
         return (self._seen if self.workers is None else self.workers) - self.quarantined_workers
@@ -316,6 +330,7 @@ class AuditAPI:
                 if self.fatal_error:
                     return _error("audit_stopped", self.fatal_error)
                 self._seen.add(worker)
+                self._asked[worker] = self.clock()
                 reply = self.base.handle(operation, request, authenticated_worker_id=authenticated_worker_id)
                 if (
                     not reply["ok"]

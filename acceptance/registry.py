@@ -293,7 +293,7 @@ CHECKS = [
         + ("--scratch", "{out}", "--mutants", "acceptance/mutants/audit-outcomes.json", "--test")
         + (
             "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_outcomes.py "
-            "tests/v3/test_v3_audit.py tests/v3/test_audit_states.py",
+            "tests/v3/test_v3_audit.py tests/v3/test_audit_states.py tests/v3/test_audit_drain_idle.py",
         ),
         timeout=3600,
     ),

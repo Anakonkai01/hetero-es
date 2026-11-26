@@ -64,6 +64,9 @@ class RunPaused(CoordinatorError):
 _DEFAULT = object()
 MIN_STALL_SECONDS = 60.0
 STALL_LEASES = 5
+# Seconds without a lease request from any worker able to audit before an audit drain closes as insufficient_workers
+# (one that is leaving, or rejoining and downloading weights, never audits before the timeout).
+AUDITOR_IDLE_SECONDS = 30.0
 
 
 class _NoGeneration:
@@ -691,14 +694,17 @@ class Coordinator:
     def _drain_audits(self, generation, api, policy):
         if not self._audit_rate or api.drain_closed:
             return
-        deadline = self._monotonic() + self._limit(self._audit_timeout, generation)
+        started = self._monotonic()
+        deadline = started + self._limit(self._audit_timeout, generation)
         self.server.set_generation(api, self._job(generation, policy, "AUDITING"))
         while api.pending:
             self._check_cancel()
             if api.fatal_error:
                 raise CoordinatorError(api.fatal_error)
-            if len(api.available_workers) < 2 or self._monotonic() >= deadline:
-                reason = "insufficient_workers" if len(api.available_workers) < 2 else "timeout"
+            # nobody who could audit has asked for work for a while: the timeout would only keep every GPU waiting
+            idle = self._monotonic() - started >= AUDITOR_IDLE_SECONDS and not api.auditable(AUDITOR_IDLE_SECONDS)
+            if len(api.available_workers) < 2 or idle or self._monotonic() >= deadline:
+                reason = "insufficient_workers" if len(api.available_workers) < 2 or idle else "timeout"
                 api.close_drain(reason)
                 self.log(
                     "audit_incomplete",
