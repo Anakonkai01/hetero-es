@@ -1,0 +1,110 @@
+{
+ "1 GPU (5070 Ti)": {
+  "run": "6131a0ade3834556b9051407c0516bd3",
+  "generations": 15,
+  "score": {
+   "median": 83.5,
+   "mean": 88.8,
+   "min": 76.8,
+   "max": 117.3
+  },
+  "update": {
+   "median": 8.7,
+   "mean": 10.2,
+   "min": 7.9,
+   "max": 15.2
+  },
+  "publish": {
+   "median": 1.5,
+   "mean": 2.0,
+   "min": 0.5,
+   "max": 5.1
+  },
+  "backup_open": {
+   "median": 3.2,
+   "mean": 5.0,
+   "min": 1.0,
+   "max": 34.4
+  },
+  "total": {
+   "median": 102.5,
+   "mean": 106.1,
+   "min": 87.3,
+   "max": 134.2
+  },
+  "speedupMedian": 1.0,
+  "speedupMean": 1.0
+ },
+ "2 GPU (2×5070 Ti)": {
+  "run": "bc2b12ef39024a3f8e41ae96f0323b0f",
+  "generations": 11,
+  "score": {
+   "median": 52.9,
+   "mean": 54.1,
+   "min": 47.4,
+   "max": 63.4
+  },
+  "update": {
+   "median": 10.8,
+   "mean": 10.3,
+   "min": 7.8,
+   "max": 13.7
+  },
+  "publish": {
+   "median": 0.3,
+   "mean": 0.5,
+   "min": 0.1,
+   "max": 1.9
+  },
+  "backup_open": {
+   "median": 2.8,
+   "mean": 4.6,
+   "min": 0.4,
+   "max": 21.9
+  },
+  "total": {
+   "median": 71.2,
+   "mean": 69.6,
+   "min": 58.7,
+   "max": 82.8
+  },
+  "speedupMedian": 1.44,
+  "speedupMean": 1.52
+ },
+ "3 GPU (2×5070 Ti + 3060)": {
+  "run": "9ce75c6f88ae49039e31ec46402e0874",
+  "generations": 11,
+  "score": {
+   "median": 50.6,
+   "mean": 51.1,
+   "min": 42.1,
+   "max": 61.6
+  },
+  "update": {
+   "median": 12.4,
+   "mean": 13.5,
+   "min": 8.0,
+   "max": 36.3
+  },
+  "publish": {
+   "median": 1.9,
+   "mean": 2.3,
+   "min": 0.1,
+   "max": 5.6
+  },
+  "backup_open": {
+   "median": 2.3,
+   "mean": 7.7,
+   "min": 0.6,
+   "max": 59.7
+  },
+  "total": {
+   "median": 69.9,
+   "mean": 74.7,
+   "min": 54.5,
+   "max": 127.3
+  },
+  "speedupMedian": 1.47,
+  "speedupMean": 1.42
+ }
+}

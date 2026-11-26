@@ -1,0 +1,35 @@
+{
+ "segments": {},
+ "one-gpu": {
+  "experimentId": "6131a0ade3834556b9051407c0516bd3",
+  "workers": [
+   "5070ti-nhan"
+  ],
+  "generations": 16
+ },
+ "two-gpu": {
+  "experimentId": "bc2b12ef39024a3f8e41ae96f0323b0f",
+  "workers": [
+   "5070ti-nhan",
+   "5070ti-nhut"
+  ],
+  "generations": 12
+ },
+ "fault-demo": {
+  "experimentId": "94d9b883f9c24f4b9ab3736e5e96f6db",
+  "workers": [
+   "5070ti-nhan",
+   "5070ti-nhut"
+  ],
+  "generations": 16
+ },
+ "three-gpu": {
+  "experimentId": "9ce75c6f88ae49039e31ec46402e0874",
+  "workers": [
+   "5070ti-nhan",
+   "5070ti-nhut",
+   "3060-thao"
+  ],
+  "generations": 12
+ }
+}

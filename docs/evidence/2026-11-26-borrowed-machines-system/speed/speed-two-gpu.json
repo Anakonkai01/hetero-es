@@ -1,0 +1,52 @@
+{
+ "key": "two-gpu",
+ "run": "bc2b12ef39024a3f8e41ae96f0323b0f",
+ "status": "COMPLETED",
+ "devices": [
+  "5070ti-nhan",
+  "5070ti-nhut"
+ ],
+ "phases": {
+  "chấm candidate": 52.9,
+  "cập nhật ES": 10.8,
+  "phát hành trọng số": 0.3,
+  "điểm khôi phục + mở thế hệ sau": 2.8,
+  "tổng": 71.2,
+  "generations": 11
+ },
+ "speed": {
+  "groups": {
+   "5070ti-nhan + 5070ti-nhut": [
+    62.5064799785614,
+    74.94030666351318,
+    65.19747257232666,
+    70.39149498939514,
+    68.88941597938538,
+    67.8781521320343,
+    68.90964150428772,
+    61.53543782234192,
+    58.139305114746094,
+    89.05062747001648,
+    80.86231470108032
+   ]
+  },
+  "perDevice": {
+   "5070ti-nhan": 204,
+   "5070ti-nhut": 180
+  },
+  "audits": 22,
+  "matched": 22
+ },
+ "deviceTiming": {
+  "5070ti-nhan": {
+   "startSeconds": 11.2,
+   "secondsPerCandidate": 2.44,
+   "candidatesPerGeneration": 16.8
+  },
+  "5070ti-nhut": {
+   "startSeconds": 11.4,
+   "secondsPerCandidate": 2.86,
+   "candidatesPerGeneration": 15.2
+  }
+ }
+}

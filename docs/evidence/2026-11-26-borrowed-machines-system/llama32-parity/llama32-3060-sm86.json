@@ -1,0 +1,579 @@
+{
+ "status": "ok",
+ "model": "llama32",
+ "hardwareQualified": false,
+ "probeSha256": "fe88711241c59a1fa58b92735df3ae3d1baafdce203eed46b215be326ba0c5a2",
+ "goldenSha256": "f7e4755037b69fa1c45303aaf3bc701e03b994288530f080c47a58548d0eb18a",
+ "recorded": false,
+ "environment": {
+  "python": "3.12.15",
+  "torch": "2.13.0+cu132",
+  "transformers": "5.17.0",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "computeCapability": [
+   8,
+   6
+  ]
+ },
+ "cases": [
+  {
+   "state": "parent",
+   "results": {
+    "tile": {
+     "prefillLogitsSha256": "9c67d1bcea058daf49786162d98cabef337063ec181c65418962f7122ae976be",
+     "short8": {
+      "tokensSha256": "6350a99a70e90c69b86c742347b01c27b013702460e3a0e3209e4f37d054be1d",
+      "rewards": [
+       1.0,
+       1.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "b61ff2fd6769c0050bbcf49c909c254e6bcd5746eaf92c45df44a50643420ea8",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    },
+    "stream": {
+     "prefillLogitsSha256": "9c67d1bcea058daf49786162d98cabef337063ec181c65418962f7122ae976be",
+     "short8": {
+      "tokensSha256": "6350a99a70e90c69b86c742347b01c27b013702460e3a0e3209e4f37d054be1d",
+      "rewards": [
+       1.0,
+       1.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "b61ff2fd6769c0050bbcf49c909c254e6bcd5746eaf92c45df44a50643420ea8",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    }
+   },
+   "weightsSha256": "c93ebfb49a39ae28068a585302a60f54bce3ef8f26d43eed399f0cfb33183d28",
+   "restoreExact": true
+  },
+  {
+   "state": "plus",
+   "results": {
+    "tile": {
+     "prefillLogitsSha256": "b08a864588dd7e60a1ccffe5e096f9337e285f537bfc2b384c49133f9502354f",
+     "short8": {
+      "tokensSha256": "3dbcaefdb3b07410475bb770e4b2da1ff4e34992aab45acedbbd6a1d98e0b546",
+      "rewards": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "b7d7657377424fd57a500f47a4f30afd21f603d4f24f0599fd155c2f1554d33d",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    },
+    "stream": {
+     "prefillLogitsSha256": "b08a864588dd7e60a1ccffe5e096f9337e285f537bfc2b384c49133f9502354f",
+     "short8": {
+      "tokensSha256": "3dbcaefdb3b07410475bb770e4b2da1ff4e34992aab45acedbbd6a1d98e0b546",
+      "rewards": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "b7d7657377424fd57a500f47a4f30afd21f603d4f24f0599fd155c2f1554d33d",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    }
+   },
+   "weightsSha256": "478cf602bddacb0a39ce4f610cfe3cde62079cf2ec8753ee3d746effb07b3c35",
+   "restoreExact": true
+  },
+  {
+   "state": "minus",
+   "results": {
+    "tile": {
+     "prefillLogitsSha256": "9d0e92510fe9cc5de84d57526117fbe5ab127be544ec12459235bbdc147ffb6b",
+     "short8": {
+      "tokensSha256": "fc41a41c71e98b29948011ba7d23cf1350559229732ec17113dcf8eb81a6ccf2",
+      "rewards": [
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "9b8ccb531de517e476d36c1e5e885e904706aee98342ab778a51a34bdaeb5151",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    },
+    "stream": {
+     "prefillLogitsSha256": "9d0e92510fe9cc5de84d57526117fbe5ab127be544ec12459235bbdc147ffb6b",
+     "short8": {
+      "tokensSha256": "fc41a41c71e98b29948011ba7d23cf1350559229732ec17113dcf8eb81a6ccf2",
+      "rewards": [
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "9b8ccb531de517e476d36c1e5e885e904706aee98342ab778a51a34bdaeb5151",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    }
+   },
+   "weightsSha256": "7cb5f9050cf62251236a6e5c9d18e100c74c88369ac74d370d8343066375d09a",
+   "restoreExact": true
+  },
+  {
+   "state": "restored",
+   "results": {
+    "tile": {
+     "prefillLogitsSha256": "9c67d1bcea058daf49786162d98cabef337063ec181c65418962f7122ae976be",
+     "short8": {
+      "tokensSha256": "6350a99a70e90c69b86c742347b01c27b013702460e3a0e3209e4f37d054be1d",
+      "rewards": [
+       1.0,
+       1.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "b61ff2fd6769c0050bbcf49c909c254e6bcd5746eaf92c45df44a50643420ea8",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    },
+    "stream": {
+     "prefillLogitsSha256": "9c67d1bcea058daf49786162d98cabef337063ec181c65418962f7122ae976be",
+     "short8": {
+      "tokensSha256": "6350a99a70e90c69b86c742347b01c27b013702460e3a0e3209e4f37d054be1d",
+      "rewards": [
+       1.0,
+       1.0,
+       0.0,
+       0.0,
+       null,
+       0.0,
+       null,
+       null
+      ]
+     },
+     "chat32x128": {
+      "tokensSha256": "b61ff2fd6769c0050bbcf49c909c254e6bcd5746eaf92c45df44a50643420ea8",
+      "rewards": [
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     }
+    }
+   },
+   "weightsSha256": "c93ebfb49a39ae28068a585302a60f54bce3ef8f26d43eed399f0cfb33183d28",
+   "restoreExact": true
+  }
+ ],
+ "mismatches": [],
+ "modelFiles": {
+  "chat_template.jinja": "5816fce10444e03c2e9ee1ef8a4a1ea61ae7e69e438613f3b17b69d0426223a4",
+  "config.json": "dfb67fd8afe73a1c75245824ef9d64a6ba8983025447e3bf76aa1ea57ee46152",
+  "generation_config.json": "6d4f979915331212d7672c68b22a4ddad9e21ed8126cf2bd1ea6b2b88f595c1c",
+  "model.safetensors": "1ff795ff6a07e6a68085d206fb84417da2f083f68391c2843cd2b8ac6df8538f",
+  "special_tokens_map.json": "94e708c3f5e64acf85bbe5ad01467a1248faadb73e83b41793087ecced586e8f",
+  "tokenizer.json": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
+  "tokenizer_config.json": "9ddd255c19fe319c8d4e891163540382e9fbda99f394674f2a929efc47d57458"
+ },
+ "parentSha256": "c93ebfb49a39ae28068a585302a60f54bce3ef8f26d43eed399f0cfb33183d28",
+ "schemaHash": "35b5e15ab55d927959fe28550cfc241873de2a55e5c45a80493b140a0eb3993e",
+ "kernelIdentity": {
+  "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+  "operators": "pairwise_f32_reference_v1_experimental",
+  "sourceSha256": "70d560a0706be4f5d92703b593d8a4209b7a61ca17c546deff42a897ffbd27fb",
+  "nvrtcOptions": [
+   "--fmad=false",
+   "--ftz=false",
+   "--prec-div=true",
+   "--prec-sqrt=true",
+   "--std=c++17"
+  ],
+  "hardwareQualified": false,
+  "arch": "sm_86",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "nvrtcVersion": [
+   13,
+   2
+  ],
+  "builds": {},
+  "fingerprint": "24f6e3ebfee6321bff8f2fde5be807e5aa9dbfce7be0afaa366a9a77a6da5a66",
+  "linear": {
+   "operator": "row_scaled_signed_integer_dot_v1_experimental",
+   "magnitudeBits": 22,
+   "limbs": 3,
+   "maxWidth": 32768,
+   "zeroIntegerOutput": "+0",
+   "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+   "bias": "pairwise_f32_reference_v1_experimental",
+   "sourceSha256": "ae6c25a5ff36510e0f24440c36f61f62260c1cedbb9b00c859b90389f07f75c8",
+   "hardwareQualified": false
+  },
+  "nonlinear": {
+   "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+   "operators": "pairwise_f32_reference_v1_experimental",
+   "sourceSha256": "70d560a0706be4f5d92703b593d8a4209b7a61ca17c546deff42a897ffbd27fb",
+   "nvrtcOptions": [
+    "--fmad=false",
+    "--ftz=false",
+    "--prec-div=true",
+    "--prec-sqrt=true",
+    "--std=c++17"
+   ],
+   "hardwareQualified": false
+  },
+  "integerSourceSha256": "d6c59058d35f20eca3e78ae16df7e7107d440a70525bdd5b7dbc533708686ea8",
+  "boundedLmHeadSourceSha256": "574312c513cc57951082171d92e56a0cf91feef5c882b943a36775194549ad19",
+  "maxPartialBytes": 16777216,
+  "activationPacking": "radix_planes_once_v1_experimental",
+  "weightLoad": "auto",
+  "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+  "mmaSchedule": "stream",
+  "streamPolicy": "multistage_cp_async_k16_aligned_v1_experimental",
+  "streamInputPolicy": "ldmatrix_swizzle_sm120_b22_v1_experimental",
+  "decodePlanning": {
+   "policy": "occupancy_split_k_v2_experimental",
+   "rowTiles": [
+    16,
+    32
+   ],
+   "maxSplitK": 8,
+   "splitCandidates": "all_integers_1_to_8_when_residency_is_given_otherwise_powers_of_two",
+   "residentPolicy": "three_ctas_sm120_b22_stream_default_target8_rows17_to_128_k_aligned16",
+   "minSplitWidth": 256,
+   "maxBatch": 128,
+   "singleRow": "simt_split1",
+   "sourceSha256": "abef4eeaecbf660ccd2ae10fcbeda9ece7347592097819fdfb018f81aa0928b3"
+  },
+  "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+  "integerReference": {
+   "operator": "row_scaled_signed_integer_dot_v1_experimental",
+   "magnitudeBits": 22,
+   "limbs": 3,
+   "maxWidth": 32768,
+   "zeroIntegerOutput": "+0",
+   "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+   "bias": "pairwise_f32_reference_v1_experimental",
+   "sourceSha256": "ae6c25a5ff36510e0f24440c36f61f62260c1cedbb9b00c859b90389f07f75c8",
+   "hardwareQualified": false
+  },
+  "multiprocessors": 28,
+  "weightLoadEffective": "prefetch2",
+  "mmaScheduleEffective": "stream",
+  "streamInputEffective": "scalar",
+  "prefillTransport": "cp_async_stream",
+  "decodeAttentionStages": "gqa_32_key_stages",
+  "routeSourceSha256": {
+   "heteroes.strict.integer_tma": "73c288bde8c19dac98dda84ace8e7659d277b22cc109aba1c3ad5690835382c0",
+   "heteroes.strict.attention_stages": "cdcb5540ac14fade4828b7ba6a7fb20a218b511318d8fad7b1c16c3a58c7a66b"
+  }
+ },
+ "eos": {
+  "tokensSha256": "4278eaa3b2bdb3e33a429c7d50854f26442341d9addb8851811398be4b33dcdb"
+ },
+ "wallSeconds": 92.64905331099999
+}

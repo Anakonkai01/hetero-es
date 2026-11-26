@@ -1,0 +1,58 @@
+{
+ "key": "fault-demo",
+ "run": "94d9b883f9c24f4b9ab3736e5e96f6db",
+ "status": "COMPLETED",
+ "devices": [
+  "5070ti-nhan",
+  "5070ti-nhut"
+ ],
+ "phases": {
+  "chấm candidate": 81.2,
+  "cập nhật ES": 9.8,
+  "phát hành trọng số": 1.2,
+  "điểm khôi phục + mở thế hệ sau": 4.3,
+  "tổng": 101.5,
+  "generations": 15
+ },
+ "speed": {
+  "groups": {
+   "5070ti-nhan + 5070ti-nhut": [
+    65.61371088027954,
+    75.78905320167542,
+    74.5736472606659,
+    72.88208436965942,
+    76.50887680053711,
+    72.64089012145996,
+    225.69000840187073
+   ],
+   "5070ti-nhan": [
+    94.36313939094543,
+    95.55172848701477,
+    156.78238821029663,
+    100.2111177444458,
+    241.46465420722961,
+    224.66087532043457,
+    111.85846185684204,
+    219.27078104019165
+   ]
+  },
+  "perDevice": {
+   "5070ti-nhut": 118,
+   "5070ti-nhan": 394
+  },
+  "audits": 12,
+  "matched": 12
+ },
+ "deviceTiming": {
+  "5070ti-nhut": {
+   "startSeconds": 14.9,
+   "secondsPerCandidate": 2.91,
+   "candidatesPerGeneration": 14.3
+  },
+  "5070ti-nhan": {
+   "startSeconds": 15.0,
+   "secondsPerCandidate": 2.7,
+   "candidatesPerGeneration": 25.3
+  }
+ }
+}

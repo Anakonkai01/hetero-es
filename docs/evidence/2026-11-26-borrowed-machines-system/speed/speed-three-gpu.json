@@ -1,0 +1,59 @@
+{
+ "key": "three-gpu",
+ "run": "9ce75c6f88ae49039e31ec46402e0874",
+ "status": "COMPLETED",
+ "devices": [
+  "5070ti-nhan",
+  "5070ti-nhut",
+  "3060-thao"
+ ],
+ "phases": {
+  "chấm candidate": 50.6,
+  "cập nhật ES": 12.4,
+  "phát hành trọng số": 1.9,
+  "điểm khôi phục + mở thế hệ sau": 2.3,
+  "tổng": 69.9,
+  "generations": 11
+ },
+ "speed": {
+  "groups": {
+   "3060-thao + 5070ti-nhan + 5070ti-nhut": [
+    63.288188457489014,
+    90.18340301513672,
+    59.41166162490845,
+    71.16364860534668,
+    66.83071851730347,
+    76.65867877006531,
+    58.479719400405884,
+    86.9845221042633,
+    61.01861333847046,
+    118.74144577980042,
+    75.10807394981384
+   ]
+  },
+  "perDevice": {
+   "5070ti-nhan": 168,
+   "5070ti-nhut": 174,
+   "3060-thao": 42
+  },
+  "audits": 21,
+  "matched": 21
+ },
+ "deviceTiming": {
+  "5070ti-nhan": {
+   "startSeconds": 13.1,
+   "secondsPerCandidate": 2.71,
+   "candidatesPerGeneration": 14.1
+  },
+  "5070ti-nhut": {
+   "startSeconds": 12.1,
+   "secondsPerCandidate": 2.64,
+   "candidatesPerGeneration": 14.5
+  },
+  "3060-thao": {
+   "startSeconds": 28.2,
+   "secondsPerCandidate": 7.26,
+   "candidatesPerGeneration": 3.4
+  }
+ }
+}

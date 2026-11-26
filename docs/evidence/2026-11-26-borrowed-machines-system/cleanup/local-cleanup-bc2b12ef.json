@@ -1,0 +1,31 @@
+{
+  "state": "done",
+  "t": 1795667890.7258465,
+  "runStatus": "COMPLETED",
+  "labPoint": {
+    "pointId": "7eb363b6835147d59f4388c3e1d452a6",
+    "generation": 11,
+    "final": true,
+    "files": {
+      "ledger.sqlite": "4e7ede72dce2e92f6c2ca97d9ed17886328cf81d638ad68d3f725283b5f96967",
+      "config.json": "7bc5073b2126cc4e1eabde766a1dd1ceac49ee341857a072bb694f52b9bd313a",
+      "identity.json": "f02594f39a16df2352f024585edd0cd9acf0f1d6f946f840d1d41c0f311871fd",
+      "weights/9ab68ca3f5710b4bb1fa336890fb421f6a1763afa43ef719ed2d9591dbb49815.bin": "9ab68ca3f5710b4bb1fa336890fb421f6a1763afa43ef719ed2d9591dbb49815",
+      "weights/8481ce505de8bf2d13d15f0fd3ad5f2edf2dd00daa5dc536614ccb8721127557.bin": "8481ce505de8bf2d13d15f0fd3ad5f2edf2dd00daa5dc536614ccb8721127557",
+      "v3-state.json": "6bda4386663f0ad11269a5f4d77deb749ab9b0efac3d45cafd92329d3ae86117",
+      "selection/2d3ede913f812e59a51ba4cfb22982bd82cc9e1962f244256c56616e2f762585.bin": "2d3ede913f812e59a51ba4cfb22982bd82cc9e1962f244256c56616e2f762585",
+      "a7393c5c1c804abf0f22903a8339efb08a64d5d157f32aed4f1be53ffe10d9e5.jsonl": "a7393c5c1c804abf0f22903a8339efb08a64d5d157f32aed4f1be53ffe10d9e5",
+      "6d474e21d8521432520e930854a02e081bb2add488a028e526900e37e665bb8a.jsonl": "6d474e21d8521432520e930854a02e081bb2add488a028e526900e37e665bb8a",
+      "9bbe3c3de1d2bebe91de4a56173146f7bfb63e800a00a0161e01c6ee8e02bad7.jsonl": "9bbe3c3de1d2bebe91de4a56173146f7bfb63e800a00a0161e01c6ee8e02bad7",
+      "usage.sqlite": "8813394d31f6afd1a82f0d053b40a4f512eb3db963acb388fa85f7baf6a0d2dc"
+    }
+  },
+  "remove": [
+    "/home/pc5070ti/.local/share/heteroes-worker/artifacts/coordinators/bc2b12ef39024a3f8e41ae96f0323b0f/weights",
+    "/home/pc5070ti/.local/share/heteroes-worker/artifacts/coordinators/bc2b12ef39024a3f8e41ae96f0323b0f/selection",
+    "/home/pc5070ti/.local/share/heteroes-worker/artifacts/coordinators/bc2b12ef39024a3f8e41ae96f0323b0f/recovery-points"
+  ],
+  "freedBytes": 27790355960,
+  "kept": "ledger, events, usage and settings (state disk); export of the result model",
+  "doneAt": 1795667890.7596393
+}

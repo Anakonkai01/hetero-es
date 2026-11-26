@@ -1,0 +1,4 @@
+Loading weights:   0%|          | 0/146 [00:00<?, ?it/s]Loading weights:  70%|██████▉   | 102/146 [00:00<00:00, 993.31it/s]Loading weights: 100%|██████████| 146/146 [00:00<00:00, 1068.39it/s]
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+{"status": "ok", "model": "llama32", "mismatches": [], "error": null, "wallSeconds": 92.64905331099999}
+PARITY OK
