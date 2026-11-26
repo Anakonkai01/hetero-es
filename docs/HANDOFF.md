@@ -15,15 +15,24 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
 ## Kết quả của đợt cuối kỳ (24–26/11)
 
 - Thí nghiệm qua lab nằm ở `runtime/notebooks/experiments/` (notebook tiếng Việt, [README](../runtime/notebooks/experiments/README.md)).
-  E4 Countdown × Qwen2.5-1.5B trên 4 GPU: test 4 → 31/250 (p = 4,6·10⁻⁷), 151/151 audit khớp. E1/E3 (GSM8K 512 token),
-  E5 (Countdown 0,5B qua lab) và E2 (GSM8K × Llama-3.2-1B) chờ đủ GPU.
-- Llama-3.2-1B (RoPE `llama3`) chạy với `strict_b22_v1` trên RTX 5070 Ti; golden parity
-  `acceptance/golden/strict-b22-llama32.json` ghi trên 5070 Ti. Còn phải chạy trên RTX 3060:
-  `HETEROES_GPU_ACCEPTANCE=1 PYTHONPATH=runtime/src:runtime/scripts python acceptance/probes/strict_parity.py --gpu --model llama32 --models <dir có llama32/> --out <file mới>`
-  (thư mục mô hình: bản sao của `unsloth/Llama-3.2-1B-Instruct@5a8abab4…`). Không thuộc ma trận 37 cặp.
-- Điểm khôi phục mặc định 10 thế hệ một lần. Đo trên một 5070 Ti (cấu hình E4): bước ghi điểm khôi phục 7,8 → 3,2 s
-  mỗi thế hệ (trung vị); tổng một thế hệ chưa khác biệt rõ. Số đo 2/4 GPU chưa có.
-  [Bằng chứng 26/11](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-11-26-llama32-parity-and-backup-interval/README.md).
+  E4 Countdown × Qwen2.5-1.5B trên 4 GPU: test 4 → 31/250 (p = 4,6·10⁻⁷), 151/151 audit khớp. Chủ dự án (26/11): không chạy
+  thêm thí nghiệm học (E1, E2, E5); máy mượn dùng cho phép đo hệ thống.
+- Trưa 26/11 với máy Thảo (3060 WSL2) và máy Nhựt (5070 Ti); máy Quang tắt.
+  [Bằng chứng](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-11-26-borrowed-machines-system/README.md):
+  - Llama-3.2-1B parity trên RTX 3060 khớp golden của 5070 Ti (PARITY OK).
+  - Tốc độ cấu hình E4, điểm khôi phục 10 thế hệ: 1/2/3 GPU = 102,5/71,2/69,9 s mỗi thế hệ (trung vị); thêm 3060 gần như
+    không nhanh hơn (vào việc trễ 28 s, 7,3 s/candidate).
+  - Thử chịu lỗi trên lab (run `94d9b883`): kill -9, off, on + thêm lại máy Nhựt; run xong 16/16, audit 12/12. Tìm ra lỗi
+    audit chờ hết hạn khi máy khác không hỏi việc → sửa ở `83480c6d`.
+- Mã mới trên nhánh: `4efd1596` + `099f20da` coordinator tự dọn run đã xong khi điểm mới nhất READY trên kho lab
+  (`heteroes-worker clean --dry-run`, `HETEROES_KEEP_FINISHED_RUN_DATA=1` để tắt); `83480c6d` đóng lượt audit sau 30 s
+  khi không còn máy nào có thể audit. Bundle worker `20261126-83480c6d` đã build ở
+  `/mnt/Archive-2tb/HETEROES-LAB-KHONG-XOA/builds/20261126-83480c6d/cli`, **chưa phát hành** (chủ dự án chạy
+  `~/heteroes-experiments/borrowed-20261126/publish-worker-83480c6d.sh`, rồi `heteroes-worker update` trên từng máy;
+  máy Thảo WSL phải cài tay như ghi ở mục Vận hành).
+- Lỗ hổng đóng gói: profile Worker Windows thiếu `cuda-bindings`/NVRTC nên app Windows không chạy được `strict_b22_v1`;
+  môi trường nghiệm thu native 26/11 = profile Windows + `cuda-bindings==13.4.3` + `nvidia-cuda-nvrtc==13.2.78`
+  (`D:\heteroes-accept-native-20261126`, junction từ đường dẫn trong `acceptance/hosts.py`).
 - Báo cáo, slide và video demo nằm ngoài repo, ở `~/projects/bao-cao/heteroes-cuoi-ky-2026-12`.
 
 ## Vận hành cần nhớ
@@ -42,6 +51,11 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
   xuất). Run đã xong được chuyển tay sang `/mnt/Archive-2tb/HETEROES-LAB-KHONG-XOA/coordinator-archive-20261125/`
   (26/11: `5f0c79f0`, `6131a0ad`, `d4214933`). Ổ hệ thống cần ≥ 25 GB trống trước một run 1,5B; nên làm tự dọn sau khi
   điểm cuối đã kiểm chứng trên kho lab.
+- Máy Thảo (WSL2): bộ cài worker từ chối WSL. Cập nhật tay: tải `install-worker.sh`, bỏ dòng "WSL is not supported", chạy
+  với `HETEROES_WORKER_HOME=~/.local/share/heteroes-c4-cpu HETEROES_SKIP_SETUP=1`, rồi `heteroes-worker selftest` (PATH và
+  LD_LIBRARY_PATH có `/usr/lib/wsl/lib`) và `heteroes-worker restart`. Đừng chạy `heteroes-worker clean` ở đó: nghiệm thu
+  3060-wsl dùng Python của runtime cũ `9a553d2dfae9`. Các tệp nghiệm thu nằm đúng đường dẫn của `acceptance/hosts.py`
+  (thư viện kiểm thử ở `/tmp`, mất khi WSL khởi động lại: cài lại bằng pip `--target`).
 - Môi trường `ai` có PEFT 0.19.1 (bản ghim 0.21.2): 4 kiểm thử `test_v3_qualification` chạy bằng môi trường này thất bại;
   không sửa môi trường `ai`.
 
