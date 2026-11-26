@@ -53,12 +53,32 @@ The repository code (`run_cleanup.apply`) was run by hand on this coordinator (t
 removed directories) → fixed in `099f20da`. `94d9b883`: receipt 18.53 GB, disk gained 18.53 GB. Both receipts name
 the READY lab point (final, generation 11 and 15) the run relies on.
 
+## 5. Fault demo again with the fix deployed, and automatic cleanup (`fault-recheck/`)
+
+Evening 26/11 the owner published worker `20261126-83480c6d` to the lab downloads page; `5070ti-nhan`, `5070ti-nhut`
+and `3060-thao` updated to runtime `01446be01907` (self-test passed on each). The same scenario as section 3 was rerun
+(run `f8700fc5`, 2 × 5070 Ti, 16 generations, crash at 3, OFF at 8, ON + add at 11).
+
+| | `94d9b883` (old runtime) | `f8700fc5` (fixed runtime) |
+| --- | --- | --- |
+| Audit drains closed by `timeout` | 4 (gens 8, 12, 13, 15) | 0 |
+| Audit drains closed by `insufficient_workers` | 3 | 7 |
+| Generation 8 / 12 / 13 (s) | 215 / 228 / 237 | 110 / 138 / 138 |
+| Audits matched | 12/12 | 15/15 |
+
+`fault-compare-before-after.json` is `fault_compare.py 94d9b883 f8700fc5` on the coordinator's events. The remaining
+extra ~30 s over a one-GPU generation (~100 s) is the new idle threshold. The rejoined worker again needed the full
+3 GB sync (1,113 s, `nhut-worker-rejoin-events.jsonl`) and scored nothing before the end: the known limitation.
+
+Automatic cleanup, first time on the lab without anyone running it: the run ended 17:50; ~15 minutes later the
+coordinator's sync loop removed 18.53 GB (`local-cleanup-automatic-f8700fc5.json`, relying on the READY final point,
+generation 15); free space went from 15 to 32 GiB.
+
 ## What this does NOT show
 
 - No 4-GPU measurement with the recovery point every 10 generations; the 2- and 3-GPU numbers are 11 generations each,
   with the same training batches but different noise per run, so differences below ~5 s are not meaningful.
-- The audit-drain fix and the cleanup are not yet running on the lab: the worker bundle `20261126-83480c6d` was built
-  but publishing it to the lab downloads page is the owner's action; the fault demo has not been repeated with the fix.
+- The audit fix and automatic cleanup were checked once each on the lab (section 5), not over many runs.
 - The fault demo is one run with one machine taken away; it does not cover the coordinator machine failing, network
   partitions, or more than two workers.
 - The Llama parity covers the probe's 64 chat rows and cases, not every input; it is not part of the 37-pair matrix.

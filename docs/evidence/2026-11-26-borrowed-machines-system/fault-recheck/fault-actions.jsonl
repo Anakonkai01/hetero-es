@@ -1,0 +1,6 @@
+{"t": 1795688531.1906822, "action": "crash_start", "generation": 3}
+{"t": 1795688533.4890728, "action": "crash", "generation": 3, "out": "\u25cf heteroes-worker.service - HeteroES Worker (lends this GPU to a HeteroES lab)\n     Loaded: loaded (/home/<nhut-user>/.config/systemd/user/heteroes-worker.service; enabled; preset: enabled)\n     Active: activating (auto-restart) (Result: signal) since Thu 2026-11-26 17:22:11 +07; 2s ago"}
+{"t": 1795688942.441484, "action": "off", "generation": 8, "out": "contribution OFF requested: a run in progress continues on the other machines"}
+{"t": 1795689301.1981058, "action": "on", "generation": 11, "out": "contribution ON requested, kept after restart"}
+{"t": 1795689322.3683314, "action": "re-add", "generation": 11, "response": {"changeId": "913f783db2bf4edd9af0399ce3f9712c", "workerId": "cli-d152aa6a13f8", "action": "JOIN", "actor": "admin", "appliesAtNextGeneration": true}}
+{"t": 1795690609.6643827, "action": "run_ended", "status": "COMPLETED"}

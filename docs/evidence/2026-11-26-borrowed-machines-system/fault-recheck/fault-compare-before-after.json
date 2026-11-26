@@ -1,0 +1,123 @@
+{
+ "94d9b883": {
+  "durations": {
+   "0": 64.8,
+   "1": 63.6,
+   "2": 72.4,
+   "3": 101.5,
+   "4": 73.6,
+   "5": 80.9,
+   "6": 63.7,
+   "7": 84.5,
+   "8": 214.7,
+   "9": 142.9,
+   "10": 116.4,
+   "11": 105.5,
+   "12": 227.5,
+   "13": 237.0,
+   "14": 101.5
+  },
+  "auditIncomplete": {
+   "timeout": 4,
+   "insufficient_workers": 3
+  },
+  "perGeneration": {
+   "8": [
+    "timeout"
+   ],
+   "9": [
+    "insufficient_workers"
+   ],
+   "10": [
+    "insufficient_workers"
+   ],
+   "11": [
+    "insufficient_workers"
+   ],
+   "12": [
+    "timeout"
+   ],
+   "13": [
+    "timeout"
+   ],
+   "15": [
+    "timeout"
+   ]
+  },
+  "membership": [
+   [
+    9,
+    "LEAVE"
+   ],
+   [
+    12,
+    "JOIN"
+   ]
+  ],
+  "audits": {
+   "audit_leased": 12,
+   "audit_completed": 12,
+   "audit_incomplete": 7
+  }
+ },
+ "f8700fc5": {
+  "durations": {
+   "0": 58.6,
+   "1": 55.5,
+   "2": 66.5,
+   "3": 93.5,
+   "4": 69.1,
+   "5": 80.6,
+   "6": 67.4,
+   "7": 79.8,
+   "8": 110.3,
+   "9": 130.1,
+   "10": 118.4,
+   "11": 95.8,
+   "12": 137.8,
+   "13": 138.3,
+   "14": 150.8
+  },
+  "auditIncomplete": {
+   "insufficient_workers": 7
+  },
+  "perGeneration": {
+   "8": [
+    "insufficient_workers"
+   ],
+   "10": [
+    "insufficient_workers"
+   ],
+   "11": [
+    "insufficient_workers"
+   ],
+   "12": [
+    "insufficient_workers"
+   ],
+   "13": [
+    "insufficient_workers"
+   ],
+   "14": [
+    "insufficient_workers"
+   ],
+   "15": [
+    "insufficient_workers"
+   ]
+  },
+  "membership": [
+   [
+    9,
+    "LEAVE"
+   ],
+   [
+    12,
+    "JOIN"
+   ]
+  ],
+  "audits": {
+   "audit_leased": 15,
+   "audit_completed": 15,
+   "audit_incomplete": 7
+  }
+ }
+}
