@@ -6,6 +6,7 @@ import threading
 import time
 import urllib.request
 from heteroes.http_safety import opener
+from . import run_cleanup
 from .files import read_json, write_json
 from .recovery import verify_point
 from .storage import data_root
@@ -184,6 +185,12 @@ class CloudSync:
                     # Persist the cleanup intent before removing the local bytes.
                     write_json(root / "cloud-cleanup.json", list(dict.fromkeys(remaining)))
                 shutil.rmtree(point)
+            # A finished run whose newest point the lab store verified gives its large local data back (run_cleanup).
+            if run_cleanup.automatic():
+                try:
+                    run_cleanup.apply(root, now=self.clock())
+                except Exception as error:  # one run's cleanup never stops the uploads of the others
+                    write_json(root / "local-cleanup-error.json", {"errorType": type(error).__name__, "t": time.time()})
 
     def run(self):
         while not self.stop.is_set():

@@ -35,6 +35,7 @@ import urllib.request
 from heteroes.http_transport import USER_AGENT
 from heteroes.http_safety import opener
 from .downloads import DOWNLOAD_ATTEMPTS, TRANSIENT, Progress, sha256_file, verified_download
+from . import run_cleanup
 from .files import read_json, write_json
 from .worker_service import Service
 from .worker_lab import DEFAULT_LAB, LabError, lab_health, lab_request, tailscale_ip
@@ -546,28 +547,40 @@ class Worker:
         return rows
 
     # --- maintenance ------------------------------------------------------------------------------------------------
-    def clean(self):
-        """Remove what is never needed again: leftover wheel files and runtimes other than the current one. Run data
-        (a coordinator's ledger and weights under artifacts/coordinators) is the only copy and is never removed here."""
+    def clean(self, dry_run=False):
+        """Remove what is never needed again: leftover wheel files, runtimes other than the current one, and the large
+        data of finished runs whose newest recovery point the lab store verified (run_cleanup; the service also does
+        this by itself). A run's ledger and records, and any data that is still the only copy, are never removed.
+        `dry_run` only reports."""
         p, freed = self.paths(), 0
 
         def size(path):  # a file linked into several places (runtimes, checkpoints) counts once
             files = {(f.stat().st_dev, f.stat().st_ino): f.stat().st_size for f in Path(path).rglob("*") if f.is_file()}
             return sum(files.values())
 
+        def remove(path):
+            if not dry_run:
+                shutil.rmtree(path) if path.is_dir() else path.unlink()
+
         if p["wheels"].exists():
             freed += size(p["wheels"])
-            shutil.rmtree(p["wheels"])
+            remove(p["wheels"])
         keep = {p["runtime"].resolve(), *Path(sys.executable).resolve().parents}  # the current one and this process's
         for runtime in (self.root / "runtimes").glob("*"):
             if runtime.resolve() not in keep:
                 freed += size(runtime)
-                shutil.rmtree(runtime)
+                remove(runtime)
         for partial in (self.root / "downloads").rglob("*.part"):
             freed += partial.stat().st_size
-            partial.unlink()
+            remove(partial)
+        runs = []
+        for root in sorted((p["agentState"] / "runs").glob("*")) if (p["agentState"] / "runs").exists() else []:
+            if root.is_dir():
+                decided = run_cleanup.plan(root) if dry_run else run_cleanup.apply(root)
+                runs.append({k: decided[k] for k in ("runId", "eligible", "reason", "bytes")})
+                freed += decided["bytes"] if decided["eligible"] else 0
         kept = size(p["artifacts"] / "coordinators") if (p["artifacts"] / "coordinators").exists() else 0
-        return {"freedBytes": freed, "runDataBytes": kept}
+        return {"freedBytes": freed, "runDataBytes": kept, "runs": runs, "dryRun": dry_run}
 
 
 def launcher():
@@ -807,7 +820,10 @@ def main(argv=None):
     doctor.add_argument("--lab", help="check this lab address instead of the paired one")
     u = commands.add_parser("update", help="install the lab's newest worker and restart the service")
     u.add_argument("--force", action="store_true", help="update even while this machine is in a run")
-    commands.add_parser("clean", help="delete leftover downloads and old runtimes (never run data)")
+    c = commands.add_parser(
+        "clean", help="delete leftover downloads, old runtimes and finished runs' data already safe on the lab"
+    )
+    c.add_argument("--dry-run", action="store_true", help="only show what would be removed")
     limits = commands.add_parser("limits", help="show or set this machine's limits (taken at the next service start)")
     limits.add_argument(
         "--max-chunk", type=int, choices=(16, 32, 64), help="largest prompts per generate() call this GPU may use"
@@ -883,10 +899,14 @@ def main(argv=None):
         elif args.command == "update":
             update(worker, args)
         elif args.command == "clean":
-            result = worker.clean()
+            result = worker.clean(dry_run=args.dry_run)
+            for run in result["runs"]:
+                if run["eligible"] or run["reason"] != "nothing to remove":
+                    mark = f"{run['bytes'] / 1e9:6.2f} GB" if run["eligible"] else "  kept   "
+                    print(f"  run {run['runId'][:8]}  {mark}  {run['reason']}")
             print(
-                f"freed {result['freedBytes'] / 1e9:.2f} GB; run data kept: {result['runDataBytes'] / 1e9:.2f} GB in"
-                f" {worker.paths()['artifacts'] / 'coordinators'}"
+                f"{'would free' if args.dry_run else 'freed'} {result['freedBytes'] / 1e9:.2f} GB; run data on this"
+                f" machine: {result['runDataBytes'] / 1e9:.2f} GB in {worker.paths()['artifacts'] / 'coordinators'}"
             )
         elif args.command == "limits":
             settings = worker.settings()

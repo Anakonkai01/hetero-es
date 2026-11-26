@@ -13,5 +13,16 @@
  {"name": "cache ignores manifest bytes", "file": "src/heteroes/product/recovery.py", "old": "    key = hashlib.sha256(raw).hexdigest()", "new": "    key = \"manifest\""},
  {"name": "restore trusts the cache", "file": "src/heteroes/product/recovery.py", "old": "def verify_point(point, cache=False):", "new": "def verify_point(point, cache=True):"},
  {"name": "strict stop not carried", "file": "src/heteroes/v3/recovery.py", "old": "(\"auditStop\", \"audit-stop.json\")):\n        if (root / name).exists():", "new": "):\n        if (root / name).exists():"},
- {"name": "drain states not restored", "file": "src/heteroes/v3/recovery.py", "old": "        write_json(temporary / \"audit-state\" / name, value)", "new": "        pass"}
+ {"name": "drain states not restored", "file": "src/heteroes/v3/recovery.py", "old": "        write_json(temporary / \"audit-state\" / name, value)", "new": "        pass"},
+ {"name": "finished-run cleanup of a running run", "file": "src/heteroes/product/run_cleanup.py", "old": "TERMINAL = {\"COMPLETED\", \"CANCELLED\", \"FAILED\"}", "new": "TERMINAL = {\"COMPLETED\", \"CANCELLED\", \"FAILED\", \"RUNNING\"}"},
+ {"name": "finished-run cleanup without grace", "file": "src/heteroes/product/run_cleanup.py", "old": "    if now - ended < GRACE_SECONDS:", "new": "    if False:"},
+ {"name": "finished-run cleanup trusts an unverified point", "file": "src/heteroes/product/run_cleanup.py", "old": "    if cloud.get(\"status\") != \"READY\":", "new": "    if cloud.get(\"status\") not in (\"READY\", \"VERIFYING\"):"},
+ {"name": "finished-run cleanup judges the oldest point", "file": "src/heteroes/product/run_cleanup.py", "old": "    points.sort(key=lambda item: (item[0], item[1]), reverse=True)", "new": "    points.sort(key=lambda item: (item[0], item[1]))"},
+ {"name": "finished-run cleanup ranks a plain point over a final one", "file": "src/heteroes/product/run_cleanup.py", "old": "    points.sort(key=lambda item: (item[0], item[1]), reverse=True)", "new": "    points.sort(key=lambda item: (item[0], not item[1]), reverse=True)"},
+ {"name": "finished-run cleanup removes the export", "file": "src/heteroes/product/run_cleanup.py", "old": "REMOVABLE = (\"weights\", \"selection\", \"recovery-points\")", "new": "REMOVABLE = (\"weights\", \"selection\", \"recovery-points\", \"export\")"},
+ {"name": "finished-run cleanup ignores its receipt", "file": "src/heteroes/product/run_cleanup.py", "old": "    if read_json(root / RECEIPT):", "new": "    if False:"},
+ {"name": "finished-run cleanup of a run without a point", "file": "src/heteroes/product/run_cleanup.py", "old": "        return out | {\"reason\": \"no recovery point on this machine\" if present else \"nothing to remove\"}", "new": "        points = [(0, True, large)]"},
+ {"name": "finished-run cleanup ignores an interrupted receipt", "file": "src/heteroes/product/run_cleanup.py", "old": "    if pending and pending.get(\"state\") == \"removing\":", "new": "    if False:"},
+ {"name": "finished-run cleanup ignores the keep switch", "file": "src/heteroes/product/run_cleanup.py", "old": "    return os.environ.get(KEEP_ENV) != \"1\"", "new": "    return True"},
+ {"name": "finished-run cleanup error stops the sync", "file": "src/heteroes/product/cloud_sync.py", "old": "                except Exception as error:  # one run's cleanup never stops the uploads of the others", "new": "                except OSError as error:  # one run's cleanup never stops the uploads of the others"}
 ]

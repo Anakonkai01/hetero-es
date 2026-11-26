@@ -306,7 +306,7 @@ CHECKS = [
         + ("--scratch", "{out}", "--mutants", "acceptance/mutants/recovery-io.json", "--test")
         + (
             "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/ledger/test_cloud_sync.py "
-            "tests/ledger/test_recovery_points.py tests/v3/test_v3_recovery.py -k 'not download_restore_cli'",
+            "tests/ledger/test_run_cleanup.py tests/ledger/test_recovery_points.py tests/v3/test_v3_recovery.py -k 'not download_restore_cli'",
         ),
         timeout=3600,
     ),
@@ -490,6 +490,12 @@ GATES = [
         "M3.retention",
         "M3",
         "retention keeps the newest cloud-verified point and the paused checkpoint",
+        checks=("check-all", "mutation-recovery-io"),
+    ),
+    Gate(
+        "M3.finished-run-cleanup",
+        "M3",
+        "a finished run's coordinator weights and points go only after the lab store verified its newest point",
         checks=("check-all", "mutation-recovery-io"),
     ),
     Gate(

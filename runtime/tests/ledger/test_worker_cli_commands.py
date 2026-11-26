@@ -11,6 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from heteroes.product import downloads, worker_cli, worker_service
+from heteroes.product.files import write_json
 from heteroes.product.worker_cli import LabError, Worker, explain, render_status, setup, verified_download
 from test_worker_cli import SELF_TEST, bundle, item
 
@@ -280,7 +281,7 @@ def test_update_waits_while_the_machine_is_in_a_run(tmp_path, monkeypatch):
         worker_cli.update(worker, argparse.Namespace(force=False), call=lab)
 
 
-def test_clean_frees_downloads_and_old_runtimes_but_never_run_data(tmp_path, monkeypatch):
+def test_clean_frees_downloads_and_old_runtimes_but_never_unverified_run_data(tmp_path, monkeypatch):
     worker = ready(tmp_path, monkeypatch)
     root = worker.root
     (root / "downloads/linux").mkdir(parents=True)
@@ -289,10 +290,32 @@ def test_clean_frees_downloads_and_old_runtimes_but_never_run_data(tmp_path, mon
     (root / "runtimes/old123/python/lib").write_bytes(b"y" * 500)
     (root / "artifacts/coordinators/run1").mkdir(parents=True)
     (root / "artifacts/coordinators/run1/ledger.sqlite").write_bytes(b"z" * 300)
+    assert worker.clean(dry_run=True) == {"freedBytes": 1500, "runDataBytes": 300, "runs": [], "dryRun": True}
+    assert (root / "runtimes/old123").exists() and (root / "downloads/linux/big.whl").exists()
     result = worker.clean()
-    assert result == {"freedBytes": 1500, "runDataBytes": 300}
+    assert result == {"freedBytes": 1500, "runDataBytes": 300, "runs": [], "dryRun": False}
     assert worker.paths()["runtime"].exists() and (root / "artifacts/coordinators/run1/ledger.sqlite").exists()
     assert not (root / "runtimes/old123").exists()
+
+
+def test_clean_removes_a_finished_runs_large_data_only_after_the_lab_verified_it(tmp_path, monkeypatch):
+    worker = ready(tmp_path, monkeypatch)
+    state, large = worker.root / "agent-state/runs/r1", worker.root / "artifacts/coordinators/r1"
+    write_json(state / "large-data.json", {"directory": str(large), "volumeUUID": None})
+    write_json(state / "state.json", {"status": "COMPLETED", "updatedAt": 1.0})
+    (state / "ledger.sqlite").write_bytes(b"l")
+    (large / "weights").mkdir(parents=True)
+    (large / "weights/w.bin").write_bytes(b"w" * 400)
+    point = large / "recovery-points/p"
+    write_json(point / "manifest.json", {"pointId": "p", "generation": 9, "final": True, "files": {}})
+    write_json(point / "cloud-state.json", {"status": "VERIFYING"})
+    assert worker.clean()["runs"][0]["reason"].startswith("newest point (generation 9) is not verified")
+    assert (large / "weights/w.bin").exists()
+    write_json(point / "cloud-state.json", {"status": "READY"})
+    report = worker.clean(dry_run=True)
+    assert report["runs"][0]["eligible"] and report["freedBytes"] >= 400 and (large / "weights/w.bin").exists()
+    worker.clean()
+    assert not (large / "weights").exists() and not point.exists() and (state / "ledger.sqlite").exists()
 
 
 def test_the_service_unit_runs_the_command_and_drains_on_stop(tmp_path, monkeypatch):
