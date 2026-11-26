@@ -7,10 +7,10 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
 
 | Phạm vi | Phiên bản | Kết quả kiểm tra |
 | --- | --- | --- |
-| Bản cuối kỳ | Nhánh `feat/final-2026-12` (chưa push), nghiệm thu trên `40c644af` = cây nguồn `src-95182970…` | [23/26 cặp tại máy 5070 Ti đạt](acceptance/STATUS-src-95182970.md) (CPU, đóng gói, 12 nhóm đột biến, GPU, hiệu năng). 3 cặp `strict-e2e*` cần máy 3060 của Thảo làm máy thứ hai (máy tắt), 11 cặp RTX 3060 chưa chạy lại. [Checklist](acceptance/FINAL-2026-12-CHECKLIST.md). |
-| Lab công khai | `https://lab.heteroes.site`, bản cài ở `~/.local/share/heteroes-lab/app` theo `872152cf`; kho phục hồi `/mnt/sekai/HETEROES-LAB-KHONG-XOA/lab-storage-20261125` | Chạy. Trang tải phát hành worker Linux `20261126-872152cf` (runtime `3f1adea02535`); bộ cài Windows vẫn là `20261204-8d339686`. |
-| Máy GPU của lab | `5070ti-nhan` (coordinator + worker, runtime mới); `5070ti-nhut`, `3060-quang`, `3060-thao` là máy mượn | Ba máy mượn tắt từ tối 25/11; khi bật lại cần `heteroes-worker update` để lên runtime mới. `1660s` không hỗ trợ bộ suy luận nghiêm ngặt (sm75). |
-| `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [Biên bản nghiệm thu](acceptance/STATUS.md). |
+| Bản cuối kỳ | Nhánh `feat/final-2026-12` (chưa push), nghiệm thu trên `83480c6d` = cây nguồn `src-3fce794a…` | [37/37 cặp đạt](acceptance/STATUS-src-3fce794a.md) (26 tại 5070 Ti, 8 trên 3060 WSL2, 3 trên 3060 Windows); M3 và M5 còn đúng hai cổng mở như B-021. Hai lần trượt có biên nhận: native thiếu `nvdisasm` (thêm `nvidia-cuda-nvdisasm==13.2.78`), `strict-e2e` lần đầu 3060 khởi động chậm nên chỉ làm audit. [Checklist](acceptance/FINAL-2026-12-CHECKLIST.md). |
+| Lab công khai | `https://lab.heteroes.site`, bản cài ở `~/.local/share/heteroes-lab/app` theo `872152cf`; kho phục hồi `/mnt/sekai/HETEROES-LAB-KHONG-XOA/lab-storage-20261125` | Chạy. Trang tải phát hành worker Linux `20261126-872152cf` (runtime `3f1adea02535`); bundle `20261126-83480c6d` đã build, chưa phát hành; bộ cài Windows vẫn là `20261204-8d339686` (thiếu `cuda-bindings`/NVRTC). |
+| Máy GPU của lab | `5070ti-nhan` (coordinator + worker); `5070ti-nhut`, `3060-quang`, `3060-thao` là máy mượn | 26/11 trưa: Nhựt và Thảo lên runtime `3f1adea02535`; Quang tắt, chưa cập nhật. `1660s` không hỗ trợ bộ suy luận nghiêm ngặt (sm75). |
+| `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [STATUS.md](acceptance/STATUS.md) nay là cây nguồn cuối. |
 
 ## Kết quả của đợt cuối kỳ (24–26/11)
 
@@ -87,8 +87,10 @@ serially. Check the workstation lab before any authorized GPU work.
 
 ## Việc còn mở (báo cáo cuối kỳ nộp 04/12/2026)
 
-- Khi các máy mượn bật lại: `heteroes-worker update` trên từng máy; chạy probe parity Llama trên RTX 3060; nghiệm thu
-  `faults` tại máy này (`HETEROES_GPU_ACCEPTANCE=1 python3 scripts/accept.py run faults --keep`, cần máy Thảo) và
-  3060 WSL/native (`scripts/accept.py remote 3060-wsl gpu perf`, `remote 3060-native gpu`) trên cây nguồn cuối; đo tốc độ 2/4 GPU với điểm khôi phục 10 thế hệ; E5 và E2 trên nhiều GPU.
-- Chủ dự án duyệt báo cáo (mục 5.11–5.13 mới), slide và video; push nhánh khi chủ dự án đồng ý.
+- Chủ dự án: phát hành worker `20261126-83480c6d` (`~/heteroes-experiments/borrowed-20261126/publish-worker-83480c6d.sh`), rồi
+  `heteroes-worker update` trên từng máy (Thảo: cài tay như mục Vận hành) và chạy lại phép thử chịu lỗi để xác nhận bản
+  sửa audit trên lab.
+- Sửa bộ cài Worker Windows (thêm `cuda-bindings`, `nvidia-cuda-nvrtc`) khi chủ dự án đồng ý; build lại bộ cài cần nghiệm thu lại.
+- Probe `strict-e2e` phụ thuộc thời điểm khởi động worker: nên cho thế hệ 0 chờ đủ hai worker.
+- Chủ dự án duyệt báo cáo (71 trang; mục 5.8, 5.11–5.13, chương 6), slide (31) và hai video; push khi đồng ý.
 - Sau khi nghiệm thu và báo cáo xong: bộ suy luận nghiêm ngặt tổng quát (ghi chú thiết kế ở mục 6.3 của báo cáo).

@@ -2,7 +2,7 @@
 
 The release requires all 37 registered check–environment pairs on one clean source tree. The live lab, notebook, D1 regression tests and Countdown experiment also need receipts that identify the code and hardware used. Record `PASS`, `FAIL`, `NOT_RUN`, `DEFERRED` or `OPEN` and an evidence path for each result. Use the generated [acceptance report](README.md) for the matrix and the [workstation operations guide](../guides/local-lab-operations.md) for the live lab.
 
-Checked matrix items refer to [candidate source `src-95182970…`](STATUS-src-95182970.md) (commit `40c644af`, 26/11): 23 of the 26 local pairs pass (CPU, packaging, all 12 mutation groups, GPU, performance). The three `faults` pairs (`strict-e2e`, `-soak`, `-int8`) need Thảo's RTX 3060 as the second machine and could not start (SSH timeout, machine off). The 11 RTX 3060 pairs are not rerun yet.
+Checked matrix items refer to [final source `src-3fce794a…`](STATUS-src-3fce794a.md) (commit `83480c6d`, 26/11 midday): all 37 pairs pass — 26 local (CPU, packaging, 12 mutation groups, GPU, performance, the three `faults` pairs with Thảo's RTX 3060 as the second machine), 8 on the RTX 3060 under WSL2 and 3 under native Windows. Failed attempts kept as receipts: native `strict-gpu-suite-native` T1306 (57 SASS tests skipped, `nvdisasm` missing from the rebuilt env) and `strict-e2e` T1350 (the 3060 worker started 32 s late and only audited). The earlier candidate `src-95182970…` (23/26 local) is superseded.
 
 ## 1. Prepare the candidate and hosts
 
