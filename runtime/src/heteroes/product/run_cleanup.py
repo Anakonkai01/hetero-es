@@ -26,13 +26,18 @@ RECEIPT = "local-cleanup.json"
 KEEP_ENV = "HETEROES_KEEP_FINISHED_RUN_DATA"  # "1": never clean automatically (the CLI dry run still reports)
 
 
-def _size(path):
-    files = {}
-    for f in Path(path).rglob("*"):
-        if f.is_file() and not f.is_symlink():
-            stat = f.stat()
-            files[(stat.st_dev, stat.st_ino)] = stat.st_size  # a hard link counts once
-    return sum(files.values())
+def _freed(paths):
+    """Bytes that removing `paths` gives back: a file counts once, and only when every hard link to it is inside them
+    (recovery points link the run's weight files, and a worker on the same machine may link them into its cache)."""
+    seen, sizes = {}, {}
+    for path in paths:
+        for f in Path(path).rglob("*"):
+            if f.is_file() and not f.is_symlink():
+                stat = f.stat()
+                key = (stat.st_dev, stat.st_ino)
+                seen[key] = seen.get(key, 0) + 1
+                sizes[key] = (stat.st_size, stat.st_nlink)
+    return sum(size for key, (size, links) in sizes.items() if seen[key] >= links)
 
 
 def _points(large):
@@ -83,7 +88,7 @@ def plan(root, now=None):
         "eligible": True,
         "reason": "finished; newest point verified by the lab store",
         "remove": remove,
-        "bytes": sum(_size(p) for p in remove),
+        "bytes": _freed(remove),
         "labPoint": {
             "pointId": manifest.get("pointId", newest.name),
             "generation": generation,

@@ -145,3 +145,19 @@ def test_a_cleanup_error_does_not_stop_the_sync_of_other_runs(tmp_path, monkeypa
     )
     CloudSync(agent, clock=lambda: NOW).cycle()
     assert read_json(tmp_path / "runs" / "run" / "local-cleanup-error.json")["errorType"] == "RuntimeError"
+
+
+def test_freed_bytes_count_a_linked_file_once_and_only_when_all_its_links_go(tmp_path):
+    root, large = finished_run(tmp_path)
+    import os
+
+    # the newest point links the run's weight file (as recovery points do); a worker cache outside links another one
+    os.link(large / "weights" / "w.bin", large / "recovery-points" / "p12f" / "linked.bin")
+    (tmp_path / "cache").mkdir()
+    os.link(large / "selection" / "w.bin", tmp_path / "cache" / "kept.bin")
+    decided = run_cleanup.plan(root, now=NOW)
+    files = [f for d in ("weights", "recovery-points") for f in (large / d).rglob("*") if f.is_file()]
+    unique = {(f.stat().st_ino): f.stat().st_size for f in files}
+    assert decided["bytes"] == sum(unique.values())  # selection/w.bin stays reachable from the cache: not freed
+    run_cleanup.apply(root, now=NOW)
+    assert (tmp_path / "cache" / "kept.bin").read_bytes() == b"x" * 100
