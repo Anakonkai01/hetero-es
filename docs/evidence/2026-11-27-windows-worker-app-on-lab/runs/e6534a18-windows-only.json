@@ -1,0 +1,24 @@
+{
+ "run": "e6534a1851794c9eb4ed31a4023c4eb2",
+ "status": "COMPLETED",
+ "speed": {
+  "groups": {
+   "3060-quang-windows": [
+    32.79611015319824,
+    30.3959743976593
+   ]
+  },
+  "perDevice": {
+   "3060-quang-windows": 24
+  },
+  "audits": 0,
+  "matched": 0
+ },
+ "deviceTiming": {
+  "3060-quang-windows": {
+   "startSeconds": 3.4,
+   "secondsPerCandidate": 3.43,
+   "candidatesPerGeneration": 8
+  }
+ }
+}

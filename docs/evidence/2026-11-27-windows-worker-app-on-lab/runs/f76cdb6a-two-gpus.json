@@ -1,0 +1,32 @@
+{
+ "run": "f76cdb6ac4e34cf2934b1802ca6de8f2",
+ "status": "COMPLETED",
+ "speed": {
+  "groups": {
+   "3060-quang-windows + 5070ti-nhan": [
+    9.952974319458008
+   ],
+   "5070ti-nhan": [
+    17.451409339904785
+   ]
+  },
+  "perDevice": {
+   "5070ti-nhan": 21,
+   "3060-quang-windows": 3
+  },
+  "audits": 14,
+  "matched": 14
+ },
+ "deviceTiming": {
+  "5070ti-nhan": {
+   "startSeconds": 1.1,
+   "secondsPerCandidate": 0.6,
+   "candidatesPerGeneration": 7.5
+  },
+  "3060-quang-windows": {
+   "startSeconds": 1.8,
+   "secondsPerCandidate": 1.66,
+   "candidatesPerGeneration": 1
+  }
+ }
+}

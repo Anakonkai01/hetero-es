@@ -1,0 +1,120 @@
+{
+ "names": {
+  "cli-3dacd1745773": "5070ti-nhan (Linux CLI worker)",
+  "desktop-e9e5ff64b01e": "3060-quang-windows (Windows app)"
+ },
+ "audits": [
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c1",
+   "worker_id": "cli-3dacd1745773",
+   "sha256": "d2dc4dd155a2f5db566429e2d240fa657a9f7208d27acc766212ff78d379e257",
+   "matched": 1,
+   "audited_at": 1795759100.0425367,
+   "scoredBy": "desktop-e9e5ff64b01e"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c0",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "3f37002874a1b988cc886850eb37061ab6f779b93dc8978429c6e1d0dc9f807e",
+   "matched": 1,
+   "audited_at": 1795759100.628058,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c5",
+   "worker_id": "cli-3dacd1745773",
+   "sha256": "9adaea5b726815fa34b28fe922429cc85711705dc3036bcfb5340782f559905d",
+   "matched": 1,
+   "audited_at": 1795759100.6425035,
+   "scoredBy": "desktop-e9e5ff64b01e"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c2",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "16e8fde1914fee0a3f24c49ee609321529e48ba121fb4b8e7eb0867d1d3cad1c",
+   "matched": 1,
+   "audited_at": 1795759103.603811,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c3",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "dfbba5dcec54321159073033dc9af06229cb5f04abba99d4a7059719d557bf7d",
+   "matched": 1,
+   "audited_at": 1795759107.9769385,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c4",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "b19e31e3643a5da14fe34a5a37c2ee80affa05b93a9859369730f8cd60bd5d25",
+   "matched": 1,
+   "audited_at": 1795759110.5338602,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g0/c6",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "d67eaead1337d0ae6bf9c03c59010926f35e1a953c4fbad5331e723623cab600",
+   "matched": 1,
+   "audited_at": 1795759116.3509955,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g1/c3",
+   "worker_id": "cli-3dacd1745773",
+   "sha256": "df17ccbbce253df3c45bfe83a151a52d46fa537c2db7ef415ac66a978e3cdf9d",
+   "matched": 1,
+   "audited_at": 1795759122.2930481,
+   "scoredBy": "desktop-e9e5ff64b01e"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g1/c5",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "f669932469cabc0f02252e23b83f0d952828d8aeea39b1ba4207f745035a7a80",
+   "matched": 1,
+   "audited_at": 1795759123.265381,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g1/c7",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "d60d302e275ac9ad132515a0dfd38cec1cdb06f85ccc8f6de67bf1624e9d4028",
+   "matched": 1,
+   "audited_at": 1795759126.3358307,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g2/c2",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "50f8c1294fcce21c00bc735cabfe12b4566bf9cacbe6c52867d1cd7ec5482c8f",
+   "matched": 1,
+   "audited_at": 1795759134.7039711,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g2/c3",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "b25085686dc254cc82d6c8a547ba793d1b26819e5a4793041c327c76b61adcd9",
+   "matched": 1,
+   "audited_at": 1795759137.1385226,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g2/c4",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "1656c1b047424ec0839f486eb2226a9fa21ed8e0fc28d1c7b3c32f3a4770924e",
+   "matched": 1,
+   "audited_at": 1795759139.984504,
+   "scoredBy": "cli-3dacd1745773"
+  },
+  {
+   "candidate_id": "f76cdb6ac4e34cf2934b1802ca6de8f2/g2/c5",
+   "worker_id": "desktop-e9e5ff64b01e",
+   "sha256": "96fc626fbb7bc8dec88de26c7c828450147a616bacc229d3b4dd0d407f6ee4d7",
+   "matched": 1,
+   "audited_at": 1795759143.7862697,
+   "scoredBy": "cli-3dacd1745773"
+  }
+ ]
+}
