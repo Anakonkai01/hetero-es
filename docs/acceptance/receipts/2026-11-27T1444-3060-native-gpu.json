@@ -1,0 +1,112 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-e1f1527a94bb046ae3f98fdd8d6e383b1f5b7c096b680b0683b4ce51da93cd31",
+  "dirty": false,
+  "commit": "472ef70fa2d364d2726b840f648e7242f972cac4",
+  "host": "3060-native",
+  "profiles": [
+    "gpu"
+  ],
+  "machine": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.15",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": [
+      "NVIDIA GeForce RTX 3060, 617.42"
+    ]
+  },
+  "started": "2026-11-27T14:18:30+0700",
+  "finished": "2026-11-27T14:44:00+0700",
+  "results": [
+    {
+      "name": "noise-es-gpu-native",
+      "host": "3060-native",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 119.5,
+      "log": "results\\noise-es-gpu-native\\output.log",
+      "log_sha256": "13999e7e5e56bb2f84bdd9746d3898eaf1a6f5cea6a318fbc4d725449e5ae042",
+      "detail": "",
+      "counts": {
+        "passed": 572,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "572 passed in 95.88s (0:01:35)",
+      "log_tail": [
+        "$ 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\venv\\Scripts\\python.exe' 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-e1f1527a94bb-20261127-141829/acceptance/native_python.py' -m pytest -q -rs -p no:cacheprovider tests/noise tests/es",
+        "........................................................................ [ 12%]",
+        "........................................................................ [ 25%]",
+        "........................................................................ [ 37%]",
+        "........................................................................ [ 50%]",
+        "........................................................................ [ 62%]",
+        "........................................................................ [ 75%]",
+        "........................................................................ [ 88%]",
+        "....................................................................     [100%]",
+        "572 passed in 95.88s (0:01:35)"
+      ]
+    },
+    {
+      "name": "strict-gpu-suite-native",
+      "host": "3060-native",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1340.063,
+      "log": "results\\strict-gpu-suite-native\\output.log",
+      "log_sha256": "84a16ca7e797df51267e7ddad94ad63fd2a13f35fcd009e4a14484f5623726cf",
+      "detail": "",
+      "counts": {
+        "passed": 957,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 79
+      },
+      "pytest_summary": "957 passed, 79 deselected in 1338.14s (0:22:18)",
+      "log_tail": [
+        "$ 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\venv\\Scripts\\python.exe' 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-e1f1527a94bb-20261127-141829/acceptance/native_python.py' 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-e1f1527a94bb-20261127-141829/acceptance/probes/pytest_gpu_suite.py' --models 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\models-prefetch-01' --out 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-e1f1527a94bb-20261127-141829\\results\\strict-gpu-suite-native/pinned-model' -- -q -rs -p no:cacheprovider tests/eval/test_integer_lm_head.py tests/eval/test_integer_weights_batched.py tests/eval/test_integer_balanced_plan.py tests/eval/test_integer_nonpower_split.py tests/eval/test_strict_graph_host.py tests/eval/test_integer_stream.py tests/eval/test_strict_decode_pipeline.py tests/eval/test_integer_decoder.py tests/eval/test_integer_group.py tests/eval/test_integer_packed_input.py tests/eval/test_integer_cuda.py tests/eval/test_strict_decode_graph.py tests/eval/test_strict_cuda.py tests/eval/test_strict_packed.py tests/eval/test_strict_attention_split.py tests/eval/test_strict_attention_prefill.py tests/eval/test_integer_fused_finish.py tests/eval/test_qwen2_strict_cuda.py tests/eval/test_integer_tma.py tests/eval/test_attention_key_stages.py tests/eval/test_request_context.py tests/v3/test_v3_strict_decoder.py -m 'not sm120'",
+        "........................................................................ [  7%]",
+        "........................................................................ [ 15%]",
+        "........................................................................ [ 22%]",
+        "........................................................................ [ 30%]",
+        "........................................................................ [ 37%]",
+        "........................................................................ [ 45%]",
+        "........................................................................ [ 52%]",
+        "........................................................................ [ 60%]",
+        "........................................................................ [ 67%]",
+        "........................................................................ [ 75%]",
+        "........................................................................ [ 82%]",
+        "........................................................................ [ 90%]",
+        "........................................................................ [ 97%]",
+        ".....................                                                    [100%]",
+        "957 passed, 79 deselected in 1338.14s (0:22:18)"
+      ]
+    },
+    {
+      "name": "strict-parity-qwen-native",
+      "host": "3060-native",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 70.156,
+      "log": "results\\strict-parity-qwen-native\\output.log",
+      "log_sha256": "e0aec30788fdf18f319d8124269a1f11dbac224272d87ae11d8f4a85604cd24a",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\venv\\Scripts\\python.exe' acceptance/native_python.py acceptance/probes/strict_parity.py --gpu --model qwen --models 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\models-prefetch-01' --out 'C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-e1f1527a94bb-20261127-141829\\results\\strict-parity-qwen-native/parity.json'",
+        "",
+        "Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]",
+        "Loading weights:  20%|##        | 59/290 [00:00<00:00, 572.82it/s]",
+        "Loading weights:  40%|####      | 117/290 [00:00<00:00, 554.08it/s]",
+        "Loading weights:  60%|#####9    | 173/290 [00:00<00:00, 500.14it/s]",
+        "Loading weights:  77%|#######7  | 224/290 [00:00<00:00, 501.89it/s]",
+        "Loading weights:  95%|#########4| 275/290 [00:00<00:00, 472.47it/s]",
+        "Loading weights: 100%|##########| 290/290 [00:00<00:00, 513.16it/s]",
+        "{\"status\": \"ok\", \"model\": \"qwen\", \"mismatches\": [], \"error\": null, \"wallSeconds\": 67.48939610000025}",
+        "PARITY OK"
+      ]
+    }
+  ]
+}

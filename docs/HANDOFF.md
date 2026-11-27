@@ -1,15 +1,15 @@
 # HeteroES — current state
 
-Checked 2026-11-26 on the project workstation. See the [documentation map](README.md) for guides, the
+Checked 2026-11-27 on the project workstation. See the [documentation map](README.md) for guides, the
 [review guide](REVIEW-GUIDE.md) for code ownership and the [evidence index](EVIDENCE-INDEX.md) for dated records.
 
 ## Phiên bản và trạng thái
 
 | Phạm vi | Phiên bản | Kết quả kiểm tra |
 | --- | --- | --- |
-| Bản cuối kỳ | Nhánh `feat/final-2026-12` (chưa push), nghiệm thu trên `83480c6d` = cây nguồn `src-3fce794a…` | [37/37 cặp đạt](acceptance/STATUS-src-3fce794a.md) (26 tại 5070 Ti, 8 trên 3060 WSL2, 3 trên 3060 Windows); M3 và M5 còn đúng hai cổng mở như B-021. Hai lần trượt có biên nhận: native thiếu `nvdisasm` (thêm `nvidia-cuda-nvdisasm==13.2.78`), `strict-e2e` lần đầu 3060 khởi động chậm nên chỉ làm audit. [Checklist](acceptance/FINAL-2026-12-CHECKLIST.md). |
-| Lab công khai | `https://lab.heteroes.site`, bản cài ở `~/.local/share/heteroes-lab/app` theo `872152cf`; kho phục hồi `/mnt/sekai/HETEROES-LAB-KHONG-XOA/lab-storage-20261125` | Chạy. Trang tải phát hành worker Linux `20261126-83480c6d` (runtime `01446be01907`, chủ dự án phát hành chiều 26/11); bộ cài Windows vẫn là `20261204-8d339686` (thiếu `cuda-bindings`/NVRTC). |
-| Máy GPU của lab | `5070ti-nhan` (coordinator + worker); `5070ti-nhut`, `3060-quang`, `3060-thao` là máy mượn | 26/11 chiều: `5070ti-nhan`, Nhựt và Thảo lên runtime `01446be01907`; Quang tắt, chưa cập nhật. `1660s` không hỗ trợ bộ suy luận nghiêm ngặt (sm75). |
+| Bản cuối kỳ | Nhánh `feat/final-2026-12`, nghiệm thu trên `472ef70f` = cây nguồn `src-e1f1527a…` (27/11) | [37/37 cặp đạt](acceptance/STATUS-src-e1f1527a.md) (26 tại 5070 Ti, 8 trên 3060 WSL2, 3 trên 3060 Windows); M3 và M5 còn đúng hai cổng mở như B-021. Lượt 26/11 trên `src-3fce794a…` (`83480c6d`) cũng 37/37, với hai lần trượt có biên nhận: native thiếu `nvdisasm`, `strict-e2e` lần đầu 3060 khởi động chậm. [Checklist](acceptance/FINAL-2026-12-CHECKLIST.md). |
+| Lab công khai | `https://lab.heteroes.site`, bản cài ở `~/.local/share/heteroes-lab/app` theo `872152cf`; kho phục hồi `/mnt/sekai/HETEROES-LAB-KHONG-XOA/lab-storage-20261125` | Chạy. Trang tải phát hành worker Linux `20261126-83480c6d` (runtime `01446be01907`, chủ dự án phát hành chiều 26/11); bộ cài Worker Windows `20261127-472ef70f` (có `cuda-bindings`/NVRTC, chừa 5 GiB trống; runtime `01446be01907`); bộ cài Lab Server Windows vẫn `20261204-8d339686`. |
+| Máy GPU của lab | `5070ti-nhan` (coordinator + worker); `5070ti-nhut`, `3060-quang`, `3060-thao` là máy mượn; `3060-quang-windows` là app Worker Windows trên máy Quang (27/11) | 26/11 chiều: `5070ti-nhan`, Nhựt và Thảo lên runtime `01446be01907`; Quang tắt, chưa cập nhật. `1660s` không hỗ trợ bộ suy luận nghiêm ngặt (sm75). |
 | `main` upstream | `38327051` trên GitHub, cùng cây nguồn với `3429d810` | B-021 đạt 37/37 cặp kiểm tra–môi trường. [STATUS.md](acceptance/STATUS.md) nay là cây nguồn cuối. |
 
 ## Kết quả của đợt cuối kỳ (24–26/11)
@@ -32,9 +32,12 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
   khi không còn máy nào có thể audit. Bundle worker `20261126-83480c6d`
   (`/mnt/Archive-2tb/HETEROES-LAB-KHONG-XOA/builds/20261126-83480c6d/cli`) đã phát hành và cài trên 3 máy (máy Thảo WSL
   cài tay như ghi ở mục Vận hành).
-- Lỗ hổng đóng gói: profile Worker Windows thiếu `cuda-bindings`/NVRTC nên app Windows không chạy được `strict_b22_v1`;
-  môi trường nghiệm thu native 26/11 = profile Windows + `cuda-bindings==13.4.3` + `nvidia-cuda-nvrtc==13.2.78`
-  (`D:\heteroes-accept-native-20261126`, junction từ đường dẫn trong `acceptance/hosts.py`).
+- App Worker Windows (27/11): `fdf359a3` thêm `cuda-bindings==13.4.3`, `cuda-pathfinder==1.8.3`, `nvidia-cuda-nvrtc==13.2.78`,
+  `nvidia-cuda-nvdisasm==13.2.78` vào profile Windows và đặt `<python>\Lib\site-packages\nvidia\cu13\bin` lên đầu `Path`
+  (`desktop/worker/electron/agent-env.cjs`); `472ef70f` cho cả hai app chừa 5 GiB trống trên ổ cài. Trên máy Quang (Windows 11,
+  RTX 3060): cài từ trang tải, runtime trên `D:\HeteroES-Worker-data`, ghép + duyệt `3060-quang-windows`, qualification strict đạt,
+  run `e6534a18` (app là worker duy nhất, 24/24) và `f76cdb6a` (cùng 5070 Ti, audit chéo 14/14), cài đè bản mới giữ nguyên
+  thiết bị. [Bằng chứng](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-11-27-windows-worker-app-on-lab/README.md).
 - Báo cáo, slide và video demo nằm ngoài repo, ở `~/projects/bao-cao/heteroes-cuoi-ky-2026-12`.
 
 ## Vận hành cần nhớ
@@ -53,6 +56,8 @@ Checked 2026-11-26 on the project workstation. See the [documentation map](READM
   xuất). Run đã xong được chuyển tay sang `/mnt/Archive-2tb/HETEROES-LAB-KHONG-XOA/coordinator-archive-20261125/`
   (26/11: `5f0c79f0`, `6131a0ad`, `d4214933`). Ổ hệ thống cần ≥ 25 GB trống trước một run 1,5B; nên làm tự dọn sau khi
   điểm cuối đã kiểm chứng trên kho lab.
+- App Worker Windows: thư mục dữ liệu là `%APPDATA%\@heteroes\worker` (cố ý: script gỡ cài và Lab Server dựa vào tên này); chọn
+  ổ khác trước khi cài khi ổ C: nhỏ. Điều khiển app không cần GUI: `--remote-debugging-port` + `window.worker.call` (xem bằng chứng 27/11).
 - Máy Thảo (WSL2): bộ cài worker từ chối WSL. Cập nhật tay: tải `install-worker.sh`, bỏ dòng "WSL is not supported", chạy
   với `HETEROES_WORKER_HOME=~/.local/share/heteroes-c4-cpu HETEROES_SKIP_SETUP=1`, rồi `heteroes-worker selftest` (PATH và
   LD_LIBRARY_PATH có `/usr/lib/wsl/lib`) và `heteroes-worker restart`. Đừng chạy `heteroes-worker clean` ở đó: nghiệm thu
