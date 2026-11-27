@@ -1,5 +1,6 @@
 const { spawn } = require('node:child_process');
 const crypto = require('node:crypto');
+const { agentEnv } = require('./agent-env.cjs');
 const TAIL_BYTES = 4096;
 // Windows reports a missing system library as a status code, not as text: 0xC0000135 is "DLL not found", 0xC000007B "bad image".
 const MISSING_LIBRARY_EXIT = new Set([0xc0000135, 0xc000007b]);
@@ -18,7 +19,7 @@ class Bridge {
     this.pending = new Map();
     this.child = spawn(python, ['-m', 'heteroes.product.desktop_bridge'], {
       windowsHide: true,
-      env: { ...process.env, PYTHONPATH: source, PYTHONNOUSERSITE: '1', PYTHONUTF8: '1' },
+      env: agentEnv(python, source),
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     let buffer = '';

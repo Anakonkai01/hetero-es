@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { verifiedDownload, digest } = require('@heteroes/desktop-shared/download.cjs');
 const { run, extract } = require('@heteroes/desktop-shared/runtime.cjs');
+const { agentEnv } = require('./agent-env.cjs');
 const DATA_FOLDER_NAME = 'HeteroES-Worker-data';
 class Setup {
   constructor(root, resources, onProgress = () => {}) {
@@ -226,7 +227,7 @@ class Setup {
     try {
       await run(p.python, ['-m', 'heteroes.product.qualification'], {
         cwd: p.root,
-        env: { ...process.env, PYTHONPATH: p.source, PYTHONNOUSERSITE: '1', PYTHONUTF8: '1' },
+        env: agentEnv(p.python, p.source),
         input: { modelPath: p.model, referencePath: path.join(this.resources, 'reference.json') },
         onLine: (chunk) => {
           buffer += chunk;

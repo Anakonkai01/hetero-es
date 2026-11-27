@@ -106,7 +106,9 @@ def platform_entry(platform, target, release, report, reports, out, pinned):
         filename = urllib.parse.unquote(urllib.parse.urlparse(url).path.rsplit("/", 1)[1])
         if not filename.endswith(".whl") or urllib.parse.urlparse(url).scheme != "https":
             raise ValueError("Only HTTPS wheels accepted")
-        if platform == "windows" and ("manylinux" in filename or filename.startswith(("nvidia_", "triton-"))):
+        # NVIDIA's CUDA wheels exist for Windows too (cuda.bindings needs NVRTC; the SASS audit needs nvdisasm.exe).
+        nvidia_linux = filename.startswith("nvidia_") and not filename.endswith("-win_amd64.whl")
+        if platform == "windows" and ("manylinux" in filename or filename.startswith("triton-") or nvidia_linux):
             raise ValueError("Linux-only wheel in Windows report")
         if "pypi.nvidia.com" in url:
             public = public_wheel(row["metadata"]["name"], row["metadata"]["version"], filename, sha)

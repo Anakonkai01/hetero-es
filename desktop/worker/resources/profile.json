@@ -63,6 +63,18 @@
           "sizeBytes": 125251
         },
         {
+          "name": "cuda_bindings-13.4.3-cp312-cp312-win_amd64.whl",
+          "url": "https://files.pythonhosted.org/packages/2d/87/353cfe267b988b6d0a3565eb872845747bcd01cc2299f616cde72f1e95cc/cuda_bindings-13.4.3-cp312-cp312-win_amd64.whl",
+          "sha256": "f8519603001c92bf83e7095df3b8211e3999a9c4ded096b57de0f3ff52b66368",
+          "sizeBytes": 6332748
+        },
+        {
+          "name": "cuda_pathfinder-1.8.3-py3-none-any.whl",
+          "url": "https://files.pythonhosted.org/packages/b9/fb/f8e1890428f9f590b4beebd63b068aac1ce32a3331510c847b9f9a78f261/cuda_pathfinder-1.8.3-py3-none-any.whl",
+          "sha256": "e29e59829c297a7a5233bd9cc71094fc5bddbd076951482670178f9eade39b1f",
+          "sizeBytes": 62561
+        },
+        {
           "name": "colorama-0.4.6-py2.py3-none-any.whl",
           "url": "https://download.pytorch.org/whl/colorama-0.4.6-py2.py3-none-any.whl",
           "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
@@ -145,6 +157,18 @@
           "url": "https://files.pythonhosted.org/packages/3c/a1/accf6d4f0c80c5d9ba9735d6b1550e444180599f34dec69ca01360f717ad/numpy-2.5.3-cp312-cp312-win_amd64.whl",
           "sha256": "0a59a421a32580a009e8a1751345bf829631b990dc1794b80514ab722b435def",
           "sizeBytes": 12567828
+        },
+        {
+          "name": "nvidia_cuda_nvdisasm-13.2.78-py3-none-win_amd64.whl",
+          "url": "https://files.pythonhosted.org/packages/c0/11/079190e3dc2a22167e3d3d66df2364ca3dc04579c69c2363c0fe447d26b3/nvidia_cuda_nvdisasm-13.2.78-py3-none-win_amd64.whl",
+          "sha256": "1ee04526f3609993610cc0d323447be101ec8bf882dfa53ea2256a8eaf9aecec",
+          "sizeBytes": 4638970
+        },
+        {
+          "name": "nvidia_cuda_nvrtc-13.2.78-py3-none-win_amd64.whl",
+          "url": "https://files.pythonhosted.org/packages/48/35/41b84ff9b4a9acc42590be44e69f32fc867a57d7018e87c532019d627f17/nvidia_cuda_nvrtc-13.2.78-py3-none-win_amd64.whl",
+          "sha256": "46aff2df5615c408f23fb968a75e5641060f89fa611a85af51a387dff9bf375b",
+          "sizeBytes": 40817783
         },
         {
           "name": "packaging-26.3-py3-none-any.whl",

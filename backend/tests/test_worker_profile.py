@@ -141,6 +141,30 @@ def test_unsafe_requests_leave_nothing_behind(builder, inputs, problem):
         assert not any(out.iterdir())
 
 
+@pytest.mark.parametrize(
+    ("wheel", "accepted"),
+    [
+        ("nvidia_cuda_nvrtc-13.2.78-py3-none-win_amd64.whl", True),
+        ("nvidia_cuda_nvrtc-13.2.78-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", False),
+        ("nvidia_cuda_nvrtc-13.2.78-py3-none-any.whl", False),
+        ("triton-3.7.1-cp312-cp312-win_amd64.whl", False),
+    ],
+)
+def test_a_windows_report_accepts_only_windows_builds_of_nvidia_wheels(builder, inputs, wheel, accepted):
+    reports = Path(inputs["common"][3])
+    (reports / "windows.json").write_text(json.dumps(report("peft-0.21.2-py3-none-any.whl", wheel)))
+    selection = ["--profile", "desktop-v3", "--reference-dir", str(inputs["reference"])]
+    out = inputs["tmp"] / "out"
+    if accepted:
+        builder.main([*inputs["common"], *selection, "--out", str(out)])
+        names = [w["name"] for w in json.loads((out / "profile.json").read_text())["platforms"]["windows"]["wheels"]]
+        assert wheel in names
+    else:
+        with pytest.raises(ValueError, match="Linux-only"):
+            builder.main([*inputs["common"], *selection, "--out", str(out)])
+        assert not out.exists()
+
+
 def test_a_missing_report_hash_comes_only_from_the_same_url_in_a_reviewed_profile(builder, inputs):
     reports = Path(inputs["common"][3])
     for platform in ("linux", "windows"):
@@ -207,3 +231,23 @@ def test_a_size_lookup_retries_transient_network_errors_a_bounded_number_of_time
     with pytest.raises(urllib.error.URLError):
         module.get_size("https://files.example.invalid/a.whl")
     assert len(calls) == module.SIZE_ATTEMPTS  # bounded, then the error is reported
+
+
+RESOURCES = Path(__file__).parents[2] / "desktop/worker/resources"
+# strict_b22_v1 compiles its kernels with NVRTC through cuda.bindings and audits SASS with nvdisasm (Linux: Triton's copy).
+STRICT_WHEELS = {
+    "windows": ("cuda_bindings-", "cuda_pathfinder-", "nvidia_cuda_nvrtc-", "nvidia_cuda_nvdisasm-"),
+    "linux": ("cuda_bindings-", "cuda_pathfinder-", "nvidia_cuda_nvrtc-", "triton-"),
+}
+
+
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_the_shipped_profile_pins_exactly_its_lock_file_including_the_strict_decoder_wheels(platform):
+    profile = json.loads((RESOURCES / "profile.json").read_text())["platforms"][platform]
+    lock = (RESOURCES / profile["lockFile"]).read_text().splitlines()
+    assert sorted(w["sha256"] for w in profile["wheels"]) == sorted(line.rsplit(":", 1)[1] for line in lock)
+    names = [w["name"] for w in profile["wheels"]]
+    for prefix in STRICT_WHEELS[platform]:
+        assert [n for n in names if n.startswith(prefix)], prefix
+    if platform == "windows":
+        assert all(n.endswith(("-win_amd64.whl", "-none-any.whl")) for n in names)
