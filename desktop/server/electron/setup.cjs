@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { extract, run } = require('@heteroes/desktop-shared/runtime.cjs');
 const { verifiedDownload, digest } = require('@heteroes/desktop-shared/download.cjs');
+const { leavesReserve } = require('@heteroes/desktop-shared/disk.cjs');
 
 class Setup {
   constructor(root, resources, onProgress = () => {}) {
@@ -58,7 +59,7 @@ class Setup {
       await fsp.mkdir(p.root, { recursive: true, mode: 0o700 });
       const space = await fsp.statfs(p.root);
       const bytes = [profile.selected.python, ...profile.selected.wheels].reduce((n, x) => n + x.sizeBytes, 0);
-      if (Number(space.bavail) * Number(space.bsize) < bytes * 4 + 256 * 1024 ** 2)
+      if (!leavesReserve(Number(space.bavail) * Number(space.bsize), bytes * 4 + 256 * 1024 ** 2))
         throw Error('INSUFFICIENT_DISK_SPACE');
       const cache = path.join(this.root, 'downloads');
       update({ stage: 'PYTHON' });

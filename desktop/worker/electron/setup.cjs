@@ -6,6 +6,7 @@ const { execFileSync } = require('node:child_process');
 const { verifiedDownload, digest } = require('@heteroes/desktop-shared/download.cjs');
 const { run, extract } = require('@heteroes/desktop-shared/runtime.cjs');
 const { agentEnv } = require('./agent-env.cjs');
+const { leavesReserve } = require('@heteroes/desktop-shared/disk.cjs');
 const DATA_FOLDER_NAME = 'HeteroES-Worker-data';
 class Setup {
   constructor(root, resources, onProgress = () => {}) {
@@ -83,7 +84,8 @@ class Setup {
   }
   /** The folder holding runtime, model and downloads: the app data folder, or the one chosen on another drive. */
   dataFolder() {
-    return this.storage.runtimes ? path.dirname(this.storage.runtimes) : this.root;
+    // normalized: Electron reports the default folder with a forward slash on Windows (…\Roaming\@heteroes/worker)
+    return path.normalize(this.storage.runtimes ? path.dirname(this.storage.runtimes) : this.root);
   }
   /**
    * Put runtime, model, downloads and artifacts in DATA_FOLDER_NAME inside `parent` (for example D:\), before
@@ -173,7 +175,8 @@ class Setup {
         previous.required += required;
         volumes.set(dev, previous);
       }
-      if ([...volumes.values()].some((volume) => volume.free < volume.required)) throw Error('INSUFFICIENT_DISK_SPACE');
+      if ([...volumes.values()].some((volume) => !leavesReserve(volume.free, volume.required)))
+        throw Error('INSUFFICIENT_DISK_SPACE');
       const cache = p.downloads;
       update({ stage: 'PYTHON' });
       const archive = await verifiedDownload(profile.selected.python, cache, (v) => update({ stage: 'PYTHON', ...v }));
